@@ -1,0 +1,8 @@
+cmake-*
+.idea
+/build
+.cache
+lib/*.so
+/bin
+.vscode/launch.json
+/docs
