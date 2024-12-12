@@ -2,27 +2,25 @@
 #define TORCHLIGHT_EVALVISITOR_H
 
 #include <antlr4-runtime.h>
-#include <fstream>
+#include <sstream>
 
-#include "CalculatorBaseVisitor.h"
+#include "Python3ParserBaseVisitor.h"
 
-class EvalVisitor : public CalculatorBaseVisitor {
+class EvalVisitor : public Python3ParserBaseVisitor {
  private:
-  std::ofstream output;
+  std::vector<std::string> output;
 
  public:
-  explicit EvalVisitor(const std::string& outputFilename);
-  antlrcpp::Any visitProg(CalculatorParser::ProgContext* ctx) override;
-  antlrcpp::Any visitPrimaryExpr(CalculatorParser::PrimaryExprContext* ctx
-  ) override;
-  antlrcpp::Any visitMulDivExpr(CalculatorParser::MulDivExprContext* ctx
-  ) override;
-  antlrcpp::Any visitAddSubExpr(CalculatorParser::AddSubExprContext* ctx
-  ) override;
-  antlrcpp::Any visitExpr(CalculatorParser::ExprContext* ctx) override;
+  explicit EvalVisitor();
 
-  antlrcpp::Any visitStatement(CalculatorParser::StatementContext* ctx
-  ) override;
+  void WriteToFile(const char* filename);
+
+  antlrcpp::Any visitAtom(Python3Parser::AtomContext* ctx) override;
+
+  antlrcpp::Any visitExpr(Python3Parser::ExprContext* ctx) override;
+
+  // antlrcpp::Any visitAtom_expr(Python3Parser::Atom_exprContext* ctx)
+  // override;
 };
 
 #endif  // TORCHLIGHT_EVALVISITOR_H

@@ -16,7 +16,8 @@ add_custom_target(
     COMMAND java -jar /usr/local/lib/antlr-4.9.2-complete.jar 
     -Dlanguage=Cpp 
     -visitor
-    -o ${torchlight_antlr4_generated_dir}/src ${torchlight_antlr4_grammar_dir}/Calculator.g4
+    -o ${torchlight_antlr4_generated_dir}/src ${torchlight_antlr4_grammar_dir}/Python3Lexer.g4
+    ${torchlight_antlr4_grammar_dir}/Python3Parser.g4
     COMMAND mv ${torchlight_antlr4_generated_dir}/src/*.h ${torchlight_antlr4_generated_dir}/include
     WORKING_DIRECTORY ${torchlight_dir}
     COMMENT "Generating ANTLR files"

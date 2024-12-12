@@ -1,7 +1,8 @@
 #ifndef TORCHLIGHT_BYTECODE_H
 #define TORCHLIGHT_BYTECODE_H
 
-#include <fstream>
+#include <sstream>
+#include <vector>
 namespace torchlight::bytecode {
 enum class ByteCode {
   StoreInt = 0x80,
@@ -13,19 +14,22 @@ enum class ByteCode {
   Print,
 };
 
-void WriteByteCodeStoreInt(std::ofstream& stream, std::string value);
+void WriteByteCodeStoreInt(std::vector<std::string>& stream, std::string value);
 
-void WriteByteCodeStoreDouble(std::ofstream& stream, std::string value);
+void WriteByteCodeStoreDouble(
+  std::vector<std::string>& stream,
+  std::string value
+);
 
-void WriteByteCodeOperatorAdd(std::ofstream& stream);
+void WriteByteCodeOperatorAdd(std::vector<std::string>& stream);
 
-void WriteByteCodeOperatorSub(std::ofstream& stream);
+void WriteByteCodeOperatorSub(std::vector<std::string>& stream);
 
-void WriteByteCodeOperatorMul(std::ofstream& stream);
+void WriteByteCodeOperatorMul(std::vector<std::string>& stream);
 
-void WriteByteCodeOperatorDiv(std::ofstream& stream);
+void WriteByteCodeOperatorDiv(std::vector<std::string>& stream);
 
-void WriteByteCodePrint(std::ofstream& stream);
+void WriteByteCodePrint(std::vector<std::string>& stream);
 
 }  // namespace torchlight::bytecode
 

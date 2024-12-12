@@ -1,5 +1,7 @@
-#include "CalculatorLexer.h"
-#include "CalculatorParser.h"
+
+#include "Python3Lexer.h"
+#include "Python3Parser.h"
+#include "Python3ParserBaseVisitor.h"
 #include "generation/EvalVisitor.h"
 
 #include <antlr4-runtime.h>
@@ -20,18 +22,31 @@ int main(int argc, char** argv) {
   std::ifstream stream(input);
   ANTLRInputStream inputStream(stream);
 
-  // 创建 Lexer
-  CalculatorLexer lexer(&inputStream);
+  Python3Lexer lexer(&inputStream);
+
   CommonTokenStream tokens(&lexer);
 
-  // 创建 Parser
-  CalculatorParser parser(&tokens);
+  Python3Parser parser(&tokens);
 
-  // 解析表达式
-  antlr4::tree::ParseTree* tree = parser.prog();
+  antlr4::tree::ParseTree* tree = parser.file_input();
 
-  EvalVisitor visitor("/app/test/a.pyc");
+  // 输出 AST
+  std::cout << tree->toStringTree(&parser) << std::endl;
+
+  // // 创建 Lexer
+  // CalculatorLexer lexer(&inputStream);
+  // CommonTokenStream tokens(&lexer);
+
+  // // 创建 Parser
+  // CalculatorParser parser(&tokens);
+
+  // // 解析表达式
+  // antlr4::tree::ParseTree* tree = parser.prog();
+
+  EvalVisitor visitor;
   visitor.visit(tree);
+
+  visitor.WriteToFile("/app/test/a.pyc");
 
   return 0;
 }

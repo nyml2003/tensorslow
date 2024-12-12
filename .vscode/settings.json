@@ -130,4 +130,8 @@
     "[antlr]": {
         "editor.defaultFormatter": "mike-lischke.vscode-antlr4"
     },
+    "cSpell.words": [
+        "ANTLR",
+        "Dlanguage"
+    ],
 }

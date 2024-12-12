@@ -1,77 +1,40 @@
+#include <algorithm>
+#include <fstream>
 #include "bytecode/ByteCode.h"
 #include "generation/EvalVisitor.h"
 
-EvalVisitor::EvalVisitor(const std::string& outputFilename)
-  : output(outputFilename) {}
+EvalVisitor::EvalVisitor() = default;
 
-antlrcpp::Any EvalVisitor::visitProg(CalculatorParser::ProgContext* ctx) {
-  visitChildren(ctx);
-  return nullptr;
+void EvalVisitor::WriteToFile(const char* filename) {
+  std::ofstream file(filename);
+  for (auto x = output.rbegin(); x != output.rend(); x++) {
+    for (auto y = x->begin(); y != x->end(); y++) {
+      uint8_t byte = *y;
+      file.put(byte);
+    }
+  }
 }
 
-antlrcpp::Any EvalVisitor::visitPrimaryExpr(
-  CalculatorParser::PrimaryExprContext* ctx
-) {
-  if (ctx->INT()) {
-    torchlight::bytecode::WriteByteCodeStoreInt(output, ctx->INT()->getText());
-    return nullptr;
-  }
-  if (ctx->FLOAT()) {
-    torchlight::bytecode::WriteByteCodeStoreDouble(
-      output, ctx->FLOAT()->getText()
+antlrcpp::Any EvalVisitor::visitAtom(Python3Parser::AtomContext* ctx) {
+  if (ctx->NUMBER()) {
+    torchlight::bytecode::WriteByteCodeStoreInt(
+      output, ctx->NUMBER()->getText()
     );
-    return nullptr;
+  } else if (ctx->name()->NAME()->getText() == "print") {
+    torchlight::bytecode::WriteByteCodePrint(output);
   }
-  if (ctx->expr()) {
-    visit(ctx->expr());
-    return nullptr;
-  }
-  return nullptr;
+  return visitChildren(ctx);
 }
 
-antlrcpp::Any EvalVisitor::visitMulDivExpr(
-  CalculatorParser::MulDivExprContext* ctx
-) {
-  if (!ctx->op) {
-    visit(ctx->primaryExpr());
-    return nullptr;
-  }
-  visit(ctx->primaryExpr());
-  visit(ctx->mulDivExpr());
-  if (ctx->op->getText() == "*") {
+antlrcpp::Any EvalVisitor::visitExpr(Python3Parser::ExprContext* ctx) {
+  if (ctx->ADD(0)) {
+    torchlight::bytecode::WriteByteCodeOperatorAdd(output);
+  } else if (ctx->MINUS(0)) {
+    torchlight::bytecode::WriteByteCodeOperatorSub(output);
+  } else if (ctx->STAR()) {
     torchlight::bytecode::WriteByteCodeOperatorMul(output);
-  } else {
+  } else if (ctx->DIV()) {
     torchlight::bytecode::WriteByteCodeOperatorDiv(output);
   }
-  return nullptr;
-}
-
-antlrcpp::Any EvalVisitor::visitAddSubExpr(
-  CalculatorParser::AddSubExprContext* ctx
-) {
-  if (!ctx->op) {
-    visit(ctx->mulDivExpr());
-    return nullptr;
-  }
-  visit(ctx->mulDivExpr());
-  visit(ctx->addSubExpr());
-  if (ctx->op->getText() == "+") {
-    torchlight::bytecode::WriteByteCodeOperatorAdd(output);
-  } else {
-    torchlight::bytecode::WriteByteCodeOperatorSub(output);
-  }
-  return nullptr;
-}
-
-antlrcpp::Any EvalVisitor::visitExpr(CalculatorParser::ExprContext* ctx) {
-  visit(ctx->addSubExpr());
-  return nullptr;
-}
-
-antlrcpp::Any EvalVisitor::visitStatement(
-  CalculatorParser::StatementContext* ctx
-) {
-  visit(ctx->expr());
-  torchlight::bytecode::WriteByteCodePrint(output);
-  return nullptr;
+  return visitChildren(ctx);
 }

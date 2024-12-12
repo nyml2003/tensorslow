@@ -7,3 +7,4 @@ lib/*.so
 .vscode/launch.json
 /docs
 grammar/.antlr/
+test

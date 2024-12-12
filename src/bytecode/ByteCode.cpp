@@ -1,47 +1,59 @@
+#include <array>
+#include <cstring>
 #include <iostream>
 #include "bytecode/ByteCode.h"
 namespace torchlight::bytecode {
 
-void WriteByteCodeStoreInt(std::ofstream& stream, std::string value) {
+void WriteByteCodeStoreInt(
+  std::vector<std::string>& stream,
+  std::string value
+) {
   std::cout << "StoreInt: " << value << std::endl;
-  stream.put(static_cast<char>(ByteCode::StoreInt));
-  auto size = value.size();
-  stream.write(reinterpret_cast<const char*>(&size), sizeof(size));
-  stream.write(value.c_str(), static_cast<std::streamsize>(size));
+  std::string s;
+  s.push_back(static_cast<char>(ByteCode::StoreInt));
+  size_t size = value.size();
+  s.append(reinterpret_cast<const char*>(&size), sizeof(size));
+  s.append(value);
+  stream.push_back(s);
 }
+void WriteByteCodeStoreDouble(
+  std::vector<std::string>& stream,
+  std::string value
+) {}
 
-void WriteByteCodeStoreDouble(std::ofstream& stream, std::string value) {
-  std::cout << "StoreDouble: " << value << std::endl;
-  stream.put(static_cast<char>(ByteCode::StoreDouble));
-  double doubleValue = std::stod(value);
-  stream.write(
-    reinterpret_cast<const char*>(&doubleValue), sizeof(doubleValue)
-  );
-}
-
-void WriteByteCodeOperatorAdd(std::ofstream& stream) {
+void WriteByteCodeOperatorAdd(std::vector<std::string>& stream) {
   std::cout << "OperatorAdd" << std::endl;
-  stream.put(static_cast<char>(ByteCode::OperatorAdd));
+  std::string s;
+  s.push_back(static_cast<char>(ByteCode::OperatorAdd));
+  stream.push_back(s);
 }
 
-void WriteByteCodeOperatorSub(std::ofstream& stream) {
+void WriteByteCodeOperatorSub(std::vector<std::string>& stream) {
   std::cout << "OperatorSub" << std::endl;
-  stream.put(static_cast<char>(ByteCode::OperatorSub));
+  std::string s;
+  s.push_back(static_cast<char>(ByteCode::OperatorSub));
+  stream.push_back(s);
 }
 
-void WriteByteCodeOperatorMul(std::ofstream& stream) {
+void WriteByteCodeOperatorMul(std::vector<std::string>& stream) {
   std::cout << "OperatorMul" << std::endl;
-  stream.put(static_cast<char>(ByteCode::OperatorMul));
+  std::string s;
+  s.push_back(static_cast<char>(ByteCode::OperatorMul));
+  stream.push_back(s);
 }
 
-void WriteByteCodeOperatorDiv(std::ofstream& stream) {
+void WriteByteCodeOperatorDiv(std::vector<std::string>& stream) {
   std::cout << "OperatorDiv" << std::endl;
-  stream.put(static_cast<char>(ByteCode::OperatorDiv));
+  std::string s;
+  s.push_back(static_cast<char>(ByteCode::OperatorDiv));
+  stream.push_back(s);
 }
 
-void WriteByteCodePrint(std::ofstream& stream) {
+void WriteByteCodePrint(std::vector<std::string>& stream) {
   std::cout << "Print" << std::endl;
-  stream.put(static_cast<char>(ByteCode::Print));
+  std::string s;
+  s.push_back(static_cast<char>(ByteCode::Print));
+  stream.push_back(s);
 }
 
 }  // namespace torchlight::bytecode
