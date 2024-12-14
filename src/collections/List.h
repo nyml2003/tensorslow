@@ -27,18 +27,23 @@ class List {
   std::shared_ptr<T[]> items;
 
   /**
-   * @brief 扩容
-   * @param leastCapacity 这次扩容后，列表的容量至少为leastCapacity
-   */
-  void Expand(Index leastCapacity = 1);
-
-  /**
    * @brief 计算已分配内存还能容纳的元素个数
    * @return 已分配内存还能容纳的元素个数
    */
   Index RemainingCapacity();
 
+  /**
+   * @brief 扩容
+   */
+  void Expand();
+
  public:
+  /**
+   * @brief 扩容
+   * @param leastCapacity 这次扩容后，列表的容量至少为leastCapacity
+   */
+  void Expand(Index leastCapacity);
+
   /**
    * 构造函数
    * @param capacity 列表的容量
@@ -203,7 +208,10 @@ class List {
 
     Iterator() = delete;
 
-    const Iterator& operator=(const Iterator& it) {
+    Iterator& operator=(const Iterator& it) {
+      if (this == &it) {
+        return *this;
+      }
       index = it.index;
       end = it.end;
       return *this;
@@ -234,13 +242,23 @@ class List {
 
     static Iterator Begin(const List<T>& list) {
       Iterator it(list);
-      it.SetIndex(0).SetEnd(false).SetOrder(true);
+      it.SetIndex(0).SetOrder(true);
+      if (list.Size() == 0) {
+        it.SetEnd(true);
+      } else {
+        it.SetEnd(false);
+      }
       return it;
     }
 
     static Iterator RBegin(const List<T>& list) {
       Iterator it(list);
-      it.SetIndex(list.Size() - 1).SetEnd(false).SetOrder(false);
+      it.SetIndex(list.Size() - 1).SetOrder(false);
+      if (list.Size() == 0) {
+        it.SetEnd(true);
+      } else {
+        it.SetEnd(false);
+      }
       return it;
     }
   };

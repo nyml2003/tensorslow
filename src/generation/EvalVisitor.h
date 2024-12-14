@@ -19,8 +19,11 @@ class EvalVisitor : public Python3ParserBaseVisitor {
 
   antlrcpp::Any visitExpr(Python3Parser::ExprContext* ctx) override;
 
-  // antlrcpp::Any visitAtom_expr(Python3Parser::Atom_exprContext* ctx)
-  // override;
+  antlrcpp::Any visitIf_stmt(Python3Parser::If_stmtContext* ctx) override;
+
+  antlrcpp::Any visitComparison(Python3Parser::ComparisonContext* ctx) override;
+
+  antlrcpp::Any visitComp_op(Python3Parser::Comp_opContext* ctx) override;
 };
 
 #endif  // TORCHLIGHT_EVALVISITOR_H

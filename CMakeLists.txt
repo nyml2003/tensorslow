@@ -4,6 +4,7 @@ include(cmake/GlobalSettings.cmake)
 include(cmake/AntlrConfig.cmake)
 include(cmake/tools.cmake)
 include(src/source.cmake)
+include(test/unittest/unittest.cmake)
 message(STATUS "torchlight_frontend_files: ${torchlight_frontend_files}")
 message(STATUS "torchlight_backend_files: ${torchlight_backend_files}")
 add_executable(

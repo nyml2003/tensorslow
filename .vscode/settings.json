@@ -132,6 +132,17 @@
     },
     "cSpell.words": [
         "ANTLR",
-        "Dlanguage"
+        "COMPILECOMMANDS",
+        "Dlanguage",
+        "DNDEBUG",
+        "gdwarf",
+        "GTEST",
+        "MINSIZEREL",
+        "RELWITHDEBINFO",
+        "STREQ",
+        "valgrind"
+    ],
+    "gcovViewer.buildDirectories": [
+        "/app/build"
     ],
 }

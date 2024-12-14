@@ -63,9 +63,7 @@ String::String(const char* str) {
   }
 }
 
-String::String() {
-  codePoints = List<Unicode>(0);
-}
+String::String() = default;
 
 String::String(Index capacity) {
   codePoints = List<Unicode>(capacity);
@@ -284,6 +282,10 @@ bool String::LessThanOrEqual(const String& rhs) const {
 
 bool String::NotEqual(const String& rhs) const {
   return !Equal(rhs);
+}
+
+void String::Reverse() {
+  codePoints.Reverse();
 }
 
 }  // namespace torchlight::collections

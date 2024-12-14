@@ -1,7 +1,10 @@
+#include "collections/Decimal.h"
+#include "collections/Integer.h"
 #include "collections/List.h"
 #include "collections/Map.h"
 #include "collections/String.h"
 #include "object/common.h"
+
 
 #include <stdexcept>
 
@@ -76,10 +79,7 @@ bool List<T>::Full() {
 
 template <typename T>
 void List<T>::Expand(Index leastCapacity) {
-  Index newCapacity = capacity ? capacity * 2 : 1;
-  while (newCapacity < leastCapacity) {
-    newCapacity *= 2;
-  }
+  Index newCapacity = leastCapacity;
   std::shared_ptr<T[]> newItems(new T[newCapacity], std::default_delete<T[]>());
   std::shared_ptr<T[]> oldItems = items;
   items = newItems;
@@ -87,6 +87,11 @@ void List<T>::Expand(Index leastCapacity) {
     items[i] = oldItems[i];
   }
   capacity = newCapacity;
+}
+
+template <typename T>
+void List<T>::Expand() {
+  Expand(capacity * 2);
 }
 
 template <typename T>
@@ -229,17 +234,23 @@ template class List<String>;
 
 template class List<Unicode>;
 
-extern template class MapEntry<String, String>;
+template class List<int32_t>;
 
-template class List<MapEntry<String, String>>;
+template class List<Decimal>;
 
-template class List<int>;
+template class List<Integer>;
 
-template class List<std::shared_ptr<int>>;
+// extern template class MapEntry<String, String>;
 
-template class List<Byte>;
+// template class List<MapEntry<String, String>>;
 
-template class List<object::PyObjPtr>;
+// template class List<int>;
 
-template class List<object::PyStrPtr>;
+// template class List<std::shared_ptr<int>>;
+
+// template class List<Byte>;
+
+// template class List<object::PyObjPtr>;
+
+// template class List<object::PyStrPtr>;
 }  // namespace torchlight::collections

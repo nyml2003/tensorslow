@@ -67,6 +67,8 @@ class String {
 
   [[nodiscard]] String Slice(Index start, Index end) const;
 
+  void Reverse();
+
   [[nodiscard]] bool Equal(const String& rhs) const;
 
   [[nodiscard]] bool GreaterThan(const String& rhs) const;
@@ -81,4 +83,4 @@ class String {
 };
 
 }  // namespace torchlight::collections
-#endif  // TORCHLIGHT_DATASTRUCTURE_STRING_H
+#endif  // TORCHLIGHT_COLLECTIONS_STRING_H
