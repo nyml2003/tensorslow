@@ -37,7 +37,21 @@ class Klass {
 
   virtual PyObjPtr div(PyObjPtr lhs, PyObjPtr rhs);
 
+  virtual PyObjPtr gt(PyObjPtr lhs, PyObjPtr rhs);
+
+  virtual PyObjPtr lt(PyObjPtr lhs, PyObjPtr rhs);
+
+  virtual PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs);
+
+  virtual PyObjPtr ge(PyObjPtr lhs, PyObjPtr rhs);
+
+  virtual PyObjPtr le(PyObjPtr lhs, PyObjPtr rhs);
+
+  virtual PyObjPtr ne(PyObjPtr lhs, PyObjPtr rhs);
+
   virtual PyObjPtr repr(PyObjPtr obj);
+
+  virtual PyObjPtr _bool_(PyObjPtr obj);
 };
 
 }  // namespace torchlight::object

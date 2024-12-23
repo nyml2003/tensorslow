@@ -30,4 +30,32 @@ PyObjPtr Klass::repr(PyObjPtr obj) {
   return nullptr;
 }
 
+PyObjPtr Klass::gt(PyObjPtr lhs, PyObjPtr rhs) {
+  return nullptr;
+}
+
+PyObjPtr Klass::lt(PyObjPtr lhs, PyObjPtr rhs) {
+  return nullptr;
+}
+
+PyObjPtr Klass::eq(PyObjPtr lhs, PyObjPtr rhs) {
+  return nullptr;
+}
+
+PyObjPtr Klass::ge(PyObjPtr lhs, PyObjPtr rhs) {
+  return nullptr;
+}
+
+PyObjPtr Klass::le(PyObjPtr lhs, PyObjPtr rhs) {
+  return nullptr;
+}
+
+PyObjPtr Klass::ne(PyObjPtr lhs, PyObjPtr rhs) {
+  return nullptr;
+}
+
+PyObjPtr Klass::_bool_(PyObjPtr obj) {
+  return nullptr;
+}
+
 }  // namespace torchlight::object

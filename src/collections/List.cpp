@@ -1,10 +1,10 @@
+#include "bytecode/ByteCode.h"
 #include "collections/Decimal.h"
 #include "collections/Integer.h"
 #include "collections/List.h"
 #include "collections/Map.h"
 #include "collections/String.h"
 #include "object/common.h"
-
 
 #include <stdexcept>
 
@@ -240,17 +240,15 @@ template class List<Decimal>;
 
 template class List<Integer>;
 
-// extern template class MapEntry<String, String>;
+extern template class MapEntry<String, String>;
 
-// template class List<MapEntry<String, String>>;
+template class List<MapEntry<String, String>>;
 
-// template class List<int>;
+template class List<Byte>;
 
-// template class List<std::shared_ptr<int>>;
+template class List<object::PyObjPtr>;
 
-// template class List<Byte>;
+using InstPtr = bytecode::InstPtr;
 
-// template class List<object::PyObjPtr>;
-
-// template class List<object::PyStrPtr>;
+template class List<InstPtr>;
 }  // namespace torchlight::collections

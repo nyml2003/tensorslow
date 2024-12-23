@@ -1,6 +1,7 @@
 #ifndef TORCHLIGHT_COLLECTIONS_DECIMAL_H
 #define TORCHLIGHT_COLLECTIONS_DECIMAL_H
 
+#include "collections/Bytes.h"
 #include "collections/List.h"
 #include "collections/String.h"
 #include "collections/common.h"
@@ -19,12 +20,16 @@ class Decimal {
 
   static bool IsNegative(const String& str);
 
+  static bool IsNegative(const Bytes& str);
+
   [[nodiscard]] Decimal Slice(Index start, Index end) const;
 
   explicit Decimal();
 
  public:
   explicit Decimal(const String& str);
+
+  explicit Decimal(const Bytes& str);
 
   explicit Decimal(int32_t value);
 

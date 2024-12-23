@@ -16,7 +16,28 @@ bool Decimal::IsNegative(const String& str) {
   return str.Get(0) == UnicodeMinus;
 }
 
+bool Decimal::IsNegative(const Bytes& str) {
+  const Byte ByteMinus = 0x2D;
+  return str.Get(0) == ByteMinus;
+}
+
 Decimal::Decimal(const String& str) {
+  Index i = 0;
+  if (IsNegative(str)) {
+    isNegative = true;
+    i = 1;
+  }
+  for (; i < str.Size(); i++) {
+    int c = UnicodeToInt(str.Get(i));
+    if (c == -1) {
+      throw std::runtime_error("Invalid character in Decimal");
+    }
+    parts.Add(c);
+  }
+  TrimLeadingZero();
+}
+
+Decimal::Decimal(const Bytes& str) {
   Index i = 0;
   if (IsNegative(str)) {
     isNegative = true;

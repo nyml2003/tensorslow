@@ -2,18 +2,18 @@
 #define TORCHLIGHT_BYTECODE_H
 
 #include "bytecode/Operand.h"
+#include "collections/Bytes.h"
+#include "collections/List.h"
 
 #include <functional>
 #include <memory>
 #include <utility>
-#include <vector>
 
 namespace torchlight::bytecode {
+using collections::Bytes;
 using std::function;
-using std::make_unique;
-using std::string;
-using std::unique_ptr;
-using std::vector;
+using std::make_shared;
+using std::shared_ptr;
 
 enum class ByteCode {
   LOAD_CONST = 0x80,
@@ -32,26 +32,27 @@ enum class ByteCode {
   BINARY_LSHIFT,
   BINARY_RSHIFT,
   PRINT,  // 临时字节码
+  ERROR = 0xFF
 };
 
 struct ByteCodeInstruction {
-  ByteCode code;
-  OperandKind operand;
-  function<string()> ToString;
+  ByteCode code = ByteCode::ERROR;
+  OperandKind operand = NoneType();
+  function<Bytes()> ToString;
 
   ByteCodeInstruction(
     ByteCode c,
     OperandKind op,
-    std::function<std::string()> toStringFunc
+    std::function<Bytes()> toStringFunc
   )
     : code(c), operand(std::move(op)), ToString(std::move(toStringFunc)) {}
 };
 
-using InstPtr = unique_ptr<ByteCodeInstruction>;
+using InstPtr = shared_ptr<ByteCodeInstruction>;
 
-using InstStream = vector<InstPtr>;
+using InstStream = collections::List<InstPtr>;
 
-InstPtr CreateLoadConst(string value);
+InstPtr CreateLoadConst(Bytes value);
 
 InstPtr CreateCompareOp(CompareOp op);
 

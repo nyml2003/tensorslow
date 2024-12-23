@@ -9,22 +9,17 @@
 #include "runtime/PyCode.h"
 
 namespace torchlight::runtime {
+using collections::Index;
+using collections::String;
 class PyFrame : public object::PyObject {
  private:
   collections::Stack<object::PyObjPtr> stack;
   PyCodePtr code;
+  Index programCounter = 0;
 
  public:
   explicit PyFrame(PyCodePtr code);
   void Run();
-  size_t ReadSize(collections::List<collections::Byte>::Iterator& byteIter);
-  collections::Integer ReadInt(
-    collections::List<collections::Byte>::Iterator& byteIter
-  );
-  double ReadDouble(collections::List<collections::Byte>::Iterator& byteIter);
-  collections::String ReadString(
-    collections::List<collections::Byte>::Iterator& byteIter
-  );
 };
 
 using PyFramePtr = std::shared_ptr<PyFrame>;

@@ -1,154 +1,191 @@
-
-
 #include "bytecode/ByteCode.h"
 
-#include <string>
 #include "bytecode/utils.h"
 
 namespace torchlight::bytecode {
-using std::to_string;
 
-InstPtr CreateLoadConst(string value) {
-  return make_unique<ByteCodeInstruction>(
+InstPtr CreateLoadConst(Bytes value) {
+  return make_shared<ByteCodeInstruction>(
     ByteCode::LOAD_CONST, value,
-    [value]() -> string {
-      return to_string(SerializeByteCode(ByteCode::LOAD_CONST)) + value;
+    [value]() -> Bytes {
+      auto value_size_list = SerializeUInt64(value.Size());
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::LOAD_CONST));
+      for (collections::Index i = 0; i < value_size_list.Size(); ++i) {
+        result.Add(value_size_list.Get(i));
+      }
+      return Bytes(result).Concat(value);
     }
   );
 }
 
 InstPtr CreateCompareOp(CompareOp op) {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::COMPARE_OP, op,
-    [op]() -> string {
-      return to_string(SerializeByteCode(ByteCode::COMPARE_OP)) +
-             to_string(static_cast<uint8_t>(op));
+    [op]() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::COMPARE_OP));
+      result.Add(static_cast<Byte>(op));
+      return Bytes(result);
     }
   );
 }
 
 InstPtr CreatePopJumpIfFalse(uint32_t offset) {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::POP_JUMP_IF_FALSE, offset,
-    [offset]() -> string {
-      const char* offset_str = reinterpret_cast<const char*>(&offset);
-      string offset_str_str(offset_str, sizeof(uint32_t));
-      return to_string(SerializeByteCode(ByteCode::POP_JUMP_IF_FALSE)) +
-             offset_str_str;
+    [offset]() -> Bytes {
+      auto offset_list = SerializeUInt32(offset);
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::POP_JUMP_IF_FALSE));
+      for (collections::Index i = 0; i < offset_list.Size(); ++i) {
+        result.Add(offset_list.Get(i));
+      }
+      return Bytes(result);
     }
   );
 }
 
 InstPtr CreateBinaryAdd() {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::BINARY_ADD, NoneType(),
-    []() -> string {
-      return to_string(SerializeByteCode(ByteCode::BINARY_ADD));
+    []() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::BINARY_ADD));
+      return Bytes(result);
     }
   );
 }
 
 InstPtr CreateBinarySubtract() {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::BINARY_SUBTRACT, NoneType(),
-    []() -> string {
-      return to_string(SerializeByteCode(ByteCode::BINARY_SUBTRACT));
+    []() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::BINARY_SUBTRACT));
+      return Bytes(result);
     }
   );
 }
 
 InstPtr CreateBinaryMultiply() {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::BINARY_MULTIPLY, NoneType(),
-    []() -> string {
-      return to_string(SerializeByteCode(ByteCode::BINARY_MULTIPLY));
+    []() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::BINARY_MULTIPLY));
+      return Bytes(result);
     }
   );
 }
 
 InstPtr CreateBinaryTrueDivide() {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::BINARY_TRUE_DIVIDE, NoneType(),
-    []() -> string {
-      return to_string(SerializeByteCode(ByteCode::BINARY_TRUE_DIVIDE));
+    []() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::BINARY_TRUE_DIVIDE));
+      return Bytes(result);
     }
   );
 }
 
 InstPtr CreateBinaryFloorDivide() {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::BINARY_FLOOR_DIVIDE, NoneType(),
-    []() -> string {
-      return to_string(SerializeByteCode(ByteCode::BINARY_FLOOR_DIVIDE));
+    []() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::BINARY_FLOOR_DIVIDE));
+      return Bytes(result);
     }
   );
 }
 
 InstPtr CreateBinaryXor() {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::BINARY_XOR, NoneType(),
-    []() -> string {
-      return to_string(SerializeByteCode(ByteCode::BINARY_XOR));
+    []() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::BINARY_XOR));
+      return Bytes(result);
     }
   );
 }
 
 InstPtr CreateBinaryAnd() {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::BINARY_AND, NoneType(),
-    []() -> string {
-      return to_string(SerializeByteCode(ByteCode::BINARY_AND));
+    []() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::BINARY_AND));
+      return Bytes(result);
     }
   );
 }
 
 InstPtr CreateBinaryOr() {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::BINARY_OR, NoneType(),
-    []() -> string { return to_string(SerializeByteCode(ByteCode::BINARY_OR)); }
+    []() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::BINARY_OR));
+      return Bytes(result);
+    }
   );
 }
 
 InstPtr CreateBinaryPower() {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::BINARY_POWER, NoneType(),
-    []() -> string {
-      return to_string(SerializeByteCode(ByteCode::BINARY_POWER));
+    []() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::BINARY_POWER));
+      return Bytes(result);
     }
   );
 }
 
 InstPtr CreateBinaryModulo() {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::BINARY_MODULO, NoneType(),
-    []() -> string {
-      return to_string(SerializeByteCode(ByteCode::BINARY_MODULO));
+    []() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::BINARY_MODULO));
+      return Bytes(result);
     }
   );
 }
 
 InstPtr CreateBinaryLShift() {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::BINARY_LSHIFT, NoneType(),
-    []() -> string {
-      return to_string(SerializeByteCode(ByteCode::BINARY_LSHIFT));
+    []() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::BINARY_LSHIFT));
+      return Bytes(result);
     }
   );
 }
 
 InstPtr CreateBinaryRShift() {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::BINARY_RSHIFT, NoneType(),
-    []() -> string {
-      return to_string(SerializeByteCode(ByteCode::BINARY_RSHIFT));
+    []() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::BINARY_RSHIFT));
+      return Bytes(result);
     }
   );
 }
 
 InstPtr CreatePrint() {
-  return make_unique<ByteCodeInstruction>(
+  return make_shared<ByteCodeInstruction>(
     ByteCode::PRINT, NoneType(),
-    []() -> string { return to_string(SerializeByteCode(ByteCode::PRINT)); }
+    []() -> Bytes {
+      List<Byte> result;
+      result.Add(SerializeByteCode(ByteCode::PRINT));
+      return Bytes(result);
+    }
   );
 }
 

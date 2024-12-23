@@ -137,10 +137,12 @@
         "DNDEBUG",
         "gdwarf",
         "GTEST",
+        "Klass",
         "LSHIFT",
         "MINSIZEREL",
         "mockfront",
         "RELWITHDEBINFO",
+        "repr",
         "RSHIFT",
         "STREQ",
         "valgrind"

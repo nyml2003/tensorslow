@@ -1,11 +1,13 @@
 #ifndef TORCHLIGHT_BYTECODE_OPERAND_H
 #define TORCHLIGHT_BYTECODE_OPERAND_H
 
-#include <string>
+#include "collections/Bytes.h"
+
 #include <variant>
+
 namespace torchlight::bytecode {
 
-using std::string;
+using collections::Bytes;
 using std::variant;
 
 enum class CompareOp {
@@ -19,6 +21,6 @@ enum class CompareOp {
 
 struct NoneType {};
 
-using OperandKind = variant<CompareOp, string, uint32_t, NoneType>;
+using OperandKind = variant<CompareOp, Bytes, uint32_t, NoneType>;
 }  // namespace torchlight::bytecode
 #endif  // TORCHLIGHT_BYTECODE_OPERAND_H

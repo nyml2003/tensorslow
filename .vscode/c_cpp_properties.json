@@ -3,8 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**",
-                "/usr/include/jsoncpp"
+                "${workspaceFolder}/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

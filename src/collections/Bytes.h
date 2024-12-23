@@ -11,7 +11,17 @@ class Bytes {
  public:
   explicit Bytes(List<Byte> value);
 
+  explicit Bytes() = default;
+
+  explicit Bytes(const char* value);
+
   [[nodiscard]] List<Byte> Value() const;
+
+  [[nodiscard]] Bytes Concat(const Bytes& rhs) const;
+
+  [[nodiscard]] Byte Get(Index index) const;
+
+  [[nodiscard]] Index Size() const;
 };
 }  // namespace torchlight::collections
 

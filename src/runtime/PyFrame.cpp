@@ -1,23 +1,24 @@
 #include "runtime/PyFrame.h"
 
 #include "bytecode/ByteCode.h"
+#include "collections/Bytes.h"
 #include "collections/Integer.h"
 #include "collections/String.h"
-#include "collections/common.h"
-#include "object/PyFloat.h"
+#include "object/PyBoolean.h"
 #include "object/PyInteger.h"
 #include "object/PyString.h"
-#include "object/common.h"
 
-#include <array>
-#include <cstddef>
 #include <cstring>
 #include <iostream>
 #include <memory>
-#include <string>
+#include <stdexcept>
 #include <utility>
 
 namespace torchlight::runtime {
+
+using collections::Bytes;
+using collections::Integer;
+using object::BooleanKlass;
 
 FrameKlass::FrameKlass() : object::Klass(collections::String("frame")) {}
 
@@ -29,94 +30,83 @@ object::KlassPtr FrameKlass::Self() {
 PyFrame::PyFrame(PyCodePtr code)
   : object::PyObject(FrameKlass::Self()), code(std::move(code)) {}
 
-size_t PyFrame::ReadSize(
-  collections::List<collections::Byte>::Iterator& byteIter
-) {
-  size_t result = 0;
-  for (size_t i = 0; i < sizeof(size_t); ++i) {
-    result |= byteIter.Get() << (i * 8);
-    byteIter.Next();
-  }
-  return result;
-}
-
-collections::String PyFrame::ReadString(
-  collections::List<collections::Byte>::Iterator& byteIter
-) {
-  size_t size = ReadSize(byteIter);
-  std::string result;
-  for (size_t i = 0; i < size; ++i) {
-    result.push_back(static_cast<char>(byteIter.Get()));
-    byteIter.Next();
-  }
-  return collections::String(result.c_str());
-}
-
-collections::Integer PyFrame::ReadInt(
-  collections::List<collections::Byte>::Iterator& byteIter
-) {
-  collections::String str = ReadString(byteIter);
-  return collections::Integer(str);
-}
-
-double PyFrame::ReadDouble(
-  collections::List<collections::Byte>::Iterator& byteIter
-) {
-  std::array<char, sizeof(double)> sizeBuffer{};
-  for (std::size_t i = 0; i < sizeof(double); ++i) {
-    sizeBuffer[i] = static_cast<char>(byteIter.Get());
-    byteIter.Next();
-  }
-  double result = 0;
-  std::memcpy(&result, sizeBuffer.data(), sizeof(double));
-  return result;
-}
-
 void PyFrame::Run() {
-  collections::List<collections::Byte>::Iterator iter(
-    collections::List<collections::Byte>::Iterator::Begin(
-      this->code->ByteCodes()->Value().Value()
-    )
-  );
-  while (!iter.End()) {
-    auto byte = iter.Get();
-    iter.Next();
-    switch (static_cast<bytecode::ByteCode>(byte)) {
-      case bytecode::ByteCode::StoreInt: {
-        collections::Integer value = ReadInt(iter);
-        stack.Push(std::make_shared<object::PyInteger>(value));
+  auto& instructions = code->Instructions();
+  programCounter = 0;
+  while (programCounter < instructions.Size()) {
+    const auto& inst = instructions.Get(programCounter);
+    switch (inst->code) {
+      case bytecode::ByteCode::LOAD_CONST: {
+        Bytes value = std::get<Bytes>(inst->operand);
+        stack.Push(std::make_shared<object::PyInteger>(Integer(value)));
+        programCounter++;
         break;
       }
-      case bytecode::ByteCode::StoreDouble: {
-        double value = ReadDouble(iter);
-        stack.Push(std::make_shared<object::PyFloat>(value));
-        break;
-      }
-      case bytecode::ByteCode::OperatorAdd: {
-        auto left = stack.Pop();
+      case bytecode::ByteCode::COMPARE_OP: {
+        auto op = std::get<bytecode::CompareOp>(inst->operand);
         auto right = stack.Pop();
+        auto left = stack.Pop();
+        switch (op) {
+          case bytecode::CompareOp::EQUAL:
+            stack.Push(left->eq(right));
+            break;
+          case bytecode::CompareOp::NOT_EQUAL:
+            stack.Push(left->ne(right));
+            break;
+          case bytecode::CompareOp::LESS_THAN:
+            stack.Push(left->lt(right));
+            break;
+          case bytecode::CompareOp::LESS_THAN_EQUAL:
+            stack.Push(left->le(right));
+            break;
+          case bytecode::CompareOp::GREATER_THAN:
+            stack.Push(left->gt(right));
+            break;
+          case bytecode::CompareOp::GREATER_THAN_EQUAL:
+            stack.Push(left->ge(right));
+            break;
+          default:
+            throw std::runtime_error("Unknown compare operation");
+        }
+        programCounter++;
+        break;
+      }
+      case bytecode::ByteCode::POP_JUMP_IF_FALSE: {
+        auto needJump = stack.Pop();
+        if (!(needJump->Klass() == BooleanKlass::Self())) {
+          throw std::runtime_error("Cannot jump if not boolean");
+        }
+        auto bool_needJump =
+          std::dynamic_pointer_cast<object::PyBoolean>(needJump);
+        if (bool_needJump == nullptr) {
+          throw std::runtime_error("Cannot jump if not boolean");
+        }
+        if (bool_needJump->Value()) {
+          programCounter += std::get<uint32_t>(inst->operand) + 1;
+        } else {
+          programCounter++;
+        }
+        break;
+      }
+      case bytecode::ByteCode::BINARY_ADD: {
+        auto right = stack.Pop();
+        auto left = stack.Pop();
         stack.Push(left->add(right));
+        programCounter++;
         break;
       }
-      case bytecode::ByteCode::OperatorSub: {
-        auto left = stack.Pop();
-        auto right = stack.Pop();
-        stack.Push(left->sub(right));
-        break;
-      }
-      case bytecode::ByteCode::OperatorMul: {
-        auto left = stack.Pop();
-        auto right = stack.Pop();
-        stack.Push(left->mul(right));
-        break;
-      }
-      case bytecode::ByteCode::OperatorDiv: {
-        auto left = stack.Pop();
-        auto right = stack.Pop();
-        stack.Push(left->div(right));
-        break;
-      }
-      case bytecode::ByteCode::Print: {
+      case bytecode::ByteCode::BINARY_SUBTRACT:
+      case bytecode::ByteCode::BINARY_MULTIPLY:
+      case bytecode::ByteCode::BINARY_TRUE_DIVIDE:
+      case bytecode::ByteCode::BINARY_FLOOR_DIVIDE:
+      case bytecode::ByteCode::BINARY_XOR:
+      case bytecode::ByteCode::BINARY_AND:
+      case bytecode::ByteCode::BINARY_OR:
+      case bytecode::ByteCode::BINARY_POWER:
+      case bytecode::ByteCode::BINARY_MODULO:
+      case bytecode::ByteCode::BINARY_LSHIFT:
+      case bytecode::ByteCode::BINARY_RSHIFT:
+      case bytecode::ByteCode::PRINT: {
         auto obj = stack.Pop();
         auto result = obj->repr();
         object::PyStrPtr string =
@@ -125,13 +115,13 @@ void PyFrame::Run() {
           throw std::runtime_error("Cannot print object");
         }
         std::cout << string->Value().ToUTF8() << std::endl;
+        programCounter++;
         break;
       }
-      default:
-        throw std::runtime_error(
-          "Unknown byte code:" + std::to_string(static_cast<int>(iter.Get()))
-        );
+      case bytecode::ByteCode::ERROR: {
+        throw std::runtime_error("Unknown byte code");
         break;
+      }
     }
   }
 }

@@ -1,6 +1,7 @@
 #include "collections/Integer.h"
 
 #include <stdexcept>
+#include "collections/Bytes.h"
 
 namespace torchlight::collections {
 
@@ -72,6 +73,31 @@ Integer::Integer(const String& str) {
   } else {
     FromDecimal(Decimal(str));
   }
+}
+
+Integer::Integer(const Bytes& str) {
+  Byte byte_0 = 0x30;
+  Byte byte_X = 0x58;
+  Byte byte_x = 0x78;
+  if (str.Size() > 2 && str.Get(0) == byte_0 &&
+      (str.Get(1) == byte_X || str.Get(1) == byte_x)) {
+    int32_t buffer = 0;
+    int counter = 0;
+    for (Index i = 0; i < str.Size(); i++) {
+      uint8_t c = str.Get(i);
+      buffer = (buffer << 8) | c;
+      counter++;
+      if (counter == 4) {
+        parts.Add(buffer);
+        buffer = 0;
+        counter = 0;
+      }
+    }
+    if (counter != 0) {
+      parts.Add(buffer);
+    }
+  }
+  FromDecimal(Decimal(str));
 }
 
 String Integer::ToString() const {

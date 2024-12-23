@@ -1,6 +1,7 @@
 #ifndef TORCHLIGHT_COLLECTIONS_INTEGER_H
 #define TORCHLIGHT_COLLECTIONS_INTEGER_H
 
+#include "collections/Bytes.h"
 #include "collections/Decimal.h"
 #include "collections/List.h"
 #include "collections/String.h"
@@ -68,6 +69,13 @@ class Integer {
    * @param str
    */
   explicit Integer(const String& str);
+
+  /**
+   * @brief 使用Unicode字符串构造Integer
+   *
+   * @param str
+   */
+  explicit Integer(const Bytes& str);
 
   /**
    * @brief 重新还原为字符串
