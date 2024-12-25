@@ -240,9 +240,9 @@ template class List<Decimal>;
 
 template class List<Integer>;
 
-extern template class MapEntry<String, String>;
+// extern template class MapEntry<String, String>;
 
-template class List<MapEntry<String, String>>;
+// template class List<MapEntry<String, String>>;
 
 template class List<Byte>;
 
@@ -251,4 +251,6 @@ template class List<object::PyObjPtr>;
 using InstPtr = bytecode::InstPtr;
 
 template class List<InstPtr>;
+
+template class List<double>;
 }  // namespace torchlight::collections

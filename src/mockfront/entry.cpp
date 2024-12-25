@@ -20,8 +20,12 @@ void createTask(
 int main() {
   createTask(String("Add_1_2"), [](const String& name) {
     InstStream stream;
-    stream.Add(torchlight::bytecode::CreateLoadConst(Bytes("1")));
-    stream.Add(torchlight::bytecode::CreateLoadConst(Bytes("2")));
+    stream.Add(torchlight::bytecode::CreateLoadConst(
+      Bytes("11111111111111111111111111111111111111111")
+    ));
+    stream.Add(torchlight::bytecode::CreateLoadConst(
+      Bytes("22222222222222222222222222222222222222222")
+    ));
     stream.Add(torchlight::bytecode::CreateBinaryAdd());
     stream.Add(torchlight::bytecode::CreatePrint());
     SerializeInstStream(stream, name);
@@ -29,8 +33,12 @@ int main() {
 
   createTask(String("Compare_1_2"), [](const String& name) {
     InstStream stream;
-    stream.Add(torchlight::bytecode::CreateLoadConst(Bytes("1")));
-    stream.Add(torchlight::bytecode::CreateLoadConst(Bytes("2")));
+    stream.Add(torchlight::bytecode::CreateLoadConst(
+      Bytes("11111111111111111111111111111111111111111")
+    ));
+    stream.Add(torchlight::bytecode::CreateLoadConst(
+      Bytes("22222222222222222222222222222222222222222")
+    ));
     stream.Add(torchlight::bytecode::CreateCompareOp(
       torchlight::bytecode::CompareOp::GREATER_THAN
     ));

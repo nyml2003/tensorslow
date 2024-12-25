@@ -53,6 +53,8 @@ class String {
 
   [[nodiscard]] String Concat(const String& rhs) const;
 
+  void InplaceConcat(const String& rhs);
+
   [[nodiscard]] String Copy() const;
 
   [[nodiscard]] Unicode Get(Index index) const;
@@ -81,6 +83,8 @@ class String {
 
   [[nodiscard]] bool NotEqual(const String& rhs) const;
 };
+
+String DoubleToString(double value);
 
 }  // namespace torchlight::collections
 #endif  // TORCHLIGHT_COLLECTIONS_STRING_H

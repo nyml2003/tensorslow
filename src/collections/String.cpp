@@ -288,4 +288,15 @@ void String::Reverse() {
   codePoints.Reverse();
 }
 
+String DoubleToString(double value) {
+  char buffer[32];
+  snprintf(buffer, sizeof(buffer), "%.6f", value);
+  return String(buffer);
+}
+
+void String::InplaceConcat(const String& rhs) {
+  for (Index i = 0; i < rhs.Size(); i++) {
+    Add(rhs.Get(i));
+  }
+}
 }  // namespace torchlight::collections
