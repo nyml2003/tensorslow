@@ -1,19 +1,16 @@
 #ifndef TORCHLIGHT_BYTECODE_H
 #define TORCHLIGHT_BYTECODE_H
 
-#include "bytecode/Operand.h"
 #include "collections/Bytes.h"
-#include "collections/List.h"
+#include "collections/String.h"
 
-#include <functional>
-#include <memory>
-#include <utility>
+#include <map>
+#include <variant>
 
-namespace torchlight::bytecode {
+namespace torchlight::object {
 using collections::Bytes;
-using std::function;
-using std::make_shared;
-using std::shared_ptr;
+using collections::Index;
+using collections::String;
 
 enum class ByteCode {
   POP_TOP = 0,
@@ -92,7 +89,6 @@ enum class ByteCode {
   STORE_FAST = 125,
   DELETE_FAST = 126,
 
-
   MAKE_FUNCTION = 132,
   BUILD_SLICE = 133,
   LOAD_CLOSURE = 135,
@@ -105,55 +101,46 @@ enum class ByteCode {
   ERROR = 0xFF
 };
 
-struct ByteCodeInstruction {
-  ByteCode code = ByteCode::ERROR;
-  OperandKind operand = NoneType();
-  function<Bytes()> ToString;
-
-  ByteCodeInstruction(
-    ByteCode c,
-    OperandKind op,
-    std::function<Bytes()> toStringFunc
-  )
-    : code(c), operand(std::move(op)), ToString(std::move(toStringFunc)) {}
+enum class CompareOp {
+  EQUAL = 2,
+  NOT_EQUAL = 3,
+  LESS_THAN = 0,
+  LESS_THAN_EQUAL = 1,
+  GREATER_THAN = 4,
+  GREATER_THAN_EQUAL = 5,
 };
 
-using InstPtr = shared_ptr<ByteCodeInstruction>;
+struct NoneType {};
+using OperandKind = std::variant<CompareOp, NoneType, Index>;
 
-using InstStream = collections::List<InstPtr>;
+enum class Literal {
+  INTEGER,
+  ZERO,
+  FLOAT,
+  STRING,
+  NONE,
+  TRUE,
+  FALSE,
+  LIST,
+};
 
-InstPtr CreateLoadConst(Bytes value);
+extern std::map<ByteCode, const char*> ByteCodeNames;
 
-InstPtr CreateCompareOp(CompareOp op);
+String ToString(NoneType kind);
 
-InstPtr CreatePopJumpIfFalse(uint32_t offset);
+String ToString(CompareOp kind);
 
-InstPtr CreateBinaryAdd();
+String ToString(ByteCode code);
 
-InstPtr CreateBinarySubtract();
+String ToString(Literal kind);
 
-InstPtr CreateBinaryMultiply();
+Bytes Serialize(NoneType kind);
 
-InstPtr CreateBinaryTrueDivide();
+Bytes Serialize(CompareOp kind);
 
-InstPtr CreateBinaryFloorDivide();
+Bytes Serialize(ByteCode code);
 
-InstPtr CreateBinaryXor();
+Bytes Serialize(Literal kind);
 
-InstPtr CreateBinaryAnd();
-
-InstPtr CreateBinaryOr();
-
-InstPtr CreateBinaryPower();
-
-InstPtr CreateBinaryModulo();
-
-InstPtr CreateBinaryLShift();
-
-InstPtr CreateBinaryRShift();
-
-InstPtr CreatePrint();
-
-}  // namespace torchlight::bytecode
-
+}  // namespace torchlight::object
 #endif  // TORCHLIGHT_BYTECODE_H

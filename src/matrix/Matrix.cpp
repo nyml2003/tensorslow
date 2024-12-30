@@ -1,10 +1,11 @@
-#include <iostream>
 
 #include "matrix/Matrix.h"
+#include <stdexcept>
+#include "collections/impl/String.h"
 
 namespace torchlight::matrix {
 
-using collections::DoubleToString;
+using collections::CreateStringWithCString;
 
 Matrix::Matrix(Index rows, Index cols)
   : rows(rows), cols(cols), data(rows * cols) {
@@ -15,18 +16,19 @@ Matrix::Matrix(Index rows, Index cols, List<double> data)
   : rows(rows), cols(cols), data(std::move(data)) {}
 
 String Matrix::ToString() const {
-  String str("[");
+  String str;
+  str.InplaceConcat(CreateStringWithCString("["));
   for (Index i = 0; i < rows; i++) {
-    str.Add('[');
+    str.InplaceConcat(CreateStringWithCString("["));
     for (Index j = 0; j < cols; j++) {
-      str.InplaceConcat(DoubleToString(At(i, j)));
+      str.InplaceConcat(collections::ToString(At(i, j)));
       if (j != cols - 1) {
-        str.Add(',');
+        str.InplaceConcat(CreateStringWithCString(","));
       }
     }
-    str.Add(']');
+    str.InplaceConcat(CreateStringWithCString("]"));
   }
-  str.Add(']');
+  str.InplaceConcat(CreateStringWithCString("]"));
   return str;
 }
 

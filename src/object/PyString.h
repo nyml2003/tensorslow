@@ -28,6 +28,8 @@ class StringKlass : public Klass {
   PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs) override;
 
   PyObjPtr repr(PyObjPtr obj) override;
+
+  PyObjPtr _serialize_(PyObjPtr obj) override;
 };
 
 }  // namespace torchlight::object

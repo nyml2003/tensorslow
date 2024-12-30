@@ -1,6 +1,7 @@
 
 #include "runtime/BinaryFileParser.h"
 #include "runtime/BufferedInputStream.h"
+#include "runtime/Interpreter.h"
 #include "runtime/PyFrame.h"
 
 #include <filesystem>
@@ -39,7 +40,9 @@ int main() {
 
     auto frame = std::make_shared<torchlight::runtime::PyFrame>(code);
 
-    frame->Run();
+    torchlight::runtime::Interpreter interpreter(frame);
+
+    interpreter.Run();
   }
 
   return 0;

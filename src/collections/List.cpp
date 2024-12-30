@@ -1,30 +1,29 @@
-#include "bytecode/ByteCode.h"
+#include "collections/List.h"
 #include "collections/Decimal.h"
 #include "collections/Integer.h"
-#include "collections/List.h"
 #include "collections/Map.h"
 #include "collections/String.h"
 #include "object/common.h"
 
+#include <algorithm>
 #include <stdexcept>
 
 namespace torchlight::collections {
 
 template <typename T>
-List<T>::List(Index capacity) : capacity(capacity) {
-  if (capacity == 0) {
-    capacity = 1;
-  }
-  items = std::shared_ptr<T[]>(new T[capacity], std::default_delete<T[]>());
-}
+List<T>::List(Index capacity)
+  : capacity(capacity == 0 ? 1 : capacity), items(new T[capacity]) {}
 
 template <typename T>
 List<T>::List(Index capacity, std::shared_ptr<T[]> elements)
-  : size(capacity), capacity(capacity), items(elements) {}
+  : size(capacity), capacity(capacity), items(std::move(elements)) {}
 
 template <typename T>
-List<T>::List() : List(INIT_CAPACITY) {
-  items = std::shared_ptr<T[]>(new T[capacity], std::default_delete<T[]>());
+List<T>::List() : List(INIT_CAPACITY) {}
+
+template <typename T>
+T* List<T>::Data() const {
+  return items.get();
 }
 
 template <typename T>
@@ -80,12 +79,10 @@ bool List<T>::Full() {
 template <typename T>
 void List<T>::Expand(Index leastCapacity) {
   Index newCapacity = leastCapacity;
-  std::shared_ptr<T[]> newItems(new T[newCapacity], std::default_delete<T[]>());
+  std::shared_ptr<T[]> newItems(new T[newCapacity]);
   std::shared_ptr<T[]> oldItems = items;
   items = newItems;
-  for (Index i = 0; i < size; i++) {
-    items[i] = oldItems[i];
-  }
+  std::copy(oldItems.get(), oldItems.get() + size, items.get());
   capacity = newCapacity;
 }
 
@@ -104,9 +101,7 @@ void List<T>::RemoveAt(Index index) {
   if (!ValidIndex(index)) {
     throw std::runtime_error("RemoveAt::Index out of range");
   }
-  for (Index i = index; i < size - 1; i++) {
-    items[i] = items[i + 1];
-  }
+  std::move(items.get() + index + 1, items.get() + size, items.get() + index);
   size--;
 }
 
@@ -115,14 +110,14 @@ void List<T>::Insert(Index index, T item) {
   if (Full()) {
     Expand();
   }
-  if (!ValidIndex(index)) {
+  if (index > size) {
     throw std::runtime_error("Insert::Index out of range");
   }
+  std::move_backward(
+    items.get() + index, items.get() + size, items.get() + size + 1
+  );
+  items[index] = std::move(item);
   size++;
-  for (Index i = size; i > index; i--) {
-    items[i] = items[i - 1];
-  }
-  items[index] = item;
 }
 
 template <typename T>
@@ -132,13 +127,35 @@ Index List<T>::RemainingCapacity() {
 
 template <typename T>
 void List<T>::Add(const List<T>& list) {
-  if (RemainingCapacity() < list.Size()) {
-    Expand(size + list.Size());
+  if (this == &list) {
+    Add(list.Copy());
+  } else {
+    if (RemainingCapacity() < list.Size()) {
+      Expand(size + list.Size());
+    }
+    std::copy(
+      list.items.get(), list.items.get() + list.Size(), items.get() + size
+    );
+    size += list.Size();
   }
-  size += list.Size();
-  for (Index i = 0; i < list.Size(); i++) {
-    items[size - list.Size() + i] = list.Get(i);
+}
+
+template <typename T>
+void List<T>::Add(T* items, Index count) {
+  if (RemainingCapacity() < count) {
+    Expand(size + count);
   }
+  std::copy(items, items + count, this->items.get() + size);
+  size += count;
+}
+
+template <typename T>
+void List<T>::AppendElements(T element, Index count) {
+  if (RemainingCapacity() < count) {
+    Expand(size + count);
+  }
+  std::fill(items.get() + size, items.get() + size + count, element);
+  size += count;
 }
 
 template <typename T>
@@ -160,12 +177,13 @@ void List<T>::Insert(Index index, List<T>& list) {
   if (RemainingCapacity() < list.Size()) {
     Expand(size + list.Size());
   }
-  for (Index i = size; i > index; i--) {
-    items[i + list.Size() - 1] = items[i - 1];
-  }
-  for (Index i = 0; i < list.Size(); i++) {
-    items[index + i] = list.Get(i);
-  }
+  std::move_backward(
+    items.get() + index, items.get() + size, items.get() + size + list.Size()
+  );
+  std::copy(
+    list.items.get(), list.items.get() + list.Size(), items.get() + index
+  );
+
   size += list.Size();
 }
 
@@ -174,49 +192,38 @@ void List<T>::Remove(Index start, Index end) {
   if (start >= size || end > size || start > end) {
     throw std::runtime_error("Remove::Index out of range");
   }
-  for (Index i = 0; i < size - end; i++) {
-    items[start + i] = items[end + i];
-  }
-  size -= end - start;
+  std::move(items.get() + end, items.get() + size, items.get() + start);
+  size -= (end - start);
 }
 
 template <typename T>
 void List<T>::Reverse() {
-  for (Index i = 0; i < size / 2; i++) {
-    T temp = items[i];
-    items[i] = items[size - i - 1];
-    items[size - i - 1] = temp;
-  }
+  std::reverse(items.get(), items.get() + size);
 }
 
 template <typename T>
 void List<T>::TrimExcess() {
   if (size < capacity) {
-    std::shared_ptr<T[]> newItems(new T[size], std::default_delete<T[]>());
-    for (Index i = 0; i < size; i++) {
-      newItems[i] = items[i];
-    }
+    std::shared_ptr<T[]> newItems(new T[size]);
+    std::copy(items.get(), items.get() + size, newItems.get());
     items = newItems;
     capacity = size;
   }
 }
 
 template <typename T>
-void List<T>::Fill(T value) {
-  for (Index i = 0; i < size; i++) {
-    items[i] = value;
-  }
-  for (Index i = size; i < capacity; i++) {
-    Add(value);
+void List<T>::Fill(T item) {
+  std::fill(items.get(), items.get() + size, item);
+  while (size < capacity) {
+    Add(item);
   }
 }
 
 template <typename T>
 List<T> List<T>::Copy() const {
   List<T> list(size);
-  for (Index i = 0; i < size; i++) {
-    list.Add(items[i]);
-  }
+  std::copy(items.get(), items.get() + size, list.items.get());
+  list.size = size;  // 确保复制后的列表大小正确
   return list;
 }
 
@@ -240,17 +247,14 @@ template class List<Decimal>;
 
 template class List<Integer>;
 
-// extern template class MapEntry<String, String>;
+extern template class MapEntry<String, object::PyObjPtr>;
 
-// template class List<MapEntry<String, String>>;
+template class List<MapEntry<String, object::PyObjPtr>>;
 
 template class List<Byte>;
 
 template class List<object::PyObjPtr>;
 
-using InstPtr = bytecode::InstPtr;
-
-template class List<InstPtr>;
-
 template class List<double>;
+
 }  // namespace torchlight::collections

@@ -1,105 +1,95 @@
-#include <stdexcept>
 #include "collections/Decimal.h"
+#include <stdexcept>
 #include "collections/String.h"
+#include "collections/impl/Decimal.h"
+#include "collections/impl/String.h"
 
 namespace torchlight::collections {
 
-int Decimal::UnicodeToInt(Unicode c) noexcept {
+Decimal CreateDecimalZero() {
+  return CreateDecimalWithU32(0);
+}
+
+Decimal CreateDecimalOne() {
+  return CreateDecimalWithU32(1);
+}
+
+Decimal CreateDecimalWithU32(uint32_t value) {
+  List<int32_t> parts;
+  for (Index i = 0; value != 0; i++) {
+    parts.Add(static_cast<int32_t>(value % 10));
+    value /= 10;
+  }
+  parts.Reverse();
+  return Decimal(parts, false);
+}
+
+int32_t UnicodeToInt(Unicode c) noexcept {
   if (c >= 0x0030 && c <= 0x0039) {
-    return static_cast<int>(c - 0x0030);
+    return static_cast<int32_t>(c - 0x0030);
   }
   return -1;
 }
 
-bool Decimal::IsNegative(const String& str) {
+bool IsNegative(const String& str) {
   const Unicode UnicodeMinus = 0x2D;
   return str.Get(0) == UnicodeMinus;
 }
 
-bool Decimal::IsNegative(const Bytes& str) {
+bool IsNegative(const Bytes& str) {
   const Byte ByteMinus = 0x2D;
   return str.Get(0) == ByteMinus;
 }
 
-Decimal::Decimal(const String& str) {
+Decimal Slice(const Decimal& decimal, Index start, Index end) {
+  List<int32_t> parts = decimal.Data().Slice(start, end);
+  return Decimal(parts, decimal.Sign());
+}
+
+Decimal CreateDecimalWithString(const String& str) {
   Index i = 0;
+  bool sign = false;
   if (IsNegative(str)) {
-    isNegative = true;
+    sign = true;
     i = 1;
   }
+  List<int32_t> parts;
   for (; i < str.Size(); i++) {
-    int c = UnicodeToInt(str.Get(i));
+    int32_t c = UnicodeToInt(str.Get(i));
     if (c == -1) {
       throw std::runtime_error("Invalid character in Decimal");
     }
     parts.Add(c);
   }
-  TrimLeadingZero();
-}
 
-Decimal::Decimal(const Bytes& str) {
-  Index i = 0;
-  if (IsNegative(str)) {
-    isNegative = true;
-    i = 1;
-  }
-  for (; i < str.Size(); i++) {
-    int c = UnicodeToInt(str.Get(i));
-    if (c == -1) {
-      throw std::runtime_error("Invalid character in Decimal");
-    }
-    parts.Add(c);
-  }
-  TrimLeadingZero();
-}
-
-Decimal::Decimal() = default;
-
-Decimal Decimal::Slice(Index start, Index end) const {
-  Decimal newDecimal;
-  newDecimal.parts = parts.Slice(start, end);
-  newDecimal.isNegative = isNegative;
-  return newDecimal;
-}
-
-Decimal::Decimal(int32_t value) {
-  if (value < 0) {
-    isNegative = true;
-    value = -value;
-  }
-  while (value > 0) {
-    parts.Add(value % 10);
-    value /= 10;
-  }
-  this->parts.Reverse();
+  return Decimal(parts, sign);
 }
 
 String Decimal::ToString() const {
   if (IsZero()) {
-    return String("0");
+    return CreateStringWithCString("0");
   }
   const Unicode UnicodeDigitZero = 0x30;
-  String str(parts.Size() + (isNegative ? 1 : 0));
-  if (isNegative) {
+  List<Unicode> str(parts.Size() + (sign ? 1 : 0));
+  if (sign) {
     str.Add(0x2D);  // '-'
   }
   for (Index i = 0; i < parts.Size(); i++) {
     str.Add(parts.Get(i) + UnicodeDigitZero);
   }
-  return str;
+  return String(str);
 }
 
 Decimal Decimal::Add(const Decimal& rhs) const {
   // 正负号相同
-  if (isNegative == rhs.isNegative) {
+  if (sign == rhs.sign) {
     Index size = std::max(parts.Size(), rhs.parts.Size());
-    Decimal result;
-    result.parts.Expand(size + 1);
-    int carry = 0;
-    for (auto it = List<int>::Iterator::RBegin(parts),
-              it2 = List<int>::Iterator::RBegin(rhs.parts);
+    List<int32_t> result(size + 1);
+    int32_t carry = 0;
+    for (auto it = List<int32_t>::Iterator::RBegin(parts),
+              it2 = List<int32_t>::Iterator::RBegin(rhs.parts);
          !(it.End() && it2.End()); it.Next(), it2.Next()) {
-      int sum = carry;
+      int32_t sum = carry;
       if (!it.End()) {
         sum += it.Get();
       }
@@ -108,13 +98,13 @@ Decimal Decimal::Add(const Decimal& rhs) const {
       }
       carry = sum / 10;
       sum %= 10;
-      result.parts.Add(sum);
+      result.Add(sum);
     }
     if (carry != 0) {
-      result.parts.Add(carry);
+      result.Add(carry);
     }
-    result.isNegative = isNegative;
-    return result.Reverse();
+    result.Reverse();
+    return Decimal(result, sign);
   }
   return Subtract(rhs.Copy().Negate());
 }
@@ -122,35 +112,34 @@ Decimal Decimal::Add(const Decimal& rhs) const {
 Decimal Decimal::Negate() {
   Decimal newDecimal;
   newDecimal.parts = parts.Copy();
-  newDecimal.isNegative = !isNegative;
+  newDecimal.sign = !sign;
   return newDecimal;
 }
 
 Decimal Decimal::Copy() const {
   Decimal newDecimal;
   newDecimal.parts = parts.Copy();
-  newDecimal.isNegative = isNegative;
+  newDecimal.sign = sign;
   return newDecimal;
 }
 
 bool Decimal::GreaterThan(const Decimal& rhs) const {
   // 如果左值是负数，右值是正数，那么左值一定比右值小
-  if (isNegative && !rhs.isNegative) {
+  if (sign && !rhs.sign) {
     return false;
   }
   // 如果左值是正数，右值是负数，那么左值一定比右值大
-  if (!isNegative && rhs.isNegative) {
+  if (!sign && rhs.sign) {
     return true;
   }
-  bool sign = isNegative;
   // 此时左值和右值正负号相同
   if (parts.Size() != rhs.parts.Size()) {
     // 正号，位数多的数大；负号，位数少的数大
     return sign ^ (parts.Size() > rhs.parts.Size());
   }
   // 此时左值和右值的位数相等，正负号相同
-  for (auto it = List<int>::Iterator::Begin(parts),
-            it2 = List<int>::Iterator::Begin(rhs.parts);
+  for (auto it = List<int32_t>::Iterator::Begin(parts),
+            it2 = List<int32_t>::Iterator::Begin(rhs.parts);
        !it.End() && !it2.End(); it.Next(), it2.Next()) {
     if (it.Get() == it2.Get()) {
       continue;
@@ -162,52 +151,43 @@ bool Decimal::GreaterThan(const Decimal& rhs) const {
 
 Decimal Decimal::Subtract(const Decimal& rhs) const {
   // 正负号相同
-  if (isNegative == rhs.isNegative) {
+  if (sign == rhs.sign) {
     // 假定左值大于右值
     bool sign = false;
     Index size = 0;
-    auto _lhs = Copy().Reverse();
-    auto _rhs = rhs.Copy().Reverse();
-    if (_lhs.parts.Size() > _rhs.parts.Size()) {
-      const Index diff = _lhs.parts.Size() - _rhs.parts.Size();
-      for (Index i = 0; i < diff; i++) {
-        _rhs.parts.Add(0);
-      }
-      size = _lhs.parts.Size();
-    } else if (_lhs.parts.Size() < _rhs.parts.Size()) {
-      const Index diff = _rhs.parts.Size() - _lhs.parts.Size();
-      for (Index i = 0; i < diff; i++) {
-        _lhs.parts.Add(0);
-      }
-      size = _rhs.parts.Size();
+    List<int32_t> _lhs = parts.Copy();
+    _lhs.Reverse();
+    List<int32_t> _rhs = rhs.parts.Copy();
+    _rhs.Reverse();
+    if (_lhs.Size() > _rhs.Size()) {
+      _rhs.AppendElements(0, _lhs.Size() - _rhs.Size());
+      size = _lhs.Size();
+    } else if (_lhs.Size() < _rhs.Size()) {
+      _lhs.AppendElements(0, _rhs.Size() - _lhs.Size());
+      size = _rhs.Size();
       sign = true;
-      Decimal temp = _lhs;
-      _lhs = _rhs;
-      _rhs = temp;
+      std::swap(_lhs, _rhs);
     } else {
-      size = _lhs.parts.Size();
-      for (auto it = List<int>::Iterator::RBegin(_lhs.parts),
-                it2 = List<int>::Iterator::RBegin(_rhs.parts);
+      size = _lhs.Size();
+      for (auto it = List<int32_t>::Iterator::RBegin(_lhs),
+                it2 = List<int32_t>::Iterator::RBegin(_rhs);
            !it.End() && !it2.End(); it.Next(), it2.Next()) {
         if (it.Get() > it2.Get()) {
           break;
         }
         if (it.Get() < it2.Get()) {
           sign = true;
-          Decimal temp = _lhs;
-          _lhs = _rhs;
-          _rhs = temp;
+          std::swap(_lhs, _rhs);
           break;
         }
       }
     }
-    Decimal result;
-    result.parts.Expand(size);
-    int borrow = 0;
-    for (auto it = List<int>::Iterator::Begin(_lhs.parts),
-              it2 = List<int>::Iterator::Begin(_rhs.parts);
+    List<int32_t> result(size);
+    int32_t borrow = 0;
+    for (auto it = List<int32_t>::Iterator::Begin(_lhs),
+              it2 = List<int32_t>::Iterator::Begin(_rhs);
          !it.End() && !it2.End(); it.Next(), it2.Next()) {
-      int diff = borrow + it.Get();
+      int32_t diff = borrow + it.Get();
       if (diff < it2.Get()) {
         diff += 10;
         borrow = -1;
@@ -215,39 +195,38 @@ Decimal Decimal::Subtract(const Decimal& rhs) const {
         borrow = 0;
       }
       diff -= it2.Get();
-      result.parts.Add(diff);
+      result.Add(diff);
     }
-    result.TrimTrailingZero();
-    result.isNegative = sign ^ isNegative;
-    return result.Reverse();
+    TrimTrailingZero(result);
+    result.Reverse();
+    return Decimal(result, this->sign ^ sign);
   }
   return Add(rhs.Copy().Negate());
 }
 
 Decimal Decimal::Multiply(const Decimal& rhs) const {
   if (IsZero() || rhs.IsZero()) {
-    return Decimal(String("0"));
+    return CreateDecimalZero();
   }
-  Decimal result;
-  result.parts.Expand(parts.Size() + rhs.parts.Size());
-  result.parts.Fill(0);
-  auto _lhs = Copy().Reverse();
-  auto _rhs = rhs.Copy().Reverse();
-  for (auto it = List<int>::Iterator::Begin(_lhs.parts); !it.End(); it.Next()) {
-    for (auto it2 = List<int>::Iterator::Begin(_rhs.parts); !it2.End();
+  List<int32_t> result(parts.Size() + rhs.parts.Size());
+  result.Fill(0);
+  List<int32_t> _lhs = parts.Copy();
+  _lhs.Reverse();
+  List<int32_t> _rhs = rhs.parts.Copy();
+  _rhs.Reverse();
+  for (auto it = List<int32_t>::Iterator::Begin(_lhs); !it.End(); it.Next()) {
+    for (auto it2 = List<int32_t>::Iterator::Begin(_rhs); !it2.End();
          it2.Next()) {
-      int product = it.Get() * it2.Get();
+      int32_t product = it.Get() * it2.Get();
       Index index = it.Index() + it2.Index();
-      result.parts.Set(index, result.parts.Get(index) + product);
-      result.parts.Set(
-        index + 1, result.parts.Get(index + 1) + result.parts.Get(index) / 10
-      );
-      result.parts.Set(index, result.parts.Get(index) % 10);
+      result.Set(index, result.Get(index) + product);
+      result.Set(index + 1, result.Get(index + 1) + result.Get(index) / 10);
+      result.Set(index, result.Get(index) % 10);
     }
   }
-  result.TrimTrailingZero();
-  result.isNegative = isNegative ^ rhs.isNegative;  // 处理符号
-  return result.Reverse();
+  TrimTrailingZero(result);
+  result.Reverse();
+  return Decimal(result, sign ^ rhs.sign);
 }
 
 Decimal Decimal::Divide(const Decimal& rhs) const {
@@ -264,25 +243,25 @@ List<Decimal> Decimal::DivMod(const Decimal& rhs) const {
   }
   if (IsZero() || LessThan(rhs)) {
     List<Decimal> divmods;
-    divmods.Add(Decimal(String("0")));
+    divmods.Add(CreateDecimalZero());
     divmods.Add(Copy());
     return divmods;
   }
   if (Equal(rhs)) {
     List<Decimal> divmods;
-    divmods.Add(Decimal(String("1")));
-    divmods.Add(Decimal(String("0")));
+    divmods.Add(CreateDecimalOne());
+    divmods.Add(CreateDecimalZero());
     return divmods;
   }
   Decimal result;
   result.parts.Expand(parts.Size());
-  result.isNegative = isNegative ^ rhs.isNegative;
-  Decimal dividend = Copy().Slice(0, std::min(parts.Size(), rhs.parts.Size()));
-  dividend.isNegative = false;
-  Decimal divisor = rhs.Copy();
-  divisor.isNegative = false;
+  result.sign = sign ^ rhs.sign;
+  Decimal dividend(
+    parts.Copy().Slice(0, std::min(parts.Size(), rhs.parts.Size())), false
+  );
+  Decimal divisor(rhs.parts.Copy(), false);
   for (Index i = 0; i < parts.Size() - rhs.parts.Size() + 1; i++) {
-    int quotient = 0;
+    int32_t quotient = 0;
     while (dividend.GreaterThanOrEqual(divisor)) {
       dividend = dividend.Subtract(divisor);
       quotient++;
@@ -291,11 +270,11 @@ List<Decimal> Decimal::DivMod(const Decimal& rhs) const {
     if (i + rhs.parts.Size() < parts.Size()) {
       dividend.parts.Add(parts.Get(i + rhs.parts.Size()));
     }
-    dividend.TrimLeadingZero();
+    TrimLeadingZero(dividend.parts);
   }
   List<Decimal> divmods;
-  result.TrimLeadingZero();
-  dividend.TrimLeadingZero();
+  TrimLeadingZero(result.parts);
+  TrimLeadingZero(dividend.parts);
   divmods.Add(result);
   divmods.Add(dividend);
   return divmods;
@@ -305,7 +284,7 @@ bool Decimal::IsZero() const {
   if (parts.Size() == 0) {
     return true;
   }
-  for (auto it = List<int>::Iterator::Begin(parts); !it.End(); it.Next()) {
+  for (auto it = List<int32_t>::Iterator::Begin(parts); !it.End(); it.Next()) {
     if (it.Get() != 0) {
       return false;
     }
@@ -313,16 +292,8 @@ bool Decimal::IsZero() const {
   return true;
 }
 
-Decimal Decimal::Reverse() const {
-  Decimal newDecimal;
-  newDecimal.parts = parts.Copy();
-  newDecimal.parts.Reverse();
-  newDecimal.isNegative = isNegative;
-  return newDecimal;
-}
-
 bool Decimal::Equal(const Decimal& rhs) const {
-  if (isNegative != rhs.isNegative) {
+  if (sign != rhs.sign) {
     return false;
   }
   if (parts.Size() != rhs.parts.Size()) {
@@ -336,8 +307,8 @@ bool Decimal::Equal(const Decimal& rhs) const {
   return true;
 }
 
-void Decimal::TrimTrailingZero() {
-  for (auto it = List<int>::Iterator::RBegin(parts); !it.End(); it.Next()) {
+void TrimTrailingZero(List<int32_t>& parts) {
+  for (auto it = List<int32_t>::Iterator::RBegin(parts); !it.End(); it.Next()) {
     if (it.Get() != 0 || it.Index() == 0) {
       parts = parts.Slice(0, it.Index() + 1);
       break;
@@ -345,13 +316,40 @@ void Decimal::TrimTrailingZero() {
   }
 }
 
-void Decimal::TrimLeadingZero() {
-  for (auto it = List<int>::Iterator::Begin(parts); !it.End(); it.Next()) {
+void TrimLeadingZero(List<int32_t>& parts) {
+  for (auto it = List<int32_t>::Iterator::Begin(parts); !it.End(); it.Next()) {
     if (it.Get() != 0 || it.Index() == parts.Size() - 1) {
       parts = parts.Slice(it.Index(), parts.Size());
       break;
     }
   }
+}
+
+bool Decimal::GreaterThanOrEqual(const Decimal& rhs) const {
+  return GreaterThan(rhs) || Equal(rhs);
+}
+
+bool Decimal::LessThan(const Decimal& rhs) const {
+  return !GreaterThan(rhs) && !Equal(rhs);
+}
+
+bool Decimal::LessThanOrEqual(const Decimal& rhs) const {
+  return !GreaterThan(rhs);
+}
+
+bool Decimal::NotEqual(const Decimal& rhs) const {
+  return !Equal(rhs);
+}
+
+List<int32_t> Decimal::Data() const {
+  return parts;
+}
+
+Decimal::Decimal(const List<int32_t>& parts, bool sign)
+  : parts(parts), sign(sign) {}
+
+bool Decimal::Sign() const {
+  return sign;
 }
 
 }  // namespace torchlight::collections

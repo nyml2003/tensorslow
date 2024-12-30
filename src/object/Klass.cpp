@@ -58,4 +58,8 @@ PyObjPtr Klass::_bool_(PyObjPtr obj) {
   return nullptr;
 }
 
+PyObjPtr Klass::_serialize_(PyObjPtr obj) {
+  return nullptr;
+}
+
 }  // namespace torchlight::object

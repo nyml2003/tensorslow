@@ -50,9 +50,13 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   PyObjPtr repr();
 
   PyObjPtr _bool_();
+
+  PyObjPtr _serialize_();
 };
 
 using PyObjPtr = std::shared_ptr<PyObject>;
+
+void print(PyObjPtr obj);
 
 }  // namespace torchlight::object
 

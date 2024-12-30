@@ -1,11 +1,10 @@
 #ifndef TORCHLIGHT_OBJECT_PYBYTES_H
 #define TORCHLIGHT_OBJECT_PYBYTES_H
 
+#include "collections/Bytes.h"
 #include "object/Klass.h"
 #include "object/PyObject.h"
 #include "object/common.h"
-
-#include "collections/Bytes.h"
 
 namespace torchlight::object {
 
@@ -26,6 +25,12 @@ class BytesKlass : public Klass {
   explicit BytesKlass();
 
   static KlassPtr Self();
+
+  PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs) override;
+
+  PyObjPtr _serialize_(PyObjPtr obj) override;
+
+  PyObjPtr repr(PyObjPtr obj) override;
 };
 
 }  // namespace torchlight::object

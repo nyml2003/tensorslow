@@ -1,14 +1,17 @@
-#include <cstdio>
-#include "collections/List.h"
-#include "object/PyBytes.h"
-#include "object/common.h"
 #include "runtime/BinaryFileParser.h"
 
-#include <string>
+#include "collections/List.h"
+#include "object/PyBytes.h"
+#include "runtime/Serialize.h"
 
-#include <iostream>
+#include <cstdio>
+#include <memory>
 
 namespace torchlight::runtime {
+
+using collections::Byte;
+using collections::Bytes;
+using collections::List;
 
 BinaryFileParser::BinaryFileParser(BufferedInputStreamPtr inputStream)
   : inputStream(std::move(inputStream)) {}
@@ -19,7 +22,7 @@ PyCodePtr BinaryFileParser::Parse() {
 }
 
 PyCodePtr BinaryFileParser::ParseCode() {
-  collections::List<collections::Byte> byteCodes;
+  List<Byte> byteCodes;
   while (true) {
     std::optional<uint8_t> byte = inputStream->ReadU8();
     if (!byte.has_value()) {
@@ -27,9 +30,6 @@ PyCodePtr BinaryFileParser::ParseCode() {
     }
     byteCodes.Add(byte.value());
   }
-  byteCodes.PopBack();
-  return std::make_shared<PyCode>(
-    std::make_shared<object::PyBytes>(collections::Bytes(byteCodes))
-  );
+  return MakeCode(std::make_shared<object::PyBytes>(Bytes(byteCodes)));
 }
 }  // namespace torchlight::runtime

@@ -5,24 +5,21 @@
 #include <cstdint>
 
 namespace torchlight::collections {
-template <typename T>
-class List;
-
-template <typename K, typename V>
-class MapEntry;
-
-template <typename K, typename V>
-class Map;
-
-class String;
-
 using Byte = uint8_t;
-
 using Unicode = uint32_t;
-
 using Index = uint64_t;
 
-class Integer;
+// overload
+
 }  // namespace torchlight::collections
+
+namespace torchlight {
+template <class... Ts>
+struct overload : Ts... {
+  using Ts::operator()...;
+};
+template <class... Ts>
+overload(Ts...) -> overload<Ts...>;
+}  // namespace torchlight
 
 #endif  // TORCHLIGHT_COLLECTIONS_COMMON_H

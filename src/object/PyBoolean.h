@@ -4,13 +4,7 @@
 #include "object/Klass.h"
 #include "object/PyInteger.h"
 
-#include "collections/Integer.h"
-#include "collections/String.h"
-
 namespace torchlight::object {
-
-using collections::Integer;
-using collections::String;
 
 class BooleanKlass : public Klass {
  public:
@@ -18,6 +12,8 @@ class BooleanKlass : public Klass {
   static KlassPtr Self();
 
   PyObjPtr _bool_(PyObjPtr obj) override;
+
+  PyObjPtr _serialize_(PyObjPtr obj) override;
 };
 
 class PyBoolean : public PyInteger {

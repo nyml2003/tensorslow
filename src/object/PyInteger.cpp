@@ -1,24 +1,30 @@
-#include "collections/Integer.h"
 #include "object/PyInteger.h"
-
-#include <utility>
+#include "collections/Integer.h"
+#include "collections/impl/Bytes.h"
+#include "collections/impl/String.h"
+#include "object/ByteCode.h"
 #include "object/PyBoolean.h"
+#include "object/PyBytes.h"
 #include "object/PyString.h"
 
 namespace torchlight::object {
 
-PyInteger::PyInteger(collections::Integer value)
+using collections::Bytes;
+using collections::Integer;
+using collections::Serialize;
+using collections::String;
+
+PyInteger::PyInteger(Integer value)
   : PyObject(IntegerKlass::Self()), value(std::move(value)) {}
 
 [[nodiscard]]
 
-collections::Integer PyInteger::Value() const {
+Integer PyInteger::Value() const {
   return value;
 }
 
-IntegerKlass::IntegerKlass() : Klass(collections::String("int")) {}
-
-IntegerKlass::~IntegerKlass() = default;
+IntegerKlass::IntegerKlass()
+  : Klass(collections::CreateStringWithCString("int")) {}
 
 KlassPtr IntegerKlass::Self() {
   static KlassPtr instance = std::make_shared<IntegerKlass>();
@@ -26,8 +32,7 @@ KlassPtr IntegerKlass::Self() {
 }
 
 PyObjPtr IntegerKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
-  if (lhs->Klass() != IntegerKlass::Self() ||
-      rhs->Klass() != IntegerKlass::Self()) {
+  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     return nullptr;
   }
   auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
@@ -36,8 +41,7 @@ PyObjPtr IntegerKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
 }
 
 PyObjPtr IntegerKlass::sub(PyObjPtr lhs, PyObjPtr rhs) {
-  if (lhs->Klass() != IntegerKlass::Self() ||
-      rhs->Klass() != IntegerKlass::Self()) {
+  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     return nullptr;
   }
   auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
@@ -46,8 +50,7 @@ PyObjPtr IntegerKlass::sub(PyObjPtr lhs, PyObjPtr rhs) {
 }
 
 PyObjPtr IntegerKlass::mul(PyObjPtr lhs, PyObjPtr rhs) {
-  if (lhs->Klass() != IntegerKlass::Self() ||
-      rhs->Klass() != IntegerKlass::Self()) {
+  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     return nullptr;
   }
   auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
@@ -56,8 +59,7 @@ PyObjPtr IntegerKlass::mul(PyObjPtr lhs, PyObjPtr rhs) {
 }
 
 PyObjPtr IntegerKlass::div(PyObjPtr lhs, PyObjPtr rhs) {
-  if (lhs->Klass() != IntegerKlass::Self() ||
-      rhs->Klass() != IntegerKlass::Self()) {
+  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     return nullptr;
   }
   auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
@@ -66,19 +68,18 @@ PyObjPtr IntegerKlass::div(PyObjPtr lhs, PyObjPtr rhs) {
 }
 
 PyObjPtr IntegerKlass::repr(PyObjPtr obj) {
-  if (obj->Klass() != IntegerKlass::Self()) {
+  if (obj->Klass() != Self()) {
     return nullptr;
   }
   auto integer = std::dynamic_pointer_cast<PyInteger>(obj);
-  collections::String result = collections::String("<int ")
-                                 .Concat(integer->Value().ToString())
-                                 .Concat(collections::String(">"));
+  String result = collections::CreateStringWithCString("<int ")
+                    .Concat(integer->Value().ToString())
+                    .Concat(collections::CreateStringWithCString(" >"));
   return std::make_shared<PyString>(result);
 }
 
 PyObjPtr IntegerKlass::gt(PyObjPtr lhs, PyObjPtr rhs) {
-  if (lhs->Klass() != IntegerKlass::Self() ||
-      rhs->Klass() != IntegerKlass::Self()) {
+  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     return nullptr;
   }
   auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
@@ -87,8 +88,7 @@ PyObjPtr IntegerKlass::gt(PyObjPtr lhs, PyObjPtr rhs) {
 }
 
 PyObjPtr IntegerKlass::lt(PyObjPtr lhs, PyObjPtr rhs) {
-  if (lhs->Klass() != IntegerKlass::Self() ||
-      rhs->Klass() != IntegerKlass::Self()) {
+  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     return nullptr;
   }
   auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
@@ -97,8 +97,7 @@ PyObjPtr IntegerKlass::lt(PyObjPtr lhs, PyObjPtr rhs) {
 }
 
 PyObjPtr IntegerKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
-  if (lhs->Klass() != IntegerKlass::Self() ||
-      rhs->Klass() != IntegerKlass::Self()) {
+  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     return nullptr;
   }
   auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
@@ -107,8 +106,7 @@ PyObjPtr IntegerKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
 }
 
 PyObjPtr IntegerKlass::ge(PyObjPtr lhs, PyObjPtr rhs) {
-  if (lhs->Klass() != IntegerKlass::Self() ||
-      rhs->Klass() != IntegerKlass::Self()) {
+  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     return nullptr;
   }
   auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
@@ -117,8 +115,7 @@ PyObjPtr IntegerKlass::ge(PyObjPtr lhs, PyObjPtr rhs) {
 }
 
 PyObjPtr IntegerKlass::le(PyObjPtr lhs, PyObjPtr rhs) {
-  if (lhs->Klass() != IntegerKlass::Self() ||
-      rhs->Klass() != IntegerKlass::Self()) {
+  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     return nullptr;
   }
   auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
@@ -127,13 +124,26 @@ PyObjPtr IntegerKlass::le(PyObjPtr lhs, PyObjPtr rhs) {
 }
 
 PyObjPtr IntegerKlass::ne(PyObjPtr lhs, PyObjPtr rhs) {
-  if (lhs->Klass() != IntegerKlass::Self() ||
-      rhs->Klass() != IntegerKlass::Self()) {
+  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     return nullptr;
   }
   auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
   auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
   return PyBoolean::Constant(!left->Value().Equal(right->Value()));
+}
+
+PyObjPtr IntegerKlass::_serialize_(PyObjPtr obj) {
+  if (obj->Klass() != Self()) {
+    return nullptr;
+  }
+  auto integer = std::dynamic_pointer_cast<PyInteger>(obj);
+  if (integer->Value().IsZero()) {
+    return std::make_shared<PyBytes>(Serialize(Literal::ZERO));
+  }
+  Bytes bytes;
+  bytes.InplaceConcat(Serialize(Literal::INTEGER));
+  bytes.InplaceConcat(Serialize(integer->Value()));
+  return std::make_shared<PyBytes>(bytes);
 }
 
 }  // namespace torchlight::object

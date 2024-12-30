@@ -1,10 +1,12 @@
 #ifndef TORCHLIGHT_RUNTIME_BINARYFILEPARSER_H
 #define TORCHLIGHT_RUNTIME_BINARYFILEPARSER_H
 
+#include "object/PyCode.h"
 #include "runtime/BufferedInputStream.h"
-#include "runtime/PyCode.h"
 
 namespace torchlight::runtime {
+
+using object::PyCodePtr;
 
 class BinaryFileParser {
  private:

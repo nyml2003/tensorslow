@@ -4,7 +4,6 @@
 #include "object/Klass.h"
 #include "object/PyObject.h"
 
-
 namespace torchlight::object {
 
 class PyFloat : public PyObject {
@@ -34,6 +33,8 @@ class FloatKlass : public Klass {
   PyObjPtr div(PyObjPtr lhs, PyObjPtr rhs) override;
 
   PyObjPtr repr(PyObjPtr obj) override;
+
+  PyObjPtr _serialize_(PyObjPtr obj) override;
 };
 
 }  // namespace torchlight::object

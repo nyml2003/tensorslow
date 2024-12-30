@@ -1,30 +1,21 @@
 #ifndef TORCHLIGHT_COLLECTIONS_STRING_H
 #define TORCHLIGHT_COLLECTIONS_STRING_H
 
-#include "collections/common.h"
-
+#include "collections/Bytes.h"
 #include "collections/List.h"
+#include "collections/common.h"
 
 namespace torchlight::collections {
 
 class String {
  private:
-  static uint32_t UTF8ToUnicode(const char* str, Index& index);
-
   List<Unicode> codePoints;
 
  public:
-  explicit String(const char* str);
+  explicit String(const List<Unicode>& codePoints);
+  explicit String() = default;
 
-  explicit String();
-
-  explicit String(Index capacity);
-
-  /**
-   * 获取字符串的 UTF-8 编码
-   * @return
-   */
-  [[nodiscard]] const char* ToUTF8() const;
+  [[nodiscard]] List<Unicode> Data() const;
 
   /**
    * 用于将字符串数组连接起来
@@ -47,13 +38,9 @@ class String {
    */
   [[nodiscard]] Index Find(String& sub, Index start = 0) const;
 
-  bool operator==(const String& rhs) const;
-
-  void Add(Unicode codePoint);
-
   [[nodiscard]] String Concat(const String& rhs) const;
 
-  void InplaceConcat(const String& rhs);
+  String InplaceConcat(const String& rhs);
 
   [[nodiscard]] String Copy() const;
 
@@ -82,9 +69,10 @@ class String {
   [[nodiscard]] bool LessThanOrEqual(const String& rhs) const;
 
   [[nodiscard]] bool NotEqual(const String& rhs) const;
+
+  bool operator==(const String& rhs) const;
 };
 
-String DoubleToString(double value);
-
 }  // namespace torchlight::collections
+
 #endif  // TORCHLIGHT_COLLECTIONS_STRING_H

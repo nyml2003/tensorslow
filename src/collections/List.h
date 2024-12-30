@@ -38,6 +38,7 @@ class List {
   void Expand();
 
  public:
+  T* Data() const;
   /**
    * @brief 扩容
    * @param leastCapacity 这次扩容后，列表的容量至少为leastCapacity
@@ -86,6 +87,14 @@ class List {
    * @param list
    */
   void Add(const List<T>& list);
+
+  void Add(T* items, Index count);
+
+  /**
+   * @brief
+   *
+   */
+  void AppendElements(T element, Index count);
 
   /**
    * @brief 清空列表

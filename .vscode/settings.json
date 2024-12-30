@@ -122,7 +122,7 @@
         "--enable-config"
     ],
     "[cpp]": {
-        "editor.defaultFormatter": "xaver.clang-format",
+        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
     },
     "[jsonc]": {
         "editor.defaultFormatter": "vscode.json-language-features"
@@ -137,6 +137,7 @@
         "DNDEBUG",
         "gdwarf",
         "GTEST",
+        "insts",
         "Klass",
         "LSHIFT",
         "MINSIZEREL",

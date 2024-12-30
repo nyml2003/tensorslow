@@ -1,12 +1,13 @@
-#include "collections/List.h"
 #include "collections/Map.h"
+#include "collections/List.h"
 #include "collections/String.h"
+#include "object/PyObject.h"
 
 #include <stdexcept>
 
 namespace torchlight::collections {
 
-extern template class List<MapEntry<String, String>>;
+extern template class List<MapEntry<String, object::PyObjPtr>>;
 
 extern template class List<String>;
 
@@ -110,8 +111,7 @@ List<MapEntry<K, V>> Map<K, V>::Entries() {
   return entries;
 }
 
-template class MapEntry<String, String>;
-
-template class Map<String, String>;
+template class Map<String, object::PyObjPtr>;
+template class MapEntry<String, object::PyObjPtr>;
 
 }  // namespace torchlight::collections

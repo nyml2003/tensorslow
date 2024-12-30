@@ -1,7 +1,10 @@
 #include "collections/String.h"
+#include "collections/impl/Bytes.h"
+#include "collections/impl/String.h"
 
 #include <cstring>
 #include <stdexcept>
+#include <iostream>
 
 namespace torchlight::collections {
 extern template class List<Unicode>;
@@ -10,8 +13,12 @@ extern template class List<String>;
 
 extern template class List<Index>;
 
-Unicode String::UTF8ToUnicode(const char* str, Index& index) {
-  Byte leadByte = str[index];
+Unicode GetUnicode(
+  Index& index,
+  const std::function<Byte(Index)>& GetByte,
+  const std::function<bool(Index)>& IsValid
+) {
+  Byte leadByte = GetByte(index);
   int sequenceLength = 0;
   if ((leadByte & 0x80) == 0) {
     sequenceLength = 1;
@@ -24,7 +31,7 @@ Unicode String::UTF8ToUnicode(const char* str, Index& index) {
   } else {
     throw std::runtime_error("Invalid UTF-8 sequence");
   }
-  if (index + sequenceLength > strlen(str)) {
+  if (!IsValid(index + sequenceLength - 1)) {
     throw std::runtime_error("Invalid UTF-8 sequence");
   }
   Unicode codePoint = 0;
@@ -34,18 +41,18 @@ Unicode String::UTF8ToUnicode(const char* str, Index& index) {
       break;
     case 2:
       codePoint = (leadByte & 0x1F) << 6;
-      codePoint |= str[index + 1] & 0x3F;
+      codePoint |= GetByte(index + 1) & 0x3F;
       break;
     case 3:
       codePoint = (leadByte & 0x0F) << 12;
-      codePoint |= (str[index + 1] & 0x3F) << 6;
-      codePoint |= str[index + 2] & 0x3F;
+      codePoint |= (GetByte(index + 1) & 0x3F) << 6;
+      codePoint |= GetByte(index + 2) & 0x3F;
       break;
     case 4:
       codePoint = (leadByte & 0x07) << 18;
-      codePoint |= (str[index + 1] & 0x3F) << 12;
-      codePoint |= (str[index + 2] & 0x3F) << 6;
-      codePoint |= str[index + 3] & 0x3F;
+      codePoint |= (GetByte(index + 1) & 0x3F) << 12;
+      codePoint |= (GetByte(index + 2) & 0x3F) << 6;
+      codePoint |= GetByte(index + 3) & 0x3F;
       break;
     default:
       throw std::runtime_error("Invalid UTF-8 sequence");
@@ -54,39 +61,53 @@ Unicode String::UTF8ToUnicode(const char* str, Index& index) {
   return codePoint;
 }
 
-String::String(const char* str) {
+String CreateEmptyString() {
+  List<Unicode> codePoints;
+  return String(codePoints);
+}
+
+String CreateStringWithCString(const char* str) {
+  List<Unicode> codePoints;
   size_t length = strlen(str);
   size_t index = 0;
   while (index < length) {
-    Unicode codePoint = UTF8ToUnicode(str, index);
-    Add(codePoint);
+    Unicode codePoint = GetUnicode(
+      index,
+      [str](Index index) -> Byte { return static_cast<Byte>(str[index]); },
+      [length](Index index) -> bool { return index < length; }
+    );
+    codePoints.Add(codePoint);
   }
+  return String(codePoints);
 }
 
-String::String() = default;
-
-String::String(Index capacity) {
-  codePoints = List<Unicode>(capacity);
+String CreateStringWithBytes(const Bytes& bytes) {
+  std::cout << ToCString(bytes).get() << std::endl;
+  List<Unicode> codePoints;
+  size_t length = bytes.Size();
+  size_t index = 0;
+  while (index < length) {
+    Unicode codePoint = GetUnicode(
+      index, [bytes](Index index) -> Byte { return bytes.Get(index); },
+      [length](Index index) -> bool { return index < length; }
+    );
+    codePoints.Add(codePoint);
+  }
+  return String(codePoints);
 }
 
-void String::Add(Unicode codePoint) {
-  codePoints.Add(codePoint);
-}
+String::String(const List<Unicode>& codePoints) : codePoints(codePoints) {}
 
 String String::Concat(const String& rhs) const {
-  String str = Copy();
-  for (Index i = 0; i < rhs.Size(); i++) {
-    str.Add(rhs.Get(i));
-  }
-  return str;
+  return Copy().InplaceConcat(rhs);
+}
+
+List<Unicode> String::Data() const {
+  return codePoints;
 }
 
 String String::Copy() const {
-  String str;
-  for (Index i = 0; i < Size(); i++) {
-    str.Add(Get(i));
-  }
-  return str;
+  return String(codePoints.Copy());
 }
 
 Unicode String::Get(Index index) const {
@@ -110,63 +131,28 @@ void String::Clear() {
   codePoints.TrimExcess();
 }
 
-const char* String::ToUTF8() const {
-  // 假设Size()返回字符串的长度
-  size_t size = Size();
-  if (size == 0) {
-    return "";
-  }
-
-  char* str = new char[size * 4 + 1];  // 分配足够的内存
-  size_t i = 0;
-  for (size_t idx = 0; idx < size; ++idx) {
-    Unicode codePoint = Get(idx);
-    if (codePoint < 0x80) {
-      str[i++] = static_cast<char>(codePoint);
-    } else if (codePoint < 0x800) {
-      str[i++] = static_cast<char>(0xC0 | (codePoint >> 6));
-      str[i++] = static_cast<char>(0x80 | (codePoint & 0x3F));
-    } else if (codePoint < 0x10000) {
-      str[i++] = static_cast<char>(0xE0 | (codePoint >> 12));
-      str[i++] = static_cast<char>(0x80 | ((codePoint >> 6) & 0x3F));
-      str[i++] = static_cast<char>(0x80 | (codePoint & 0x3F));
-    } else if (codePoint <= 0x10FFFF) {
-      str[i++] = static_cast<char>(0xF0 | (codePoint >> 18));
-      str[i++] = static_cast<char>(0x80 | ((codePoint >> 12) & 0x3F));
-      str[i++] = static_cast<char>(0x80 | ((codePoint >> 6) & 0x3F));
-      str[i++] = static_cast<char>(0x80 | (codePoint & 0x3F));
-    } else {
-      delete[] str;
-      return "";
-    }
-  }
-  str[i] = '\0';  // 确保字符串以空字符结尾
-  char* newStr = new char[i + 1];
-  strcpy(newStr, str);
-  delete[] str;
-  return newStr;  // 注意：调用者需要负责释放内存
+std::unique_ptr<char[]> ToCString(const String& str) {
+  return ToCString(ToBytes(str));
 }
 
 String String::Join(String& joiner) const {
-  String str;
+  List<Unicode> str;
   for (Index i = 0; i < Size(); i++) {
     str.Add(Get(i));
     if (i < Size() - 1) {
-      for (Index j = 0; j < joiner.Size(); j++) {
-        str.Add(joiner.Get(j));
-      }
+      str.Add(joiner.Data());
     }
   }
-  return str;
+  return String(str);
 }
 
 List<String> String::Split(String& delimiter) const {
   List<String> list;
-  String str;
+  List<Unicode> str;
   for (Index i = 0; i < Size(); i++) {
     if (Get(i) == delimiter.Get(0)) {
       if (Find(delimiter, i) == i) {
-        list.Add(str);
+        list.Add(String(str));
         str.Clear();
         i += delimiter.Size() - 1;
         continue;
@@ -174,7 +160,7 @@ List<String> String::Split(String& delimiter) const {
     }
     str.Add(Get(i));
   }
-  list.Add(str);
+  list.Add(String(str));
   return list;
 }
 
@@ -182,11 +168,7 @@ String String::Slice(Index start, Index end) const {
   if (start >= Size() || end > Size() || start > end) {
     throw std::runtime_error("Index out of range");
   }
-  String str;
-  for (Index i = start; i < end; i++) {
-    str.Add(Get(i));
-  }
-  return str;
+  return String(codePoints.Slice(start, end));
 }
 
 Index String::Find(String& sub, Index start) const {
@@ -200,10 +182,7 @@ Index String::Find(String& sub, Index start) const {
     throw std::runtime_error("Start index out of range");
   }
   List<Index> next(sub.Size());
-  for (Index i = 0; i < sub.Size(); i++) {
-    next.Add(0);
-  }
-  next.Set(0, 0);
+  next.Fill(0);
   Index j = 0;
   for (Index i = 1; i < sub.Size(); i++) {
     while (j > 0 && sub.Get(i) != sub.Get(j)) {
@@ -227,18 +206,6 @@ Index String::Find(String& sub, Index start) const {
     }
   }
   throw std::runtime_error("Sub string not found");
-}
-
-bool String::operator==(const String& rhs) const {
-  if (Size() != rhs.Size()) {
-    return false;
-  }
-  for (Index i = 0; i < Size(); i++) {
-    if (Get(i) != rhs.Get(i)) {
-      return false;
-    }
-  }
-  return true;
 }
 
 bool String::Equal(const String& rhs) const {
@@ -288,15 +255,35 @@ void String::Reverse() {
   codePoints.Reverse();
 }
 
-String DoubleToString(double value) {
+String ToString(double value) {
   char buffer[32];
   snprintf(buffer, sizeof(buffer), "%.6f", value);
-  return String(buffer);
+  return CreateStringWithCString(buffer);
 }
 
-void String::InplaceConcat(const String& rhs) {
-  for (Index i = 0; i < rhs.Size(); i++) {
-    Add(rhs.Get(i));
-  }
+String ToString(int32_t value) {
+  char buffer[32];
+  snprintf(buffer, sizeof(buffer), "%d", value);
+  return CreateStringWithCString(buffer);
+}
+
+String ToString(uint64_t value) {
+  char buffer[32];
+  snprintf(buffer, sizeof(buffer), "%lu", value);
+  return CreateStringWithCString(buffer);
+}
+
+String ToString(uint32_t value) {
+  char buffer[32];
+  snprintf(buffer, sizeof(buffer), "%u", value);
+  return CreateStringWithCString(buffer);
+}
+String String::InplaceConcat(const String& rhs) {
+  codePoints.Add(rhs.codePoints);
+  return *this;
+}
+
+bool String::operator==(const String& rhs) const {
+  return Equal(rhs);
 }
 }  // namespace torchlight::collections

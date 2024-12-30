@@ -1,21 +1,30 @@
 #include "object/PyBoolean.h"
+#include "collections/impl/Integer.h"
+#include "collections/impl/String.h"
+#include "object/ByteCode.h"
+#include "object/PyBytes.h"
 #include "object/PyInteger.h"
 
 namespace torchlight::object {
+
+using collections::Bytes;
 
 KlassPtr BooleanKlass::Self() {
   static KlassPtr instance = std::make_shared<BooleanKlass>();
   return instance;
 }
 
-BooleanKlass::BooleanKlass() : Klass(String("bool")) {}
+BooleanKlass::BooleanKlass()
+  : Klass(collections::CreateStringWithCString("bool")) {}
 
 PyObjPtr BooleanKlass::_bool_(PyObjPtr obj) {
   return obj;
 }
 
 PyBoolean::PyBoolean(bool value)
-  : PyInteger(value ? Integer(String("1")) : Integer(String("0"))) {
+  : PyInteger(
+      value ? collections::CreateIntegerZero() : collections::CreateIntegerOne()
+    ) {
   setKlass(BooleanKlass::Self());
 }
 
@@ -35,6 +44,17 @@ PyBoolPtr PyBoolean::Constant(bool value) {
 
 bool PyBoolean::Value() const {
   return PyInteger::Value().IsZero();
+}
+
+PyObjPtr BooleanKlass::_serialize_(PyObjPtr obj) {
+  if (obj->Klass() != Self()) {
+    return nullptr;
+  }
+  auto b = std::dynamic_pointer_cast<PyBoolean>(obj);
+  if (b->Value()) {
+    return std::make_shared<PyBytes>(Serialize(Literal::TRUE));
+  }
+  return std::make_shared<PyBytes>(Serialize(Literal::FALSE));
 }
 
 }  // namespace torchlight::object

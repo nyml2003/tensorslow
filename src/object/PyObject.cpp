@@ -1,7 +1,10 @@
-#include "object/Klass.h"
 #include "object/PyObject.h"
+#include "collections/impl/Bytes.h"
+#include "collections/impl/String.h"
+#include "object/Klass.h"
+#include "object/PyString.h"
 
-#include <utility>
+#include <iostream>
 
 namespace torchlight::object {
 
@@ -63,5 +66,14 @@ PyObjPtr PyObject::_bool_() {
   return klass->_bool_(shared_from_this());
 }
 
+PyObjPtr PyObject::_serialize_() {
+  return klass->_serialize_(shared_from_this());
+}
+
+void print(PyObjPtr obj) {
+  auto repr = obj->repr();
+  auto str = std::dynamic_pointer_cast<PyString>(repr)->Value();
+  std::cout << collections::ToCString(str).get() << std::endl;
+}
 
 }  // namespace torchlight::object

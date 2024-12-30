@@ -7,6 +7,7 @@
 #include "object/common.h"
 
 namespace torchlight::object {
+
 class PyInteger : public PyObject {
  private:
   collections::Integer value;
@@ -25,7 +26,15 @@ class IntegerKlass : public Klass {
 
   static KlassPtr Self();
 
-  ~IntegerKlass() override;
+  ~IntegerKlass() override = default;
+
+  IntegerKlass(const IntegerKlass& other) = delete;
+
+  IntegerKlass& operator=(const IntegerKlass& other) = delete;
+
+  IntegerKlass(IntegerKlass&& other) noexcept = delete;
+
+  IntegerKlass& operator=(IntegerKlass&& other) noexcept = delete;
 
   PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs) override;
 
@@ -48,6 +57,8 @@ class IntegerKlass : public Klass {
   PyObjPtr ne(PyObjPtr lhs, PyObjPtr rhs) override;
 
   PyObjPtr repr(PyObjPtr obj) override;
+
+  PyObjPtr _serialize_(PyObjPtr obj) override;
 };
 
 }  // namespace torchlight::object

@@ -1,8 +1,10 @@
 
 #include "object/PyBytes.h"
-
 #include "collections/Bytes.h"
-#include "collections/String.h"
+#include "collections/impl/Bytes.h"
+#include "collections/impl/String.h"
+#include "object/PyObject.h"
+#include "object/PyString.h"
 
 namespace torchlight::object {
 
@@ -14,11 +16,39 @@ PyBytes::PyBytes(collections::Bytes value)
 }
 
 BytesKlass::BytesKlass()
-  : Klass(collections::String("bytes")) {}
+  : Klass(collections::CreateStringWithCString("bytes")) {}
 
 KlassPtr BytesKlass::Self() {
   static KlassPtr instance = std::make_shared<BytesKlass>();
   return instance;
+}
+
+PyObjPtr BytesKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
+  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
+    return nullptr;
+  }
+  auto left = std::dynamic_pointer_cast<PyBytes>(lhs);
+  auto right = std::dynamic_pointer_cast<PyBytes>(rhs);
+  return std::make_shared<PyBytes>(left->Value().Concat(right->Value()));
+}
+
+PyObjPtr BytesKlass::_serialize_(PyObjPtr obj) {
+  if (obj->Klass() != Self()) {
+    return nullptr;
+  }
+  return obj;
+}
+
+PyObjPtr BytesKlass::repr(PyObjPtr obj) {
+  if (obj->Klass() != Self()) {
+    return nullptr;
+  }
+  auto bytes = std::dynamic_pointer_cast<PyBytes>(obj);
+  collections::String result =
+    collections::CreateStringWithCString("<bytes ")
+      .Concat(collections::CreateStringWithBytes(bytes->Value()))
+      .Concat(collections::CreateStringWithCString(">\n"));
+  return std::make_shared<PyString>(result);
 }
 
 }  // namespace torchlight::object

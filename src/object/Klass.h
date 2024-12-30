@@ -52,6 +52,8 @@ class Klass {
   virtual PyObjPtr repr(PyObjPtr obj);
 
   virtual PyObjPtr _bool_(PyObjPtr obj);
+
+  virtual PyObjPtr _serialize_(PyObjPtr obj);
 };
 
 }  // namespace torchlight::object
