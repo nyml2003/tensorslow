@@ -63,7 +63,6 @@ void Map<K, V>::Put(K key, V value) noexcept {
     entries.Set(index.value(), MapEntry<K, V>(key, value));
   }
 }
-
 template <typename K, typename V>
 void Map<K, V>::Remove(K key) {
   auto index = IndexOf(key);

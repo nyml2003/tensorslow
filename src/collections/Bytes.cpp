@@ -121,6 +121,13 @@ Bytes Serialize(uint64_t value) {
   return Bytes(bytes);
 }
 
+Bytes Serialize(int64_t value) {
+  List<Byte> bytes(sizeof(int64_t));
+  Byte* ptr = reinterpret_cast<Byte*>(&value);
+  bytes.Add(ptr, sizeof(int64_t));
+  return Bytes(bytes);
+}
+
 Bytes Serialize(uint32_t value) {
   List<Byte> bytes(sizeof(uint32_t));
   Byte* ptr = reinterpret_cast<Byte*>(&value);

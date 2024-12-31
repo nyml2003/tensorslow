@@ -1,10 +1,12 @@
 #include "object/PyList.h"
 #include "collections/Bytes.h"
 #include "collections/impl/Bytes.h"
+#include "collections/impl/Integer.h"
 #include "collections/impl/String.h"
-#include "object/PyBytes.h"
-#include "object/PyString.h"
 #include "object/ByteCode.h"
+#include "object/PyBytes.h"
+#include "object/PyInteger.h"
+#include "object/PyString.h"
 
 namespace torchlight::object {
 
@@ -77,6 +79,25 @@ PyObjPtr ListKlass::_serialize_(PyObjPtr obj) {
     bytes.InplaceConcat(str->Value());
   }
   return std::make_shared<PyBytes>(bytes);
+}
+
+PyObjPtr ListKlass::getitem(PyObjPtr obj, PyObjPtr key) {
+  if (obj->Klass() != Self() || key->Klass() != IntegerKlass::Self()) {
+    return nullptr;
+  }
+  auto list = std::dynamic_pointer_cast<PyList>(obj);
+  auto index = std::dynamic_pointer_cast<PyInteger>(key);
+  return list->Value().Get(collections::ToIndex(index->Value()));
+}
+
+PyObjPtr ListKlass::setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) {
+  if (obj->Klass() != Self() || key->Klass() != IntegerKlass::Self()) {
+    return nullptr;
+  }
+  auto list = std::dynamic_pointer_cast<PyList>(obj);
+  auto index = std::dynamic_pointer_cast<PyInteger>(key);
+  list->Value().Set(collections::ToIndex(index->Value()), value);
+  return obj;
 }
 
 }  // namespace torchlight::object

@@ -10,6 +10,7 @@
 #include "object/PyFloat.h"
 #include "object/PyInteger.h"
 #include "object/PyList.h"
+#include "object/PyNone.h"
 #include "object/PyString.h"
 
 #include <cstring>
@@ -24,6 +25,7 @@ using object::PyCode;
 using object::PyFloat;
 using object::PyInteger;
 using object::PyList;
+using object::PyNone;
 using object::PyString;
 double ReadDouble(List<Byte>::Iterator& byteIter) {
   std::array<Byte, sizeof(double)> sizeBuffer{};
@@ -39,6 +41,15 @@ uint64_t ReadU64(List<Byte>::Iterator& byteIter) {
   uint64_t result = 0;
   for (size_t i = 0; i < sizeof(uint64_t); ++i) {
     result |= byteIter.Get() << (i * 8);
+    byteIter.Next();
+  }
+  return result;
+}
+
+int64_t ReadI64(List<Byte>::Iterator& byteIter) {
+  int64_t result = 0;
+  for (size_t i = 0; i < sizeof(int64_t); ++i) {
+    result |= static_cast<int64_t>(byteIter.Get()) << (i * 8);
     byteIter.Next();
   }
   return result;
@@ -123,7 +134,7 @@ PyObjPtr ReadObject(List<Byte>::Iterator& byteIter) {
     case Literal::FALSE:
       return PyBoolean::False();
     case Literal::NONE:
-      return nullptr;  // TODO: return None
+      return PyNone::Instance();
     case Literal::ZERO:
       return std::make_shared<PyInteger>(collections::CreateIntegerZero());
   }
@@ -132,13 +143,12 @@ PyObjPtr ReadObject(List<Byte>::Iterator& byteIter) {
 PyCodePtr MakeCode(const PyBytesPtr& bytes) {
   auto it = List<Byte>::Iterator::Begin(bytes->Value().Value());
   auto filename = ReadObject(it);
-  print(filename);
   auto consts = ReadObject(it);
-  print(consts);
   auto names = ReadObject(it);
+  auto varNames = ReadObject(it);
   auto byteCode = bytes->Value().Slice(it.Index(), bytes->Value().Size());
   return std::make_shared<PyCode>(
-    std::make_shared<PyBytes>(byteCode), consts, names, filename
+    std::make_shared<PyBytes>(byteCode), consts, names, varNames, filename
   );
 }
 

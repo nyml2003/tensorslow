@@ -20,6 +20,7 @@ using object::PyStrPtr;
 
 double ReadDouble(List<Byte>::Iterator& byteIter);
 uint64_t ReadU64(List<Byte>::Iterator& byteIter);
+int64_t ReadI64(List<Byte>::Iterator& byteIter);
 uint32_t ReadU32(List<Byte>::Iterator& byteIter);
 uint16_t ReadU16(List<Byte>::Iterator& byteIter);
 uint8_t ReadU8(List<Byte>::Iterator& byteIter);

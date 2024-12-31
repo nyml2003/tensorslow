@@ -21,6 +21,8 @@ Bytes Serialize(double value);
 
 Bytes Serialize(uint64_t value);
 
+Bytes Serialize(int64_t value);
+
 Bytes Serialize(uint32_t value);
 
 Bytes Serialize(int32_t value);

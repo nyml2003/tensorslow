@@ -29,6 +29,10 @@ class ListKlass : public Klass {
   PyObjPtr repr(PyObjPtr obj) override;
 
   PyObjPtr _serialize_(PyObjPtr obj) override;
+
+  PyObjPtr getitem(PyObjPtr obj, PyObjPtr key) override;
+
+  PyObjPtr setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) override;
 };
 
 }  // namespace torchlight::object

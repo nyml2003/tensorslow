@@ -9,6 +9,7 @@
 #include "object/PyInst.h"
 #include "object/PyInteger.h"
 #include "object/PyList.h"
+#include "object/PyNone.h"
 #include "object/PyObject.h"
 #include "object/PyString.h"
 
@@ -23,17 +24,7 @@ using torchlight::collections::CreateStringWithCString;
 using torchlight::collections::List;
 using torchlight::collections::String;
 using torchlight::collections::Write;
-using torchlight::object::CreateBinaryAdd;
-using torchlight::object::CreateLoadConst;
-using torchlight::object::CreatePrint;
-using torchlight::object::PyBytes;
-using torchlight::object::PyCode;
-using torchlight::object::PyCodePtr;
-using torchlight::object::PyInteger;
-using torchlight::object::PyList;
-using torchlight::object::PyListPtr;
-using torchlight::object::PyObjPtr;
-using torchlight::object::PyString;
+using namespace torchlight::object;
 
 String test_dir = CreateStringWithCString("/app/test/integration/");
 
@@ -50,103 +41,168 @@ void createTask(
 }
 
 int main() {
-  createTask(CreateStringWithCString("Add_123_456"), [](const String& testname) {
-    String filename = CreateFilename(testname);
-    List<PyObjPtr> consts;
-    consts.Add(std::make_shared<PyInteger>(
-      CreateIntegerWithString(CreateStringWithCString("123"))
-    ));
-    consts.Add(std::make_shared<PyInteger>(
-      CreateIntegerWithString(CreateStringWithCString("456"))
-    ));
-    PyListPtr constsObject = std::make_shared<PyList>(consts);
+  createTask(
+    CreateStringWithCString("Add_123_456"),
+    [](const String& testname) {
+      String filename = CreateFilename(testname);
+      List<PyObjPtr> consts;
+      consts.Add(std::make_shared<PyInteger>(
+        CreateIntegerWithString(CreateStringWithCString("123"))
+      ));
+      consts.Add(std::make_shared<PyInteger>(
+        CreateIntegerWithString(CreateStringWithCString("456"))
+      ));
+      PyListPtr constsObject = std::make_shared<PyList>(consts);
 
-    List<PyObjPtr> instructions;
-    instructions.Add(CreateLoadConst(0));
-    instructions.Add(CreateLoadConst(1));
-    instructions.Add(CreateBinaryAdd());
-    instructions.Add(CreatePrint());
-    PyListPtr instructionsObject = std::make_shared<PyList>(instructions);
+      List<PyObjPtr> instructions;
+      instructions.Add(CreateLoadConst(0));
+      instructions.Add(CreateLoadConst(1));
+      instructions.Add(CreateBinaryAdd());
+      instructions.Add(CreatePrint());
+      PyListPtr instructionsObject = std::make_shared<PyList>(instructions);
 
-    List<PyObjPtr> names;
-    PyListPtr namesObject = std::make_shared<PyList>(names);
+      List<PyObjPtr> names;
+      PyListPtr namesObject = std::make_shared<PyList>(names);
 
-    PyCodePtr code = std::make_shared<PyCode>(
-      instructionsObject->_serialize_(), constsObject, namesObject,
-      std::make_shared<PyString>(filename)
-    );
+      List<PyObjPtr> varNames;
+      PyListPtr varNamesObject = std::make_shared<PyList>(varNames);
 
-    String codeStr = std::dynamic_pointer_cast<PyString>(code->repr())->Value();
-    std::cout << ToCString(codeStr).get() << std::endl;
-    Bytes serialized =
-      std::dynamic_pointer_cast<PyBytes>(code->_serialize_())->Value();
-    Write(serialized, filename);
-  });
+      PyCodePtr code = std::make_shared<PyCode>(
+        instructionsObject->_serialize_(), constsObject, namesObject,
+        varNamesObject, std::make_shared<PyString>(filename)
+      );
 
-  createTask(CreateStringWithCString("Add_1_2"), [](const String& testname) {
-    String filename = CreateFilename(testname);
-    List<PyObjPtr> consts;
-    consts.Add(std::make_shared<PyInteger>(
-      CreateIntegerWithString(CreateStringWithCString("123"))
-    ));
-    consts.Add(std::make_shared<PyInteger>(
-      CreateIntegerWithString(CreateStringWithCString("456"))
-    ));
-    PyListPtr constsObject = std::make_shared<PyList>(consts);
+      String codeStr =
+        std::dynamic_pointer_cast<PyString>(code->repr())->Value();
+      std::cout << ToCString(codeStr).get() << std::endl;
+      Bytes serialized =
+        std::dynamic_pointer_cast<PyBytes>(code->_serialize_())->Value();
+      Write(serialized, filename);
+    }
+  );
 
-    List<PyObjPtr> instructions;
-    instructions.Add(CreateLoadConst(0));
-    instructions.Add(CreateLoadConst(1));
-    instructions.Add(CreateBinaryAdd());
-    instructions.Add(CreatePrint());
-    PyListPtr instructionsObject = std::make_shared<PyList>(instructions);
+  createTask(
+    CreateStringWithCString("Add_123_456_From_Var"),
+    [](const String& testname) {
+      String filename = CreateFilename(testname);
+      List<PyObjPtr> consts;
+      consts.Add(PyNone::Instance());
+      consts.Add(std::make_shared<PyInteger>(
+        CreateIntegerWithString(CreateStringWithCString("123"))
+      ));
+      consts.Add(std::make_shared<PyInteger>(
+        CreateIntegerWithString(CreateStringWithCString("456"))
+      ));
+      PyListPtr constsObject = std::make_shared<PyList>(consts);
 
-    List<PyObjPtr> names;
-    PyListPtr namesObject = std::make_shared<PyList>(names);
+      List<PyObjPtr> instructions;
+      instructions.Add(CreateLoadConst(1));
+      instructions.Add(CreateStoreFast(0));
+      instructions.Add(CreateLoadConst(2));
+      instructions.Add(CreateStoreFast(1));
 
-    PyCodePtr code = std::make_shared<PyCode>(
-      instructionsObject->_serialize_(), constsObject, namesObject,
-      std::make_shared<PyString>(filename)
-    );
+      instructions.Add(CreateLoadFast(0));
+      instructions.Add(CreateLoadFast(1));
+      instructions.Add(CreateBinaryAdd());
+      instructions.Add(CreateStoreFast(2));
+      instructions.Add(CreateLoadFast(2));
+      instructions.Add(CreatePrint());
+      PyListPtr instructionsObject = std::make_shared<PyList>(instructions);
 
-    String codeStr = std::dynamic_pointer_cast<PyString>(code->repr())->Value();
-    std::cout << ToCString(codeStr).get() << std::endl;
-    Bytes serialized =
-      std::dynamic_pointer_cast<PyBytes>(code->_serialize_())->Value();
-    Write(serialized, filename);
-  });
+      List<PyObjPtr> names;
+      PyListPtr namesObject = std::make_shared<PyList>(names);
 
-  // createTask(CreateStringWithCString("Compare_1_2"), [](const String& name) {
-  //   InstStream stream;
-  //   stream.Add(torchlight::bytecode::CreateLoadConst(Bytes("1")));
-  //   stream.Add(torchlight::bytecode::CreateLoadConst(Bytes("2")));
-  //   stream.Add(torchlight::bytecode::CreateCompareOp(
-  //     torchlight::bytecode::CompareOp::GREATER_THAN
-  //   ));
-  //   stream.Add(torchlight::bytecode::CreatePopJumpIfFalse(2));
-  //   stream.Add(torchlight::bytecode::CreateLoadConst(Bytes("2")));
-  //   stream.Add(torchlight::bytecode::CreatePrint());
+      List<PyObjPtr> varNames;
+      varNames.Add(std::make_shared<PyString>(CreateStringWithCString("a")));
+      varNames.Add(std::make_shared<PyString>(CreateStringWithCString("b")));
+      varNames.Add(std::make_shared<PyString>(CreateStringWithCString("c")));
+      PyListPtr varNamesObject = std::make_shared<PyList>(varNames);
 
-  //   stream.Add(torchlight::bytecode::CreateLoadConst(Bytes("1")));
-  //   stream.Add(torchlight::bytecode::CreatePrint());
-  //   SerializeInstStream(stream, name);
-  // });
+      PyCodePtr code = std::make_shared<PyCode>(
+        instructionsObject->_serialize_(), constsObject, namesObject,
+        varNamesObject, std::make_shared<PyString>(filename)
+      );
 
-  // createTask(CreateStringWithCString("Compare_2_1"), [](const String& name) {
-  //   InstStream stream;
-  //   stream.Add(torchlight::bytecode::CreateLoadConst(Bytes("2")));
-  //   stream.Add(torchlight::bytecode::CreateLoadConst(Bytes("1")));
-  //   stream.Add(torchlight::bytecode::CreateCompareOp(
-  //     torchlight::bytecode::CompareOp::GREATER_THAN
-  //   ));
-  //   stream.Add(torchlight::bytecode::CreatePopJumpIfFalse(2));
-  //   stream.Add(torchlight::bytecode::CreateLoadConst(Bytes("2")));
-  //   stream.Add(torchlight::bytecode::CreatePrint());
+      String codeStr =
+        std::dynamic_pointer_cast<PyString>(code->repr())->Value();
+      std::cout << ToCString(codeStr).get() << std::endl;
+      Bytes serialized =
+        std::dynamic_pointer_cast<PyBytes>(code->_serialize_())->Value();
+      Write(serialized, filename);
+    }
+  );
 
-  //   stream.Add(torchlight::bytecode::CreateLoadConst(Bytes("1")));
-  //   stream.Add(torchlight::bytecode::CreatePrint());
-  //   SerializeInstStream(stream, name);
-  // });
+  createTask(
+    CreateStringWithCString("add_from_1_to_10"),
+    [](const String& testname) {
+      String filename = CreateFilename(testname);
+      List<PyObjPtr> consts;
+      consts.Add(PyNone::Instance());
+      consts.Add(std::make_shared<PyInteger>(
+        CreateIntegerWithString(CreateStringWithCString("0"))
+      ));
+      consts.Add(std::make_shared<PyInteger>(
+        CreateIntegerWithString(CreateStringWithCString("10"))
+      ));
+      consts.Add(std::make_shared<PyInteger>(
+        CreateIntegerWithString(CreateStringWithCString("1"))
+      ));
+      PyListPtr constsObject = std::make_shared<PyList>(consts);
+
+      List<PyObjPtr> instructions;
+      instructions.Add(CreateLoadConst(1));  // instructions[0]
+      instructions.Add(CreateStoreFast(0));  // instructions[1]
+
+      instructions.Add(CreateLoadConst(1));  // instructions[2]
+      instructions.Add(CreateStoreFast(1));  // instructions[3]
+
+      instructions.Add(CreateLoadFast(0));   // instructions[4]
+      instructions.Add(CreateLoadConst(2));  // instructions[5]
+      instructions.Add(CreateCompareOp(CompareOp::LESS_THAN)
+      );                                           // instructions[6]
+      instructions.Add(CreatePopJumpIfFalse(13));  // instructions[7]
+
+      instructions.Add(CreateLoadFast(1));   // instructions[8]
+      instructions.Add(CreateLoadFast(0));   // instructions[9]
+      instructions.Add(CreateBinaryAdd());   // instructions[10]
+      instructions.Add(CreateStoreFast(1));  // instructions[11]
+
+      instructions.Add(CreateLoadFast(0));   // instructions[12]
+      instructions.Add(CreateLoadConst(3));  // instructions[13]
+      instructions.Add(CreateBinaryAdd());   // instructions[14]
+      instructions.Add(CreateStoreFast(0));  // instructions[15]
+
+      instructions.Add(CreateLoadFast(0));   // instructions[16]
+      instructions.Add(CreateLoadConst(2));  // instructions[17]
+      instructions.Add(CreateCompareOp(CompareOp::LESS_THAN_EQUAL)
+      );                                           // instructions[18]
+      instructions.Add(CreatePopJumpIfTrue(-11));  // instructions[19]
+
+      instructions.Add(CreateLoadFast(1));  // instructions[20]
+      instructions.Add(CreatePrint());
+      PyListPtr instructionsObject = std::make_shared<PyList>(instructions);
+
+      List<PyObjPtr> names;
+      PyListPtr namesObject = std::make_shared<PyList>(names);
+
+      List<PyObjPtr> varNames;
+      varNames.Add(std::make_shared<PyString>(CreateStringWithCString("i")));
+      varNames.Add(std::make_shared<PyString>(CreateStringWithCString("sum")));
+      PyListPtr varNamesObject = std::make_shared<PyList>(varNames);
+
+      PyCodePtr code = std::make_shared<PyCode>(
+        instructionsObject->_serialize_(), constsObject, namesObject,
+        varNamesObject, std::make_shared<PyString>(filename)
+      );
+
+      String codeStr =
+        std::dynamic_pointer_cast<PyString>(code->repr())->Value();
+      std::cout << ToCString(codeStr).get() << std::endl;
+      Bytes serialized =
+        std::dynamic_pointer_cast<PyBytes>(code->_serialize_())->Value();
+      Write(serialized, filename);
+    }
+  );
 
   return 0;
 }

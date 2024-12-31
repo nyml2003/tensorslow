@@ -39,7 +39,8 @@ PyObjPtr InstKlass::_serialize_(PyObjPtr obj) {
     overload{
       [&bytes](NoneType) {},
       [&bytes](Index index) { bytes.InplaceConcat(Serialize(index)); },
-      [&bytes](CompareOp op) { bytes.InplaceConcat(Serialize(op)); }
+      [&bytes](CompareOp op) { bytes.InplaceConcat(Serialize(op)); },
+      [&bytes](int64_t index) { bytes.InplaceConcat(Serialize(index)); }
     },
     inst->Operand()
   );
@@ -58,7 +59,8 @@ PyObjPtr InstKlass::repr(PyObjPtr obj) {
     overload{
       [&result](NoneType) {},
       [&result](Index index) { result.InplaceConcat(ToString(index)); },
-      [&result](CompareOp op) { result.InplaceConcat(ToString(op)); }
+      [&result](CompareOp op) { result.InplaceConcat(ToString(op)); },
+      [&result](int64_t index) { result.InplaceConcat(ToString(index)); }
     },
     inst->Operand()
   );
@@ -76,6 +78,34 @@ PyInstPtr CreateBinaryAdd() {
 
 PyInstPtr CreatePrint() {
   return std::make_shared<PyInst>(ByteCode::PRINT);
+}
+
+PyInstPtr CreateStoreName(Index index) {
+  return std::make_shared<PyInst>(ByteCode::STORE_NAME, index);
+}
+
+PyInstPtr CreateLoadName(Index index) {
+  return std::make_shared<PyInst>(ByteCode::LOAD_NAME, index);
+}
+
+PyInstPtr CreateStoreFast(Index index) {
+  return std::make_shared<PyInst>(ByteCode::STORE_FAST, index);
+}
+
+PyInstPtr CreateLoadFast(Index index) {
+  return std::make_shared<PyInst>(ByteCode::LOAD_FAST, index);
+}
+
+PyInstPtr CreateCompareOp(CompareOp op) {
+  return std::make_shared<PyInst>(ByteCode::COMPARE_OP, op);
+}
+
+PyInstPtr CreatePopJumpIfFalse(int64_t index) {
+  return std::make_shared<PyInst>(ByteCode::POP_JUMP_IF_FALSE, index);
+}
+
+PyInstPtr CreatePopJumpIfTrue(int64_t index) {
+  return std::make_shared<PyInst>(ByteCode::POP_JUMP_IF_TRUE, index);
 }
 
 }  // namespace torchlight::object

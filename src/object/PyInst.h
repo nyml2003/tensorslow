@@ -39,6 +39,20 @@ PyInstPtr CreateBinaryAdd();
 
 PyInstPtr CreatePrint();
 
+PyInstPtr CreateStoreName(Index index);
+
+PyInstPtr CreateLoadName(Index index);
+
+PyInstPtr CreateStoreFast(Index index);
+
+PyInstPtr CreateLoadFast(Index index);
+
+PyInstPtr CreateCompareOp(CompareOp op);
+
+PyInstPtr CreatePopJumpIfFalse(int64_t index);
+
+PyInstPtr CreatePopJumpIfTrue(int64_t index);
+
 }  // namespace torchlight::object
 
 #endif

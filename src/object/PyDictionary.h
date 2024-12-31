@@ -14,6 +14,8 @@ class PyDictionary : public PyObject {
 
  public:
   explicit PyDictionary();
+
+  collections::Map<collections::String, PyObjPtr>& Value();
 };
 
 using PyDictPtr = std::shared_ptr<PyDictionary>;
@@ -22,6 +24,10 @@ class DictionaryKlass : public Klass {
  public:
   explicit DictionaryKlass();
   static object::KlassPtr Self();
+
+  PyObjPtr setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) override;
+
+  PyObjPtr getitem(PyObjPtr obj, PyObjPtr key) override;
 };
 
 }  // namespace torchlight::object

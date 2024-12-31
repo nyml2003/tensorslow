@@ -39,11 +39,11 @@ class PyFrame : public PyObject {
 
   [[nodiscard]] Index ProgramCounter() const;
 
-  [[nodiscard]] PyDictPtr Locals() const;
+  [[nodiscard]] PyDictPtr& Locals();
 
-  [[nodiscard]] PyDictPtr Globals() const;
+  [[nodiscard]] PyDictPtr& Globals();
 
-  [[nodiscard]] PyDictPtr FastLocals() const;
+  [[nodiscard]] PyDictPtr& FastLocals();
 
   [[nodiscard]] Stack<PyObjPtr>& Stack();
 

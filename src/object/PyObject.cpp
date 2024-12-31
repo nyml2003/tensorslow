@@ -70,6 +70,14 @@ PyObjPtr PyObject::_serialize_() {
   return klass->_serialize_(shared_from_this());
 }
 
+PyObjPtr PyObject::getitem(PyObjPtr key) {
+  return klass->getitem(shared_from_this(), std::move(key));
+}
+
+PyObjPtr PyObject::setitem(PyObjPtr key, PyObjPtr value) {
+  return klass->setitem(shared_from_this(), std::move(key), std::move(value));
+}
+
 void print(PyObjPtr obj) {
   auto repr = obj->repr();
   auto str = std::dynamic_pointer_cast<PyString>(repr)->Value();

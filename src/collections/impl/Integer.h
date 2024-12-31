@@ -1,6 +1,8 @@
 #ifndef TORCHLIGHT_COLLECTIONS_IMPL_INTEGER_H
 #define TORCHLIGHT_COLLECTIONS_IMPL_INTEGER_H
 
+#include <limits>
+#include <stdexcept>
 #include "collections/Integer.h"
 
 namespace torchlight::collections {
@@ -24,6 +26,12 @@ Integer CreateIntegerWithBytes(const Bytes& bytes);
 Integer CreateIntegerZero();
 
 Integer CreateIntegerOne();
+
+Integer CreateIntegerWithIndex(Index index);
+
+Index ToIndex(const Integer& integer);
+
+uint64_t safe_add(uint64_t a, int64_t b);
 
 }  // namespace torchlight::collections
 

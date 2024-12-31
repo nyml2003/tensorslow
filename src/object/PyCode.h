@@ -22,6 +22,7 @@ class PyCode : public PyObject {
   PyListPtr instructions;
   PyListPtr consts;
   PyListPtr names;
+  PyListPtr varNames;
   PyStrPtr filename;
 
  public:
@@ -29,6 +30,7 @@ class PyCode : public PyObject {
     const PyObjPtr& byteCodes,
     const PyObjPtr& consts,
     const PyObjPtr& names,
+    const PyObjPtr& varNames,
     const PyObjPtr& filename
   );
 
@@ -43,6 +45,8 @@ class PyCode : public PyObject {
   [[nodiscard]] PyListPtr Names() const;
 
   [[nodiscard]] PyStrPtr Filename() const;
+
+  [[nodiscard]] PyListPtr VarNames() const;
 };
 
 using PyCodePtr = std::shared_ptr<PyCode>;

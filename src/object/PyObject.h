@@ -49,6 +49,11 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
 
   PyObjPtr repr();
 
+  PyObjPtr getitem(PyObjPtr key);
+
+  PyObjPtr setitem(PyObjPtr key, PyObjPtr value);
+
+
   PyObjPtr _bool_();
 
   PyObjPtr _serialize_();

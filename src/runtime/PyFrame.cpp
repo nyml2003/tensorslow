@@ -3,6 +3,7 @@
 #include "collections/impl/String.h"
 #include "object/ByteCode.h"
 #include "object/PyCode.h"
+#include "object/PyDictionary.h"
 #include "object/PyInst.h"
 #include "object/PyList.h"
 #include "runtime/Serialize.h"
@@ -29,7 +30,11 @@ object::KlassPtr FrameKlass::Self() {
 }
 
 PyFrame::PyFrame(PyCodePtr code)
-  : object::PyObject(FrameKlass::Self()), code(std::move(code)) {}
+  : object::PyObject(FrameKlass::Self()), code(std::move(code)) {
+  locals = std::make_shared<object::PyDictionary>();
+  globals = std::make_shared<object::PyDictionary>();
+  fastLocals = std::make_shared<object::PyDictionary>();
+}
 
 void PyFrame::SetProgramCounter(Index pc) {
   programCounter = pc;
@@ -43,15 +48,15 @@ Index PyFrame::ProgramCounter() const {
   return programCounter;
 }
 
-PyDictPtr PyFrame::Locals() const {
+PyDictPtr& PyFrame::Locals() {
   return locals;
 }
 
-PyDictPtr PyFrame::Globals() const {
+PyDictPtr& PyFrame::Globals() {
   return globals;
 }
 
-PyDictPtr PyFrame::FastLocals() const {
+PyDictPtr& PyFrame::FastLocals() {
   return fastLocals;
 }
 
@@ -103,6 +108,28 @@ void ParseByteCode(const PyCodePtr& code) {
       }
       case ByteCode::PRINT: {
         insts.Add(object::CreatePrint());
+        break;
+      }
+      case ByteCode::STORE_FAST: {
+        insts.Add(object::CreateStoreFast(ReadU64(iter)));
+        break;
+      }
+      case ByteCode::LOAD_FAST: {
+        insts.Add(object::CreateLoadFast(ReadU64(iter)));
+        break;
+      }
+      case ByteCode::COMPARE_OP: {
+        insts.Add(
+          object::CreateCompareOp(static_cast<object::CompareOp>(ReadU8(iter)))
+        );
+        break;
+      }
+      case ByteCode::POP_JUMP_IF_FALSE: {
+        insts.Add(object::CreatePopJumpIfFalse(ReadI64(iter)));
+        break;
+      }
+      case ByteCode::POP_JUMP_IF_TRUE: {
+        insts.Add(object::CreatePopJumpIfTrue(ReadI64(iter)));
         break;
       }
       default:

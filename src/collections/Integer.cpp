@@ -500,4 +500,47 @@ List<uint32_t> Integer::Data() const {
   return parts;
 }
 
+Index ToIndex(const Integer& integer) {
+  if (integer.IsZero()) {
+    return 0;
+  }
+  if (integer.Sign()) {
+    throw std::runtime_error("Negative integer cannot be converted to index");
+  }
+  auto data = integer.Data();
+  if (data.Size() > 4) {
+    throw std::runtime_error("Integer is too large to be converted to index");
+  }
+
+  Index result = 0;
+  for (Index i = 0; i < data.Size(); i++) {
+    result = (result << 16) | data.Get(i);
+  }
+  return result;
+}
+
+Integer CreateIntegerWithIndex(Index index) {
+  List<uint32_t> parts;
+  while (index != 0) {
+    parts.Add(index & 0x0000FFFF);
+    index >>= 16;
+  }
+  parts.Reverse();
+  return Integer(parts, false);
+}
+uint64_t safe_add(uint64_t a, int64_t b) {
+  if (b >= 0) {
+    // b 是正数或零，直接相加
+    if (a > std::numeric_limits<uint64_t>::max() - b) {
+      throw std::overflow_error("Addition overflow");
+    }
+    return a + static_cast<uint64_t>(b);
+  } else {
+    // b 是负数，转换为补码并相减
+    if (a < static_cast<uint64_t>(-b)) {
+      throw std::underflow_error("Subtraction underflow");
+    }
+    return a - static_cast<uint64_t>(-b);
+  }
+}
 }  // namespace torchlight::collections

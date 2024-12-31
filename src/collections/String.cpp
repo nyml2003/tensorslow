@@ -3,8 +3,9 @@
 #include "collections/impl/String.h"
 
 #include <cstring>
-#include <stdexcept>
 #include <iostream>
+#include <stdexcept>
+
 
 namespace torchlight::collections {
 extern template class List<Unicode>;
@@ -82,7 +83,6 @@ String CreateStringWithCString(const char* str) {
 }
 
 String CreateStringWithBytes(const Bytes& bytes) {
-  std::cout << ToCString(bytes).get() << std::endl;
   List<Unicode> codePoints;
   size_t length = bytes.Size();
   size_t index = 0;
@@ -270,6 +270,12 @@ String ToString(int32_t value) {
 String ToString(uint64_t value) {
   char buffer[32];
   snprintf(buffer, sizeof(buffer), "%lu", value);
+  return CreateStringWithCString(buffer);
+}
+
+String ToString(int64_t value) {
+  char buffer[32];
+  snprintf(buffer, sizeof(buffer), "%ld", value);
   return CreateStringWithCString(buffer);
 }
 

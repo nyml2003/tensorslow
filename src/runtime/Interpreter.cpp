@@ -1,20 +1,27 @@
 
 #include "runtime/Interpreter.h"
 #include "collections/impl/Bytes.h"
+#include "collections/impl/Integer.h"
 #include "object/ByteCode.h"
 #include "object/PyBoolean.h"
+#include "object/PyDictionary.h"
+#include "object/PyInteger.h"
 #include "object/PyList.h"
 #include "object/PyString.h"
 
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 namespace torchlight::runtime {
 
+using collections::CreateIntegerWithIndex;
 using collections::ToBytes;
 using collections::ToCString;
 using object::BooleanKlass;
 using object::ByteCode;
 using object::CompareOp;
+using object::Index;
+using object::PyInteger;
 
 Interpreter::Interpreter(PyFramePtr frame) : frame(std::move(frame)) {}
 
@@ -29,6 +36,17 @@ void Interpreter::Run() {
           std::dynamic_pointer_cast<object::PyList>(consts)->Value();
         auto value = const_list.Get(key);
         frame->Stack().Push(value);
+        frame->NextProgramCounter();
+        break;
+      }
+      case ByteCode::STORE_FAST: {
+        auto key = std::get<Index>(inst->Operand());
+        auto value = frame->Stack().Pop();
+        auto varNames = frame->Code()->VarNames();
+        auto varNamesList =
+          std::dynamic_pointer_cast<object::PyList>(varNames)->Value();
+        auto varName = varNamesList.Get(key);
+        frame->FastLocals()->setitem(varName, value);
         frame->NextProgramCounter();
         break;
       }
@@ -72,9 +90,28 @@ void Interpreter::Run() {
           throw std::runtime_error("Cannot jump if not boolean");
         }
         if (bool_needJump->Value()) {
-          frame->SetProgramCounter(
-            frame->ProgramCounter() + std::get<Index>(inst->Operand()) + 1
-          );
+          frame->NextProgramCounter();
+        } else {
+          frame->SetProgramCounter(collections::safe_add(
+            frame->ProgramCounter(), std::get<int64_t>(inst->Operand())
+          ));
+        }
+        break;
+      }
+      case ByteCode::POP_JUMP_IF_TRUE: {
+        auto needJump = frame->Stack().Pop();
+        if (!(needJump->Klass() == BooleanKlass::Self())) {
+          throw std::runtime_error("Cannot jump if not boolean");
+        }
+        auto bool_needJump =
+          std::dynamic_pointer_cast<object::PyBoolean>(needJump);
+        if (bool_needJump == nullptr) {
+          throw std::runtime_error("Cannot jump if not boolean");
+        }
+        if (bool_needJump->Value()) {
+          frame->SetProgramCounter(collections::safe_add(
+            frame->ProgramCounter(), std::get<int64_t>(inst->Operand())
+          ));
         } else {
           frame->NextProgramCounter();
         }
@@ -98,6 +135,7 @@ void Interpreter::Run() {
       case ByteCode::BINARY_MODULO:
       case ByteCode::BINARY_LSHIFT:
       case ByteCode::BINARY_RSHIFT:
+        break;
       case ByteCode::PRINT: {
         auto obj = frame->Stack().Pop();
         auto result = obj->repr();
@@ -111,6 +149,17 @@ void Interpreter::Run() {
         break;
       }
       case ByteCode::RETURN_VALUE: {
+        break;
+      }
+      case ByteCode::LOAD_FAST: {
+        auto key = std::get<Index>(inst->Operand());
+        auto varNames = frame->Code()->VarNames();
+        auto varNamesList =
+          std::dynamic_pointer_cast<object::PyList>(varNames)->Value();
+        auto varName = varNamesList.Get(key);
+        frame->Stack().Push(frame->FastLocals()->getitem(varName));
+        frame->NextProgramCounter();
+        break;
       }
       case ByteCode::ERROR: {
         throw std::runtime_error("Unknown byte code");

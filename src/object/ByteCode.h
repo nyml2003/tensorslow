@@ -111,7 +111,7 @@ enum class CompareOp {
 };
 
 struct NoneType {};
-using OperandKind = std::variant<CompareOp, NoneType, Index>;
+using OperandKind = std::variant<CompareOp, NoneType, Index, int64_t>;
 
 enum class Literal {
   INTEGER,

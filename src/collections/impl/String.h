@@ -26,6 +26,8 @@ String ToString(uint32_t value);
 
 String ToString(int32_t value);
 
+String ToString(int64_t value);
+
 std::unique_ptr<char[]> ToCString(const String& str);
 
 }  // namespace torchlight::collections

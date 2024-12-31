@@ -62,4 +62,12 @@ PyObjPtr Klass::_serialize_(PyObjPtr obj) {
   return nullptr;
 }
 
+PyObjPtr Klass::getitem(PyObjPtr obj, PyObjPtr key) {
+  return nullptr;
+}
+
+PyObjPtr Klass::setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) {
+  return nullptr;
+}
+
 }  // namespace torchlight::object
