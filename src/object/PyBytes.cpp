@@ -3,6 +3,7 @@
 #include "collections/Bytes.h"
 #include "collections/impl/Bytes.h"
 #include "collections/impl/String.h"
+#include "object/ByteCode.h"
 #include "object/PyObject.h"
 #include "object/PyString.h"
 
@@ -36,7 +37,10 @@ PyObjPtr BytesKlass::_serialize_(PyObjPtr obj) {
   if (obj->Klass() != Self()) {
     return nullptr;
   }
-  return obj;
+  return std::make_shared<PyBytes>(
+    Serialize(Literal::BYTES)
+      .Concat(Serialize(std::dynamic_pointer_cast<PyBytes>(obj)->Value()))
+  );
 }
 
 PyObjPtr BytesKlass::repr(PyObjPtr obj) {

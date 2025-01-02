@@ -3,10 +3,7 @@
 
 #include "collections/List.h"
 #include "collections/String.h"
-namespace torchlight::matrix {
-using collections::Index;
-using collections::List;
-using collections::String;
+namespace torchlight::collections {
 class Matrix {
  private:
   Index rows{};
@@ -40,5 +37,5 @@ class Matrix {
   static Matrix eye(Index n);
 };
 
-}  // namespace torchlight::matrix
+}  // namespace torchlight::collections
 #endif

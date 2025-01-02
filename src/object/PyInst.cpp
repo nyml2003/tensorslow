@@ -8,7 +8,11 @@
 
 namespace torchlight::object {
 
+using collections::Bytes;
+using collections::CreateStringWithCString;
+using collections::Index;
 using collections::Serialize;
+using collections::String;
 using collections::ToString;
 PyInst::PyInst(ByteCode code, OperandKind operand)
   : PyObject(InstKlass::Self()), code(code), operand(operand) {}
@@ -21,7 +25,7 @@ PyInst::PyInst(ByteCode code, OperandKind operand)
   return operand;
 }
 
-InstKlass::InstKlass() : Klass(collections::CreateStringWithCString("inst")) {}
+InstKlass::InstKlass() : Klass(CreateStringWithCString("inst")) {}
 
 KlassPtr InstKlass::Self() {
   static KlassPtr instance = std::make_shared<InstKlass>();
@@ -106,6 +110,18 @@ PyInstPtr CreatePopJumpIfFalse(int64_t index) {
 
 PyInstPtr CreatePopJumpIfTrue(int64_t index) {
   return std::make_shared<PyInst>(ByteCode::POP_JUMP_IF_TRUE, index);
+}
+
+PyInstPtr CreateMakeFunction() {
+  return std::make_shared<PyInst>(ByteCode::MAKE_FUNCTION);
+}
+
+PyInstPtr CreateCallFunction(Index argumentCount) {
+  return std::make_shared<PyInst>(ByteCode::CALL_FUNCTION, argumentCount);
+}
+
+PyInstPtr CreateReturnValue() {
+  return std::make_shared<PyInst>(ByteCode::RETURN_VALUE);
 }
 
 }  // namespace torchlight::object

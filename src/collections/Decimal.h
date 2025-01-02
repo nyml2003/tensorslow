@@ -6,8 +6,6 @@
 
 namespace torchlight::collections {
 
-using collections::String;
-
 class Decimal {
   friend class List<Decimal>;
   friend class Integer;

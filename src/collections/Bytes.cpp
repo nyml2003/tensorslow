@@ -169,4 +169,8 @@ Bytes Serialize(const String& value) {
   return bytes.Concat(ToBytes(value));
 }
 
+Bytes Serialize(const Bytes& value) {
+  return Serialize(value.Size()).Concat(value);
+}
+
 }  // namespace torchlight::collections

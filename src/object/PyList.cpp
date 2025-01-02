@@ -11,6 +11,7 @@
 namespace torchlight::object {
 
 using collections::Bytes;
+using collections::List;
 using collections::Serialize;
 using collections::String;
 

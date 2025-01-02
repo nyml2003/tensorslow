@@ -33,6 +33,8 @@ Bytes Serialize(const Integer& value);
 
 Bytes Serialize(const String& value);
 
+Bytes Serialize(const Bytes& value);
+
 }  // namespace torchlight::collections
 
 #endif

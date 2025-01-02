@@ -1,11 +1,9 @@
 
-#include "matrix/Matrix.h"
+#include "collections/Matrix.h"
 #include <stdexcept>
 #include "collections/impl/String.h"
 
-namespace torchlight::matrix {
-
-using collections::CreateStringWithCString;
+namespace torchlight::collections {
 
 Matrix::Matrix(Index rows, Index cols)
   : rows(rows), cols(cols), data(rows * cols) {
@@ -212,4 +210,4 @@ Matrix Matrix::eye(Index n) {
   }
   return result;
 }
-}  // namespace torchlight::matrix
+}  // namespace torchlight::collections

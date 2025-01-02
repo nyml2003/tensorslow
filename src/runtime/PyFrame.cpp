@@ -1,4 +1,5 @@
 #include "runtime/PyFrame.h"
+#include "collections/Stack.h"
 #include "collections/common.h"
 #include "collections/impl/String.h"
 #include "object/ByteCode.h"
@@ -6,6 +7,7 @@
 #include "object/PyDictionary.h"
 #include "object/PyInst.h"
 #include "object/PyList.h"
+#include "object/PyNone.h"
 #include "runtime/Serialize.h"
 
 #include <cstring>
@@ -16,10 +18,18 @@
 namespace torchlight::runtime {
 
 using collections::Byte;
+using collections::Index;
 using collections::List;
+using collections::Stack;
 using object::ByteCode;
-using object::InstKlass;
+using object::PyCodePtr;
+using object::PyDictPtr;
 using object::PyInst;
+using object::PyInstPtr;
+using object::PyList;
+using object::PyListPtr;
+using object::PyObjPtr;
+using object::PyStrPtr;
 
 FrameKlass::FrameKlass()
   : object::Klass(collections::CreateStringWithCString("frame")) {}
@@ -30,10 +40,33 @@ object::KlassPtr FrameKlass::Self() {
 }
 
 PyFrame::PyFrame(PyCodePtr code)
-  : object::PyObject(FrameKlass::Self()), code(std::move(code)) {
+  : object::PyObject(FrameKlass::Self()),
+    code(std::move(code)),
+    locals(std::make_shared<object::PyDictionary>()),
+    globals(locals) {
+  List<PyObjPtr> fastLocalsList(this->code->NLocals());
+  fastLocalsList.Fill(object::PyNone::Instance());
+  fastLocals = std::make_shared<object::PyList>(List<PyObjPtr>(fastLocalsList));
+  caller = object::PyNone::Instance();
+}
+
+PyFrame::PyFrame(
+  const PyFunctionPtr& function,
+  const List<PyObjPtr>& arguments,
+  PyObjPtr caller
+)
+  : object::PyObject(FrameKlass::Self()),
+    code(function->Code()),
+    globals(function->Globals()),
+    caller(std::move(caller)) {
+  code = function->Code();
   locals = std::make_shared<object::PyDictionary>();
-  globals = std::make_shared<object::PyDictionary>();
-  fastLocals = std::make_shared<object::PyDictionary>();
+  List<PyObjPtr> fastLocalsList(arguments.Size());
+  for (auto it = List<PyObjPtr>::Iterator::Begin(arguments); !it.End();
+       it.Next()) {
+    fastLocalsList.Add(it.Get());
+  }
+  fastLocals = std::make_shared<object::PyList>(fastLocalsList);
 }
 
 void PyFrame::SetProgramCounter(Index pc) {
@@ -56,7 +89,7 @@ PyDictPtr& PyFrame::Globals() {
   return globals;
 }
 
-PyDictPtr& PyFrame::FastLocals() {
+PyListPtr& PyFrame::FastLocals() {
   return fastLocals;
 }
 
@@ -86,10 +119,8 @@ void PyFrame::NextProgramCounter() {
 
 void ParseByteCode(const PyCodePtr& code) {
   auto iter = List<Byte>::Iterator::Begin(code->ByteCode()->Value().Value());
-
-  auto byte = iter.Get();
-  if (static_cast<object::Literal>(byte) != object::Literal::LIST) {
-    throw std::runtime_error("Invalid byte code");
+  if (static_cast<object::Literal>(iter.Get()) != object::Literal::LIST) {
+    throw std::runtime_error("Invalid insts");
   }
   iter.Next();
   Index size = ReadU64(iter);
@@ -132,6 +163,18 @@ void ParseByteCode(const PyCodePtr& code) {
         insts.Add(object::CreatePopJumpIfTrue(ReadI64(iter)));
         break;
       }
+      case ByteCode::MAKE_FUNCTION: {
+        insts.Add(object::CreateMakeFunction());
+        break;
+      }
+      case ByteCode::CALL_FUNCTION: {
+        insts.Add(object::CreateCallFunction(ReadU64(iter)));
+        break;
+      }
+      case ByteCode::RETURN_VALUE: {
+        insts.Add(object::CreateReturnValue());
+        break;
+      }
       default:
         throw std::runtime_error(
           "Unknown byte code:" + std::to_string(static_cast<int>(iter.Get()))
@@ -140,5 +183,13 @@ void ParseByteCode(const PyCodePtr& code) {
     }
   }
   code->SetInstructions(std::make_shared<object::PyList>(insts));
+}
+
+PyObjPtr PyFrame::Caller() const {
+  return caller;
+}
+
+bool PyFrame::HasCaller() const {
+  return caller != object::PyNone::Instance();
 }
 }  // namespace torchlight::runtime

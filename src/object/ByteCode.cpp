@@ -1,11 +1,11 @@
 #include "object/ByteCode.h"
-#include "collections/impl/Bytes.h"
 #include "collections/impl/String.h"
 
 namespace torchlight::object {
 
 using collections::Byte;
-using collections::Serialize;
+using collections::Bytes;
+using collections::String;
 
 std::map<ByteCode, const char*> ByteCodeNames = {
   {ByteCode::POP_TOP, "POP_TOP"},
@@ -128,6 +128,10 @@ String ToString(Literal kind) {
       return collections::CreateStringWithCString("FALSE");
     case Literal::LIST:
       return collections::CreateStringWithCString("LIST");
+    case Literal::CODE:
+      return collections::CreateStringWithCString("CODE");
+    case Literal::BYTES:
+      return collections::CreateStringWithCString("BYTES");
   }
 }
 
@@ -153,5 +157,4 @@ Bytes Serialize(Literal kind) {
   return bytes;
 }
 
-
-}  // namespace torchlight::runtime
+}  // namespace torchlight::object

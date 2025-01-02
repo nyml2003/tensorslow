@@ -38,11 +38,9 @@ int main() {
 
     auto code = parser.Parse();
 
-    auto frame = std::make_shared<torchlight::runtime::PyFrame>(code);
+    torchlight::runtime::Interpreter interpreter;
 
-    torchlight::runtime::Interpreter interpreter(frame);
-
-    interpreter.Run();
+    interpreter.Run(code);
   }
 
   return 0;

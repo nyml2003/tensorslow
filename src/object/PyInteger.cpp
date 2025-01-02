@@ -74,7 +74,7 @@ PyObjPtr IntegerKlass::repr(PyObjPtr obj) {
   auto integer = std::dynamic_pointer_cast<PyInteger>(obj);
   String result = collections::CreateStringWithCString("<int ")
                     .Concat(integer->Value().ToString())
-                    .Concat(collections::CreateStringWithCString(" >"));
+                    .Concat(collections::CreateStringWithCString(">"));
   return std::make_shared<PyString>(result);
 }
 

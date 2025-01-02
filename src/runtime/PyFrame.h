@@ -1,57 +1,59 @@
 #ifndef TORCHLIGHT_RUNTIME_PYFRAME_H
 #define TORCHLIGHT_RUNTIME_PYFRAME_H
 
-#include "collections/Map.h"
 #include "collections/Stack.h"
 #include "collections/common.h"
 #include "object/Klass.h"
 #include "object/PyCode.h"
+#include "object/PyDictionary.h"
 #include "object/PyInst.h"
 #include "object/PyObject.h"
 #include "object/common.h"
+#include "runtime/PyFunction.h"
 
 namespace torchlight::runtime {
-using collections::Index;
-using collections::Map;
-using collections::Stack;
-using collections::String;
-using object::Klass;
-using object::PyCodePtr;
-using object::PyDictPtr;
-using object::PyInstPtr;
-using object::PyObject;
-using object::PyObjPtr;
-class PyFrame : public PyObject {
+class PyFrame : public object::PyObject {
  private:
-  Stack<PyObjPtr> stack;
-  PyCodePtr code;
-  Index programCounter = 0;
-  PyDictPtr locals;
-  PyDictPtr globals;
-  PyDictPtr fastLocals;
+  collections::Stack<object::PyObjPtr> stack;
+  object::PyCodePtr code;
+  collections::Index programCounter = 0;
+  object::PyDictPtr locals;
+  object::PyDictPtr globals;
+  object::PyListPtr fastLocals;
+  object::PyObjPtr caller;
 
  public:
-  explicit PyFrame(PyCodePtr code);
+  explicit PyFrame(object::PyCodePtr code);
 
-  void SetProgramCounter(Index pc);
+  explicit PyFrame(
+    const PyFunctionPtr& function,
+    const collections::List<object::PyObjPtr>& arguments,
+    object::PyObjPtr caller
+  );
 
-  [[nodiscard]] PyCodePtr Code() const;
+  void SetProgramCounter(collections::Index pc);
 
-  [[nodiscard]] Index ProgramCounter() const;
+  [[nodiscard]] object::PyCodePtr Code() const;
 
-  [[nodiscard]] PyDictPtr& Locals();
+  [[nodiscard]] collections::Index ProgramCounter() const;
 
-  [[nodiscard]] PyDictPtr& Globals();
+  [[nodiscard]] object::PyDictPtr& Locals();
 
-  [[nodiscard]] PyDictPtr& FastLocals();
+  [[nodiscard]] object::PyDictPtr& Globals();
 
-  [[nodiscard]] Stack<PyObjPtr>& Stack();
+  [[nodiscard]] object::PyListPtr& FastLocals();
 
-  PyInstPtr Instruction() const;
+  [[nodiscard]] collections::Stack<object::PyObjPtr>& Stack();
+
+  [[nodiscard]] object::PyObjPtr Caller() const;
+
+  [[nodiscard]] object::PyInstPtr Instruction() const;
 
   bool Finished() const;
 
   void NextProgramCounter();
+
+  bool HasCaller() const;
 };
 
 using PyFramePtr = std::shared_ptr<PyFrame>;
@@ -62,7 +64,7 @@ class FrameKlass : public object::Klass {
   static object::KlassPtr Self();
 };
 
-void ParseByteCode(const PyCodePtr& code);
+void ParseByteCode(const object::PyCodePtr& code);
 
 }  // namespace torchlight::runtime
 

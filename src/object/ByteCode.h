@@ -8,9 +8,6 @@
 #include <variant>
 
 namespace torchlight::object {
-using collections::Bytes;
-using collections::Index;
-using collections::String;
 
 enum class ByteCode {
   POP_TOP = 0,
@@ -111,7 +108,8 @@ enum class CompareOp {
 };
 
 struct NoneType {};
-using OperandKind = std::variant<CompareOp, NoneType, Index, int64_t>;
+using OperandKind =
+  std::variant<CompareOp, NoneType, collections::Index, int64_t>;
 
 enum class Literal {
   INTEGER,
@@ -122,25 +120,20 @@ enum class Literal {
   TRUE,
   FALSE,
   LIST,
+  CODE,
+  BYTES,
 };
 
 extern std::map<ByteCode, const char*> ByteCodeNames;
 
-String ToString(NoneType kind);
-
-String ToString(CompareOp kind);
-
-String ToString(ByteCode code);
-
-String ToString(Literal kind);
-
-Bytes Serialize(NoneType kind);
-
-Bytes Serialize(CompareOp kind);
-
-Bytes Serialize(ByteCode code);
-
-Bytes Serialize(Literal kind);
+collections::String ToString(NoneType kind);
+collections::String ToString(CompareOp kind);
+collections::String ToString(ByteCode code);
+collections::String ToString(Literal kind);
+collections::Bytes Serialize(NoneType kind);
+collections::Bytes Serialize(CompareOp kind);
+collections::Bytes Serialize(ByteCode code);
+collections::Bytes Serialize(Literal kind);
 
 }  // namespace torchlight::object
 #endif  // TORCHLIGHT_BYTECODE_H

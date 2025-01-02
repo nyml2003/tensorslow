@@ -2,11 +2,13 @@
 
 #include "runtime/Serialize.h"
 #include "collections/Bytes.h"
+#include "collections/Integer.h"
 #include "collections/impl/Integer.h"
 #include "collections/impl/String.h"
 #include "object/ByteCode.h"
 #include "object/PyBoolean.h"
 #include "object/PyBytes.h"
+#include "object/PyCode.h"
 #include "object/PyFloat.h"
 #include "object/PyInteger.h"
 #include "object/PyList.h"
@@ -17,16 +19,27 @@
 #include <memory>
 #include <stdexcept>
 namespace torchlight::runtime {
+using collections::Byte;
 using collections::Bytes;
+using collections::Integer;
+using collections::List;
 using object::Literal;
 using object::PyBoolean;
 using object::PyBytes;
+using object::PyBytesPtr;
 using object::PyCode;
+using object::PyCodePtr;
 using object::PyFloat;
+using object::PyFloatPtr;
 using object::PyInteger;
+using object::PyIntPtr;
 using object::PyList;
+using object::PyListPtr;
 using object::PyNone;
+using object::PyObjPtr;
 using object::PyString;
+using object::PyStrPtr;
+
 double ReadDouble(List<Byte>::Iterator& byteIter) {
   std::array<Byte, sizeof(double)> sizeBuffer{};
   for (std::size_t i = 0; i < sizeof(double); ++i) {
@@ -87,6 +100,17 @@ PyStrPtr ReadString(List<Byte>::Iterator& byteIter) {
     collections::CreateStringWithBytes(Bytes(result))
   );
 }
+
+PyBytesPtr ReadBytes(List<Byte>::Iterator& byteIter) {
+  uint64_t size = ReadU64(byteIter);
+  List<Byte> result(size);
+  while (size--) {
+    result.Add(byteIter.Get());
+    byteIter.Next();
+  }
+  return std::make_shared<PyBytes>(Bytes(result));
+}
+
 PyIntPtr ReadInteger(List<Byte>::Iterator& byteIter) {
   const char positiveSign = '+';
   const char negativeSign = '-';
@@ -109,6 +133,9 @@ PyFloatPtr ReadFloat(List<Byte>::Iterator& byteIter) {
 }
 PyListPtr ReadList(List<Byte>::Iterator& byteIter) {
   uint64_t size = ReadU64(byteIter);
+  if (size == 0) {
+    return std::make_shared<PyList>(List<PyObjPtr>());
+  }
   List<PyObjPtr> result(size);
   while (size--) {
     result.Add(ReadObject(byteIter));
@@ -137,19 +164,29 @@ PyObjPtr ReadObject(List<Byte>::Iterator& byteIter) {
       return PyNone::Instance();
     case Literal::ZERO:
       return std::make_shared<PyInteger>(collections::CreateIntegerZero());
+    case Literal::CODE:
+      return ReadCode(byteIter);
+    case Literal::BYTES:
+      return ReadBytes(byteIter);
   }
+}
+
+PyCodePtr ReadCode(List<Byte>::Iterator& byteIter) {
+  auto consts = ReadObject(byteIter);
+  auto names = ReadObject(byteIter);
+  auto varNames = ReadObject(byteIter);
+  auto name = ReadObject(byteIter);
+  auto nLocals = ReadU64(byteIter);
+  auto byteCode = ReadObject(byteIter);
+  return std::make_shared<PyCode>(
+    byteCode, consts, names, varNames, name, nLocals
+  );
 }
 
 PyCodePtr MakeCode(const PyBytesPtr& bytes) {
   auto it = List<Byte>::Iterator::Begin(bytes->Value().Value());
-  auto filename = ReadObject(it);
-  auto consts = ReadObject(it);
-  auto names = ReadObject(it);
-  auto varNames = ReadObject(it);
-  auto byteCode = bytes->Value().Slice(it.Index(), bytes->Value().Size());
-  return std::make_shared<PyCode>(
-    std::make_shared<PyBytes>(byteCode), consts, names, varNames, filename
-  );
+  auto code = ReadObject(it);
+  return std::dynamic_pointer_cast<PyCode>(code);
 }
 
 }  // namespace torchlight::runtime

@@ -1,18 +1,12 @@
 #ifndef TORCHLIGHT_RUNTIME_PYCODE_H
 #define TORCHLIGHT_RUNTIME_PYCODE_H
 
-#include "collections/List.h"
 #include "object/Klass.h"
 #include "object/PyBytes.h"
 #include "object/PyObject.h"
 #include "object/common.h"
 
 namespace torchlight::object {
-
-using collections::Byte;
-using collections::Bytes;
-using collections::List;
-using collections::String;
 
 class PyCode : public PyObject {
   friend class CodeKlass;
@@ -23,7 +17,8 @@ class PyCode : public PyObject {
   PyListPtr consts;
   PyListPtr names;
   PyListPtr varNames;
-  PyStrPtr filename;
+  PyStrPtr name;
+  collections::Index nLocals;
 
  public:
   explicit PyCode(
@@ -31,7 +26,8 @@ class PyCode : public PyObject {
     const PyObjPtr& consts,
     const PyObjPtr& names,
     const PyObjPtr& varNames,
-    const PyObjPtr& filename
+    const PyObjPtr& name,
+    collections::Index nLocals
   );
 
   [[nodiscard]] PyListPtr Instructions();
@@ -44,9 +40,11 @@ class PyCode : public PyObject {
 
   [[nodiscard]] PyListPtr Names() const;
 
-  [[nodiscard]] PyStrPtr Filename() const;
+  [[nodiscard]] PyStrPtr Name() const;
 
   [[nodiscard]] PyListPtr VarNames() const;
+
+  [[nodiscard]] collections::Index NLocals() const;
 };
 
 using PyCodePtr = std::shared_ptr<PyCode>;

@@ -270,6 +270,8 @@ class List {
       }
       return it;
     }
+
+    const List<T>& List() { return list; }
   };
 
   using IteratorPtr = std::shared_ptr<Iterator>;

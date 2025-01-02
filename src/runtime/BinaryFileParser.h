@@ -6,8 +6,6 @@
 
 namespace torchlight::runtime {
 
-using object::PyCodePtr;
-
 class BinaryFileParser {
  private:
   BufferedInputStreamPtr inputStream;
@@ -15,9 +13,9 @@ class BinaryFileParser {
  public:
   explicit BinaryFileParser(BufferedInputStreamPtr inputStream);
 
-  PyCodePtr Parse();
+  object::PyCodePtr Parse();
 
-  PyCodePtr ParseCode();
+  object::PyCodePtr ParseCode();
 };
 
 }  // namespace torchlight::runtime

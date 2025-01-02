@@ -140,6 +140,7 @@
         "insts",
         "Klass",
         "LSHIFT",
+        "memcheck",
         "MINSIZEREL",
         "mockfront",
         "RELWITHDEBINFO",

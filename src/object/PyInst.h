@@ -33,25 +33,31 @@ class InstKlass : public Klass {
   PyObjPtr repr(PyObjPtr obj) override;
 };
 
-PyInstPtr CreateLoadConst(Index index);
+PyInstPtr CreateLoadConst(collections::Index index);
 
 PyInstPtr CreateBinaryAdd();
 
 PyInstPtr CreatePrint();
 
-PyInstPtr CreateStoreName(Index index);
+PyInstPtr CreateStoreName(collections::Index index);
 
-PyInstPtr CreateLoadName(Index index);
+PyInstPtr CreateLoadName(collections::Index index);
 
-PyInstPtr CreateStoreFast(Index index);
+PyInstPtr CreateStoreFast(collections::Index index);
 
-PyInstPtr CreateLoadFast(Index index);
+PyInstPtr CreateLoadFast(collections::Index index);
 
 PyInstPtr CreateCompareOp(CompareOp op);
 
 PyInstPtr CreatePopJumpIfFalse(int64_t index);
 
 PyInstPtr CreatePopJumpIfTrue(int64_t index);
+
+PyInstPtr CreateMakeFunction();
+
+PyInstPtr CreateCallFunction(collections::Index argumentCount);
+
+PyInstPtr CreateReturnValue();
 
 }  // namespace torchlight::object
 

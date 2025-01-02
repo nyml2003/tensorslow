@@ -2,6 +2,7 @@
 
 #include "collections/List.h"
 #include "object/PyBytes.h"
+#include "object/PyCode.h"
 #include "runtime/Serialize.h"
 
 #include <cstdio>
@@ -12,6 +13,7 @@ namespace torchlight::runtime {
 using collections::Byte;
 using collections::Bytes;
 using collections::List;
+using object::PyCodePtr;
 
 BinaryFileParser::BinaryFileParser(BufferedInputStreamPtr inputStream)
   : inputStream(std::move(inputStream)) {}

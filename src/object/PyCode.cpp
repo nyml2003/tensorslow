@@ -10,8 +10,10 @@
 
 #include <cstring>
 #include <memory>
+#include <stdexcept>
 
 namespace torchlight::object {
+using collections::CreateStringWithCString;
 using collections::ToString;
 
 PyCode::PyCode(
@@ -19,7 +21,8 @@ PyCode::PyCode(
   const PyObjPtr& consts,
   const PyObjPtr& names,
   const PyObjPtr& varNames,
-  const PyObjPtr& filename
+  const PyObjPtr& name,
+  collections::Index nLocals
 )
   : PyObject(CodeKlass::Self()) {
   if (byteCodes->Klass() != BytesKlass::Self()) {
@@ -38,10 +41,12 @@ PyCode::PyCode(
     throw std::runtime_error("varNames must be a list object");
   }
   this->varNames = std::dynamic_pointer_cast<PyList>(varNames);
-  if (filename->Klass() != StringKlass::Self()) {
+  if (name->Klass() != StringKlass::Self()) {
     throw std::runtime_error("filename must be a string object");
   }
-  this->filename = std::dynamic_pointer_cast<PyString>(filename);
+  this->name = std::dynamic_pointer_cast<PyString>(name);
+
+  this->nLocals = nLocals;
 }
 
 PyListPtr PyCode::Instructions() {
@@ -64,16 +69,19 @@ PyListPtr PyCode::Names() const {
   return names;
 }
 
-PyStrPtr PyCode::Filename() const {
-  return filename;
+PyStrPtr PyCode::Name() const {
+  return name;
 }
 
 PyListPtr PyCode::VarNames() const {
   return varNames;
 }
 
-CodeKlass::CodeKlass()
-  : object::Klass(collections::CreateStringWithCString("code")) {}
+collections::Index PyCode::NLocals() const {
+  return nLocals;
+}
+
+CodeKlass::CodeKlass() : object::Klass(CreateStringWithCString("code")) {}
 
 object::KlassPtr CodeKlass::Self() {
   static object::KlassPtr instance = std::make_shared<CodeKlass>();
@@ -85,25 +93,13 @@ PyObjPtr CodeKlass::repr(PyObjPtr self) {
     return nullptr;
   }
   auto code = std::dynamic_pointer_cast<PyCode>(self);
-  String result = collections::CreateStringWithCString("<code object ");
-  result.InplaceConcat(code->Filename()->Value());
-  result.InplaceConcat(collections::CreateStringWithCString(" at "));
-  result.InplaceConcat(String(ToString(reinterpret_cast<uint64_t>(self.get())))
+  PyObjPtr s = std::make_shared<PyString>(
+    CreateStringWithCString("<code object ")
+      .Concat(code->Name()->Value())
+      .Concat(CreateStringWithCString(" at "))
+      .Concat(ToString(reinterpret_cast<uint64_t>(self.get())))
+      .Concat(CreateStringWithCString(">"))
   );
-  result.InplaceConcat(collections::CreateStringWithCString(">"));
-  PyObjPtr s = std::make_shared<PyString>(result);
-  s = s->add(std::make_shared<PyString>(
-    collections::CreateStringWithCString("\nConsts:\n")
-  ));
-  s = s->add(code->Consts()->repr());
-  s = s->add(std::make_shared<PyString>(
-    collections::CreateStringWithCString("\nNames:\n")
-  ));
-  s = s->add(code->Names()->repr());
-  s = s->add(std::make_shared<PyString>(
-    collections::CreateStringWithCString("\nVarNames:\n")
-  ));
-  s = s->add(code->VarNames()->repr());
   return s;
 }
 
@@ -113,12 +109,13 @@ PyObjPtr CodeKlass::_serialize_(PyObjPtr self) {
   }
   auto code = std::dynamic_pointer_cast<PyCode>(self);
   PyObjPtr result =
-    std::make_shared<PyBytes>(collections::CreateBytesWithCString(""));
-  result = result->add(code->Filename()->_serialize_());
-  result = result->add(code->Consts()->_serialize_());
-  result = result->add(code->Names()->_serialize_());
-  result = result->add(code->VarNames()->_serialize_());
-  result = result->add(code->ByteCode()->_serialize_());
+    std::make_shared<PyBytes>(Serialize(Literal::CODE))
+      ->add(code->Consts()->_serialize_())
+      ->add(code->Names()->_serialize_())
+      ->add(code->VarNames()->_serialize_())
+      ->add(code->Name()->_serialize_())
+      ->add(std::make_shared<PyBytes>(collections::Serialize(code->NLocals())))
+      ->add(code->ByteCode()->_serialize_());
   return result;
 }
 

@@ -6,15 +6,14 @@
 #include "object/PyObject.h"
 
 namespace torchlight::object {
-using collections::List;
 class PyList : public PyObject {
  private:
-  List<PyObjPtr> value;
+  collections::List<PyObjPtr> value;
 
  public:
-  explicit PyList(List<PyObjPtr> value);
+  explicit PyList(collections::List<PyObjPtr> value);
 
-  [[nodiscard]] List<PyObjPtr> Value() const;
+  [[nodiscard]] collections::List<PyObjPtr> Value() const;
 };
 
 using PyListPtr = std::shared_ptr<PyList>;
