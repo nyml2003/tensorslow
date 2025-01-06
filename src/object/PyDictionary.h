@@ -13,12 +13,18 @@ class PyDictionary : public PyObject {
   collections::Map<collections::String, PyObjPtr> dict;
 
  public:
-  explicit PyDictionary();
+  explicit PyDictionary(collections::Map<collections::String, PyObjPtr> dict);
 
   collections::Map<collections::String, PyObjPtr>& Value();
+
+  void Put(const collections::String& key, const PyObjPtr& value);
+
+  PyObjPtr Get(const collections::String& key);
 };
 
 using PyDictPtr = std::shared_ptr<PyDictionary>;
+
+PyDictPtr CreateDict(collections::Map<collections::String, PyObjPtr> dict);
 
 class DictionaryKlass : public Klass {
  public:
@@ -28,6 +34,8 @@ class DictionaryKlass : public Klass {
   PyObjPtr setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) override;
 
   PyObjPtr getitem(PyObjPtr obj, PyObjPtr key) override;
+
+  PyObjPtr repr(PyObjPtr obj) override;
 };
 
 }  // namespace torchlight::object

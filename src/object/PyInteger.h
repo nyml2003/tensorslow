@@ -20,6 +20,10 @@ class PyInteger : public PyObject {
 
 using PyIntPtr = std::shared_ptr<PyInteger>;
 
+PyIntPtr CreateInteger(collections::Integer value);
+
+PyIntPtr CreateInteger(collections::Index value);
+
 class IntegerKlass : public Klass {
  public:
   explicit IntegerKlass();

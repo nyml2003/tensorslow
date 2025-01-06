@@ -32,6 +32,6 @@ PyCodePtr BinaryFileParser::ParseCode() {
     }
     byteCodes.Add(byte.value());
   }
-  return MakeCode(std::make_shared<object::PyBytes>(Bytes(byteCodes)));
+  return MakeCode(object::CreateBytes(Bytes(byteCodes)));
 }
 }  // namespace torchlight::runtime

@@ -6,6 +6,7 @@
 #include "object/ByteCode.h"
 #include "object/PyBytes.h"
 #include "object/PyInteger.h"
+#include "object/PyNone.h"
 #include "object/PyString.h"
 
 namespace torchlight::object {
@@ -17,6 +18,20 @@ using collections::String;
 
 PyList::PyList(List<PyObjPtr> value)
   : PyObject(ListKlass::Self()), value(std::move(value)) {}
+
+PyListPtr CreateList(collections::Index capacity) {
+  List<PyObjPtr> list(capacity);
+  list.Fill(PyNone::Instance());
+  return std::make_shared<PyList>(list);
+}
+
+PyListPtr CreateList(List<PyObjPtr> list, collections::Index capacity) {
+  if (list.Size() >= capacity) {
+    return std::make_shared<PyList>(list);
+  }
+  list.AppendElements(PyNone::Instance(), capacity - list.Size());
+  return std::make_shared<PyList>(list);
+}
 
 List<PyObjPtr> PyList::Value() const {
   return value;

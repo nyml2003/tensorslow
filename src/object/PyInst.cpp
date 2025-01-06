@@ -124,4 +124,12 @@ PyInstPtr CreateReturnValue() {
   return std::make_shared<PyInst>(ByteCode::RETURN_VALUE);
 }
 
+PyInstPtr CreateLoadGlobal(Index index) {
+  return std::make_shared<PyInst>(ByteCode::LOAD_GLOBAL, index);
+}
+
+PyInstPtr CreateBinarySubtract() {
+  return std::make_shared<PyInst>(ByteCode::BINARY_SUBTRACT);
+}
+
 }  // namespace torchlight::object

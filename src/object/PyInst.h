@@ -37,6 +37,9 @@ PyInstPtr CreateLoadConst(collections::Index index);
 
 PyInstPtr CreateBinaryAdd();
 
+PyInstPtr CreateBinarySubtract();
+
+
 PyInstPtr CreatePrint();
 
 PyInstPtr CreateStoreName(collections::Index index);
@@ -58,6 +61,10 @@ PyInstPtr CreateMakeFunction();
 PyInstPtr CreateCallFunction(collections::Index argumentCount);
 
 PyInstPtr CreateReturnValue();
+
+PyInstPtr CreateLoadGlobal(collections::Index index);
+
+
 
 }  // namespace torchlight::object
 

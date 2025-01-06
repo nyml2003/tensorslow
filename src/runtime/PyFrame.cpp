@@ -39,34 +39,88 @@ object::KlassPtr FrameKlass::Self() {
   return instance;
 }
 
-PyFrame::PyFrame(PyCodePtr code)
-  : object::PyObject(FrameKlass::Self()),
-    code(std::move(code)),
-    locals(std::make_shared<object::PyDictionary>()),
-    globals(locals) {
-  List<PyObjPtr> fastLocalsList(this->code->NLocals());
-  fastLocalsList.Fill(object::PyNone::Instance());
-  fastLocals = std::make_shared<object::PyList>(List<PyObjPtr>(fastLocalsList));
-  caller = object::PyNone::Instance();
-}
-
 PyFrame::PyFrame(
-  const PyFunctionPtr& function,
-  const List<PyObjPtr>& arguments,
+  PyCodePtr code,
+  PyDictPtr locals,
+  PyDictPtr globals,
+  PyListPtr fastLocals,
   PyObjPtr caller
 )
   : object::PyObject(FrameKlass::Self()),
-    code(function->Code()),
-    globals(function->Globals()),
-    caller(std::move(caller)) {
-  code = function->Code();
-  locals = std::make_shared<object::PyDictionary>();
+    stack(),
+    programCounter(0),
+    code(std::move(code)),
+    locals(std::move(locals)),
+    globals(std::move(globals)),
+    fastLocals(std::move(fastLocals)),
+    caller(std::move(caller)) {}
+
+// PyFrame::PyFrame(PyCodePtr code)
+//   : object::PyObject(FrameKlass::Self()),
+//     code(std::move(code)),
+//     locals(std::make_shared<object::PyDictionary>()),
+//     globals(locals) {
+//   List<PyObjPtr> fastLocalsList(this->code->NLocals());
+//   fastLocalsList.Fill(object::PyNone::Instance());
+//   fastLocals =
+//   std::make_shared<object::PyList>(List<PyObjPtr>(fastLocalsList)); caller =
+//   object::PyNone::Instance();
+// }
+
+// PyFrame::PyFrame(
+//   const PyFunctionPtr& function,
+//   const List<PyObjPtr>& arguments,
+//   PyObjPtr caller
+// )
+//   : object::PyObject(FrameKlass::Self()),
+//     code(function->Code()),
+//     globals(function->Globals()),
+//     caller(std::move(caller)) {
+//   code = function->Code();
+//   locals = std::make_shared<object::PyDictionary>();
+//   Index nLocals = code->NLocals();
+//   List<PyObjPtr> fastLocalsList(std::max(nLocals, arguments.Size()));
+//   for (auto it = List<PyObjPtr>::Iterator::Begin(arguments); !it.End();
+//        it.Next()) {
+//     fastLocalsList.Add(it.Get());
+//   }
+//   if (nLocals > arguments.Size()) {
+//     fastLocalsList.AppendElements(
+//       object::PyNone::Instance(), nLocals - arguments.Size()
+//     );
+//   }
+//   fastLocals = std::make_shared<object::PyList>(fastLocalsList);
+// }
+
+PyFramePtr CreateFrameWithCode(const PyCodePtr& code) {
+  auto locals =
+    object::CreateDict(collections::Map<collections::String, PyObjPtr>());
+  auto globals = locals;
+  auto fastLocals = object::CreateList(code->NLocals());
+  return std::make_shared<PyFrame>(
+    code, locals, globals, fastLocals, object::PyNone::Instance()
+  );
+}
+
+PyFramePtr CreateFrameWithFunction(
+  const PyFunctionPtr& function,
+  const List<PyObjPtr>& arguments,
+  PyObjPtr caller
+) {
+  auto code = function->Code();
+  auto globals = function->Globals();
+  auto locals =
+    object::CreateDict(collections::Map<collections::String, PyObjPtr>());
+  Index nLocals = code->NLocals();
   List<PyObjPtr> fastLocalsList(arguments.Size());
   for (auto it = List<PyObjPtr>::Iterator::Begin(arguments); !it.End();
        it.Next()) {
     fastLocalsList.Add(it.Get());
   }
-  fastLocals = std::make_shared<object::PyList>(fastLocalsList);
+  auto fastLocals = object::CreateList(fastLocalsList, nLocals);
+  return std::make_shared<PyFrame>(
+    code, locals, globals, fastLocals, std::move(caller)
+  );
 }
 
 void PyFrame::SetProgramCounter(Index pc) {
@@ -137,6 +191,10 @@ void ParseByteCode(const PyCodePtr& code) {
         insts.Add(object::CreateBinaryAdd());
         break;
       }
+      case ByteCode::BINARY_SUBTRACT: {
+        insts.Add(object::CreateBinarySubtract());
+        break;
+      }
       case ByteCode::PRINT: {
         insts.Add(object::CreatePrint());
         break;
@@ -173,6 +231,18 @@ void ParseByteCode(const PyCodePtr& code) {
       }
       case ByteCode::RETURN_VALUE: {
         insts.Add(object::CreateReturnValue());
+        break;
+      }
+      case ByteCode::LOAD_NAME: {
+        insts.Add(object::CreateLoadName(ReadU64(iter)));
+        break;
+      }
+      case ByteCode::STORE_NAME: {
+        insts.Add(object::CreateStoreName(ReadU64(iter)));
+        break;
+      }
+      case ByteCode::LOAD_GLOBAL: {
+        insts.Add(object::CreateLoadGlobal(ReadU64(iter)));
         break;
       }
       default:

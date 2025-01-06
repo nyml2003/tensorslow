@@ -15,19 +15,20 @@ namespace torchlight::runtime {
 class PyFrame : public object::PyObject {
  private:
   collections::Stack<object::PyObjPtr> stack;
+  collections::Index programCounter;
+
   object::PyCodePtr code;
-  collections::Index programCounter = 0;
   object::PyDictPtr locals;
   object::PyDictPtr globals;
   object::PyListPtr fastLocals;
   object::PyObjPtr caller;
 
  public:
-  explicit PyFrame(object::PyCodePtr code);
-
   explicit PyFrame(
-    const PyFunctionPtr& function,
-    const collections::List<object::PyObjPtr>& arguments,
+    object::PyCodePtr code,
+    object::PyDictPtr locals,
+    object::PyDictPtr globals,
+    object::PyListPtr fastLocals,
     object::PyObjPtr caller
   );
 
@@ -57,6 +58,14 @@ class PyFrame : public object::PyObject {
 };
 
 using PyFramePtr = std::shared_ptr<PyFrame>;
+
+PyFramePtr CreateFrameWithCode(const object::PyCodePtr& code);
+
+PyFramePtr CreateFrameWithFunction(
+  const PyFunctionPtr& function,
+  const collections::List<object::PyObjPtr>& arguments,
+  object::PyObjPtr caller
+);
 
 class FrameKlass : public object::Klass {
  public:

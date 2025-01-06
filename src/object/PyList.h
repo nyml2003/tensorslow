@@ -18,6 +18,11 @@ class PyList : public PyObject {
 
 using PyListPtr = std::shared_ptr<PyList>;
 
+PyListPtr CreateList(collections::Index capacity);
+
+PyListPtr
+CreateList(collections::List<PyObjPtr> list, collections::Index capacity);
+
 class ListKlass : public Klass {
  public:
   explicit ListKlass();

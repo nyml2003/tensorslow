@@ -12,6 +12,10 @@ namespace torchlight::object {
 PyBytes::PyBytes(collections::Bytes value)
   : PyObject(BytesKlass::Self()), value(std::move(value)) {}
 
+PyBytesPtr CreateBytes(collections::Bytes value) {
+  return std::make_shared<PyBytes>(value);
+}
+
 [[nodiscard]] collections::Bytes PyBytes::Value() const {
   return value;
 }

@@ -1,11 +1,13 @@
 #include "object/PyInteger.h"
 #include "collections/Integer.h"
 #include "collections/impl/Bytes.h"
+#include "collections/impl/Integer.h"
 #include "collections/impl/String.h"
 #include "object/ByteCode.h"
 #include "object/PyBoolean.h"
 #include "object/PyBytes.h"
 #include "object/PyString.h"
+
 
 namespace torchlight::object {
 
@@ -21,6 +23,15 @@ PyInteger::PyInteger(Integer value)
 
 Integer PyInteger::Value() const {
   return value;
+}
+
+PyIntPtr CreateInteger(collections::Integer value) {
+  return std::make_shared<PyInteger>(value);
+}
+
+PyIntPtr CreateInteger(collections::Index value) {
+  return std::make_shared<PyInteger>(collections::CreateIntegerWithIndex(value)
+  );
 }
 
 IntegerKlass::IntegerKlass()

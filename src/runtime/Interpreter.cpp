@@ -15,6 +15,7 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include <string>
 namespace torchlight::runtime {
 
 using collections::Index;
@@ -35,7 +36,7 @@ Interpreter::Interpreter() {
 }
 
 void Interpreter::Run(const object::PyCodePtr& code) {
-  frame = std::make_shared<PyFrame>(code);
+  frame = CreateFrameWithCode(code);
   EvalFrame();
   DestroyFrame();
 }
@@ -48,7 +49,7 @@ void Interpreter::BuildFrameWithFunction(
   if (function == nullptr) {
     throw std::runtime_error("Cannot build frame with non-function object");
   }
-  PyFramePtr new_frame = std::make_shared<PyFrame>(function, arguments, frame);
+  PyFramePtr new_frame = CreateFrameWithFunction(function, arguments, frame);
   frame = new_frame;
 }
 
@@ -66,6 +67,8 @@ void Interpreter::EvalFrame() {
         auto const_list =
           std::dynamic_pointer_cast<object::PyList>(consts)->Value();
         auto value = const_list.Get(key);
+        std::cout << "LOAD_CONST ";
+        print(value);
         frameObject->Stack().Push(value);
         frameObject->NextProgramCounter();
         break;
@@ -82,24 +85,48 @@ void Interpreter::EvalFrame() {
         auto right = frameObject->Stack().Pop();
         auto left = frameObject->Stack().Pop();
         switch (op) {
-          case CompareOp::EQUAL:
+          case CompareOp::EQUAL: {
             frameObject->Stack().Push(left->eq(right));
+            std::cout << "COMPARE_OP: EQUAL";
+            auto result = left->eq(right);
+            print(result);
             break;
-          case CompareOp::NOT_EQUAL:
+          }
+          case CompareOp::NOT_EQUAL: {
             frameObject->Stack().Push(left->ne(right));
+            std::cout << "COMPARE_OP: NOT_EQUAL";
+            auto result = left->ne(right);
+            print(result);
             break;
-          case CompareOp::LESS_THAN:
+          }
+          case CompareOp::LESS_THAN: {
             frameObject->Stack().Push(left->lt(right));
+            std::cout << "COMPARE_OP: LESS_THAN";
+            auto result = left->lt(right);
+            print(result);
             break;
-          case CompareOp::LESS_THAN_EQUAL:
+          }
+          case CompareOp::LESS_THAN_EQUAL: {
             frameObject->Stack().Push(left->le(right));
+            std::cout << "COMPARE_OP: LESS_THAN_EQUAL";
+            auto result = left->le(right);
+            print(result);
             break;
-          case CompareOp::GREATER_THAN:
+          }
+          case CompareOp::GREATER_THAN: {
             frameObject->Stack().Push(left->gt(right));
+            std::cout << "COMPARE_OP: GREATER_THAN";
+            auto result = left->gt(right);
+            print(result);
             break;
-          case CompareOp::GREATER_THAN_EQUAL:
+          }
+          case CompareOp::GREATER_THAN_EQUAL: {
             frameObject->Stack().Push(left->ge(right));
+            std::cout << "COMPARE_OP: GREATER_THAN_EQUAL";
+            auto result = left->ge(right);
+            print(result);
             break;
+          }
           default:
             throw std::runtime_error("Unknown compare operation");
         }
@@ -118,11 +145,16 @@ void Interpreter::EvalFrame() {
         }
         if (bool_needJump->Value()) {
           frameObject->NextProgramCounter();
+          std::cout << "POP_JUMP_IF_FALSE: true, jump next to "
+                    << frameObject->ProgramCounter() << std::endl;
         } else {
           frameObject->SetProgramCounter(collections::safe_add(
             frameObject->ProgramCounter(), std::get<int64_t>(inst->Operand())
           ));
+          std::cout << "POP_JUMP_IF_FALSE: false, jump to "
+                    << frameObject->ProgramCounter() << std::endl;
         }
+
         break;
       }
       case ByteCode::POP_JUMP_IF_TRUE: {
@@ -139,8 +171,13 @@ void Interpreter::EvalFrame() {
           frameObject->SetProgramCounter(collections::safe_add(
             frameObject->ProgramCounter(), std::get<int64_t>(inst->Operand())
           ));
+          std::cout << "POP_JUMP_IF_TRUE: true, jump to "
+                    << frameObject->ProgramCounter() << std::endl;
+
         } else {
           frameObject->NextProgramCounter();
+          std::cout << "POP_JUMP_IF_TRUE: false, jump next to "
+                    << frameObject->ProgramCounter() << std::endl;
         }
         break;
       }
@@ -151,7 +188,13 @@ void Interpreter::EvalFrame() {
         frameObject->NextProgramCounter();
         break;
       }
-      case ByteCode::BINARY_SUBTRACT:
+      case ByteCode::BINARY_SUBTRACT: {
+        auto right = frameObject->Stack().Pop();
+        auto left = frameObject->Stack().Pop();
+        frameObject->Stack().Push(left->sub(right));
+        frameObject->NextProgramCounter();
+        break;
+      }
       case ByteCode::BINARY_MULTIPLY:
       case ByteCode::BINARY_TRUE_DIVIDE:
       case ByteCode::BINARY_FLOOR_DIVIDE:
@@ -204,10 +247,52 @@ void Interpreter::EvalFrame() {
       case ByteCode::CALL_FUNCTION: {
         auto argumentCount = std::get<Index>(inst->Operand());
         List<PyObjPtr> arguments(argumentCount);
-        while (argumentCount--) {
+        for (Index i = 0; i < argumentCount; i++) {
           arguments.Add(frameObject->Stack().Pop());
         }
         BuildFrameWithFunction(frameObject->Stack().Pop(), arguments);
+        frameObject->NextProgramCounter();
+        break;
+      }
+      case ByteCode::LOAD_GLOBAL: {
+        auto index = std::get<Index>(inst->Operand());
+        auto key = frameObject->Code()->Names()->Value().Get(index);
+        auto value = frameObject->Globals()->getitem(key);
+        frameObject->Stack().Push(value);
+        frameObject->NextProgramCounter();
+        break;
+      }
+      case ByteCode::STORE_NAME: {
+        auto index = std::get<Index>(inst->Operand());
+        auto key = frameObject->Code()->Names()->Value().Get(index);
+        auto value = frameObject->Stack().Pop();
+        frameObject->Globals()->setitem(key, value);
+        frameObject->NextProgramCounter();
+        break;
+      }
+      case ByteCode::LOAD_NAME: {
+        auto index = std::get<Index>(inst->Operand());
+        auto key = frameObject->Code()->Names()->Value().Get(index);
+        // LEGB rule
+        // local -> enclosing -> global -> built-in
+        bool found = false;
+        auto value = frameObject->Locals()->getitem(key);
+        if (value->Klass() != object::NoneKlass::Self()) {
+          found = true;
+        }
+        if (!found) {
+          value = frameObject->Globals()->getitem(key);
+          if (value->Klass() != object::NoneKlass::Self()) {
+            found = true;
+          }
+        }
+        if (!found) {
+          print(key);
+          throw std::runtime_error("NameError: name is not defined");
+        }
+        std::cout << "LOAD_NAME: ";
+        print(value);
+        frameObject->Stack().Push(value);
         frameObject->NextProgramCounter();
         break;
       }
@@ -215,6 +300,7 @@ void Interpreter::EvalFrame() {
         throw std::runtime_error("Unknown byte code");
         break;
       }
+        throw std::runtime_error("Unknown byte code");
     }
   }
 }
