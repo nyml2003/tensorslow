@@ -1,9 +1,10 @@
 #ifndef TORCHLIGHT_COLLECTIONS_IMPL_INTEGER_H
 #define TORCHLIGHT_COLLECTIONS_IMPL_INTEGER_H
 
+#include "collections/Integer.h"
+
 #include <limits>
 #include <stdexcept>
-#include "collections/Integer.h"
 
 namespace torchlight::collections {
 
@@ -21,7 +22,7 @@ Integer Slice(const Integer& integer, Index start, Index end);
 
 Integer CreateIntegerWithString(const String& str);
 
-Integer CreateIntegerWithBytes(const Bytes& bytes);
+Integer CreateIntegerWithCString(const char* str);
 
 Integer CreateIntegerZero();
 

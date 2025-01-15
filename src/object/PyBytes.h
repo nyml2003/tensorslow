@@ -20,7 +20,7 @@ class PyBytes : public PyObject {
 
 using PyBytesPtr = std::shared_ptr<PyBytes>;
 
-PyBytesPtr CreateBytes(collections::Bytes value);
+PyBytesPtr CreatePyBytes(collections::Bytes value);
 
 class BytesKlass : public Klass {
  public:

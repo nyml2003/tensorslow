@@ -1,9 +1,10 @@
-#include "collections/List.h"
 #include "collections/Decimal.h"
 #include "collections/Integer.h"
+#include "collections/List.h"
 #include "collections/Map.h"
 #include "collections/String.h"
-#include "object/common.h"
+#include "object/PyObject.h"
+
 
 #include <algorithm>
 #include <stdexcept>
@@ -11,19 +12,83 @@
 namespace torchlight::collections {
 
 template <typename T>
-List<T>::List(Index capacity)
-  : capacity(capacity == 0 ? 1 : capacity), items(new T[capacity]) {}
+List<T>::~List() = default;
 
 template <typename T>
-List<T>::List(Index capacity, std::shared_ptr<T[]> elements)
-  : size(capacity), capacity(capacity), items(std::move(elements)) {}
+List<T>::List(Index capacity) : size(0), capacity(capacity) {
+  if (capacity > 0) {
+    elements = std::make_unique<T[]>(capacity);
+  }
+}
 
 template <typename T>
-List<T>::List() : List(INIT_CAPACITY) {}
+List<T>::List(Index count, const T* stream) : size(count) {
+  if (count == 0) {
+    throw std::runtime_error("List::List: count is 0");
+  }
+  capacity = count;
+  elements = std::make_unique<T[]>(count);
+  std::copy(stream, stream + count, elements.get());
+}
 
 template <typename T>
-T* List<T>::Data() const {
-  return items.get();
+List<T>::List(Index count, T element) : size(count) {
+  if (count == 0) {
+    throw std::runtime_error("List::List: count is 0");
+  }
+  capacity = count;
+  elements = std::make_unique<T[]>(count);
+  std::fill(elements.get(), elements.get() + count, element);
+}
+
+template <typename T>
+List<T>::List(std::initializer_list<T> list)
+  : size(list.size()),
+    capacity(list.size()),
+    elements(std::make_unique<T[]>(list.size())) {
+  std::copy(list.begin(), list.end(), elements.get());
+}
+
+template <typename T>
+List<T>::List(const List<T>& other)
+  : size(other.size),
+    capacity(other.capacity),
+    elements(std::make_unique<T[]>(other.capacity)) {
+  std::copy(other.elements.get(), other.elements.get() + size, elements.get());
+}
+
+template <typename T>
+List<T>::List(List<T>&& other) noexcept
+  : size(other.size),
+    capacity(other.capacity),
+    elements(std::move(other.elements)) {
+  other.size = 0;
+  other.capacity = 0;
+}
+
+template <typename T>
+List<T>& List<T>::operator=(List<T>&& other) noexcept {
+  if (this != &other) {
+    size = other.size;
+    capacity = other.capacity;
+    elements = std::move(other.elements);
+    other.size = 0;
+    other.capacity = 0;
+  }
+  return *this;
+}
+
+template <typename T>
+List<T>& List<T>::operator=(const List<T>& other) {
+  if (this != &other) {
+    size = other.size;
+    capacity = other.capacity;
+    elements = std::make_unique<T[]>(other.capacity);
+    std::copy(
+      other.elements.get(), other.elements.get() + size, elements.get()
+    );
+  }
+  return *this;
 }
 
 template <typename T>
@@ -37,58 +102,81 @@ Index List<T>::Capacity() const {
 }
 
 template <typename T>
-void List<T>::Add(T item) {
+T List<T>::First() const {
+  if (Empty()) {
+    throw std::runtime_error("List::First: List is empty");
+  }
+  return elements[0];
+}
+
+template <typename T>
+T List<T>::Shift() {
+  if (Empty()) {
+    throw std::runtime_error("List::Shift: List is empty");
+  }
+  T element = elements[0];
+  std::move(elements.get() + 1, elements.get() + size, elements.get());
+  size--;
+  return element;
+}
+
+template <typename T>
+void List<T>::Unshift(T element) {
   if (Full()) {
     Expand();
   }
-  items[size] = item;
+  std::move(elements.get(), elements.get() + size, elements.get() + 1);
+  elements[0] = element;
   size++;
 }
 
 template <typename T>
-T List<T>::Get(Index index) const {
-  if (!ValidIndex(index)) {
-    throw std::runtime_error("Get::Index out of range");
+T List<T>::Last() const {
+  if (Empty()) {
+    throw std::runtime_error("List::Last: List is empty");
   }
-  return items[index];
+  return elements[size - 1];
 }
 
 template <typename T>
-void List<T>::Set(Index index, T element) {
-  if (!ValidIndex(index)) {
-    throw std::runtime_error("Set::Index out of range");
+void List<T>::Push(T element) {
+  if (Full()) {
+    Expand();
   }
-  items[index] = element;
+  elements[size] = element;
+  size++;
 }
 
 template <typename T>
-bool List<T>::Empty() {
-  return size == 0;
+T List<T>::Pop() {
+  if (Empty()) {
+    throw std::runtime_error("List::Pop: List is empty");
+  }
+  size--;
+  return elements[size];
 }
 
 template <typename T>
-bool List<T>::ValidIndex(Index index) const {
-  return size > 0 && index < size;
+List<T> List<T>::Add(const List<T>& list) {
+  List<T> newList(size + list.size);
+  std::copy(elements.get(), elements.get() + size, newList.elements.get());
+  std::copy(
+    list.elements.get(), list.elements.get() + list.size,
+    newList.elements.get() + size
+  );
+  newList.size = size + list.size;
+  return newList;
 }
 
 template <typename T>
-bool List<T>::Full() {
-  return size == capacity;
-}
-
-template <typename T>
-void List<T>::Expand(Index leastCapacity) {
-  Index newCapacity = leastCapacity;
-  std::shared_ptr<T[]> newItems(new T[newCapacity]);
-  std::shared_ptr<T[]> oldItems = items;
-  items = newItems;
-  std::copy(oldItems.get(), oldItems.get() + size, items.get());
-  capacity = newCapacity;
-}
-
-template <typename T>
-void List<T>::Expand() {
-  Expand(capacity * 2);
+void List<T>::Concat(const List<T>& list) {
+  if (size + list.size > capacity) {
+    Expand(size + list.size);
+  }
+  std::copy(
+    list.elements.get(), list.elements.get() + list.size, elements.get() + size
+  );
+  size += list.size;
 }
 
 template <typename T>
@@ -97,142 +185,143 @@ void List<T>::Clear() {
 }
 
 template <typename T>
+List<T> List<T>::Slice(Index start, Index end) const {
+  if (start >= size || end > size || start >= end) {
+    throw std::runtime_error("List::Slice::Index out of range");
+  }
+  List<T> list(end - start);
+  std::copy(elements.get() + start, elements.get() + end, list.elements.get());
+  list.size = end - start;
+  return list;
+}
+
+template <typename T>
 void List<T>::RemoveAt(Index index) {
   if (!ValidIndex(index)) {
-    throw std::runtime_error("RemoveAt::Index out of range");
+    throw std::runtime_error("List::RemoveAt::Index out of range");
   }
-  std::move(items.get() + index + 1, items.get() + size, items.get() + index);
+  std::move(
+    elements.get() + index + 1, elements.get() + size, elements.get() + index
+  );
   size--;
 }
 
 template <typename T>
-void List<T>::Insert(Index index, T item) {
-  if (Full()) {
-    Expand();
-  }
-  if (index > size) {
-    throw std::runtime_error("Insert::Index out of range");
-  }
-  std::move_backward(
-    items.get() + index, items.get() + size, items.get() + size + 1
-  );
-  items[index] = std::move(item);
-  size++;
-}
-
-template <typename T>
-Index List<T>::RemainingCapacity() {
-  return capacity - size;
-}
-
-template <typename T>
-void List<T>::Add(const List<T>& list) {
-  if (this == &list) {
-    Add(list.Copy());
-  } else {
-    if (RemainingCapacity() < list.Size()) {
-      Expand(size + list.Size());
-    }
-    std::copy(
-      list.items.get(), list.items.get() + list.Size(), items.get() + size
-    );
-    size += list.Size();
-  }
-}
-
-template <typename T>
-void List<T>::Add(T* items, Index count) {
-  if (RemainingCapacity() < count) {
-    Expand(size + count);
-  }
-  std::copy(items, items + count, this->items.get() + size);
-  size += count;
-}
-
-template <typename T>
-void List<T>::AppendElements(T element, Index count) {
-  if (RemainingCapacity() < count) {
-    Expand(size + count);
-  }
-  std::fill(items.get() + size, items.get() + size + count, element);
-  size += count;
-}
-
-template <typename T>
-List<T> List<T>::Slice(Index start, Index end) const {
+void List<T>::RemoveRange(Index start, Index end) {
   if (start >= size || end > size || start > end) {
-    throw std::runtime_error("Slice::Index out of range");
+    throw std::runtime_error("List::RemoveRange::Index out of range");
   }
-  return List<T>(end - start, std::shared_ptr<T[]>(items, items.get() + start));
-}
-
-template <typename T>
-void List<T>::Insert(Index index, List<T>& list) {
-  if (!ValidIndex(index)) {
-    throw std::runtime_error("Insert::Index out of range");
-  }
-  if (list.Empty()) {
-    return;
-  }
-  if (RemainingCapacity() < list.Size()) {
-    Expand(size + list.Size());
-  }
-  std::move_backward(
-    items.get() + index, items.get() + size, items.get() + size + list.Size()
+  std::move(
+    elements.get() + end, elements.get() + size, elements.get() + start
   );
-  std::copy(
-    list.items.get(), list.items.get() + list.Size(), items.get() + index
-  );
-
-  size += list.Size();
-}
-
-template <typename T>
-void List<T>::Remove(Index start, Index end) {
-  if (start >= size || end > size || start > end) {
-    throw std::runtime_error("Remove::Index out of range");
-  }
-  std::move(items.get() + end, items.get() + size, items.get() + start);
   size -= (end - start);
 }
 
 template <typename T>
 void List<T>::Reverse() {
-  std::reverse(items.get(), items.get() + size);
+  std::reverse(elements.get(), elements.get() + size);
 }
 
 template <typename T>
 void List<T>::TrimExcess() {
-  if (size < capacity) {
-    std::shared_ptr<T[]> newItems(new T[size]);
-    std::copy(items.get(), items.get() + size, newItems.get());
-    items = newItems;
-    capacity = size;
+  if (size == 0) {
+    capacity = 0;
+    elements.reset();
+    return;
   }
+  if (size == capacity) {
+    return;
+  }
+  std::unique_ptr<T[]> newElements = std::make_unique<T[]>(size);
+  std::copy(elements.get(), elements.get() + size, newElements.get());
+  elements = std::move(newElements);
+  capacity = size;
 }
 
 template <typename T>
-void List<T>::Fill(T item) {
-  std::fill(items.get(), items.get() + size, item);
-  while (size < capacity) {
-    Add(item);
+bool List<T>::Empty() const noexcept {
+  return size == 0;
+}
+
+template <typename T>
+bool List<T>::ValidIndex(Index index) const noexcept {
+  return size > 0 && index < size;
+}
+
+template <typename T>
+bool List<T>::Full() const noexcept {
+  return size >= capacity;
+}
+
+template <typename T>
+T List<T>::Get(Index index) const {
+  if (!ValidIndex(index)) {
+    throw std::out_of_range("List::Get: Index out of range");
   }
+  return elements[index];
+}
+
+template <typename T>
+T& List<T>::operator[](Index index) {
+  if (!ValidIndex(index)) {
+    throw std::out_of_range("List::operator[]: Index out of range");
+  }
+  return elements[index];
+}
+
+template <typename T>
+const T& List<T>::operator[](Index index) const {
+  if (!ValidIndex(index)) {
+    throw std::out_of_range("List::operator[]: Index out of range");
+  }
+  return elements[index];
+}
+
+template <typename T>
+void List<T>::Set(Index index, T element) {
+  if (!ValidIndex(index)) {
+    throw std::runtime_error("List::Set::Index out of range");
+  }
+  elements[index] = element;
+}
+
+template <typename T>
+void List<T>::Expand() {
+  Index newCapacity = std::max(capacity * 2, INIT_CAPACITY);
+  std::unique_ptr<T[]> newElements = std::make_unique<T[]>(newCapacity);
+  std::copy(elements.get(), elements.get() + size, newElements.get());
+  elements = std::move(newElements);
+  capacity = newCapacity;
+}
+
+template <typename T>
+void List<T>::Expand(Index newCapacity) {
+  std::unique_ptr<T[]> newElements = std::make_unique<T[]>(newCapacity);
+  std::copy(elements.get(), elements.get() + size, newElements.get());
+  elements = std::move(newElements);
+  capacity = newCapacity;
+}
+
+template <typename T>
+void List<T>::Fill(T element) {
+  if (capacity == 0) {
+    throw std::runtime_error("List::Fill: List is empty");
+  }
+  std::fill(elements.get(), elements.get() + capacity, element);
+  size = capacity;
 }
 
 template <typename T>
 List<T> List<T>::Copy() const {
-  List<T> list(size);
-  std::copy(items.get(), items.get() + size, list.items.get());
-  list.size = size;  // 确保复制后的列表大小正确
-  return list;
+  List<T> newList(size);
+  std::copy(elements.get(), elements.get() + size, newList.elements.get());
+  newList.size = size;
+  return newList;
 }
 
 template <typename T>
-void List<T>::PopBack() {
-  if (size == 0) {
-    throw std::runtime_error("PopBack::List is empty");
-  }
-  size--;
+T* List<T>::Data() {
+  return elements.get();
 }
 
 template class List<Index>;
@@ -241,20 +330,22 @@ template class List<String>;
 
 template class List<Unicode>;
 
+template class List<Byte>;
+
 template class List<int32_t>;
 
 template class List<Decimal>;
 
 template class List<Integer>;
 
-extern template class MapEntry<String, object::PyObjPtr>;
+extern template class MapEntry<object::PyObjPtr, object::PyObjPtr>;
 
-template class List<MapEntry<String, object::PyObjPtr>>;
-
-template class List<Byte>;
+template class List<MapEntry<object::PyObjPtr, object::PyObjPtr>>;
 
 template class List<object::PyObjPtr>;
 
-template class List<double>;
+// template class List<double>;
+
+// template class List<int*>;
 
 }  // namespace torchlight::collections

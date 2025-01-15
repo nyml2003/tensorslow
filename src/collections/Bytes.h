@@ -10,21 +10,25 @@ class Bytes {
 
  public:
   explicit Bytes(const List<Byte>& value);
-  explicit Bytes() = default;
+  explicit Bytes();
 
-  [[nodiscard]] Bytes Concat(const Bytes& rhs) const;
+  [[nodiscard]] Bytes Add(const Bytes& rhs) const;
 
   [[nodiscard]] List<Byte> Value() const;
 
-  void InplaceConcat(const Bytes& rhs);
+  void Concat(const Bytes& rhs);
 
-  void InplaceAdd(Byte byte);
+  void Push(Byte byte);
 
   [[nodiscard]] Byte Get(Index index) const;
 
   [[nodiscard]] Index Size() const;
 
   [[nodiscard]] Bytes Slice(Index start, Index end) const;
+
+  Byte& operator[](Index index);
+
+  const Byte& operator[](Index index) const;
 };
 }  // namespace torchlight::collections
 

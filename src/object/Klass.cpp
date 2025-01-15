@@ -10,19 +10,19 @@ PyStrPtr Klass::Name() const {
   return std::make_shared<PyString>(name);
 }
 
-PyObjPtr Klass::add(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr Klass::add(PyObjPtr, PyObjPtr) {
   return nullptr;
 }
 
-PyObjPtr Klass::sub(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr Klass::sub(PyObjPtr, PyObjPtr) {
   return nullptr;
 }
 
-PyObjPtr Klass::mul(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr Klass::mul(PyObjPtr, PyObjPtr) {
   return nullptr;
 }
 
-PyObjPtr Klass::div(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr Klass::div(PyObjPtr, PyObjPtr) {
   return nullptr;
 }
 
@@ -30,27 +30,27 @@ PyObjPtr Klass::repr(PyObjPtr obj) {
   return nullptr;
 }
 
-PyObjPtr Klass::gt(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr Klass::gt(PyObjPtr, PyObjPtr) {
   return nullptr;
 }
 
-PyObjPtr Klass::lt(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr Klass::lt(PyObjPtr, PyObjPtr) {
   return nullptr;
 }
 
-PyObjPtr Klass::eq(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr Klass::eq(PyObjPtr, PyObjPtr) {
   return nullptr;
 }
 
-PyObjPtr Klass::ge(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr Klass::ge(PyObjPtr, PyObjPtr) {
   return nullptr;
 }
 
-PyObjPtr Klass::le(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr Klass::le(PyObjPtr, PyObjPtr) {
   return nullptr;
 }
 
-PyObjPtr Klass::ne(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr Klass::ne(PyObjPtr, PyObjPtr) {
   return nullptr;
 }
 
@@ -67,6 +67,10 @@ PyObjPtr Klass::getitem(PyObjPtr obj, PyObjPtr key) {
 }
 
 PyObjPtr Klass::setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) {
+  return nullptr;
+}
+
+PyObjPtr Klass::delitem(PyObjPtr obj, PyObjPtr key) {
   return nullptr;
 }
 

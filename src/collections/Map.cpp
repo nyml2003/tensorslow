@@ -1,5 +1,5 @@
-#include "collections/Map.h"
 #include "collections/List.h"
+#include "collections/Map.h"
 #include "collections/String.h"
 #include "object/PyObject.h"
 
@@ -7,7 +7,7 @@
 
 namespace torchlight::collections {
 
-extern template class List<MapEntry<String, object::PyObjPtr>>;
+extern template class List<MapEntry<object::PyObjPtr, object::PyObjPtr>>;
 
 extern template class List<String>;
 
@@ -55,7 +55,7 @@ template <typename K, typename V>
 void Map<K, V>::Put(K key, V value) noexcept {
   auto index = IndexOf(key);
   if (index == std::nullopt) {
-    entries.Add(MapEntry<K, V>(key, value));
+    entries.Push(MapEntry<K, V>(key, value));
   } else {
     if (entries.Get(index.value()).Value() == value) {
       return;
@@ -91,7 +91,7 @@ template <typename K, typename V>
 List<K> Map<K, V>::Keys() {
   List<K> keys(entries.Size());
   for (Index i = 0; i < entries.Size(); i++) {
-    keys.Add(entries.Get(i).Key());
+    keys.Push(entries.Get(i).Key());
   }
   return keys;
 }
@@ -100,7 +100,7 @@ template <typename K, typename V>
 List<V> Map<K, V>::Values() {
   List<V> values(entries.Size());
   for (Index i = 0; i < entries.Size(); i++) {
-    values.Add(entries.Get(i).Value());
+    values.Push(entries.Get(i).Value());
   }
   return values;
 }
@@ -110,7 +110,7 @@ List<MapEntry<K, V>> Map<K, V>::Entries() {
   return entries;
 }
 
-template class Map<String, object::PyObjPtr>;
-template class MapEntry<String, object::PyObjPtr>;
+template class Map<object::PyObjPtr, object::PyObjPtr>;
+template class MapEntry<object::PyObjPtr, object::PyObjPtr>;
 
 }  // namespace torchlight::collections

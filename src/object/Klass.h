@@ -58,7 +58,11 @@ class Klass {
   virtual PyObjPtr getitem(PyObjPtr obj, PyObjPtr key);
 
   virtual PyObjPtr setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value);
+
+  virtual PyObjPtr delitem(PyObjPtr obj, PyObjPtr key);
 };
+
+using KlassPtr = std::shared_ptr<Klass>;
 
 }  // namespace torchlight::object
 

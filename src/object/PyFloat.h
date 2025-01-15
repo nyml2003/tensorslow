@@ -18,6 +18,8 @@ class PyFloat : public PyObject {
 
 using PyFloatPtr = std::shared_ptr<PyFloat>;
 
+PyFloatPtr CreateFloat(double value);
+
 class FloatKlass : public Klass {
  public:
   explicit FloatKlass();

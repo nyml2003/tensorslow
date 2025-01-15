@@ -1,0 +1,7 @@
+include(${torchlight_dir}/test/unittest/List.cmake)
+include(${torchlight_dir}/test/unittest/Iterator.cmake)
+include(${torchlight_dir}/test/unittest/String.cmake)
+include(${torchlight_dir}/test/unittest/Bytes.cmake)
+include(${torchlight_dir}/test/unittest/Integer.cmake)
+include(${torchlight_dir}/test/unittest/Decimal.cmake)
+include(${torchlight_dir}/test/unittest/Map.cmake)

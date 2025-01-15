@@ -1,15 +1,14 @@
-#include "object/PyNone.h"
 #include "collections/impl/String.h"
 #include "object/ByteCode.h"
 #include "object/PyBytes.h"
+#include "object/PyNone.h"
 #include "object/PyString.h"
 
 namespace torchlight::object {
 
 using collections::CreateStringWithCString;
 
-NoneKlass::NoneKlass()
-  : Klass(collections::CreateStringWithCString("NoneType")) {}
+NoneKlass::NoneKlass() : Klass(CreateStringWithCString("NoneType")) {}
 
 KlassPtr NoneKlass::Self() {
   static KlassPtr instance = std::make_shared<NoneKlass>();
@@ -20,14 +19,14 @@ PyObjPtr NoneKlass::_serialize_(PyObjPtr obj) {
   if (obj->Klass() != Self()) {
     return nullptr;
   }
-  return std::make_shared<PyBytes>(Serialize(Literal::NONE));
+  return CreatePyBytes(Serialize(Literal::NONE));
 }
 
 PyObjPtr NoneKlass::repr(PyObjPtr obj) {
   if (obj->Klass() != Self()) {
     return nullptr;
   }
-  return std::make_shared<PyString>(CreateStringWithCString("None"));
+  return CreatePyString(CreateStringWithCString("None"));
 }
 
 PyNone::PyNone() : PyObject(NoneKlass::Self()) {}

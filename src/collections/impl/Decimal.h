@@ -2,20 +2,22 @@
 #define TORCHLIGHT_COLLECTIONS_IMPL_DECIMAL_H
 
 #include "collections/Decimal.h"
-#include "collections/String.h"
 #include "collections/Integer.h"
+#include "collections/String.h"
 
 namespace torchlight::collections {
 
-int32_t UnicodeToInt(Unicode c) noexcept;
+int32_t UnicodeToDec(Unicode c) noexcept;
+
+Byte DecToByte(int32_t c) noexcept;
 
 bool IsNegative(const String& str);
-
-bool IsNegative(const Bytes& str);
 
 Decimal Slice(const Decimal& decimal, Index start, Index end);
 
 Decimal CreateDecimalWithString(const String& str);
+
+Decimal CreateDecimalWithCString(const char* str);
 
 Decimal CreateDecimalZero();
 

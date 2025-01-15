@@ -20,6 +20,8 @@ class PyString : public PyObject {
 
 using PyStrPtr = std::shared_ptr<PyString>;
 
+PyStrPtr CreatePyString(collections::String value);
+
 class StringKlass : public Klass {
  public:
   explicit StringKlass();
@@ -28,6 +30,8 @@ class StringKlass : public Klass {
   PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs) override;
 
   PyObjPtr repr(PyObjPtr obj) override;
+
+  PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs) override;
 
   PyObjPtr _serialize_(PyObjPtr obj) override;
 };

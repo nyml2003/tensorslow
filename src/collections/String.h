@@ -1,7 +1,6 @@
 #ifndef TORCHLIGHT_COLLECTIONS_STRING_H
 #define TORCHLIGHT_COLLECTIONS_STRING_H
 
-#include "collections/Bytes.h"
 #include "collections/List.h"
 #include "collections/common.h"
 
@@ -13,9 +12,13 @@ class String {
 
  public:
   explicit String(const List<Unicode>& codePoints);
-  explicit String() = default;
+  explicit String();
+  String(const String& other);
+  String(String& other);
+  String(String&& other) noexcept;
 
-  [[nodiscard]] List<Unicode> Data() const;
+  String& operator=(const String& other);
+  String& operator=(String&& other) noexcept;
 
   /**
    * 用于将字符串数组连接起来
@@ -38,17 +41,15 @@ class String {
    */
   [[nodiscard]] Index Find(String& sub, Index start = 0) const;
 
-  [[nodiscard]] String Concat(const String& rhs) const;
+  void Concat(const String& rhs);
 
-  String InplaceConcat(const String& rhs);
+  String Add(const String& rhs);
 
   [[nodiscard]] String Copy() const;
 
   [[nodiscard]] Unicode Get(Index index) const;
 
   [[nodiscard]] Index Size() const;
-
-  void Insert(Index index, Unicode codePoint);
 
   void RemoveAt(Index index);
 
@@ -57,6 +58,8 @@ class String {
   [[nodiscard]] String Slice(Index start, Index end) const;
 
   void Reverse();
+
+  void Push(Unicode codePoint);
 
   [[nodiscard]] bool Equal(const String& rhs) const;
 
@@ -71,6 +74,10 @@ class String {
   [[nodiscard]] bool NotEqual(const String& rhs) const;
 
   bool operator==(const String& rhs) const;
+
+  Unicode operator[](Index index);
+
+  const Unicode operator[](Index index) const;
 };
 
 }  // namespace torchlight::collections

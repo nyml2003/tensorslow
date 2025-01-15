@@ -53,6 +53,7 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
 
   PyObjPtr setitem(PyObjPtr key, PyObjPtr value);
 
+  PyObjPtr delitem(PyObjPtr key);
 
   PyObjPtr _bool_();
 
@@ -61,7 +62,9 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
 
 using PyObjPtr = std::shared_ptr<PyObject>;
 
-void print(PyObjPtr obj);
+bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs);
+
+void print(const PyObjPtr& obj);
 
 }  // namespace torchlight::object
 

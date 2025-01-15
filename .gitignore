@@ -5,7 +5,5 @@ cmake-*
 lib/*.so
 /bin
 .vscode/launch.json
-/docs
 grammar/.antlr/
-test
 temp

@@ -1,22 +1,34 @@
 # 设置工作目录
 set(torchlight_dir ${CMAKE_CURRENT_SOURCE_DIR})
 set(torchlight_src_dir ${torchlight_dir}/src)
+
 # 设置 C++ 标准和编译器选项
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+# 设置编译器选项以生成覆盖率数据
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+
+# 设置调试选项
 set(CMAKE_CXX_FLAGS_MINSIZEREL "-O3 -DNDEBUG")
-set(CMAKE_CXX_FLAGS_DEBUG "-gdwarf-4") # to use valgrind
+set(CMAKE_CXX_FLAGS_DEBUG "-gdwarf-4")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -gdwarf-4 -DNDEBUG")
-set(CMAKE_EXPORT_COMPILECOMMANDS on)
+
+# 生成 compile_commands.json 文件
+set(CMAKE_EXPORT_COMPILE_COMMANDS on)
+
+# 设置构建系统为 Ninja
 set(CMAKE_GENERATOR Ninja)
+
+# 设置构建命令
 set(BUILD_COMMAND "ninja -j${NUM_PROCESSORS}")
 
-# 集成 clang-tidy
-find_program(CLANG_TIDY_EXE NAMES "clang-tidy")
-if(CLANG_TIDY_EXE)
-    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
-endif()
-
+# 包含源文件目录
 include_directories(${torchlight_src_dir})
+
+# 添加源文件
 set(torchlight_frontend_files "")
+
+enable_testing()

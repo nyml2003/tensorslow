@@ -15,8 +15,10 @@ class BooleanKlass : public Klass {
 
   PyObjPtr _serialize_(PyObjPtr obj) override;
 
-  
+  PyObjPtr repr(PyObjPtr obj) override;
 };
+
+PyBoolPtr CreatePyBoolean(bool value);
 
 class PyBoolean : public PyInteger {
  public:
@@ -24,8 +26,6 @@ class PyBoolean : public PyInteger {
   static PyBoolPtr False();
 
   static PyBoolPtr True();
-
-  static PyBoolPtr Constant(bool value);
 
   bool Value() const;
 };

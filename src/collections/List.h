@@ -3,6 +3,7 @@
 
 #include "collections/common.h"
 
+#include <initializer_list>
 #include <memory>
 
 namespace torchlight::collections {
@@ -14,55 +15,51 @@ class List {
   /**
    * 当前列表中元素的个数
    */
-  Index size{};
+  Index size;
   /**
    * 列表的容量，即列表中最多可以存放的元素个数
    * 内存分配时，会分配capacity个元素的空间
    */
-  Index capacity{};
+  Index capacity;
 
   /**
    * 列表中的元素
    */
-  std::shared_ptr<T[]> items;
-
-  /**
-   * @brief 计算已分配内存还能容纳的元素个数
-   * @return 已分配内存还能容纳的元素个数
-   */
-  Index RemainingCapacity();
+  std::unique_ptr<T[]> elements;
 
   /**
    * @brief 扩容
+   * @details 默认扩容为原来的两倍
    */
   void Expand();
 
+  void Expand(Index newCapacity);
+
  public:
-  T* Data() const;
-  /**
-   * @brief 扩容
-   * @param leastCapacity 这次扩容后，列表的容量至少为leastCapacity
-   */
-  void Expand(Index leastCapacity);
-
   /**
    * 构造函数
-   * @param capacity 列表的容量
+   * @param capacity 列表的初始容量，默认为 INIT_CAPACITY
    */
-  explicit List();
+  explicit List(Index capacity = INIT_CAPACITY);
+
+  explicit List(Index count, const T* stream);
+
+  explicit List(Index count, T element);
+
+  List(std::initializer_list<T> list);
+
+  List(const List<T>& other);
+
+  List(List<T>&& other) noexcept;
+
+  List<T>& operator=(const List<T>& other);
+
+  List<T>& operator=(List<T>&& other) noexcept;
 
   /**
-   * 构造函数
-   * @param capacity 列表的容量
+   * 析构函数
    */
-  explicit List(Index capacity);
-
-  /**
-   * 构造函数
-   * @param capacity 列表的容量, 传入elements的长度
-   * @param elements 列表中的元素
-   */
-  explicit List(Index capacity, std::shared_ptr<T[]> elements);
+  ~List();
 
   /**
    * 获取列表中元素的个数
@@ -76,25 +73,57 @@ class List {
    */
   [[nodiscard]] Index Capacity() const;
 
-  /**
-   * @brief 将 item 添加到列表末尾
-   * @param item
-   */
-  void Add(T item);
+  T* Data();
 
   /**
-   * @brief 将集合添加到列表末尾
-   * @param list
+   * @brief 返回列表末尾的元素
+   * @return 第一个元素
    */
-  void Add(const List<T>& list);
-
-  void Add(T* items, Index count);
+  T First() const;
 
   /**
-   * @brief
-   *
+   * @brief 移除列表首元素
+   * @return 被移除的元素
    */
-  void AppendElements(T element, Index count);
+  T Shift();
+
+  /**
+   * @brief 在列表前端添加元素
+   * @param element 要添加的元素
+   */
+  void Unshift(T element);
+
+  /**
+   * @brief 返回列表末尾的元素
+   * @return 最后一个元素
+   */
+  T Last() const;
+
+  /**
+   * @brief 在列表末端添加元素
+   * @param element 要添加的元素
+   */
+  void Push(T element);
+
+  /**
+   * @brief 移除列表末尾的元素
+   * @return 被移除的元素
+   */
+  T Pop();
+
+  /**
+   * @brief 合并列表
+   * @details 本身列表不会改变，返回一个新的列表
+   * @param list 要合并的列表
+   * @return 合并后的新列表
+   */
+  List<T> Add(const List<T>& list);
+
+  /**
+   * @brief 将新的列表拷贝添加到列表末尾
+   * @param list 要添加的列表
+   */
+  void Concat(const List<T>& list);
 
   /**
    * @brief 清空列表
@@ -102,39 +131,25 @@ class List {
   void Clear();
 
   /**
-   * @brief 返回列表的切片
-   * @param start
-   * @param end
-   * @return 列表在 [start, end) 之间的元素
+   * @brief 返回列表的切片, 是浅拷贝
+   * @param start 切片的起始索引（包含）
+   * @param end 切片的结束索引（不包含）
+   * @return 列表在 [start, end) 之间的元素组成的列表
    */
   List<T> Slice(Index start, Index end) const;
 
   /**
-   * @brief 插入元素到指定位置
-   * @param index
-   * @param item
-   */
-  void Insert(Index index, T item);
-
-  /**
-   * @brief 插入集合到指定位置
-   * @param index
-   * @param list
-   */
-  void Insert(Index index, List<T>& list);
-
-  /**
    * @brief 移除指定位置的元素
-   * @param index
+   * @param index 要移除的元素的索引
    */
   void RemoveAt(Index index);
 
   /**
    * @brief 移除指定区间[start, end)的元素
-   * @param start
-   * @param end
+   * @param start 移除区间的起始索引（包含）
+   * @param end 移除区间的结束索引（不包含）
    */
-  void Remove(Index start, Index end);
+  void RemoveRange(Index start, Index end);
 
   /**
    * @brief 反转列表
@@ -150,133 +165,53 @@ class List {
    * @brief 列表是否为空
    * @return 如果列表为空，则为 true; 否则为 false
    */
-  bool Empty();
+  [[nodiscard]] bool Empty() const noexcept;
 
   /**
    * @brief 列表是否已满
    * @return 如果列表已满，则为 true; 否则为 false
    */
-  bool Full();
+  [[nodiscard]] bool Full() const noexcept;
 
   /**
    * @brief 判断索引是否有效
-   * @param index
+   * @param index 要检查的索引
    * @return 如果索引有效，则为 true; 否则为 false
    */
-  [[nodiscard]] bool ValidIndex(Index index) const;
+  [[nodiscard]] bool ValidIndex(Index index) const noexcept;
 
   /**
    * @brief 获取指定位置的元素
-   * @param index
-   * @return
+   * @param index 要获取的元素的索引
+   * @return 指定位置的元素
    */
   [[nodiscard]] T Get(Index index) const;
 
+  T& operator[](Index index);
+
+  const T& operator[](Index index) const;
+
   /**
    * @brief 设置指定位置的元素
-   * @param index
-   * @param item
+   * @param index 要设置的元素的索引
+   * @param element 要设置的新元素
    */
   void Set(Index index, T element);
 
   /**
-   * @brief 填充
+   * @brief 填充列表为指定元素，
+   * @details 保证执行完后列表是一个size大小的元素全为element的列表
+   * @param element 要填充的元素
    */
-  void Fill(T item);
+  void Fill(T element);
 
+  /**
+   * @brief 深拷贝当前列表
+   * @return 深拷贝后的列表
+   */
   List<T> Copy() const;
-
-  void PopBack();
-
-  class Iterator {
-   private:
-    const List<T>& list;
-    Index index{};
-    bool end{};
-    bool order{};  // true: forward, false: backward
-
-    explicit Iterator(const List<T>& _list) : list(_list) {}
-
-    Iterator& SetIndex(Index _index) {
-      this->index = _index;
-      return *this;
-    }
-
-    Iterator& SetEnd(bool _end) {
-      this->end = _end;
-      return *this;
-    }
-
-    Iterator& SetOrder(bool _order) {
-      this->order = _order;
-      return *this;
-    }
-
-   public:
-    Iterator(Iterator& it) : list(it.list), index(it.index), end(it.end) {}
-
-    Iterator() = delete;
-
-    Iterator& operator=(const Iterator& it) {
-      if (this == &it) {
-        return *this;
-      }
-      index = it.index;
-      end = it.end;
-      return *this;
-    }
-
-    T Get() { return list.Get(index); }
-
-    Iterator& Next() {
-      if (order) {
-        if (index == list.Size() - 1) {
-          end = true;
-        } else {
-          index++;
-        }
-      } else {
-        if (index == 0) {
-          end = true;
-        } else {
-          index--;
-        }
-      }
-      return *this;
-    }
-
-    Index Index() { return index; }
-
-    bool End() { return end; }
-
-    static Iterator Begin(const List<T>& list) {
-      Iterator it(list);
-      it.SetIndex(0).SetOrder(true);
-      if (list.Size() == 0) {
-        it.SetEnd(true);
-      } else {
-        it.SetEnd(false);
-      }
-      return it;
-    }
-
-    static Iterator RBegin(const List<T>& list) {
-      Iterator it(list);
-      it.SetIndex(list.Size() - 1).SetOrder(false);
-      if (list.Size() == 0) {
-        it.SetEnd(true);
-      } else {
-        it.SetEnd(false);
-      }
-      return it;
-    }
-
-    const List<T>& List() { return list; }
-  };
-
-  using IteratorPtr = std::shared_ptr<Iterator>;
 };
 
 }  // namespace torchlight::collections
 
-#endif  // TORCHLIGHT_DATASTRUCTURE_LIST_H
+#endif  // TORCHLIGHT_COLLECTIONS_LIST_H

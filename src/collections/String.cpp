@@ -6,7 +6,6 @@
 #include <iostream>
 #include <stdexcept>
 
-
 namespace torchlight::collections {
 extern template class List<Unicode>;
 
@@ -62,11 +61,6 @@ Unicode GetUnicode(
   return codePoint;
 }
 
-String CreateEmptyString() {
-  List<Unicode> codePoints;
-  return String(codePoints);
-}
-
 String CreateStringWithCString(const char* str) {
   List<Unicode> codePoints;
   size_t length = strlen(str);
@@ -77,7 +71,7 @@ String CreateStringWithCString(const char* str) {
       [str](Index index) -> Byte { return static_cast<Byte>(str[index]); },
       [length](Index index) -> bool { return index < length; }
     );
-    codePoints.Add(codePoint);
+    codePoints.Push(codePoint);
   }
   return String(codePoints);
 }
@@ -88,22 +82,18 @@ String CreateStringWithBytes(const Bytes& bytes) {
   size_t index = 0;
   while (index < length) {
     Unicode codePoint = GetUnicode(
-      index, [bytes](Index index) -> Byte { return bytes.Get(index); },
+      index, [bytes](Index index) -> Byte { return bytes[index]; },
       [length](Index index) -> bool { return index < length; }
     );
-    codePoints.Add(codePoint);
+    codePoints.Push(codePoint);
   }
   return String(codePoints);
 }
 
 String::String(const List<Unicode>& codePoints) : codePoints(codePoints) {}
 
-String String::Concat(const String& rhs) const {
-  return Copy().InplaceConcat(rhs);
-}
-
-List<Unicode> String::Data() const {
-  return codePoints;
+void String::Concat(const String& rhs) {
+  this->codePoints.Concat(rhs.codePoints);
 }
 
 String String::Copy() const {
@@ -116,10 +106,6 @@ Unicode String::Get(Index index) const {
 
 Index String::Size() const {
   return codePoints.Size();
-}
-
-void String::Insert(Index index, Unicode codePoint) {
-  codePoints.Insert(index, codePoint);
 }
 
 void String::RemoveAt(Index index) {
@@ -135,12 +121,16 @@ std::unique_ptr<char[]> ToCString(const String& str) {
   return ToCString(ToBytes(str));
 }
 
+void String::Push(Unicode codePoint) {
+  codePoints.Push(codePoint);
+}
+
 String String::Join(String& joiner) const {
-  List<Unicode> str;
+  String str;
   for (Index i = 0; i < Size(); i++) {
-    str.Add(Get(i));
+    str.Push(Get(i));
     if (i < Size() - 1) {
-      str.Add(joiner.Data());
+      str.Concat(joiner);
     }
   }
   return String(str);
@@ -152,22 +142,19 @@ List<String> String::Split(String& delimiter) const {
   for (Index i = 0; i < Size(); i++) {
     if (Get(i) == delimiter.Get(0)) {
       if (Find(delimiter, i) == i) {
-        list.Add(String(str));
+        list.Push(String(str));
         str.Clear();
         i += delimiter.Size() - 1;
         continue;
       }
     }
-    str.Add(Get(i));
+    str.Push(Get(i));
   }
-  list.Add(String(str));
+  list.Push(String(str));
   return list;
 }
 
 String String::Slice(Index start, Index end) const {
-  if (start >= Size() || end > Size() || start > end) {
-    throw std::runtime_error("Index out of range");
-  }
   return String(codePoints.Slice(start, end));
 }
 
@@ -175,11 +162,11 @@ Index String::Find(String& sub, Index start) const {
   if (sub.Size() == 0) {
     return 0;
   }
-  if (sub.Size() + start > Size()) {
-    throw std::runtime_error("Sub string is longer than the string");
-  }
   if (start >= Size()) {
     throw std::runtime_error("Start index out of range");
+  }
+  if (sub.Size() + start > Size()) {
+    throw std::runtime_error("Sub string is longer than the string");
   }
   List<Index> next(sub.Size());
   next.Fill(0);
@@ -284,12 +271,38 @@ String ToString(uint32_t value) {
   snprintf(buffer, sizeof(buffer), "%u", value);
   return CreateStringWithCString(buffer);
 }
-String String::InplaceConcat(const String& rhs) {
-  codePoints.Add(rhs.codePoints);
-  return *this;
+String String::Add(const String& rhs) {
+  return String(codePoints.Add(rhs.codePoints));
 }
+
+String::String() : codePoints() {}
+
+String::String(const String& other) : codePoints(other.codePoints) {}
+
+String::String(String& other) : codePoints(other.codePoints) {}
 
 bool String::operator==(const String& rhs) const {
   return Equal(rhs);
+}
+
+Unicode String::operator[](Index index) {
+  return codePoints[index];
+}
+
+const Unicode String::operator[](Index index) const {
+  return codePoints[index];
+}
+
+String::String(String&& other) noexcept
+  : codePoints(std::move(other.codePoints)) {}
+
+String& String::operator=(const String& other) {
+  codePoints = other.codePoints;
+  return *this;
+}
+
+String& String::operator=(String&& other) noexcept {
+  codePoints = std::move(other.codePoints);
+  return *this;
 }
 }  // namespace torchlight::collections

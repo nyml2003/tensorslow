@@ -5,14 +5,12 @@ namespace torchlight::collections {
 
 template <typename T>
 void Stack<T>::Push(const T& value) {
-  content.Add(value);
+  content.Push(value);
 }
 
 template <typename T>
 T Stack<T>::Pop() {
-  T value = content.Get(content.Size() - 1);
-  content.PopBack();
-  return value;
+  return content.Pop();
 }
 
 template class Stack<object::PyObjPtr>;

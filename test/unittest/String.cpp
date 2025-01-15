@@ -1,0 +1,232 @@
+#include "test_default.h"
+
+#include "collections/Bytes.h"
+#include "collections/Iterator.h"
+#include "collections/List.h"
+#include "collections/String.h"
+#include "collections/impl/Bytes.h"
+#include "collections/impl/String.h"
+
+using torchlight::collections::Bytes;
+using torchlight::collections::CreateBytesWithCString;
+using torchlight::collections::CreateStringWithBytes;
+using torchlight::collections::CreateStringWithCString;
+using torchlight::collections::String;
+using torchlight::collections::ToCString;
+using torchlight::collections::ToString;
+
+TEST(String, CreateStringWithCString) {
+  String str = CreateStringWithCString("Hello, World!");
+  ASSERT_EQ(str.Size(), 13);
+  ASSERT_STREQ(ToCString(str).get(), "Hello, World!");
+}
+
+TEST(String, ComplexString) {
+  String str = CreateStringWithCString("O(∩_∩)O~~");
+  ASSERT_EQ(str.Size(), 9);
+  ASSERT_STREQ(ToCString(str).get(), "O(∩_∩)O~~");
+  str = CreateStringWithCString("αββγδδδεεζηθãäèèÄゲグデバタヒɔ:aiwjd❉♂◙㊦㊨");
+  ASSERT_EQ(str.Size(), 35);
+  ASSERT_STREQ(
+    ToCString(str).get(), "αββγδδδεεζηθãäèèÄゲグデバタヒɔ:aiwjd❉♂◙㊦㊨"
+  );
+  str = CreateStringWithCString("👨‍👩‍👧‍👦");
+  ASSERT_EQ(str.Size(), 7);
+  ASSERT_STREQ(ToCString(str).get(), "👨‍👩‍👧‍👦");
+}
+
+TEST(String, CreateStringWithBytes) {
+  torchlight::collections::Bytes bytes = CreateBytesWithCString("Hello");
+  String str = CreateStringWithBytes(bytes);
+  ASSERT_EQ(str.Size(), 5);
+  ASSERT_EQ(str.Get(0), 'H');
+  ASSERT_EQ(str.Get(1), 'e');
+  ASSERT_EQ(str.Get(2), 'l');
+  ASSERT_EQ(str.Get(3), 'l');
+  ASSERT_EQ(str.Get(4), 'o');
+}
+
+TEST(String, Concat) {
+  String str1 = CreateStringWithCString("Hello");
+  String str2 = CreateStringWithCString(" World");
+  str1.Concat(str2);
+  ASSERT_EQ(str1.Size(), 11);
+  ASSERT_TRUE(str1.Equal(CreateStringWithCString("Hello World")));
+  ASSERT_TRUE(str1 == str1);
+  ASSERT_TRUE(str1 == CreateStringWithCString("Hello World"));
+  ASSERT_TRUE(str2[0] == ' ');
+}
+
+TEST(String, Copy) {
+  String str1 = CreateStringWithCString("Hello");
+  String str2 = str1.Copy();
+  ASSERT_EQ(str1.Size(), str2.Size());
+  for (size_t i = 0; i < str1.Size(); ++i) {
+    ASSERT_EQ(str1.Get(i), str2.Get(i));
+  }
+}
+
+TEST(String, RemoveAt) {
+  String str = CreateStringWithCString("Hello");
+  str.RemoveAt(2);
+  ASSERT_EQ(str.Size(), 4);
+  ASSERT_TRUE(str.Equal(CreateStringWithCString("Helo")));
+}
+
+TEST(String, Clear) {
+  String str = CreateStringWithCString("Hello");
+  str.Clear();
+  ASSERT_EQ(str.Size(), 0);
+}
+
+TEST(String, Push) {
+  String str;
+  str.Push('H');
+  str.Push('e');
+  str.Push('l');
+  str.Push('l');
+  str.Push('o');
+  ASSERT_EQ(str.Size(), 5);
+  ASSERT_TRUE(str.Equal(CreateStringWithCString("Hello")));
+}
+
+TEST(String, Join) {
+  String str1 = CreateStringWithCString("Hello");
+  String str2 = CreateStringWithCString("World");
+  String joiner = CreateStringWithCString(", ");
+  String joinedStr = str1.Join(joiner);
+  joinedStr.Concat(str2);
+  ASSERT_EQ(joinedStr.Size(), 18);
+  ASSERT_TRUE(joinedStr.Equal(CreateStringWithCString("H, e, l, l, oWorld")));
+}
+
+TEST(String, Slice) {
+  String str = CreateStringWithCString("Hello World");
+  String slicedStr = str.Slice(0, 5);
+  ASSERT_EQ(slicedStr.Size(), 5);
+  ASSERT_TRUE(slicedStr.Equal(CreateStringWithCString("Hello")));
+  // error
+  ASSERT_THROW(str.Slice(0, 12), std::runtime_error);
+  ASSERT_THROW(str.Slice(0, 0), std::runtime_error);
+  ASSERT_THROW(str.Slice(5, 0), std::runtime_error);
+  ASSERT_THROW(str.Slice(5, 5), std::runtime_error);
+  ASSERT_THROW(str.Slice(5, 4), std::runtime_error);
+}
+
+TEST(String, Find) {
+  String str = CreateStringWithCString("Hello World");
+  String sub = CreateStringWithCString("ll");
+  ASSERT_EQ(str.Find(sub, 0), 2);
+  String empty = CreateStringWithCString("");
+  ASSERT_EQ(str.Find(empty, 0), 0);
+  ASSERT_THROW(str.Find(sub, 12), std::runtime_error);
+  ASSERT_THROW(str.Find(sub, 10), std::runtime_error);
+  str = CreateStringWithCString("abababab");
+  sub = CreateStringWithCString("bab");
+  ASSERT_EQ(str.Find(sub, 0), 1);
+}
+
+TEST(String, Equal) {
+  String str1 = CreateStringWithCString("Hello");
+  String str2 = CreateStringWithCString("Hello");
+  ASSERT_TRUE(str1.Equal(str2));
+}
+
+TEST(String, GreaterThan) {
+  String str1 = CreateStringWithCString("Hello");
+  String str2 = CreateStringWithCString("Hello World");
+  ASSERT_TRUE(str2.GreaterThan(str1));
+  str1 = CreateStringWithCString("Heaven");
+  str2 = CreateStringWithCString("Hello");
+  ASSERT_TRUE(str2.GreaterThan(str1));
+}
+
+TEST(String, LessThan) {
+  String str1 = CreateStringWithCString("Hello");
+  String str2 = CreateStringWithCString("Hello World");
+  ASSERT_TRUE(str1.LessThan(str2));
+  str1 = CreateStringWithCString("Heaven");
+  str2 = CreateStringWithCString("Hello");
+  ASSERT_TRUE(str1.LessThan(str2));
+}
+
+TEST(String, GreaterThanOrEqual) {
+  String str1 = CreateStringWithCString("Hello");
+  String str2 = CreateStringWithCString("Hello");
+  ASSERT_TRUE(str1.GreaterThanOrEqual(str2));
+  str1 = CreateStringWithCString("Heaven");
+  str2 = CreateStringWithCString("Hello");
+  ASSERT_FALSE(str1.GreaterThanOrEqual(str2));
+}
+
+TEST(String, LessThanOrEqual) {
+  String str1 = CreateStringWithCString("Hello");
+  String str2 = CreateStringWithCString("Hello");
+  ASSERT_TRUE(str1.LessThanOrEqual(str2));
+  str1 = CreateStringWithCString("Heaven");
+  str2 = CreateStringWithCString("Hello");
+  ASSERT_TRUE(str1.LessThanOrEqual(str2));
+}
+
+TEST(String, NotEqual) {
+  String str1 = CreateStringWithCString("Hello");
+  String str2 = CreateStringWithCString("World");
+  ASSERT_TRUE(str1.NotEqual(str2));
+}
+
+TEST(String, Reverse) {
+  String str = CreateStringWithCString("Hello");
+  str.Reverse();
+  ASSERT_TRUE(str.Equal(CreateStringWithCString("olleH")));
+}
+
+TEST(String, ToString) {
+  double value = 3.14159;
+  String str = ToString(value);
+  ASSERT_TRUE(str.Equal(CreateStringWithCString("3.141590")));
+
+  int32_t value2 = 123;
+  String str2 = ToString(value2);
+  ASSERT_TRUE(str2.Equal(CreateStringWithCString("123")));
+
+  uint64_t value3 = 12345678901234567890;
+  String str3 = ToString(value3);
+  ASSERT_TRUE(str3.Equal(CreateStringWithCString("12345678901234567890")));
+
+  int64_t value4 = -1234567890123456789;
+  String str4 = ToString(value4);
+  ASSERT_TRUE(str4.Equal(CreateStringWithCString("-1234567890123456789")));
+
+  uint32_t value5 = 4294967295;
+  String str5 = ToString(value5);
+  ASSERT_TRUE(str5.Equal(CreateStringWithCString("4294967295")));
+}
+
+TEST(String, Add) {
+  String str1 = CreateStringWithCString("Hello");
+  String str2 = CreateStringWithCString(" World");
+  String str3 = str1.Add(str2);
+  ASSERT_TRUE(str3.Equal(CreateStringWithCString("Hello World")));
+}
+
+TEST(String, Spilt) {
+  String str = CreateStringWithCString("Hello, World");
+  String delimiter = CreateStringWithCString(", ");
+  torchlight::collections::List<String> list = str.Split(delimiter);
+  ASSERT_EQ(list.Size(), 2);
+  ASSERT_TRUE(list.Get(0).Equal(CreateStringWithCString("Hello")));
+  ASSERT_TRUE(list.Get(1).Equal(CreateStringWithCString("World")));
+}
+
+TEST(String, Move) {
+  String str1 = CreateStringWithCString("Hello");
+  String str2 = std::move(str1);
+  ASSERT_EQ(str1.Size(), 0);
+  ASSERT_EQ(str2.Size(), 5); 
+  ASSERT_TRUE(str2.Equal(CreateStringWithCString("Hello")));
+  String str3(str2);
+  ASSERT_EQ(str2.Size(), 5);
+  ASSERT_EQ(str3.Size(), 5);
+  ASSERT_TRUE(str3.Equal(CreateStringWithCString("Hello")));
+  
+}

@@ -1,35 +1,37 @@
-#include "object/PyList.h"
-#include "collections/Bytes.h"
+
+#include "collections/Iterator.h"
 #include "collections/impl/Bytes.h"
 #include "collections/impl/Integer.h"
 #include "collections/impl/String.h"
 #include "object/ByteCode.h"
 #include "object/PyBytes.h"
 #include "object/PyInteger.h"
+#include "object/PyList.h"
 #include "object/PyNone.h"
 #include "object/PyString.h"
 
 namespace torchlight::object {
 
-using collections::Bytes;
+using collections::CreateStringWithCString;
+using collections::Index;
+using collections::Iterator;
 using collections::List;
 using collections::Serialize;
-using collections::String;
 
 PyList::PyList(List<PyObjPtr> value)
   : PyObject(ListKlass::Self()), value(std::move(value)) {}
 
-PyListPtr CreateList(collections::Index capacity) {
+PyListPtr CreatePyList(Index capacity) {
   List<PyObjPtr> list(capacity);
   list.Fill(PyNone::Instance());
   return std::make_shared<PyList>(list);
 }
 
-PyListPtr CreateList(List<PyObjPtr> list, collections::Index capacity) {
+PyListPtr CreatePyList(List<PyObjPtr> list, Index capacity) {
   if (list.Size() >= capacity) {
     return std::make_shared<PyList>(list);
   }
-  list.AppendElements(PyNone::Instance(), capacity - list.Size());
+  list.Concat(List<PyObjPtr>(capacity - list.Size(), PyNone::Instance()));
   return std::make_shared<PyList>(list);
 }
 
@@ -37,7 +39,7 @@ List<PyObjPtr> PyList::Value() const {
   return value;
 }
 
-ListKlass::ListKlass() : Klass(collections::CreateStringWithCString("list")) {}
+ListKlass::ListKlass() : Klass(CreateStringWithCString("list")) {}
 
 KlassPtr ListKlass::Self() {
   static KlassPtr instance = std::make_shared<ListKlass>();
@@ -52,7 +54,7 @@ PyObjPtr ListKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
   auto right = std::dynamic_pointer_cast<PyList>(rhs);
   List<PyObjPtr> result = left->Value().Copy();
   result.Add(right->Value());
-  return std::make_shared<PyList>(result);
+  return CreatePyList(result, result.Size());
 }
 
 PyObjPtr ListKlass::repr(PyObjPtr obj) {
@@ -60,21 +62,13 @@ PyObjPtr ListKlass::repr(PyObjPtr obj) {
     return nullptr;
   }
   auto list = std::dynamic_pointer_cast<PyList>(obj);
-  String result = collections::CreateStringWithCString("[");
-  for (auto it = List<PyObjPtr>::Iterator::Begin(list->Value()); !it.End();
+  PyObjPtr result = CreatePyString(CreateStringWithCString("["));
+  for (auto it = Iterator<PyObjPtr>::Begin(list->Value()); !it.End();
        it.Next()) {
-    auto s = it.Get()->repr();
-    if (s->Klass() != StringKlass::Self()) {
-      return nullptr;
-    }
-    auto str = std::dynamic_pointer_cast<PyString>(s);
-    result.InplaceConcat(str->Value());
-    if (!it.End()) {
-      result.InplaceConcat(collections::CreateStringWithCString(", "));
-    }
+    result = result->add(it.Get()->repr())
+               ->add(CreatePyString(CreateStringWithCString(", ")));
   }
-  result.InplaceConcat(collections::CreateStringWithCString("]"));
-  return std::make_shared<PyString>(result);
+  return result->add(CreatePyString(CreateStringWithCString("]")));
 }
 
 PyObjPtr ListKlass::_serialize_(PyObjPtr obj) {
@@ -82,19 +76,18 @@ PyObjPtr ListKlass::_serialize_(PyObjPtr obj) {
     return nullptr;
   }
   auto list = std::dynamic_pointer_cast<PyList>(obj);
-  Bytes bytes;
-  bytes.InplaceConcat(Serialize(Literal::LIST));
-  bytes.InplaceConcat(Serialize(list->Value().Size()));
-  for (auto it = List<PyObjPtr>::Iterator::Begin(list->Value()); !it.End();
-       it.Next()) {
-    auto s = it.Get()->_serialize_();
-    if (s->Klass() != BytesKlass::Self()) {
+  PyObjPtr bytes =
+    CreatePyBytes(Serialize(Literal::LIST).Add(Serialize(list->Value().Size()))
+    );
+  auto list_value = list->Value();
+  for (Index i = 0; i < list_value.Size(); ++i) {
+    auto element_s = list_value.Get(i)->_serialize_();
+    if (element_s->Klass() != BytesKlass::Self()) {
       return nullptr;
     }
-    auto str = std::dynamic_pointer_cast<PyBytes>(s);
-    bytes.InplaceConcat(str->Value());
+    bytes = bytes->add(element_s);
   }
-  return std::make_shared<PyBytes>(bytes);
+  return bytes;
 }
 
 PyObjPtr ListKlass::getitem(PyObjPtr obj, PyObjPtr key) {
@@ -103,7 +96,7 @@ PyObjPtr ListKlass::getitem(PyObjPtr obj, PyObjPtr key) {
   }
   auto list = std::dynamic_pointer_cast<PyList>(obj);
   auto index = std::dynamic_pointer_cast<PyInteger>(key);
-  return list->Value().Get(collections::ToIndex(index->Value()));
+  return list->Value().Get(ToIndex(index->Value()));
 }
 
 PyObjPtr ListKlass::setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) {
@@ -112,8 +105,12 @@ PyObjPtr ListKlass::setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) {
   }
   auto list = std::dynamic_pointer_cast<PyList>(obj);
   auto index = std::dynamic_pointer_cast<PyInteger>(key);
-  list->Value().Set(collections::ToIndex(index->Value()), value);
+  list->Value().Set(ToIndex(index->Value()), value);
   return obj;
+}
+
+void PyList::Append(PyObjPtr obj) {
+  value.Push(std::move(obj));
 }
 
 }  // namespace torchlight::object

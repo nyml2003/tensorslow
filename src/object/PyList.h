@@ -14,14 +14,16 @@ class PyList : public PyObject {
   explicit PyList(collections::List<PyObjPtr> value);
 
   [[nodiscard]] collections::List<PyObjPtr> Value() const;
+
+  void Append(PyObjPtr obj);
 };
 
 using PyListPtr = std::shared_ptr<PyList>;
 
-PyListPtr CreateList(collections::Index capacity);
+PyListPtr CreatePyList(collections::Index capacity);
 
 PyListPtr
-CreateList(collections::List<PyObjPtr> list, collections::Index capacity);
+CreatePyList(collections::List<PyObjPtr> list, collections::Index capacity);
 
 class ListKlass : public Klass {
  public:

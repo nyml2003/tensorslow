@@ -122,7 +122,7 @@
         "--enable-config"
     ],
     "[cpp]": {
-        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+        "editor.defaultFormatter": "xaver.clang-format",
     },
     "[jsonc]": {
         "editor.defaultFormatter": "vscode.json-language-features"
@@ -152,4 +152,10 @@
     "gcovViewer.buildDirectories": [
         "/app/build"
     ],
+    "[cmake]": {
+        "editor.defaultFormatter": "josetr.cmake-language-support-vscode"
+    },
+    "[shellscript]": {
+        "editor.defaultFormatter": "shakram02.bash-beautify"
+    },
 }

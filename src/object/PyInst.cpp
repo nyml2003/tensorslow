@@ -1,9 +1,8 @@
-#include "object/PyInst.h"
-
 #include "collections/common.h"
 #include "collections/impl/Bytes.h"
 #include "collections/impl/String.h"
 #include "object/PyBytes.h"
+#include "object/PyInst.h"
 #include "object/PyString.h"
 
 namespace torchlight::object {
@@ -37,14 +36,13 @@ PyObjPtr InstKlass::_serialize_(PyObjPtr obj) {
     return nullptr;
   }
   auto inst = std::dynamic_pointer_cast<PyInst>(obj);
-  Bytes bytes;
-  bytes.InplaceConcat(Serialize(inst->Code()));
+  Bytes bytes = Serialize(inst->Code());
   std::visit(
     overload{
       [&bytes](NoneType) {},
-      [&bytes](Index index) { bytes.InplaceConcat(Serialize(index)); },
-      [&bytes](CompareOp op) { bytes.InplaceConcat(Serialize(op)); },
-      [&bytes](int64_t index) { bytes.InplaceConcat(Serialize(index)); }
+      [&bytes](Index index) { bytes.Concat(Serialize(index)); },
+      [&bytes](CompareOp op) { bytes.Concat(Serialize(op)); },
+      [&bytes](int64_t index) { bytes.Concat(Serialize(index)); }
     },
     inst->Operand()
   );
@@ -56,20 +54,20 @@ PyObjPtr InstKlass::repr(PyObjPtr obj) {
     return nullptr;
   }
   auto inst = std::dynamic_pointer_cast<PyInst>(obj);
-  String result = collections::CreateStringWithCString("<inst ");
-  result.InplaceConcat(ToString(inst->Code()));
-  result.InplaceConcat(collections::CreateStringWithCString(" "));
+  String result = CreateStringWithCString("<inst ")
+                    .Add(ToString(inst->Code()))
+                    .Add(CreateStringWithCString(" "));
   std::visit(
     overload{
       [&result](NoneType) {},
-      [&result](Index index) { result.InplaceConcat(ToString(index)); },
-      [&result](CompareOp op) { result.InplaceConcat(ToString(op)); },
-      [&result](int64_t index) { result.InplaceConcat(ToString(index)); }
+      [&result](Index index) { result.Concat(ToString(index)); },
+      [&result](CompareOp op) { result.Concat(ToString(op)); },
+      [&result](int64_t index) { result.Concat(ToString(index)); }
     },
     inst->Operand()
   );
-  result.InplaceConcat(collections::CreateStringWithCString(">\n"));
-  return std::make_shared<PyString>(result);
+  result.Concat(CreateStringWithCString(">\n"));
+  return CreatePyString(result);
 }
 
 PyInstPtr CreateLoadConst(Index index) {

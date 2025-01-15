@@ -1,10 +1,10 @@
+
 #include "collections/Integer.h"
-#include "collections/Bytes.h"
+#include "collections/Iterator.h"
 #include "collections/impl/Decimal.h"
 #include "collections/impl/Integer.h"
 #include "collections/impl/String.h"
 
-#include <iostream>
 #include <stdexcept>
 
 namespace torchlight::collections {
@@ -47,6 +47,8 @@ Unicode HexToUnicode(uint8_t c) noexcept {
 Integer::Integer(const List<uint32_t>& _parts, bool _sign)
   : parts(_parts), sign(_sign) {}
 
+Integer::Integer() = default;
+
 Integer CreateIntegerWithString(const String& str) {
   Unicode unicode_0 = 0x0030;
   Unicode unicode_X = 0x0058;
@@ -64,13 +66,13 @@ Integer CreateIntegerWithString(const String& str) {
       buffer = (value << (count * 4)) | buffer;
       count++;
       if (count == 4) {
-        parts.Add(buffer);
+        parts.Push(buffer);
         buffer = 0;
         count = 0;
       }
     }
     if (count != 0) {
-      parts.Add(buffer);
+      parts.Push(buffer);
     }
     parts.Reverse();
     return Integer(parts, false);
@@ -78,16 +80,8 @@ Integer CreateIntegerWithString(const String& str) {
   return CreateIntegerWithDecimal(CreateDecimalWithString(str));
 }
 
-Integer CreateIntegerWithBytes(const Bytes& bytes) {
-  List<uint32_t> parts;
-  for (Index i = 0; i < bytes.Size(); i += 4) {
-    uint32_t buffer = 0;
-    for (Index j = 0; j < 4; j++) {
-      buffer = (buffer << 8) | bytes.Get(i + j);
-    }
-    parts.Add(buffer);
-  }
-  return Integer(parts, false);
+Integer CreateIntegerWithCString(const char* str) {
+  return CreateIntegerWithString(CreateStringWithCString(str));
 }
 
 String Integer::ToString() const {
@@ -103,6 +97,7 @@ String Integer::ToHexString() const {
     return CreateStringWithCString("0");
   }
   const Unicode UnicodeDigitZero = 0x30;
+  const Unicode UnicodeDigit_x = 0x78;
   List<Unicode> str;
   for (Index i = 0; i < parts.Size(); i++) {
     uint32_t item = parts.Get(i);
@@ -112,7 +107,7 @@ String Integer::ToHexString() const {
     buffer[2] = (item & 0x000000F0) >> 4;
     buffer[3] = (item & 0x0000000F);
     for (Index j = 0; j < 4; j++) {
-      str.Add(HexToUnicode(buffer[j]));
+      str.Push(HexToUnicode(buffer[j]));
     }
   }
   Index it = 0;
@@ -122,8 +117,8 @@ String Integer::ToHexString() const {
     }
   }
   str = str.Slice(it, str.Size());
-  str.Insert(0, UnicodeDigitZero);
-  str.Insert(0, static_cast<Unicode>(0x0058));
+  str.Unshift(UnicodeDigit_x);
+  str.Unshift(UnicodeDigitZero);
   return String(str);
 }
 
@@ -149,18 +144,19 @@ Integer CreateIntegerWithDecimal(const Decimal& decimal) {
     for (Index i = 0; i < remainder.Data().Size(); i++) {
       value = value * 10 + remainder.Data().Get(i);
     }
-    parts.Add(value);
+    parts.Push(value);
   }
   parts.Reverse();
-  return Integer(parts, decimal.Sign());
+  Integer result(parts, decimal.Sign());
+  return result;
 }
 
 Integer Integer::Add(const Integer& rhs) const {
   if (sign == rhs.sign) {
     uint32_t carry = 0;
     List<uint32_t> result;
-    for (auto itl = List<uint32_t>::Iterator::RBegin(parts),
-              itr = List<uint32_t>::Iterator::RBegin(rhs.parts);
+    for (auto itl = Iterator<uint32_t>::RBegin(parts),
+              itr = Iterator<uint32_t>::RBegin(rhs.parts);
          !itl.End() || !itr.End(); itl.Next(), itr.Next()) {
       uint32_t sum = carry;
       if (!itl.End()) {
@@ -172,10 +168,10 @@ Integer Integer::Add(const Integer& rhs) const {
       // 进位是高16位
       carry = (sum >> 16) & 0x0000FFFF;
       sum &= 0x0000FFFF;
-      result.Add(sum);
+      result.Push(sum);
     }
     if (carry != 0) {
-      result.Add(carry);
+      result.Push(carry);
     }
     result.Reverse();
     return Integer(result, sign);
@@ -209,8 +205,8 @@ bool Integer::GreaterThan(const Integer& rhs) const {
     return sign ^ (parts.Size() > rhs.parts.Size());
   }
   // 此时左值和右值的位数相等，正负号相同
-  for (auto it = List<uint32_t>::Iterator::Begin(parts),
-            it2 = List<uint32_t>::Iterator::Begin(rhs.parts);
+  for (auto it = Iterator<uint32_t>::Begin(parts),
+            it2 = Iterator<uint32_t>::Begin(rhs.parts);
        !it.End() && !it2.End(); it.Next(), it2.Next()) {
     if (it.Get() == it2.Get()) {
       continue;
@@ -231,17 +227,17 @@ Integer Integer::Subtract(const Integer& rhs) const {
     List<uint32_t> _rhs = rhs.parts.Copy();
     _rhs.Reverse();
     if (_lhs.Size() > _rhs.Size()) {
-      _rhs.AppendElements(0, _lhs.Size() - _rhs.Size());
+      _rhs.Concat(List<uint32_t>(_lhs.Size() - _rhs.Size(), (uint32_t)0));
       size = _lhs.Size();
     } else if (_lhs.Size() < _rhs.Size()) {
-      _lhs.AppendElements(0, _rhs.Size() - _lhs.Size());
+      _lhs.Concat(List<uint32_t>(_rhs.Size() - _lhs.Size(), (uint32_t)0));
       size = _rhs.Size();
       _sign = true;
       std::swap(_lhs, _rhs);
     } else {
       size = _lhs.Size();
-      for (auto it = List<uint32_t>::Iterator::RBegin(_lhs),
-                it2 = List<uint32_t>::Iterator::RBegin(_rhs);
+      for (auto it = Iterator<uint32_t>::RBegin(_lhs),
+                it2 = Iterator<uint32_t>::RBegin(_rhs);
            !it.End() && !it2.End(); it.Next(), it2.Next()) {
         if (it.Get() > it2.Get()) {
           break;
@@ -255,8 +251,8 @@ Integer Integer::Subtract(const Integer& rhs) const {
     }
     List<uint32_t> result(size);
     bool borrow = false;
-    for (auto it = List<uint32_t>::Iterator::Begin(_lhs),
-              it2 = List<uint32_t>::Iterator::Begin(_rhs);
+    for (auto it = Iterator<uint32_t>::Begin(_lhs),
+              it2 = Iterator<uint32_t>::Begin(_rhs);
          !it.End() && !it2.End(); it.Next(), it2.Next()) {
       uint32_t diff = 0;
       uint32_t sub = it2.Get() + (borrow ? 1 : 0);
@@ -267,7 +263,7 @@ Integer Integer::Subtract(const Integer& rhs) const {
         diff = it.Get() - sub;
         borrow = false;
       }
-      result.Add(diff);
+      result.Push(diff);
     }
     TrimTrailingZero(result);
     result.Reverse();
@@ -286,11 +282,10 @@ Integer Integer::Multiply(const Integer& rhs) const {
   _lhs.Reverse();
   auto _rhs = rhs.parts;
   _rhs.Reverse();
-  for (auto it = List<uint32_t>::Iterator::Begin(_lhs); !it.End(); it.Next()) {
-    for (auto it2 = List<uint32_t>::Iterator::Begin(_rhs); !it2.End();
-         it2.Next()) {
+  for (auto it = Iterator<uint32_t>::Begin(_lhs); !it.End(); it.Next()) {
+    for (auto it2 = Iterator<uint32_t>::Begin(_rhs); !it2.End(); it2.Next()) {
       uint32_t product = it.Get() * it2.Get();
-      Index index = it.Index() + it2.Index();
+      Index index = it.GetCurrentIndex() + it2.GetCurrentIndex();
       result.Set(index, result.Get(index) + product);
       result.Set(index + 1, result.Get(index + 1) + (result.Get(index) >> 16));
       result.Set(index, (result.Get(index) & 0x0000FFFF));
@@ -314,19 +309,14 @@ List<Integer> Integer::DivMod(const Integer& rhs) const {
     throw std::runtime_error("Division by zero");
   }
   if (IsZero() || LessThan(rhs)) {
-    List<Integer> divmods;
-    divmods.Add(CreateIntegerZero());
-    divmods.Add(Copy());
+    List<Integer> divmods = {CreateIntegerZero(), Copy()};
     return divmods;
   }
   if (Equal(rhs)) {
-    List<Integer> divmods;
-    divmods.Add(CreateIntegerOne());
-    divmods.Add(CreateIntegerZero());
+    List<Integer> divmods = {CreateIntegerOne(), CreateIntegerZero()};
     return divmods;
   }
   Integer result;
-  result.parts.Expand(parts.Size());
   result.sign = sign ^ rhs.sign;
   Integer dividend =
     Slice(*this, 0, std::min(parts.Size(), rhs.parts.Size())).Copy();
@@ -339,17 +329,17 @@ List<Integer> Integer::DivMod(const Integer& rhs) const {
       dividend = dividend.Subtract(divisor);
       quotient++;
     }
-    result.parts.Add(quotient);
+    result.parts.Push(quotient);
     if (i + rhs.parts.Size() < parts.Size()) {
-      dividend.parts.Add(parts.Get(i + rhs.parts.Size()));
+      dividend.parts.Push(parts.Get(i + rhs.parts.Size()));
     }
     TrimLeadingZero(dividend.parts);
   }
   List<Integer> divmods;
   TrimTrailingZero(result.parts);
   TrimTrailingZero(dividend.parts);
-  divmods.Add(result);
-  divmods.Add(dividend);
+  divmods.Push(result);
+  divmods.Push(dividend);
   return divmods;
 }
 
@@ -357,7 +347,7 @@ bool Integer::IsZero() const {
   if (parts.Size() == 0) {
     return true;
   }
-  for (auto it = List<uint32_t>::Iterator::Begin(parts); !it.End(); it.Next()) {
+  for (auto it = Iterator<uint32_t>::Begin(parts); !it.End(); it.Next()) {
     if (it.Get() != 0) {
       return false;
     }
@@ -384,19 +374,18 @@ bool Integer::Equal(const Integer& rhs) const {
 }
 
 void TrimTrailingZero(List<uint32_t>& parts) {
-  for (auto it = List<uint32_t>::Iterator::RBegin(parts); !it.End();
-       it.Next()) {
-    if (it.Get() != 0 || it.Index() == 0) {
-      parts = parts.Slice(0, it.Index() + 1);
+  for (auto it = Iterator<uint32_t>::RBegin(parts); !it.End(); it.Next()) {
+    if (it.Get() != 0 || it.GetCurrentIndex() == 0) {
+      parts = parts.Slice(0, it.GetCurrentIndex() + 1);
       break;
     }
   }
 }
 
 void TrimLeadingZero(List<uint32_t>& parts) {
-  for (auto it = List<uint32_t>::Iterator::Begin(parts); !it.End(); it.Next()) {
-    if (it.Get() != 0 || it.Index() == parts.Size() - 1) {
-      parts = parts.Slice(it.Index(), parts.Size());
+  for (auto it = Iterator<uint32_t>::Begin(parts); !it.End(); it.Next()) {
+    if (it.Get() != 0 || it.GetCurrentIndex() == parts.Size() - 1) {
+      parts = parts.Slice(it.GetCurrentIndex(), parts.Size());
       break;
     }
   }
@@ -408,15 +397,14 @@ Integer Slice(const Integer& integer, Index start, Index end) {
 }
 
 Integer Integer::BitWiseAnd(const Integer& rhs) const {
-  List<uint32_t> result;
-  result.Expand(std::max(parts.Size(), rhs.parts.Size()));
-  for (auto it = List<uint32_t>::Iterator::RBegin(parts),
-            it2 = List<uint32_t>::Iterator::RBegin(rhs.parts);
+  List<uint32_t> result(std::max(parts.Size(), rhs.parts.Size()));
+  for (auto it = Iterator<uint32_t>::RBegin(parts),
+            it2 = Iterator<uint32_t>::RBegin(rhs.parts);
        !it.End() || !it2.End(); it.Next(), it2.Next()) {
     if (it.End() || it2.End()) {
-      result.Add(0);
+      result.Push(0);
     } else {
-      result.Add(it.Get() & it2.Get());
+      result.Push(it.Get() & it2.Get());
     }
   }
   result.Reverse();
@@ -424,17 +412,16 @@ Integer Integer::BitWiseAnd(const Integer& rhs) const {
 }
 
 Integer Integer::BitWiseOr(const Integer& rhs) const {
-  List<uint32_t> result;
-  result.Expand(std::max(parts.Size(), rhs.parts.Size()));
-  for (auto it = List<uint32_t>::Iterator::RBegin(parts),
-            it2 = List<uint32_t>::Iterator::RBegin(rhs.parts);
+  List<uint32_t> result(std::max(parts.Size(), rhs.parts.Size()));
+  for (auto it = Iterator<uint32_t>::RBegin(parts),
+            it2 = Iterator<uint32_t>::RBegin(rhs.parts);
        !it.End() || !it2.End(); it.Next(), it2.Next()) {
     if (it.End()) {
-      result.Add(it2.Get());
+      result.Push(it2.Get());
     } else if (it2.End()) {
-      result.Add(it.Get());
+      result.Push(it.Get());
     } else {
-      result.Add(it.Get() | it2.Get());
+      result.Push(it.Get() | it2.Get());
     }
   }
   result.Reverse();
@@ -442,17 +429,16 @@ Integer Integer::BitWiseOr(const Integer& rhs) const {
 }
 
 Integer Integer::BitWiseXor(const Integer& rhs) const {
-  List<uint32_t> result;
-  result.Expand(std::max(parts.Size(), rhs.parts.Size()));
-  for (auto it = List<uint32_t>::Iterator::RBegin(parts),
-            it2 = List<uint32_t>::Iterator::RBegin(rhs.parts);
+  List<uint32_t> result(std::max(parts.Size(), rhs.parts.Size()));
+  for (auto it = Iterator<uint32_t>::RBegin(parts),
+            it2 = Iterator<uint32_t>::RBegin(rhs.parts);
        !it.End() || !it2.End(); it.Next(), it2.Next()) {
     if (it.End()) {
-      result.Add(it2.Get());
+      result.Push(it2.Get());
     } else if (it2.End()) {
-      result.Add(it.Get());
+      result.Push(it.Get());
     } else {
-      result.Add(it.Get() ^ it2.Get());
+      result.Push(it.Get() ^ it2.Get());
     }
   }
   result.Reverse();
@@ -460,10 +446,9 @@ Integer Integer::BitWiseXor(const Integer& rhs) const {
 }
 
 Integer Integer::BitWiseNot() const {
-  List<uint32_t> result;
-  result.Expand(parts.Size());
-  for (auto it = List<uint32_t>::Iterator::Begin(parts); !it.End(); it.Next()) {
-    result.Add(~it.Get());
+  List<uint32_t> result(parts.Size());
+  for (auto it = Iterator<uint32_t>::Begin(parts); !it.End(); it.Next()) {
+    result.Push(~it.Get());
   }
   return Integer(result, !sign);
 }
@@ -485,14 +470,12 @@ bool Integer::NotEqual(const Integer& rhs) const {
 }
 
 Integer CreateIntegerZero() {
-  List<uint32_t> parts;
-  parts.Add(0);
+  List<uint32_t> parts = {0};
   return Integer(parts, false);
 }
 
 Integer CreateIntegerOne() {
-  List<uint32_t> parts;
-  parts.Add(1);
+  List<uint32_t> parts = {1};
   return Integer(parts, false);
 }
 
@@ -522,7 +505,7 @@ Index ToIndex(const Integer& integer) {
 Integer CreateIntegerWithIndex(Index index) {
   List<uint32_t> parts;
   while (index != 0) {
-    parts.Add(index & 0x0000FFFF);
+    parts.Push(index & 0x0000FFFF);
     index >>= 16;
   }
   parts.Reverse();

@@ -16,10 +16,12 @@ class Decimal {
   bool sign = false;
 
  public:
-  explicit Decimal() = default;
+  explicit Decimal();
   explicit Decimal(const List<int32_t>& parts, bool sign);
 
   [[nodiscard]] String ToString() const;
+
+  [[nodiscard]] String ToHexString() const;
 
   [[nodiscard]] List<int32_t> Data() const;
 

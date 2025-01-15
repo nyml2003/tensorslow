@@ -5,7 +5,6 @@
 #include "collections/Decimal.h"
 #include "collections/List.h"
 #include "collections/String.h"
-#include "collections/common.h"
 
 namespace torchlight::collections {
 
@@ -18,7 +17,7 @@ class Integer {
   bool sign = false;
 
  public:
-  explicit Integer() = default;
+  explicit Integer();
 
   explicit Integer(const List<uint32_t>& _parts, bool _sign);
 
@@ -29,6 +28,8 @@ class Integer {
   [[nodiscard]] String ToHexString() const;
 
   [[nodiscard]] String ToString() const;
+
+  [[nodiscard]] Bytes Serialize() const;
 
   [[nodiscard]] Integer Add(const Integer& rhs) const;
 
