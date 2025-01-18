@@ -1,8 +1,8 @@
 
-#include "runtime/BinaryFileParser.h"
-#include "runtime/BufferedInputStream.h"
-#include "runtime/Interpreter.h"
-#include "runtime/PyFrame.h"
+#include "Runtime/BinaryFileParser.h"
+#include "Runtime/BufferedInputStream.h"
+#include "Runtime/Interpreter.h"
+#include "Runtime/PyFrame.h"
 
 #include <filesystem>
 #include <iostream>
@@ -30,15 +30,15 @@ int main() {
   std::string integrationTestDir = "/app/test/integration";
   for (const auto& file : getFilesInDirectory(integrationTestDir)) {
     std::cout << "Running test: " << file.stem() << std::endl;
-    torchlight::runtime::BinaryFileParser parser(
-      std::make_unique<torchlight::runtime::BufferedInputStream>(
+    torchlight::Runtime::BinaryFileParser parser(
+      std::make_unique<torchlight::Runtime::BufferedInputStream>(
         file.string().c_str()
       )
     );
 
     auto code = parser.Parse();
 
-    torchlight::runtime::Interpreter interpreter;
+    torchlight::Runtime::Interpreter interpreter;
 
     interpreter.Run(code);
   }

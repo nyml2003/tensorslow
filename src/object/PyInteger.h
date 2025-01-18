@@ -1,28 +1,28 @@
 #ifndef TORCHLIGHT_OBJECT_PYINTEGER_H
 #define TORCHLIGHT_OBJECT_PYINTEGER_H
 
-#include "collections/Integer.h"
-#include "object/Klass.h"
-#include "object/PyObject.h"
-#include "object/common.h"
+#include "Collections/Integer.h"
+#include "Object/Common.h"
+#include "Object/Klass.h"
+#include "Object/PyObject.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
 class PyInteger : public PyObject {
  private:
-  collections::Integer value;
+  Collections::Integer value;
 
  public:
-  explicit PyInteger(collections::Integer value);
+  explicit PyInteger(Collections::Integer value);
 
-  [[nodiscard]] collections::Integer Value() const;
+  [[nodiscard]] Collections::Integer Value() const;
 };
 
 using PyIntPtr = std::shared_ptr<PyInteger>;
 
-PyIntPtr CreatePyInteger(collections::Integer value);
+PyIntPtr CreatePyInteger(Collections::Integer value);
 
-PyIntPtr CreatePyInteger(collections::Index value);
+PyIntPtr CreatePyInteger(uint64_t value);
 
 class IntegerKlass : public Klass {
  public:
@@ -30,7 +30,7 @@ class IntegerKlass : public Klass {
 
   static KlassPtr Self();
 
-  ~IntegerKlass() override = default;
+  ~IntegerKlass() override;
 
   IntegerKlass(const IntegerKlass& other) = delete;
 
@@ -65,6 +65,6 @@ class IntegerKlass : public Klass {
   PyObjPtr _serialize_(PyObjPtr obj) override;
 };
 
-}  // namespace torchlight::object
+}  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_PYINTEGER_H

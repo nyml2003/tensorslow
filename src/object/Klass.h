@@ -1,17 +1,16 @@
 #ifndef TORCHLIGHT_OBJECT_KLASS_H
 #define TORCHLIGHT_OBJECT_KLASS_H
 
-#include "collections/String.h"
-#include "object/PyObject.h"
-#include "object/common.h"
+#include "Collections/String.h"
+#include "Object/PyObject.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 class Klass {
  private:
-  collections::String name;
+  Collections::String name;
 
  public:
-  explicit Klass(collections::String value);
+  explicit Klass(Collections::String value);
 
   // Copy constructor
   Klass(const Klass& other) = delete;
@@ -64,6 +63,6 @@ class Klass {
 
 using KlassPtr = std::shared_ptr<Klass>;
 
-}  // namespace torchlight::object
+}  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_KLASS_H

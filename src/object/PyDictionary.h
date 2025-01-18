@@ -1,20 +1,20 @@
 #ifndef TORCHLIGHT_OBJECT_PYDICTIONARY_H
 #define TORCHLIGHT_OBJECT_PYDICTIONARY_H
 
-#include "collections/Map.h"
-#include "object/Klass.h"
-#include "object/PyObject.h"
+#include "Collections/Map.h"
+#include "Object/Klass.h"
+#include "Object/PyObject.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
 class PyDictionary : public PyObject {
  private:
-  collections::Map<PyObjPtr, PyObjPtr> dict;
+  Collections::Map<PyObjPtr, PyObjPtr> dict;
 
  public:
-  explicit PyDictionary(collections::Map<PyObjPtr, PyObjPtr> dict);
+  explicit PyDictionary(Collections::Map<PyObjPtr, PyObjPtr> dict);
 
-  collections::Map<PyObjPtr, PyObjPtr>& Value();
+  Collections::Map<PyObjPtr, PyObjPtr>& Value();
 };
 
 using PyDictPtr = std::shared_ptr<PyDictionary>;
@@ -24,7 +24,7 @@ PyDictPtr CreatePyDict();
 class DictionaryKlass : public Klass {
  public:
   explicit DictionaryKlass();
-  static object::KlassPtr Self();
+  static Object::KlassPtr Self();
 
   PyObjPtr setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) override;
 
@@ -35,6 +35,6 @@ class DictionaryKlass : public Klass {
   PyObjPtr repr(PyObjPtr obj) override;
 };
 
-}  // namespace torchlight::object
+}  // namespace torchlight::Object
 
 #endif

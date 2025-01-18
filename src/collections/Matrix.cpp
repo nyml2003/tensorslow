@@ -1,9 +1,9 @@
 
-// #include "collections/Matrix.h"
+// #include "Collections/Matrix.h"
 // #include <stdexcept>
-// #include "collections/impl/String.h"
+// #include "Collections/impl/String.h"
 
-// namespace torchlight::collections {
+// namespace torchlight::Collections {
 
 // Matrix::Matrix(Index rows, Index cols)
 //   : rows(rows), cols(cols), data(rows * cols) {
@@ -19,7 +19,7 @@
 //   for (Index i = 0; i < rows; i++) {
 //     str.InplaceConcat(CreateStringWithCString("["));
 //     for (Index j = 0; j < cols; j++) {
-//       str.InplaceConcat(collections::ToString(At(i, j)));
+//       str.InplaceConcat(Collections::ToString(At(i, j)));
 //       if (j != cols - 1) {
 //         str.InplaceConcat(CreateStringWithCString(","));
 //       }
@@ -90,7 +90,8 @@
 //   return result;
 // }
 
-// double Matrix::BroadcastAt(Index row, Index col, uint8_t broadcast_type) const {
+// double Matrix::BroadcastAt(Index row, Index col, uint8_t broadcast_type)
+// const {
 //   if (broadcast_type & 0b10 && broadcast_type & 0b01) {
 //     return At(0, 0);
 //   }
@@ -106,7 +107,8 @@
 // Matrix Matrix::Add(const Matrix& other) const {
 //   uint8_t broadcast_type = CheckBroadcast(other);
 //   if (broadcast_type == 0) {
-//     throw std::invalid_argument("Matrix::Add: Matrix dimensions must be equal");
+//     throw std::invalid_argument("Matrix::Add: Matrix dimensions must be
+//     equal");
 //   }
 //   if (broadcast_type == 0b1111) {
 //     Matrix result(rows, cols);
@@ -121,8 +123,10 @@
 //   for (Index i = 0; i < result.rows; i++) {
 //     for (Index j = 0; j < result.cols; j++) {
 //       result.data.Set(
-//         i * result.cols + j, BroadcastAt(i, j, (broadcast_type & 0b1100) >> 2) +
-//                                other.BroadcastAt(i, j, broadcast_type & 0b0011)
+//         i * result.cols + j, BroadcastAt(i, j, (broadcast_type & 0b1100) >>
+//         2) +
+//                                other.BroadcastAt(i, j, broadcast_type &
+//                                0b0011)
 //       );
 //     }
 //   }
@@ -148,8 +152,10 @@
 //   for (Index i = 0; i < result.rows; i++) {
 //     for (Index j = 0; j < result.cols; j++) {
 //       result.data.Set(
-//         i * result.cols + j, BroadcastAt(i, j, (broadcast_type & 0b1100) >> 2) *
-//                                other.BroadcastAt(i, j, broadcast_type & 0b0011)
+//         i * result.cols + j, BroadcastAt(i, j, (broadcast_type & 0b1100) >>
+//         2) *
+//                                other.BroadcastAt(i, j, broadcast_type &
+//                                0b0011)
 //       );
 //     }
 //   }
@@ -210,4 +216,4 @@
 //   }
 //   return result;
 // }
-// }  // namespace torchlight::collections
+// }  // namespace torchlight::Collections

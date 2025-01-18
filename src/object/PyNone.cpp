@@ -1,14 +1,13 @@
-#include "collections/impl/String.h"
-#include "object/ByteCode.h"
-#include "object/PyBytes.h"
-#include "object/PyNone.h"
-#include "object/PyString.h"
+#include "Collections/StringHelper.h"
+#include "Object/ByteCode.h"
+#include "Object/PyBytes.h"
+#include "Object/PyNone.h"
+#include "Object/PyString.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
-using collections::CreateStringWithCString;
-
-NoneKlass::NoneKlass() : Klass(CreateStringWithCString("NoneType")) {}
+NoneKlass::NoneKlass()
+  : Klass(Collections::CreateStringWithCString("NoneType")) {}
 
 KlassPtr NoneKlass::Self() {
   static KlassPtr instance = std::make_shared<NoneKlass>();
@@ -17,16 +16,16 @@ KlassPtr NoneKlass::Self() {
 
 PyObjPtr NoneKlass::_serialize_(PyObjPtr obj) {
   if (obj->Klass() != Self()) {
-    return nullptr;
+    throw std::runtime_error("NoneType does not support serialization");
   }
-  return CreatePyBytes(Serialize(Literal::NONE));
+  return CreatePyBytes(Collections::Serialize(Literal::NONE));
 }
 
 PyObjPtr NoneKlass::repr(PyObjPtr obj) {
   if (obj->Klass() != Self()) {
-    return nullptr;
+    throw std::runtime_error("NoneType does not support repr operation");
   }
-  return CreatePyString(CreateStringWithCString("None"));
+  return CreatePyString(Collections::CreateStringWithCString("None"));
 }
 
 PyNone::PyNone() : PyObject(NoneKlass::Self()) {}
@@ -35,4 +34,8 @@ PyObjPtr PyNone::Instance() {
   static PyObjPtr instance = std::make_shared<PyNone>();
   return instance;
 }
-}  // namespace torchlight::object
+
+PyNonePtr CreatePyNone() {
+  return std::make_shared<PyNone>();
+}
+}  // namespace torchlight::Object

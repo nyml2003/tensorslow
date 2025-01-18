@@ -5,6 +5,7 @@
     "clang-format.fallbackStyle": "Chromium",
     "files.associations": {
         "*.cu": "cpp",
+        "*.tpp": "cpp",
         "*.css": "css",
         ".clang-format": "yaml",
         ".clangd": "yaml",

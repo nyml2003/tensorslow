@@ -1,11 +1,7 @@
 #ifndef TORCHLIGHT_COLLECTIONS_STRING_H
 #define TORCHLIGHT_COLLECTIONS_STRING_H
-
-#include "collections/List.h"
-#include "collections/common.h"
-
-namespace torchlight::collections {
-
+#include "Collections/List.h"
+namespace torchlight::Collections {
 class String {
  private:
   List<Unicode> codePoints;
@@ -16,70 +12,40 @@ class String {
   String(const String& other);
   String(String& other);
   String(String&& other) noexcept;
-
   String& operator=(const String& other);
   String& operator=(String&& other) noexcept;
-
-  /**
-   * 用于将字符串数组连接起来
-   * @param j
-   * @return
-   */
-  [[nodiscard]] String Join(String& joiner) const;
-
+  ~String();
   /**
    * 用于将字符串分割成多个子串
    * @param d
    * @return
    */
   [[nodiscard]] List<String> Split(String& delimiter) const;
-
   /**
    * 找到start开始的第一个String的位置
    * @param sub
    * @return
    */
   [[nodiscard]] Index Find(String& sub, Index start = 0) const;
-
   void Concat(const String& rhs);
-
   String Add(const String& rhs);
-
   [[nodiscard]] String Copy() const;
-
   [[nodiscard]] Unicode Get(Index index) const;
-
   [[nodiscard]] Index Size() const;
-
   void RemoveAt(Index index);
-
   void Clear();
-
   [[nodiscard]] String Slice(Index start, Index end) const;
-
   void Reverse();
-
   void Push(Unicode codePoint);
-
   [[nodiscard]] bool Equal(const String& rhs) const;
-
   [[nodiscard]] bool GreaterThan(const String& rhs) const;
-
   [[nodiscard]] bool LessThan(const String& rhs) const;
-
   [[nodiscard]] bool GreaterThanOrEqual(const String& rhs) const;
-
   [[nodiscard]] bool LessThanOrEqual(const String& rhs) const;
-
   [[nodiscard]] bool NotEqual(const String& rhs) const;
-
   bool operator==(const String& rhs) const;
-
   Unicode operator[](Index index);
-
-  const Unicode operator[](Index index) const;
+  Unicode operator[](Index index) const;
 };
-
-}  // namespace torchlight::collections
-
+}  // namespace torchlight::Collections
 #endif  // TORCHLIGHT_COLLECTIONS_STRING_H

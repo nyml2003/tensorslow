@@ -1,29 +1,30 @@
 #ifndef TORCHLIGHT_OBJECT_PYLIST_H
 #define TORCHLIGHT_OBJECT_PYLIST_H
 
-#include "collections/List.h"
-#include "object/Klass.h"
-#include "object/PyObject.h"
+#include "Collections/List.h"
+#include "Object/Klass.h"
+#include "Object/PyObject.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 class PyList : public PyObject {
  private:
-  collections::List<PyObjPtr> value;
+  Collections::List<PyObjPtr> value;
 
  public:
-  explicit PyList(collections::List<PyObjPtr> value);
+  explicit PyList(Collections::List<PyObjPtr> value);
 
-  [[nodiscard]] collections::List<PyObjPtr> Value() const;
+  [[nodiscard]] Collections::List<PyObjPtr>& Value();
 
   void Append(PyObjPtr obj);
+
+  PyStrPtr Join(const PyStrPtr& separator);
 };
 
 using PyListPtr = std::shared_ptr<PyList>;
 
-PyListPtr CreatePyList(collections::Index capacity);
+PyListPtr CreatePyList(Index capacity);
 
-PyListPtr
-CreatePyList(collections::List<PyObjPtr> list, collections::Index capacity);
+PyListPtr CreatePyList(Collections::List<PyObjPtr> list, Index capacity);
 
 class ListKlass : public Klass {
  public:
@@ -39,8 +40,10 @@ class ListKlass : public Klass {
   PyObjPtr getitem(PyObjPtr obj, PyObjPtr key) override;
 
   PyObjPtr setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) override;
+
+  PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs) override;
 };
 
-}  // namespace torchlight::object
+}  // namespace torchlight::Object
 
 #endif

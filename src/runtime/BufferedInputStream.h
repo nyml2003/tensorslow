@@ -7,7 +7,7 @@
 #include <memory>
 #include <optional>
 
-namespace torchlight::runtime {
+namespace torchlight::Runtime {
 constexpr int BUFFER_SIZE = 128;
 
 class BufferedInputStream {
@@ -28,6 +28,6 @@ class BufferedInputStream {
 
 using BufferedInputStreamPtr = std::unique_ptr<BufferedInputStream>;
 
-}  // namespace torchlight::runtime
+}  // namespace torchlight::Runtime
 
 #endif  // TORCHLIGHT_BUFFEREDINPUTSTREAM_H

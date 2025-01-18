@@ -1,13 +1,12 @@
-#include "object/PyObject.h"
-
-#include "collections/impl/String.h"
-#include "object/Klass.h"
-#include "object/PyBoolean.h"
-#include "object/PyString.h"
+#include "Collections/StringHelper.h"
+#include "Object/Klass.h"
+#include "Object/PyBoolean.h"
+#include "Object/PyObject.h"
+#include "Object/PyString.h"
 
 #include <iostream>
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
 PyObject::PyObject(KlassPtr klass) : klass(std::move(klass)) {}
 
@@ -18,6 +17,8 @@ void PyObject::setKlass(KlassPtr klass) {
 KlassPtr PyObject::Klass() const {
   return klass;
 }
+
+PyObject::~PyObject() = default;
 
 PyObjPtr PyObject::add(PyObjPtr other) {
   return klass->add(shared_from_this(), std::move(other));
@@ -91,7 +92,7 @@ bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 void print(const PyObjPtr& obj) {
   auto repr = obj->repr();
   auto str = std::dynamic_pointer_cast<PyString>(repr)->Value();
-  std::cout << collections::ToCString(str).get() << std::endl;
+  std::cout << Collections::ToCppString(str) << std::endl;
 }
 
-}  // namespace torchlight::object
+}  // namespace torchlight::Object

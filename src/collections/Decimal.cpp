@@ -1,73 +1,10 @@
-
-#include "collections/Decimal.h"
-#include "collections/Iterator.h"
-#include "collections/String.h"
-#include "collections/impl/Decimal.h"
-#include "collections/impl/Integer.h"
-#include "collections/impl/String.h"
-
 #include <stdexcept>
-
-namespace torchlight::collections {
-
-Decimal CreateDecimalZero() {
-  return CreateDecimalWithU32(0);
-}
-
-Decimal CreateDecimalOne() {
-  return CreateDecimalWithU32(1);
-}
-
-Decimal CreateDecimalWithU32(uint32_t value) {
-  List<int32_t> parts;
-  for (Index i = 0; value != 0; i++) {
-    parts.Push(static_cast<int32_t>(value % 10));
-    value /= 10;
-  }
-  parts.Reverse();
-  return Decimal(parts, false);
-}
-
-int32_t UnicodeToDec(Unicode c) noexcept {
-  if (c >= 0x0030 && c <= 0x0039) {
-    return static_cast<int32_t>(c - 0x0030);
-  }
-  return -1;
-}
-
-Byte DecToByte(int32_t c) noexcept {
-  return static_cast<Byte>(c + 0x30);
-}
-
-bool IsNegative(const String& str) {
-  const Unicode UnicodeMinus = 0x2D;
-  return str.Get(0) == UnicodeMinus;
-}
-
-Decimal Slice(const Decimal& decimal, Index start, Index end) {
-  List<int32_t> parts = decimal.Data().Slice(start, end);
-  return Decimal(parts, decimal.Sign());
-}
-
-Decimal CreateDecimalWithString(const String& str) {
-  Index i = 0;
-  bool sign = false;
-  if (IsNegative(str)) {
-    sign = true;
-    i = 1;
-  }
-  List<int32_t> parts;
-  for (; i < str.Size(); i++) {
-    int32_t c = UnicodeToDec(str.Get(i));
-    if (c == -1) {
-      throw std::runtime_error("Invalid character in Decimal");
-    }
-    parts.Push(c);
-  }
-
-  return Decimal(parts, sign);
-}
-
+#include "Collections/DecimalHelper.h"
+#include "Collections/IntegerHelper.h"
+#include "Collections/Iterator.h"
+#include "Collections/StringHelper.h"
+#include "Common.h"
+namespace torchlight::Collections {
 String Decimal::ToString() const {
   if (IsZero()) {
     return CreateStringWithCString("0");
@@ -75,18 +12,16 @@ String Decimal::ToString() const {
   const Unicode UnicodeDigitZero = 0x30;
   List<Unicode> str(parts.Size() + (sign ? 1 : 0));
   if (sign) {
-    str.Push(0x2D);  // '-'
+    str.Push(UnicodeMinus);
   }
   for (Index i = 0; i < parts.Size(); i++) {
     str.Push(parts.Get(i) + UnicodeDigitZero);
   }
   return String(str);
 }
-
 String Decimal::ToHexString() const {
   return CreateIntegerWithDecimal(*this).ToHexString();
 }
-
 Decimal Decimal::Add(const Decimal& rhs) const {
   if (IsZero()) {
     return rhs.Copy();
@@ -118,21 +53,18 @@ Decimal Decimal::Add(const Decimal& rhs) const {
   }
   return Subtract(rhs.Copy().Negate());
 }
-
 Decimal Decimal::Negate() {
   Decimal newDecimal;
   newDecimal.parts = parts.Copy();
   newDecimal.sign = !sign;
   return newDecimal;
 }
-
 Decimal Decimal::Copy() const {
   Decimal newDecimal;
   newDecimal.parts = parts.Copy();
   newDecimal.sign = sign;
   return newDecimal;
 }
-
 bool Decimal::GreaterThan(const Decimal& rhs) const {
   if (this->IsZero()) {
     return rhs.sign;
@@ -164,7 +96,6 @@ bool Decimal::GreaterThan(const Decimal& rhs) const {
   }
   return false;
 }
-
 Decimal Decimal::Subtract(const Decimal& rhs) const {
   // 正负号相同
   if (sign == rhs.sign) {
@@ -220,7 +151,6 @@ Decimal Decimal::Subtract(const Decimal& rhs) const {
   }
   return Add(rhs.Copy().Negate());
 }
-
 Decimal Decimal::Multiply(const Decimal& rhs) const {
   if (IsZero() || rhs.IsZero()) {
     return CreateDecimalZero();
@@ -244,15 +174,12 @@ Decimal Decimal::Multiply(const Decimal& rhs) const {
   result.Reverse();
   return Decimal(result, sign ^ rhs.sign);
 }
-
 Decimal Decimal::Divide(const Decimal& rhs) const {
   return DivMod(rhs).Get(0);
 }
-
 Decimal Decimal::Modulo(const Decimal& rhs) const {
   return DivMod(rhs).Get(1);
 }
-
 List<Decimal> Decimal::DivMod(const Decimal& rhs) const {
   if (rhs.IsZero()) {
     throw std::runtime_error("Division by zero");
@@ -288,7 +215,6 @@ List<Decimal> Decimal::DivMod(const Decimal& rhs) const {
   divmods.Push(dividend);
   return divmods;
 }
-
 bool Decimal::IsZero() const {
   if (parts.Size() == 0) {
     return true;
@@ -300,7 +226,6 @@ bool Decimal::IsZero() const {
   }
   return true;
 }
-
 bool Decimal::Equal(const Decimal& rhs) const {
   if (this->IsZero() && rhs.IsZero()) {
     return true;
@@ -318,56 +243,25 @@ bool Decimal::Equal(const Decimal& rhs) const {
   }
   return true;
 }
-
-void TrimTrailingZero(List<int32_t>& parts) {
-  for (auto it = Iterator<int32_t>::RBegin(parts); !it.End(); it.Next()) {
-    if (it.Get() != 0 || it.GetCurrentIndex() == 0) {
-      parts = parts.Slice(0, it.GetCurrentIndex() + 1);
-      break;
-    }
-  }
-}
-
-void TrimLeadingZero(List<int32_t>& parts) {
-  for (auto it = Iterator<int32_t>::Begin(parts); !it.End(); it.Next()) {
-    if (it.Get() != 0 || it.GetCurrentIndex() == parts.Size() - 1) {
-      parts = parts.Slice(it.GetCurrentIndex(), parts.Size());
-      break;
-    }
-  }
-}
-
 bool Decimal::GreaterThanOrEqual(const Decimal& rhs) const {
   return GreaterThan(rhs) || Equal(rhs);
 }
-
 bool Decimal::LessThan(const Decimal& rhs) const {
   return !GreaterThan(rhs) && !Equal(rhs);
 }
-
 bool Decimal::LessThanOrEqual(const Decimal& rhs) const {
   return !GreaterThan(rhs);
 }
-
 bool Decimal::NotEqual(const Decimal& rhs) const {
   return !Equal(rhs);
 }
-
 List<int32_t> Decimal::Data() const {
   return parts;
 }
-
 Decimal::Decimal(const List<int32_t>& parts, bool sign)
   : parts(parts), sign(sign) {}
-
 Decimal::Decimal() = default;
-
 bool Decimal::Sign() const {
   return sign;
 }
-
-Decimal CreateDecimalWithCString(const char* str) {
-  return CreateDecimalWithString(CreateStringWithCString(str));
-}
-
-}  // namespace torchlight::collections
+}  // namespace torchlight::Collections

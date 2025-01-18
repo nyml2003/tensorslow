@@ -1,26 +1,27 @@
 #ifndef TORCHLIGHT_OBJECT_PYBYTES_H
 #define TORCHLIGHT_OBJECT_PYBYTES_H
 
-#include "collections/Bytes.h"
-#include "object/Klass.h"
-#include "object/PyObject.h"
-#include "object/common.h"
+#include "Collections/Bytes.h"
+#include "Object/Common.h"
+#include "Object/Klass.h"
+#include "Object/PyObject.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
 class PyBytes : public PyObject {
  private:
-  collections::Bytes value;
+  Collections::Bytes value;
 
  public:
-  explicit PyBytes(collections::Bytes value);
+  explicit PyBytes(Collections::Bytes value);
 
-  [[nodiscard]] collections::Bytes Value() const;
+  [[nodiscard]] Collections::Bytes Value() const;
 };
 
 using PyBytesPtr = std::shared_ptr<PyBytes>;
 
-PyBytesPtr CreatePyBytes(collections::Bytes value);
+PyBytesPtr CreatePyBytes(Collections::Bytes value);
+PyBytesPtr CreatePyBytes();
 
 class BytesKlass : public Klass {
  public:
@@ -33,8 +34,10 @@ class BytesKlass : public Klass {
   PyObjPtr _serialize_(PyObjPtr obj) override;
 
   PyObjPtr repr(PyObjPtr obj) override;
+
+  PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs) override;
 };
 
-}  // namespace torchlight::object
+}  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_PYSTRING_H

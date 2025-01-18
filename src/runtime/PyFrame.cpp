@@ -1,52 +1,41 @@
-#include "runtime/PyFrame.h"
-#include "collections/Stack.h"
-#include "collections/common.h"
-#include "collections/impl/String.h"
-#include "object/ByteCode.h"
-#include "object/PyCode.h"
-#include "object/PyDictionary.h"
-#include "object/PyInst.h"
-#include "object/PyList.h"
-#include "object/PyNone.h"
-#include "runtime/Serialize.h"
+#include "Collections/IntegerHelper.h"
+#include "Collections/Stack.h"
+#include "Collections/StringHelper.h"
+#include "Object/ByteCode.h"
+#include "Object/Common.h"
+#include "Object/PyCode.h"
+#include "Object/PyDictionary.h"
+#include "Object/PyInst.h"
+#include "Object/PyInteger.h"
+#include "Object/PyList.h"
+#include "Object/PyNone.h"
+#include "Object/PyString.h"
+#include "Runtime/PyFrame.h"
+#include "Runtime/Serialize.h"
 
 #include <cstring>
 #include <memory>
 #include <stdexcept>
 #include <utility>
 
-namespace torchlight::runtime {
-
-using collections::Byte;
-using collections::Index;
-using collections::List;
-using collections::Stack;
-using object::ByteCode;
-using object::PyCodePtr;
-using object::PyDictPtr;
-using object::PyInst;
-using object::PyInstPtr;
-using object::PyList;
-using object::PyListPtr;
-using object::PyObjPtr;
-using object::PyStrPtr;
+namespace torchlight::Runtime {
 
 FrameKlass::FrameKlass()
-  : object::Klass(collections::CreateStringWithCString("frame")) {}
+  : Object::Klass(Collections::CreateStringWithCString("frame")) {}
 
-object::KlassPtr FrameKlass::Self() {
-  static object::KlassPtr instance = std::make_shared<FrameKlass>();
+Object::KlassPtr FrameKlass::Self() {
+  static Object::KlassPtr instance = std::make_shared<FrameKlass>();
   return instance;
 }
 
 PyFrame::PyFrame(
-  PyCodePtr code,
-  PyDictPtr locals,
-  PyDictPtr globals,
-  PyListPtr fastLocals,
-  PyObjPtr caller
+  Object::PyCodePtr code,
+  Object::PyDictPtr locals,
+  Object::PyDictPtr globals,
+  Object::PyListPtr fastLocals,
+  Object::PyObjPtr caller
 )
-  : object::PyObject(FrameKlass::Self()),
+  : Object::PyObject(FrameKlass::Self()),
     stack(),
     programCounter(0),
     code(std::move(code)),
@@ -56,15 +45,15 @@ PyFrame::PyFrame(
     caller(std::move(caller)) {}
 
 // PyFrame::PyFrame(PyCodePtr code)
-//   : object::PyObject(FrameKlass::Self()),
+//   : Object::PyObject(FrameKlass::Self()),
 //     code(std::move(code)),
-//     locals(std::make_shared<object::PyDictionary>()),
+//     locals(std::make_shared<Object::PyDictionary>()),
 //     globals(locals) {
 //   List<PyObjPtr> fastLocalsList(this->code->NLocals());
-//   fastLocalsList.Fill(object::PyNone::Instance());
+//   fastLocalsList.Fill(Object::PyNone::Instance());
 //   fastLocals =
-//   std::make_shared<object::PyList>(List<PyObjPtr>(fastLocalsList)); caller =
-//   object::PyNone::Instance();
+//   std::make_shared<Object::PyList>(List<PyObjPtr>(fastLocalsList)); caller =
+//   Object::PyNone::Instance();
 // }
 
 // PyFrame::PyFrame(
@@ -72,12 +61,12 @@ PyFrame::PyFrame(
 //   const List<PyObjPtr>& arguments,
 //   PyObjPtr caller
 // )
-//   : object::PyObject(FrameKlass::Self()),
+//   : Object::PyObject(FrameKlass::Self()),
 //     code(function->Code()),
 //     globals(function->Globals()),
 //     caller(std::move(caller)) {
 //   code = function->Code();
-//   locals = std::make_shared<object::PyDictionary>();
+//   locals = std::make_shared<Object::PyDictionary>();
 //   Index nLocals = code->NLocals();
 //   List<PyObjPtr> fastLocalsList(std::max(nLocals, arguments.Size()));
 //   for (auto it = List<PyObjPtr>::Iterator::Begin(arguments); !it.End();
@@ -86,38 +75,36 @@ PyFrame::PyFrame(
 //   }
 //   if (nLocals > arguments.Size()) {
 //     fastLocalsList.AppendElements(
-//       object::PyNone::Instance(), nLocals - arguments.Size()
+//       Object::PyNone::Instance(), nLocals - arguments.Size()
 //     );
 //   }
-//   fastLocals = std::make_shared<object::PyList>(fastLocalsList);
+//   fastLocals = std::make_shared<Object::PyList>(fastLocalsList);
 // }
 
-PyFramePtr CreateFrameWithCode(const PyCodePtr& code) {
-  auto locals =
-    object::CreateDict(collections::Map<collections::String, PyObjPtr>());
+PyFramePtr CreateFrameWithCode(const Object::PyCodePtr& code) {
+  auto locals = Object::CreatePyDict();
   auto globals = locals;
-  auto fastLocals = object::CreateList(code->NLocals());
+  auto fastLocals = Object::CreatePyList(code->NLocals());
   return std::make_shared<PyFrame>(
-    code, locals, globals, fastLocals, object::PyNone::Instance()
+    code, locals, globals, fastLocals, Object::PyNone::Instance()
   );
 }
 
 PyFramePtr CreateFrameWithFunction(
   const PyFunctionPtr& function,
-  const List<PyObjPtr>& arguments,
-  PyObjPtr caller
+  const Collections::List<Object::PyObjPtr>& arguments,
+  Object::PyObjPtr caller
 ) {
   auto code = function->Code();
   auto globals = function->Globals();
-  auto locals =
-    object::CreateDict(collections::Map<collections::String, PyObjPtr>());
+  auto locals = Object::CreatePyDict();
   Index nLocals = code->NLocals();
-  List<PyObjPtr> fastLocalsList(arguments.Size());
-  for (auto it = List<PyObjPtr>::Iterator::Begin(arguments); !it.End();
-       it.Next()) {
-    fastLocalsList.Add(it.Get());
+  Collections::List<Object::PyObjPtr> fastLocalsList(arguments.Size());
+  for (auto it = Collections::Iterator<Object::PyObjPtr>::Begin(arguments);
+       !it.End(); it.Next()) {
+    fastLocalsList.Push(it.Get());
   }
-  auto fastLocals = object::CreateList(fastLocalsList, nLocals);
+  auto fastLocals = Object::CreatePyList(fastLocalsList, nLocals);
   return std::make_shared<PyFrame>(
     code, locals, globals, fastLocals, std::move(caller)
   );
@@ -127,7 +114,7 @@ void PyFrame::SetProgramCounter(Index pc) {
   programCounter = pc;
 }
 
-PyCodePtr PyFrame::Code() const {
+Object::PyCodePtr PyFrame::Code() const {
   return code;
 }
 
@@ -135,28 +122,30 @@ Index PyFrame::ProgramCounter() const {
   return programCounter;
 }
 
-PyDictPtr& PyFrame::Locals() {
+Object::PyDictPtr& PyFrame::Locals() {
   return locals;
 }
 
-PyDictPtr& PyFrame::Globals() {
+Object::PyDictPtr& PyFrame::Globals() {
   return globals;
 }
 
-PyListPtr& PyFrame::FastLocals() {
+Object::PyListPtr& PyFrame::FastLocals() {
   return fastLocals;
 }
 
-Stack<PyObjPtr>& PyFrame::Stack() {
+Collections::Stack<Object::PyObjPtr>& PyFrame::Stack() {
   return stack;
 }
 
-PyInstPtr PyFrame::Instruction() const {
+Object::PyInstPtr PyFrame::Instruction() const {
   if (!code->Instructions()) {
     ParseByteCode(code);
   }
-  auto insts = std::dynamic_pointer_cast<object::PyList>(code->Instructions());
-  return std::dynamic_pointer_cast<PyInst>(insts->Value().Get(programCounter));
+  auto insts = std::dynamic_pointer_cast<Object::PyList>(code->Instructions());
+  return std::dynamic_pointer_cast<Object::PyInst>(
+    insts->Value().Get(programCounter)
+  );
 }
 
 bool PyFrame::Finished() const {
@@ -171,78 +160,79 @@ void PyFrame::NextProgramCounter() {
   programCounter++;
 }
 
-void ParseByteCode(const PyCodePtr& code) {
-  auto iter = List<Byte>::Iterator::Begin(code->ByteCode()->Value().Value());
-  if (static_cast<object::Literal>(iter.Get()) != object::Literal::LIST) {
+void ParseByteCode(const Object::PyCodePtr& code) {
+  auto bytes = code->ByteCode()->Value().Value();
+  auto iter = Collections::Iterator<Byte>::Begin(bytes);
+  if (static_cast<Object::Literal>(iter.Get()) != Object::Literal::LIST) {
     throw std::runtime_error("Invalid insts");
   }
   iter.Next();
   Index size = ReadU64(iter);
-  auto insts = List<PyObjPtr>(size);
+  auto insts = Collections::List<Object::PyObjPtr>(size);
   while (size--) {
     auto byte = iter.Get();
     iter.Next();
-    switch (static_cast<ByteCode>(byte)) {
-      case ByteCode::LOAD_CONST: {
-        insts.Add(object::CreateLoadConst(ReadU64(iter)));
+    switch (static_cast<Object::ByteCode>(byte)) {
+      case Object::ByteCode::LOAD_CONST: {
+        insts.Push(Object::CreateLoadConst(ReadU64(iter)));
         break;
       }
-      case ByteCode::BINARY_ADD: {
-        insts.Add(object::CreateBinaryAdd());
+      case Object::ByteCode::BINARY_ADD: {
+        insts.Push(Object::CreateBinaryAdd());
         break;
       }
-      case ByteCode::BINARY_SUBTRACT: {
-        insts.Add(object::CreateBinarySubtract());
+      case Object::ByteCode::BINARY_SUBTRACT: {
+        insts.Push(Object::CreateBinarySubtract());
         break;
       }
-      case ByteCode::PRINT: {
-        insts.Add(object::CreatePrint());
+      case Object::ByteCode::PRINT: {
+        insts.Push(Object::CreatePrint());
         break;
       }
-      case ByteCode::STORE_FAST: {
-        insts.Add(object::CreateStoreFast(ReadU64(iter)));
+      case Object::ByteCode::STORE_FAST: {
+        insts.Push(Object::CreateStoreFast(ReadU64(iter)));
         break;
       }
-      case ByteCode::LOAD_FAST: {
-        insts.Add(object::CreateLoadFast(ReadU64(iter)));
+      case Object::ByteCode::LOAD_FAST: {
+        insts.Push(Object::CreateLoadFast(ReadU64(iter)));
         break;
       }
-      case ByteCode::COMPARE_OP: {
-        insts.Add(
-          object::CreateCompareOp(static_cast<object::CompareOp>(ReadU8(iter)))
+      case Object::ByteCode::COMPARE_OP: {
+        insts.Push(
+          Object::CreateCompareOp(static_cast<Object::CompareOp>(ReadU8(iter)))
         );
         break;
       }
-      case ByteCode::POP_JUMP_IF_FALSE: {
-        insts.Add(object::CreatePopJumpIfFalse(ReadI64(iter)));
+      case Object::ByteCode::POP_JUMP_IF_FALSE: {
+        insts.Push(Object::CreatePopJumpIfFalse(ReadI64(iter)));
         break;
       }
-      case ByteCode::POP_JUMP_IF_TRUE: {
-        insts.Add(object::CreatePopJumpIfTrue(ReadI64(iter)));
+      case Object::ByteCode::POP_JUMP_IF_TRUE: {
+        insts.Push(Object::CreatePopJumpIfTrue(ReadI64(iter)));
         break;
       }
-      case ByteCode::MAKE_FUNCTION: {
-        insts.Add(object::CreateMakeFunction());
+      case Object::ByteCode::MAKE_FUNCTION: {
+        insts.Push(Object::CreateMakeFunction());
         break;
       }
-      case ByteCode::CALL_FUNCTION: {
-        insts.Add(object::CreateCallFunction(ReadU64(iter)));
+      case Object::ByteCode::CALL_FUNCTION: {
+        insts.Push(Object::CreateCallFunction(ReadU64(iter)));
         break;
       }
-      case ByteCode::RETURN_VALUE: {
-        insts.Add(object::CreateReturnValue());
+      case Object::ByteCode::RETURN_VALUE: {
+        insts.Push(Object::CreateReturnValue());
         break;
       }
-      case ByteCode::LOAD_NAME: {
-        insts.Add(object::CreateLoadName(ReadU64(iter)));
+      case Object::ByteCode::LOAD_NAME: {
+        insts.Push(Object::CreateLoadName(ReadU64(iter)));
         break;
       }
-      case ByteCode::STORE_NAME: {
-        insts.Add(object::CreateStoreName(ReadU64(iter)));
+      case Object::ByteCode::STORE_NAME: {
+        insts.Push(Object::CreateStoreName(ReadU64(iter)));
         break;
       }
-      case ByteCode::LOAD_GLOBAL: {
-        insts.Add(object::CreateLoadGlobal(ReadU64(iter)));
+      case Object::ByteCode::LOAD_GLOBAL: {
+        insts.Push(Object::CreateLoadGlobal(ReadU64(iter)));
         break;
       }
       default:
@@ -252,14 +242,96 @@ void ParseByteCode(const PyCodePtr& code) {
         break;
     }
   }
-  code->SetInstructions(std::make_shared<object::PyList>(insts));
+  code->SetInstructions(std::make_shared<Object::PyList>(insts));
 }
 
-PyObjPtr PyFrame::Caller() const {
+Object::PyObjPtr FrameKlass::repr(Object::PyObjPtr obj) {
+  if (obj->Klass() != FrameKlass::Self()) {
+    throw std::runtime_error("Cannot repr non-frame object");
+  }
+  auto frame = std::dynamic_pointer_cast<PyFrame>(obj);
+  auto code = frame->Code();
+  auto name = code->Name();
+  Object::PyObjPtr repr =
+    Object::CreatePyString(Collections::CreateStringWithCString("<frame>\n"));
+  repr = repr->add(
+    Object::CreatePyString(Collections::CreateStringWithCString("stack:\n"))
+  );
+  auto stack = frame->Stack().GetContent();
+  for (auto it = Collections::Iterator<Object::PyObjPtr>::Begin(stack);
+       !it.End(); it.Next()) {
+    repr =
+      repr
+        ->add(Object::CreatePyInteger(
+                Collections::CreateIntegerWithU64(it.GetCurrentIndex())
+        )
+                ->repr())
+        ->add(Object::CreatePyString(Collections::CreateStringWithCString((":"))
+        ))
+        ->add(it.Get()->repr())->add(Object::CreatePyString(
+          Collections::CreateStringWithCString("\n")
+        ));
+  }
+  repr =
+    repr->add(Object::CreatePyString(Collections::CreateStringWithCString("\n"))
+    );
+  repr = repr->add(
+    Object::CreatePyString(Collections::CreateStringWithCString("locals:\n"))
+  );
+  repr = repr->add(frame->Locals()->repr());
+  repr =
+    repr->add(Object::CreatePyString(Collections::CreateStringWithCString("\n"))
+    );
+  repr = repr->add(
+    Object::CreatePyString(Collections::CreateStringWithCString("globals:\n"))
+  );
+  repr = repr->add(frame->Globals()->repr());
+  repr =
+    repr->add(Object::CreatePyString(Collections::CreateStringWithCString("\n"))
+    );
+  repr = repr->add(Object::CreatePyString(
+    Collections::CreateStringWithCString("fastLocals:\n")
+  ));
+  repr = repr->add(frame->FastLocals()->repr());
+  repr =
+    repr->add(Object::CreatePyString(Collections::CreateStringWithCString("\n"))
+    );
+  repr = repr->add(
+    Object::CreatePyString(Collections::CreateStringWithCString("caller:\n"))
+  );
+  repr = repr->add(frame->Caller()->repr());
+  repr =
+    repr->add(Object::CreatePyString(Collections::CreateStringWithCString("\n"))
+    );
+  repr = repr->add(
+    Object::CreatePyString(Collections::CreateStringWithCString("code:\n"))
+  );
+  repr = repr->add(code->repr());
+  repr =
+    repr->add(Object::CreatePyString(Collections::CreateStringWithCString("\n"))
+    );
+  repr = repr->add(Object::CreatePyString(
+    Collections::CreateStringWithCString("instruction:\n")
+  ));
+  repr = repr->add(frame->Instruction()->repr());
+  repr =
+    repr->add(Object::CreatePyString(Collections::CreateStringWithCString("\n"))
+    );
+  repr = repr->add(Object::CreatePyString(
+    Collections::CreateStringWithCString("programCounter:\n")
+  ));
+  repr = repr->add(Object::CreatePyInteger(
+                     Collections::CreateIntegerWithU64(frame->ProgramCounter())
+  )
+                     ->repr());
+  return repr;
+}
+
+Object::PyObjPtr PyFrame::Caller() const {
   return caller;
 }
 
 bool PyFrame::HasCaller() const {
-  return caller != object::PyNone::Instance();
+  return caller != Object::PyNone::Instance();
 }
-}  // namespace torchlight::runtime
+}  // namespace torchlight::Runtime

@@ -1,9 +1,9 @@
 // #ifndef TORCHLIGHT_MATRIX_H
 // #define TORCHLIGHT_MATRIX_H
 
-// #include "collections/List.h"
-// #include "collections/String.h"
-// namespace torchlight::collections {
+// #include "Collections/List.h"
+// #include "Collections/String.h"
+// namespace torchlight::Collections {
 // class Matrix {
 //  private:
 //   Index rows{};
@@ -38,5 +38,5 @@
 //   static Matrix eye(Index n);
 // };
 
-// }  // namespace torchlight::collections
+// }  // namespace torchlight::Collections
 // #endif

@@ -3,7 +3,7 @@
 
 #include <memory>
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
 class Klass;
 
@@ -76,6 +76,6 @@ using PyNotImplementedPtr = std::shared_ptr<PyNotImplemented>;
 class PyBytes;
 
 using PyBytesPtr = std::shared_ptr<PyBytes>;
-}  // namespace torchlight::object
+}  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_COMMON_H

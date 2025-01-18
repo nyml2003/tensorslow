@@ -1,27 +1,32 @@
-#include "collections/Bytes.h"
-#include "collections/impl/Bytes.h"
-#include "collections/impl/String.h"
-#include "object/ByteCode.h"
-#include "object/PyBytes.h"
-#include "object/PyObject.h"
-#include "object/PyString.h"
+#include "Collections/BytesHelper.h"
+#include "Collections/Iterator.h"
+#include "Collections/StringHelper.h"
+#include "Object/ByteCode.h"
+#include "Object/Klass.h"
+#include "Object/PyBytes.h"
+#include "Object/PyBoolean.h"
+#include "Object/PyObject.h"
+#include "Object/PyString.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
-using collections::Bytes;
-using collections::CreateStringWithCString;
-PyBytes::PyBytes(Bytes value)
+PyBytes::PyBytes(Collections::Bytes value)
   : PyObject(BytesKlass::Self()), value(std::move(value)) {}
 
-PyBytesPtr CreatePyBytes(Bytes value) {
+PyBytesPtr CreatePyBytes(Collections::Bytes value) {
   return std::make_shared<PyBytes>(value);
 }
 
-[[nodiscard]] Bytes PyBytes::Value() const {
+PyBytesPtr CreatePyBytes() {
+  return std::make_shared<PyBytes>(Collections::Bytes());
+}
+
+[[nodiscard]] Collections::Bytes PyBytes::Value() const {
   return value;
 }
 
-BytesKlass::BytesKlass() : Klass(CreateStringWithCString("bytes")) {}
+BytesKlass::BytesKlass()
+  : Klass(Collections::CreateStringWithCString("bytes")) {}
 
 KlassPtr BytesKlass::Self() {
   static KlassPtr instance = std::make_shared<BytesKlass>();
@@ -30,7 +35,7 @@ KlassPtr BytesKlass::Self() {
 
 PyObjPtr BytesKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
-    return nullptr;
+    throw std::runtime_error("PyBytes::add(): lhs or rhs is not a bytes");
   }
   auto left = std::dynamic_pointer_cast<PyBytes>(lhs);
   auto right = std::dynamic_pointer_cast<PyBytes>(rhs);
@@ -39,22 +44,38 @@ PyObjPtr BytesKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
 
 PyObjPtr BytesKlass::_serialize_(PyObjPtr obj) {
   if (obj->Klass() != Self()) {
-    return nullptr;
+    throw std::runtime_error("PyBytes::_serialize_(): obj is not a bytes");
   }
   return CreatePyBytes(
-    Serialize(Literal::BYTES)
+    Collections::Serialize(Literal::BYTES)
       .Add(Serialize(std::dynamic_pointer_cast<PyBytes>(obj)->Value()))
   );
 }
 
 PyObjPtr BytesKlass::repr(PyObjPtr obj) {
   if (obj->Klass() != Self()) {
-    return nullptr;
+    throw std::runtime_error("PyBytes::repr(): obj is not a bytes");
   }
   auto bytes = std::dynamic_pointer_cast<PyBytes>(obj);
-  return CreatePyString(CreateStringWithCString("<bytes ")
-                          .Add(CreateStringWithBytes(bytes->Value()))
-                          .Add(CreateStringWithCString(">")));
+  Collections::List<Collections::String> reprs;
+  auto bytesValue = bytes->Value().Value();
+  for (auto it = Collections::Iterator<Byte>::Begin(bytesValue);
+       !it.End(); it.Next()) {
+    reprs.Push(Collections::ReprByte(it.Get()));
+  }
+  return CreatePyString(Collections::CreateStringWithCString("Byte{").Add(
+    Collections::Join(reprs, Collections::CreateStringWithCString(","))
+      .Add(Collections::CreateStringWithCString("}"))
+  ));
 }
 
-}  // namespace torchlight::object
+PyObjPtr BytesKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
+  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
+    return CreatePyBoolean(false);
+  }
+  auto left = std::dynamic_pointer_cast<PyBytes>(lhs);
+  auto right = std::dynamic_pointer_cast<PyBytes>(rhs);
+  return CreatePyBoolean(left->Value().Equal(right->Value()));
+}
+
+}  // namespace torchlight::Object

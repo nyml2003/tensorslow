@@ -1,12 +1,8 @@
-#include "collections/impl/String.h"
-#include "object/ByteCode.h"
+#include "Collections/Bytes.h"
+#include "Collections/StringHelper.h"
+#include "Object/ByteCode.h"
 
-namespace torchlight::object {
-
-using collections::Byte;
-using collections::Bytes;
-using collections::CreateStringWithCString;
-using collections::String;
+namespace torchlight::Object {
 
 std::map<ByteCode, const char*> ByteCodeNames = {
   {ByteCode::POP_TOP, "POP_TOP"},
@@ -86,72 +82,76 @@ std::map<ByteCode, const char*> ByteCodeNames = {
   {ByteCode::ERROR, "ERROR"},
 };
 
-String ToString(NoneType /*kind*/) {
-  return CreateStringWithCString("None");
 }
 
-String ToString(CompareOp kind) {
+namespace torchlight::Collections {
+
+Collections::String ToString(None /*kind*/) {
+  return Collections::CreateStringWithCString("None");
+}
+
+Collections::String ToString(Object::CompareOp kind) {
   switch (kind) {
-    case CompareOp::LESS_THAN:
-      return CreateStringWithCString("<");
-    case CompareOp::LESS_THAN_EQUAL:
-      return CreateStringWithCString("<=");
-    case CompareOp::EQUAL:
-      return CreateStringWithCString("==");
-    case CompareOp::NOT_EQUAL:
-      return CreateStringWithCString("!=");
-    case CompareOp::GREATER_THAN:
-      return CreateStringWithCString(">");
-    case CompareOp::GREATER_THAN_EQUAL:
-      return CreateStringWithCString(">=");
+    case Object::CompareOp::LESS_THAN:
+      return Collections::CreateStringWithCString("<");
+    case Object::CompareOp::LESS_THAN_EQUAL:
+      return Collections::CreateStringWithCString("<=");
+    case Object::CompareOp::EQUAL:
+      return Collections::CreateStringWithCString("==");
+    case Object::CompareOp::NOT_EQUAL:
+      return Collections::CreateStringWithCString("!=");
+    case Object::CompareOp::GREATER_THAN:
+      return Collections::CreateStringWithCString(">");
+    case Object::CompareOp::GREATER_THAN_EQUAL:
+      return Collections::CreateStringWithCString(">=");
   }
-  return CreateStringWithCString("UNKNOWN");
+  return Collections::CreateStringWithCString("UNKNOWN");
 }
 
-String ToString(ByteCode code) {
-  return CreateStringWithCString(ByteCodeNames[code]);
+Collections::String ToString(Object::ByteCode code) {
+  return Collections::CreateStringWithCString(Object::ByteCodeNames[code]);
 }
 
-String ToString(Literal kind) {
+Collections::String ToString(Object::Literal kind) {
   switch (kind) {
-    case Literal::INTEGER:
-      return CreateStringWithCString("INTEGER");
-    case Literal::ZERO:
-      return CreateStringWithCString("ZERO");
-    case Literal::FLOAT:
-      return CreateStringWithCString("FLOAT");
-    case Literal::STRING:
-      return CreateStringWithCString("STRING");
-    case Literal::NONE:
-      return CreateStringWithCString("NONE");
-    case Literal::TRUE:
-      return CreateStringWithCString("TRUE");
-    case Literal::FALSE:
-      return CreateStringWithCString("FALSE");
-    case Literal::LIST:
-      return CreateStringWithCString("LIST");
-    case Literal::CODE:
-      return CreateStringWithCString("CODE");
-    case Literal::BYTES:
-      return CreateStringWithCString("BYTES");
+    case Object::Literal::INTEGER:
+      return Collections::CreateStringWithCString("INTEGER");
+    case Object::Literal::ZERO:
+      return Collections::CreateStringWithCString("ZERO");
+    case Object::Literal::FLOAT:
+      return Collections::CreateStringWithCString("FLOAT");
+    case Object::Literal::STRING:
+      return Collections::CreateStringWithCString("STRING");
+    case Object::Literal::NONE:
+      return Collections::CreateStringWithCString("NONE");
+    case Object::Literal::TRUE:
+      return Collections::CreateStringWithCString("TRUE");
+    case Object::Literal::FALSE:
+      return Collections::CreateStringWithCString("FALSE");
+    case Object::Literal::LIST:
+      return Collections::CreateStringWithCString("LIST");
+    case Object::Literal::CODE:
+      return Collections::CreateStringWithCString("CODE");
+    case Object::Literal::BYTES:
+      return Collections::CreateStringWithCString("BYTES");
   }
-  return CreateStringWithCString("UNKNOWN");
+  return Collections::CreateStringWithCString("UNKNOWN");
 }
 
-Bytes Serialize(NoneType /*kind*/) {
-  return Bytes();
+Collections::Bytes Serialize(None /*kind*/) {
+  return Collections::Bytes();
 }
 
-Bytes Serialize(CompareOp kind) {
-  return Bytes({static_cast<Byte>(kind)});
+Collections::Bytes Serialize(Object::CompareOp kind) {
+  return Collections::Bytes({static_cast<Byte>(kind)});
 }
 
-Bytes Serialize(ByteCode code) {
-  return Bytes({static_cast<Byte>(code)});
+Collections::Bytes Serialize(Object::ByteCode code) {
+  return Collections::Bytes({static_cast<Byte>(code)});
 }
 
-Bytes Serialize(Literal kind) {
-  return Bytes({static_cast<Byte>(kind)});
+Collections::Bytes Serialize(Object::Literal kind) {
+  return Collections::Bytes({static_cast<Byte>(kind)});
 }
 
-}  // namespace torchlight::object
+}  // namespace torchlight::Collections

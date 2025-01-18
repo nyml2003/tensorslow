@@ -1,37 +1,36 @@
 #ifndef TORCHLIGHT_RUNTIME_PYFUNCTION_H
 #define TORCHLIGHT_RUNTIME_PYFUNCTION_H
 
-#include "object/PyCode.h"
-#include "object/PyObject.h"
-#include "object/common.h"
+#include "Object/PyCode.h"
+#include "Object/PyObject.h"
 
-namespace torchlight::runtime {
-class PyFunction : public object::PyObject {
+namespace torchlight::Runtime {
+class PyFunction : public Object::PyObject {
  private:
-  object::PyCodePtr code;
-  object::PyDictPtr globals;
+  Object::PyCodePtr code;
+  Object::PyDictPtr globals;
 
  public:
-  PyFunction(object::PyCodePtr code, object::PyDictPtr globals);
+  PyFunction(Object::PyCodePtr code, Object::PyDictPtr globals);
 
-  [[nodiscard]] object::PyCodePtr Code() const;
+  [[nodiscard]] Object::PyCodePtr Code() const;
 
-  [[nodiscard]] object::PyDictPtr& Globals();
+  [[nodiscard]] Object::PyDictPtr& Globals();
 
-  [[nodiscard]] object::PyStrPtr Name() const;
+  [[nodiscard]] Object::PyStrPtr Name() const;
 };
 
 using PyFunctionPtr = std::shared_ptr<PyFunction>;
 
-class FunctionKlass : public object::Klass {
+class FunctionKlass : public Object::Klass {
  public:
   FunctionKlass();
 
-  static object::KlassPtr Self();
+  static Object::KlassPtr Self();
 
-  object::PyObjPtr repr(object::PyObjPtr self) override;
+  Object::PyObjPtr repr(Object::PyObjPtr self) override;
 };
 
-}  // namespace torchlight::runtime
+}  // namespace torchlight::Runtime
 
 #endif

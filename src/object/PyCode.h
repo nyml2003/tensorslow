@@ -1,12 +1,11 @@
 #ifndef TORCHLIGHT_RUNTIME_PYCODE_H
 #define TORCHLIGHT_RUNTIME_PYCODE_H
 
-#include "object/Klass.h"
-#include "object/PyBytes.h"
-#include "object/PyObject.h"
-#include "object/common.h"
+#include "Object/Klass.h"
+#include "Object/PyBytes.h"
+#include "Object/PyObject.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
 class PyCode : public PyObject {
   friend class CodeKlass;
@@ -18,7 +17,7 @@ class PyCode : public PyObject {
   PyListPtr names;
   PyListPtr varNames;
   PyStrPtr name;
-  collections::Index nLocals;
+  Index nLocals;
 
  public:
   explicit PyCode(
@@ -27,7 +26,7 @@ class PyCode : public PyObject {
     const PyObjPtr& names,
     const PyObjPtr& varNames,
     const PyObjPtr& name,
-    collections::Index nLocals
+    Index nLocals
   );
 
   [[nodiscard]] PyListPtr Instructions();
@@ -44,21 +43,21 @@ class PyCode : public PyObject {
 
   [[nodiscard]] PyListPtr VarNames() const;
 
-  [[nodiscard]] collections::Index NLocals() const;
+  [[nodiscard]] Index NLocals() const;
 };
 
 using PyCodePtr = std::shared_ptr<PyCode>;
 
-class CodeKlass : public object::Klass {
+class CodeKlass : public Object::Klass {
  public:
   explicit CodeKlass();
-  static object::KlassPtr Self();
+  static Object::KlassPtr Self();
 
   PyObjPtr repr(PyObjPtr self) override;
 
   PyObjPtr _serialize_(PyObjPtr self) override;
 };
 
-}  // namespace torchlight::object
+}  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_RUNTIME_PYCODE_H

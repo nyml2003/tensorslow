@@ -1,10 +1,10 @@
 #ifndef TORCHLIGHT_OBJECT_PYFLOAT_H
 #define TORCHLIGHT_OBJECT_PYFLOAT_H
 
-#include "object/Klass.h"
-#include "object/PyObject.h"
+#include "Object/Klass.h"
+#include "Object/PyObject.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
 class PyFloat : public PyObject {
  private:
@@ -18,7 +18,7 @@ class PyFloat : public PyObject {
 
 using PyFloatPtr = std::shared_ptr<PyFloat>;
 
-PyFloatPtr CreateFloat(double value);
+PyFloatPtr CreatePyFloat(double value);
 
 class FloatKlass : public Klass {
  public:
@@ -37,8 +37,10 @@ class FloatKlass : public Klass {
   PyObjPtr repr(PyObjPtr obj) override;
 
   PyObjPtr _serialize_(PyObjPtr obj) override;
+
+  PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs) override;
 };
 
-}  // namespace torchlight::object
+}  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_PYFLOAT_H

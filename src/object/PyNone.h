@@ -1,9 +1,9 @@
 #ifndef TORCHLIGHT_OBJECT_PYNONE_H
 #define TORCHLIGHT_OBJECT_PYNONE_H
 
-#include "object/Klass.h"
+#include "Object/Klass.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
 class NoneKlass : public Klass {
  public:
@@ -21,6 +21,10 @@ class PyNone : public PyObject {
   static PyObjPtr Instance();
 };
 
-}  // namespace torchlight::object
+using PyNonePtr = std::shared_ptr<PyNone>;
+
+PyNonePtr CreatePyNone();
+
+}  // namespace torchlight::Object
 
 #endif

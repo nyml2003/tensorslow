@@ -1,23 +1,23 @@
 #ifndef TORCHLIGHT_RUNTIME_INTERPRETER_H
 #define TORCHLIGHT_RUNTIME_INTERPRETER_H
 
-#include "object/PyCode.h"
-namespace torchlight::runtime {
+#include "Object/PyCode.h"
+namespace torchlight::Runtime {
 
 class Interpreter {
  private:
-  object::PyObjPtr frame;
+  Object::PyObjPtr frame;
 
-  object::PyObjPtr returnValue;
+  Object::PyObjPtr returnValue;
 
  public:
   explicit Interpreter();
 
-  void Run(const object::PyCodePtr& code);
+  void Run(const Object::PyCodePtr& code);
 
   void BuildFrameWithFunction(
-    const object::PyObjPtr& func,
-    const collections::List<object::PyObjPtr>& arguments
+    const Object::PyObjPtr& func,
+    const Collections::List<Object::PyObjPtr>& arguments
   );
 
   void EvalFrame();
@@ -27,6 +27,6 @@ class Interpreter {
   void DestroyFrame();
 };
 
-}  // namespace torchlight::runtime
+}  // namespace torchlight::Runtime
 
 #endif

@@ -1,26 +1,27 @@
-#include "collections/impl/Integer.h"
-#include "collections/impl/String.h"
-#include "object/ByteCode.h"
-#include "object/PyBoolean.h"
-#include "object/PyBytes.h"
-#include "object/PyInteger.h"
-#include "object/PyString.h"
+#include "Collections/IntegerHelper.h"
+#include "Collections/StringHelper.h"
+#include "Object/ByteCode.h"
+#include "Object/MixinCollections.h"
+#include "Object/PyBoolean.h"
+#include "Object/PyBytes.h"
+#include "Object/PyInteger.h"
+#include "Object/PyString.h"
 
-namespace torchlight::object {
 
-using collections::CreateIntegerOne;
-using collections::CreateIntegerZero;
-using collections::CreateStringWithCString;
+namespace torchlight::Object {
 
 KlassPtr BooleanKlass::Self() {
   static KlassPtr instance = std::make_shared<BooleanKlass>();
   return instance;
 }
 
-BooleanKlass::BooleanKlass() : Klass(CreateStringWithCString("bool")) {}
+BooleanKlass::BooleanKlass()
+  : Klass(Collections::CreateStringWithCString("bool")) {}
 
 PyBoolean::PyBoolean(bool value)
-  : PyInteger(value ? CreateIntegerZero() : CreateIntegerOne()) {
+  : PyInteger(
+      value ? Collections::CreateIntegerZero() : Collections::CreateIntegerOne()
+    ) {
   setKlass(BooleanKlass::Self());
 }
 
@@ -48,25 +49,32 @@ PyObjPtr BooleanKlass::_bool_(PyObjPtr obj) {
 
 PyObjPtr BooleanKlass::_serialize_(PyObjPtr obj) {
   if (obj->Klass() != Self()) {
-    return nullptr;
+    throw std::runtime_error("PyBoolean::_serialize_(): obj is not a bool");
   }
   auto boolean = std::dynamic_pointer_cast<PyBoolean>(obj);
   if (boolean->Value()) {
-    return CreatePyBytes(Serialize(Literal::TRUE));
+    return CreatePyBytes(Collections::Serialize(Literal::TRUE));
   }
-  return CreatePyBytes(Serialize(Literal::FALSE));
+  return CreatePyBytes(Collections::Serialize(Literal::FALSE));
 }
 
 PyObjPtr BooleanKlass::repr(PyObjPtr obj) {
   if (obj->Klass() != Self()) {
-    return nullptr;
+    throw std::runtime_error("PyBoolean::repr(): obj is not a bool");
   }
   auto boolean = std::dynamic_pointer_cast<PyBoolean>(obj);
   return CreatePyString(
-    CreateStringWithCString("<bool ")
-      .Add(CreateStringWithCString(boolean->Value() ? "True" : "False"))
-      .Add(CreateStringWithCString(">"))
+    Collections::CreateStringWithCString(boolean->Value() ? "True" : "False")
   );
 }
 
-}  // namespace torchlight::object
+PyObjPtr BooleanKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
+  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
+    return CreatePyBoolean(false);
+  }
+  auto left = std::dynamic_pointer_cast<PyBoolean>(lhs);
+  auto right = std::dynamic_pointer_cast<PyBoolean>(rhs);
+  return CreatePyBoolean(left->Value() == right->Value());
+}
+
+}  // namespace torchlight::Object

@@ -1,18 +1,11 @@
-#include "collections/common.h"
-#include "collections/impl/Bytes.h"
-#include "collections/impl/String.h"
-#include "object/PyBytes.h"
-#include "object/PyInst.h"
-#include "object/PyString.h"
+#include "Collections/BytesHelper.h"
+#include "Collections/StringHelper.h"
+#include "Object/PyBytes.h"
+#include "Object/PyInst.h"
+#include "Object/PyString.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
-using collections::Bytes;
-using collections::CreateStringWithCString;
-using collections::Index;
-using collections::Serialize;
-using collections::String;
-using collections::ToString;
 PyInst::PyInst(ByteCode code, OperandKind operand)
   : PyObject(InstKlass::Self()), code(code), operand(operand) {}
 
@@ -24,7 +17,7 @@ PyInst::PyInst(ByteCode code, OperandKind operand)
   return operand;
 }
 
-InstKlass::InstKlass() : Klass(CreateStringWithCString("inst")) {}
+InstKlass::InstKlass() : Klass(Collections::CreateStringWithCString("inst")) {}
 
 KlassPtr InstKlass::Self() {
   static KlassPtr instance = std::make_shared<InstKlass>();
@@ -33,16 +26,16 @@ KlassPtr InstKlass::Self() {
 
 PyObjPtr InstKlass::_serialize_(PyObjPtr obj) {
   if (obj->Klass() != Self()) {
-    return nullptr;
+    throw std::runtime_error("PyInst::_serialize_(): obj is not an inst object");
   }
   auto inst = std::dynamic_pointer_cast<PyInst>(obj);
-  Bytes bytes = Serialize(inst->Code());
+  Collections::Bytes bytes = Collections::Serialize(inst->Code());
   std::visit(
     overload{
-      [&bytes](NoneType) {},
-      [&bytes](Index index) { bytes.Concat(Serialize(index)); },
-      [&bytes](CompareOp op) { bytes.Concat(Serialize(op)); },
-      [&bytes](int64_t index) { bytes.Concat(Serialize(index)); }
+      [&bytes](None) {},
+      [&bytes](Index index) { bytes.Concat(Collections::Serialize(index)); },
+      [&bytes](CompareOp op) { bytes.Concat(Collections::Serialize(op)); },
+      [&bytes](int64_t index) { bytes.Concat(Collections::Serialize(index)); }
     },
     inst->Operand()
   );
@@ -51,22 +44,21 @@ PyObjPtr InstKlass::_serialize_(PyObjPtr obj) {
 
 PyObjPtr InstKlass::repr(PyObjPtr obj) {
   if (obj->Klass() != Self()) {
-    return nullptr;
+    throw std::runtime_error("PyInst::repr(): obj is not an inst object");
   }
   auto inst = std::dynamic_pointer_cast<PyInst>(obj);
-  String result = CreateStringWithCString("<inst ")
-                    .Add(ToString(inst->Code()))
-                    .Add(CreateStringWithCString(" "));
+  Collections::String result =
+    Collections::ToString(inst->Code())
+      .Add(Collections::CreateStringWithCString(" "));
   std::visit(
     overload{
-      [&result](NoneType) {},
-      [&result](Index index) { result.Concat(ToString(index)); },
-      [&result](CompareOp op) { result.Concat(ToString(op)); },
-      [&result](int64_t index) { result.Concat(ToString(index)); }
+      [&result](None) {},
+      [&result](Index index) { result.Concat(Collections::ToString(index)); },
+      [&result](CompareOp op) { result.Concat(Collections::ToString(op)); },
+      [&result](int64_t index) { result.Concat(Collections::ToString(index)); }
     },
     inst->Operand()
   );
-  result.Concat(CreateStringWithCString(">\n"));
   return CreatePyString(result);
 }
 
@@ -130,4 +122,4 @@ PyInstPtr CreateBinarySubtract() {
   return std::make_shared<PyInst>(ByteCode::BINARY_SUBTRACT);
 }
 
-}  // namespace torchlight::object
+}  // namespace torchlight::Object

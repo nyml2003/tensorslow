@@ -1,9 +1,9 @@
 #ifndef TORCHLIGHT_OBJECT_PYOBJECT_H
 #define TORCHLIGHT_OBJECT_PYOBJECT_H
 
-#include "object/common.h"
+#include "Object/Common.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
 class PyObject : public std::enable_shared_from_this<PyObject> {
  private:
@@ -17,7 +17,7 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
 
   [[nodiscard]] KlassPtr Klass() const;
 
-  virtual ~PyObject() = default;
+  virtual ~PyObject();
 
   PyObject(const PyObject&) = delete;
 
@@ -66,6 +66,6 @@ bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
 void print(const PyObjPtr& obj);
 
-}  // namespace torchlight::object
+}  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_PYOBJECT_H

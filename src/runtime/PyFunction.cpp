@@ -1,46 +1,46 @@
-#include "runtime/PyFunction.h"
-#include "collections/impl/String.h"
-#include "object/PyString.h"
+#include "Collections/StringHelper.h"
+#include "Object/PyString.h"
+#include "Runtime/PyFunction.h"
 
-namespace torchlight::runtime {
+namespace torchlight::Runtime {
 
-PyFunction::PyFunction(object::PyCodePtr code, object::PyDictPtr globals)
-  : object::PyObject(FunctionKlass::Self()),
+PyFunction::PyFunction(Object::PyCodePtr code, Object::PyDictPtr globals)
+  : Object::PyObject(FunctionKlass::Self()),
     code(std::move(code)),
     globals(std::move(globals)) {}
 
-object::PyCodePtr PyFunction::Code() const {
+Object::PyCodePtr PyFunction::Code() const {
   return code;
 }
 
-object::PyDictPtr& PyFunction::Globals() {
+Object::PyDictPtr& PyFunction::Globals() {
   return globals;
 }
 
-object::PyStrPtr PyFunction::Name() const {
+Object::PyStrPtr PyFunction::Name() const {
   return code->Name();
 }
 
 FunctionKlass::FunctionKlass()
-  : object::Klass(collections::CreateStringWithCString("function")) {}
+  : Object::Klass(Collections::CreateStringWithCString("function")) {}
 
-object::KlassPtr FunctionKlass::Self() {
-  static object::KlassPtr instance = std::make_shared<FunctionKlass>();
+Object::KlassPtr FunctionKlass::Self() {
+  static Object::KlassPtr instance = std::make_shared<FunctionKlass>();
   return instance;
 }
 
-object::PyObjPtr FunctionKlass::repr(object::PyObjPtr self) {
+Object::PyObjPtr FunctionKlass::repr(Object::PyObjPtr self) {
   if (self->Klass() != Self()) {
-    return nullptr;
+    throw std::runtime_error("Function does not support repr operation");
   }
   auto function = std::dynamic_pointer_cast<PyFunction>(self);
-  return std::make_shared<object::PyString>(
-    collections::CreateStringWithCString("<function ")
-      .Concat(function->Name()->Value())
-      .Concat(collections::CreateStringWithCString(" at "))
-      .Concat(collections::ToString(reinterpret_cast<uint64_t>(self.get())))
-      .Concat(collections::CreateStringWithCString(">\n"))
+  return std::make_shared<Object::PyString>(
+    Collections::CreateStringWithCString("<function ")
+      .Add(function->Name()->Value())
+      .Add(Collections::CreateStringWithCString(" at "))
+      .Add(Collections::ToString(reinterpret_cast<uint64_t>(self.get())))
+      .Add(Collections::CreateStringWithCString(">\n"))
   );
 }
 
-}  // namespace torchlight::runtime
+}  // namespace torchlight::Runtime

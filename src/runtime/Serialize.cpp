@@ -1,192 +1,141 @@
-
-
-#include "runtime/Serialize.h"
-#include "collections/Bytes.h"
-#include "collections/Integer.h"
-#include "collections/impl/Integer.h"
-#include "collections/impl/String.h"
-#include "object/ByteCode.h"
-#include "object/PyBoolean.h"
-#include "object/PyBytes.h"
-#include "object/PyCode.h"
-#include "object/PyFloat.h"
-#include "object/PyInteger.h"
-#include "object/PyList.h"
-#include "object/PyNone.h"
-#include "object/PyString.h"
+#include "Collections/Bytes.h"
+#include "Collections/BytesHelper.h"
+#include "Collections/List.h"
+#include "Collections/StringHelper.h"
+#include "Object/ByteCode.h"
+#include "Object/PyBoolean.h"
+#include "Object/PyBytes.h"
+#include "Object/PyInteger.h"
+#include "Object/PyList.h"
+#include "Object/PyNone.h"
+#include "Object/PyString.h"
+#include "Runtime/Serialize.h"
 
 #include <cstring>
-#include <memory>
-#include <stdexcept>
-namespace torchlight::runtime {
-using collections::Byte;
-using collections::Bytes;
-using collections::Integer;
-using collections::List;
-using object::Literal;
-using object::PyBoolean;
-using object::PyBytes;
-using object::PyBytesPtr;
-using object::PyCode;
-using object::PyCodePtr;
-using object::PyFloat;
-using object::PyFloatPtr;
-using object::PyInteger;
-using object::PyIntPtr;
-using object::PyList;
-using object::PyListPtr;
-using object::PyNone;
-using object::PyObjPtr;
-using object::PyString;
-using object::PyStrPtr;
+namespace torchlight::Runtime {
 
-double ReadDouble(List<Byte>::Iterator& byteIter) {
-  std::array<Byte, sizeof(double)> sizeBuffer{};
-  for (std::size_t i = 0; i < sizeof(double); ++i) {
-    sizeBuffer[i] = byteIter.Get();
-    byteIter.Next();
-  }
-  double result = 0;
-  std::memcpy(&result, sizeBuffer.data(), sizeof(double));
-  return result;
-}
-uint64_t ReadU64(List<Byte>::Iterator& byteIter) {
-  uint64_t result = 0;
-  for (size_t i = 0; i < sizeof(uint64_t); ++i) {
-    result |= byteIter.Get() << (i * 8);
-    byteIter.Next();
-  }
-  return result;
+Collections::Bytes
+ReadBytes(Collections::Iterator<Byte>& byteIter, uint64_t size) {
+  return Collections::Bytes(byteIter.Advance(size));
 }
 
-int64_t ReadI64(List<Byte>::Iterator& byteIter) {
-  int64_t result = 0;
-  for (size_t i = 0; i < sizeof(int64_t); ++i) {
-    result |= static_cast<int64_t>(byteIter.Get()) << (i * 8);
-    byteIter.Next();
-  }
-  return result;
+double ReadDouble(Collections::Iterator<Byte>& byteIter) {
+  return Collections::DeserializeDouble(
+    Collections::Bytes(byteIter.Advance(sizeof(double)))
+  );
 }
-uint32_t ReadU32(List<Byte>::Iterator& byteIter) {
-  uint32_t result = 0;
-  for (size_t i = 0; i < sizeof(uint32_t); ++i) {
-    result |= byteIter.Get() << (i * 8);
-    byteIter.Next();
-  }
-  return result;
-}
-uint16_t ReadU16(List<Byte>::Iterator& byteIter) {
-  uint16_t result = 0;
-  for (size_t i = 0; i < sizeof(uint16_t); ++i) {
-    result |= byteIter.Get() << (i * 8);
-    byteIter.Next();
-  }
-  return result;
-}
-uint8_t ReadU8(List<Byte>::Iterator& byteIter) {
-  uint8_t result = byteIter.Get();
-  byteIter.Next();
-  return result;
-}
-
-PyStrPtr ReadString(List<Byte>::Iterator& byteIter) {
-  uint64_t size = ReadU64(byteIter);
-  List<Byte> result(size);
-  while (size--) {
-    result.Add(byteIter.Get());
-    byteIter.Next();
-  }
-  return std::make_shared<PyString>(
-    collections::CreateStringWithBytes(Bytes(result))
+uint64_t ReadU64(Collections::Iterator<Byte>& byteIter) {
+  return Collections::DeserializeU64(
+    Collections::Bytes(byteIter.Advance(sizeof(uint64_t)))
   );
 }
 
-PyBytesPtr ReadBytes(List<Byte>::Iterator& byteIter) {
-  uint64_t size = ReadU64(byteIter);
-  List<Byte> result(size);
-  while (size--) {
-    result.Add(byteIter.Get());
-    byteIter.Next();
-  }
-  return std::make_shared<PyBytes>(Bytes(result));
+uint64_t ReadSize(Collections::Iterator<Byte>& byteIter) {
+  return Collections::DeserializeU64(
+    Collections::Bytes(byteIter.Preview(sizeof(uint64_t)))
+  );
 }
 
-PyIntPtr ReadInteger(List<Byte>::Iterator& byteIter) {
-  const char positiveSign = '+';
-  const char negativeSign = '-';
-  char sign = static_cast<char>(byteIter.Get());
-  if (sign != positiveSign && sign != negativeSign) {
-    throw std::runtime_error("Invalid integer sign");
-  }
-  bool isNegative = sign == negativeSign;
+int64_t ReadI64(Collections::Iterator<Byte>& byteIter) {
+  return Collections::DeserializeI64(
+    Collections::Bytes(byteIter.Advance(sizeof(int64_t)))
+  );
+}
+uint32_t ReadU32(Collections::Iterator<Byte>& byteIter) {
+  return Collections::DeserializeU32(
+    Collections::Bytes(byteIter.Advance(sizeof(uint32_t)))
+  );
+}
+uint16_t ReadU16(Collections::Iterator<Byte>& byteIter) {
+  return Collections::DeserializeU16(
+    Collections::Bytes(byteIter.Advance(sizeof(uint16_t)))
+  );
+}
+uint8_t ReadU8(Collections::Iterator<Byte>& byteIter) {
+  auto result = byteIter.Get();
   byteIter.Next();
+  return result;
+}
+
+Object::PyStrPtr ReadString(Collections::Iterator<Byte>& byteIter) {
+  auto size = ReadU64(byteIter);
+  return Object::CreatePyString(
+    Collections::CreateStringWithBytes(ReadBytes(byteIter, size))
+  );
+}
+
+Object::PyBytesPtr ReadBytes(Collections::Iterator<Byte>& byteIter) {
   uint64_t size = ReadU64(byteIter);
-  List<uint32_t> result(size);
-  while (size--) {
-    result.Add(ReadU16(byteIter));
-  }
-  return std::make_shared<PyInteger>(Integer(result, isNegative));
+  return Object::CreatePyBytes(Collections::Bytes(ReadBytes(byteIter, size)));
 }
-PyFloatPtr ReadFloat(List<Byte>::Iterator& byteIter) {
-  double value = ReadDouble(byteIter);
-  return std::make_shared<PyFloat>(value);
+
+Object::PyIntPtr ReadInteger(Collections::Iterator<Byte>& byteIter) {
+  uint64_t size = ReadSize(byteIter);
+  auto bytes = ReadBytes(byteIter, size * 2 + sizeof(uint64_t) + 1);
+  return Object::CreatePyInteger(Collections::DeserializeInteger(bytes));
 }
-PyListPtr ReadList(List<Byte>::Iterator& byteIter) {
+Object::PyFloatPtr ReadFloat(Collections::Iterator<Byte>& byteIter) {
+  return Object::CreatePyFloat(ReadDouble(byteIter));
+}
+Object::PyListPtr ReadList(Collections::Iterator<Byte>& byteIter) {
   uint64_t size = ReadU64(byteIter);
   if (size == 0) {
-    return std::make_shared<PyList>(List<PyObjPtr>());
+    return Object::CreatePyList(0);
   }
-  List<PyObjPtr> result(size);
-  while (size--) {
-    result.Add(ReadObject(byteIter));
+  Collections::List<Object::PyObjPtr> result(size);
+  for (uint64_t i = 0; i < size; i++) {
+    auto obj = ReadObject(byteIter);
+    result.Push(obj);
   }
-  return std::make_shared<PyList>(result);
+  return std::make_shared<Object::PyList>(result);
 }
 
-PyObjPtr ReadObject(List<Byte>::Iterator& byteIter) {
+Object::PyObjPtr ReadObject(Collections::Iterator<Byte>& byteIter) {
   Byte type = byteIter.Get();
   byteIter.Next();
-  auto e = static_cast<Literal>(type);
+  auto e = static_cast<Object::Literal>(type);
   switch (e) {
-    case Literal::STRING:
+    case Object::Literal::STRING:
       return ReadString(byteIter);
-    case Literal::INTEGER:
+    case Object::Literal::INTEGER:
       return ReadInteger(byteIter);
-    case Literal::FLOAT:
+    case Object::Literal::FLOAT:
       return ReadFloat(byteIter);
-    case Literal::LIST:
+    case Object::Literal::LIST:
       return ReadList(byteIter);
-    case Literal::TRUE:
-      return PyBoolean::True();
-    case Literal::FALSE:
-      return PyBoolean::False();
-    case Literal::NONE:
-      return PyNone::Instance();
-    case Literal::ZERO:
-      return std::make_shared<PyInteger>(collections::CreateIntegerZero());
-    case Literal::CODE:
+    case Object::Literal::TRUE:
+      return Object::CreatePyBoolean(true);
+    case Object::Literal::FALSE:
+      return Object::CreatePyBoolean(false);
+    case Object::Literal::NONE:
+      return Object::CreatePyNone();
+    case Object::Literal::ZERO:
+      return Object::CreatePyInteger(0);
+    case Object::Literal::CODE:
       return ReadCode(byteIter);
-    case Literal::BYTES:
+    case Object::Literal::BYTES:
       return ReadBytes(byteIter);
   }
+  throw std::runtime_error("Unknown type");
 }
 
-PyCodePtr ReadCode(List<Byte>::Iterator& byteIter) {
+Object::PyCodePtr ReadCode(Collections::Iterator<Byte>& byteIter) {
   auto consts = ReadObject(byteIter);
   auto names = ReadObject(byteIter);
   auto varNames = ReadObject(byteIter);
   auto name = ReadObject(byteIter);
   auto nLocals = ReadU64(byteIter);
   auto byteCode = ReadObject(byteIter);
-  return std::make_shared<PyCode>(
+  return std::make_shared<Object::PyCode>(
     byteCode, consts, names, varNames, name, nLocals
   );
 }
 
-PyCodePtr MakeCode(const PyBytesPtr& bytes) {
-  auto it = List<Byte>::Iterator::Begin(bytes->Value().Value());
-  auto code = ReadObject(it);
-  return std::dynamic_pointer_cast<PyCode>(code);
+Object::PyCodePtr MakeCode(const Object::PyBytesPtr& byteCode) {
+  auto bytes = byteCode->Value().Value();
+  Collections::Iterator<Byte> byteIter =
+    Collections::Iterator<Byte>::Begin(bytes);
+  auto obj = ReadObject(byteIter);
+  return std::dynamic_pointer_cast<Object::PyCode>(obj);
 }
-
-}  // namespace torchlight::runtime
+}  // namespace torchlight::Runtime

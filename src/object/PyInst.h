@@ -1,20 +1,19 @@
 #ifndef TORCHLIGHT_RUNTIME_PYINST_H
 #define TORCHLIGHT_RUNTIME_PYINST_H
 
-#include "object/ByteCode.h"
-#include "object/Klass.h"
-#include "object/PyObject.h"
-#include "object/common.h"
+#include "Object/ByteCode.h"
+#include "Object/Klass.h"
+#include "Object/PyObject.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
 class PyInst : public PyObject {
  private:
   ByteCode code;
-  OperandKind operand = NoneType();
+  OperandKind operand = None();
 
  public:
-  explicit PyInst(ByteCode code, OperandKind operand = NoneType());
+  explicit PyInst(ByteCode code, OperandKind operand = None());
 
   [[nodiscard]] ByteCode Code() const;
 
@@ -33,22 +32,21 @@ class InstKlass : public Klass {
   PyObjPtr repr(PyObjPtr obj) override;
 };
 
-PyInstPtr CreateLoadConst(collections::Index index);
+PyInstPtr CreateLoadConst(Index index);
 
 PyInstPtr CreateBinaryAdd();
 
 PyInstPtr CreateBinarySubtract();
 
-
 PyInstPtr CreatePrint();
 
-PyInstPtr CreateStoreName(collections::Index index);
+PyInstPtr CreateStoreName(Index index);
 
-PyInstPtr CreateLoadName(collections::Index index);
+PyInstPtr CreateLoadName(Index index);
 
-PyInstPtr CreateStoreFast(collections::Index index);
+PyInstPtr CreateStoreFast(Index index);
 
-PyInstPtr CreateLoadFast(collections::Index index);
+PyInstPtr CreateLoadFast(Index index);
 
 PyInstPtr CreateCompareOp(CompareOp op);
 
@@ -58,14 +56,12 @@ PyInstPtr CreatePopJumpIfTrue(int64_t index);
 
 PyInstPtr CreateMakeFunction();
 
-PyInstPtr CreateCallFunction(collections::Index argumentCount);
+PyInstPtr CreateCallFunction(Index argumentCount);
 
 PyInstPtr CreateReturnValue();
 
-PyInstPtr CreateLoadGlobal(collections::Index index);
+PyInstPtr CreateLoadGlobal(Index index);
 
-
-
-}  // namespace torchlight::object
+}  // namespace torchlight::Object
 
 #endif

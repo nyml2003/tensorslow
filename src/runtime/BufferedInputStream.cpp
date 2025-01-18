@@ -1,8 +1,8 @@
 #include <optional>
 #include <stdexcept>
-#include "runtime/BufferedInputStream.h"
+#include "Runtime/BufferedInputStream.h"
 
-namespace torchlight::runtime {
+namespace torchlight::Runtime {
 
 BufferedInputStream::BufferedInputStream(const char* filename) {
   file.open(filename, std::ios::binary);
@@ -45,4 +45,4 @@ std::optional<uint8_t> BufferedInputStream::ReadU8() {
   return buffer;
 }
 
-}  // namespace torchlight::runtime
+}  // namespace torchlight::Runtime

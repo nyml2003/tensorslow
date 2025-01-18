@@ -1,13 +1,13 @@
 #ifndef TORCHLIGHT_BYTECODE_H
 #define TORCHLIGHT_BYTECODE_H
 
-#include "collections/Bytes.h"
-#include "collections/String.h"
+#include "Collections/Bytes.h"
+#include "Collections/String.h"
 
 #include <map>
 #include <variant>
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
 enum class ByteCode {
   POP_TOP = 0,
@@ -107,9 +107,7 @@ enum class CompareOp {
   GREATER_THAN_EQUAL = 5,
 };
 
-struct NoneType {};
-using OperandKind =
-  std::variant<CompareOp, NoneType, collections::Index, int64_t>;
+using OperandKind = std::variant<CompareOp, None, Index, int64_t>;
 
 enum class Literal {
   INTEGER,
@@ -126,14 +124,15 @@ enum class Literal {
 
 extern std::map<ByteCode, const char*> ByteCodeNames;
 
-collections::String ToString(NoneType kind);
-collections::String ToString(CompareOp kind);
-collections::String ToString(ByteCode code);
-collections::String ToString(Literal kind);
-collections::Bytes Serialize(NoneType kind);
-collections::Bytes Serialize(CompareOp kind);
-collections::Bytes Serialize(ByteCode code);
-collections::Bytes Serialize(Literal kind);
-
-}  // namespace torchlight::object
+}  // namespace torchlight::Object
+namespace torchlight::Collections {
+String ToString(None kind);
+String ToString(Object::CompareOp kind);
+String ToString(Object::ByteCode code);
+String ToString(Object::Literal kind);
+Bytes Serialize(None kind);
+Bytes Serialize(Object::CompareOp kind);
+Bytes Serialize(Object::ByteCode code);
+Bytes Serialize(Object::Literal kind);
+}  // namespace torchlight::Collections
 #endif  // TORCHLIGHT_BYTECODE_H

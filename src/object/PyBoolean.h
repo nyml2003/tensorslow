@@ -1,10 +1,10 @@
 #ifndef TORCHLIGHT_OBJECT_PYBOOLEAN_H
 #define TORCHLIGHT_OBJECT_PYBOOLEAN_H
 
-#include "object/Klass.h"
-#include "object/PyInteger.h"
+#include "Object/Klass.h"
+#include "Object/PyInteger.h"
 
-namespace torchlight::object {
+namespace torchlight::Object {
 
 class BooleanKlass : public Klass {
  public:
@@ -16,6 +16,8 @@ class BooleanKlass : public Klass {
   PyObjPtr _serialize_(PyObjPtr obj) override;
 
   PyObjPtr repr(PyObjPtr obj) override;
+
+  PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs) override;
 };
 
 PyBoolPtr CreatePyBoolean(bool value);
@@ -31,6 +33,6 @@ class PyBoolean : public PyInteger {
 };
 
 using PyBoolPtr = std::shared_ptr<PyBoolean>;
-}  // namespace torchlight::object
+}  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_PYBOOLEAN_H

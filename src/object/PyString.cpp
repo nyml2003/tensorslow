@@ -1,34 +1,29 @@
-#include "object/PyString.h"
+#include "Collections/BytesHelper.h"
+#include "Collections/StringHelper.h"
+#include "Object/ByteCode.h"
+#include "Object/Klass.h"
+#include "Object/PyBoolean.h"
+#include "Object/PyBytes.h"
+#include "Object/PyString.h"
 
-#include "collections/String.h"
-#include "collections/impl/Bytes.h"
-#include "collections/impl/String.h"
-#include "object/ByteCode.h"
-#include "object/Klass.h"
-#include "object/PyBoolean.h"
-#include "object/PyBytes.h"
+namespace torchlight::Object {
 
-namespace torchlight::object {
-
-using collections::CreateStringWithCString;
-using collections::Serialize;
-using collections::String;
-
-PyString::PyString(String value)
+PyString::PyString(Collections::String value)
   : PyObject(StringKlass::Self()), value(std::move(value)) {}
 
-String PyString::Value() const {
+Collections::String PyString::Value() const {
   return value;
 }
 
-StringKlass::StringKlass() : Klass(CreateStringWithCString("str")) {}
+StringKlass::StringKlass()
+  : Klass(Collections::CreateStringWithCString("str")) {}
 
 KlassPtr StringKlass::Self() {
   static KlassPtr instance = std::make_shared<StringKlass>();
   return instance;
 }
 
-PyStrPtr CreatePyString(String value) {
+PyStrPtr CreatePyString(Collections::String value) {
   return std::make_shared<PyString>(value);
 }
 
@@ -48,10 +43,9 @@ PyObjPtr StringKlass::repr(PyObjPtr obj) {
   if (obj->Klass() != StringKlass::Self()) {
     throw std::runtime_error("obj is not a string");
   }
-  auto string = std::dynamic_pointer_cast<PyString>(obj);
-  return CreatePyString(CreateStringWithCString("<str '")
-                          .Add(string->Value())
-                          .Add(CreateStringWithCString("'>")));
+  return CreatePyString(Collections::CreateStringWithCString("\"")
+                         .Add(std::dynamic_pointer_cast<PyString>(obj)->Value())
+                         .Add(Collections::CreateStringWithCString("\"")));
 }
 
 PyObjPtr StringKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
@@ -68,10 +62,10 @@ PyObjPtr StringKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
 
 PyObjPtr StringKlass::_serialize_(PyObjPtr obj) {
   if (obj->Klass() != Self()) {
-    return nullptr;
+    throw std::runtime_error("str does not support serialization");
   }
   auto string = std::dynamic_pointer_cast<PyString>(obj);
-  return CreatePyBytes(Serialize(Literal::BYTES).Add(Serialize(string->Value()))
-  );
+  return CreatePyBytes(Collections::Serialize(Literal::STRING)
+                         .Add(Collections::Serialize(string->Value())));
 }
-}  // namespace torchlight::object
+}  // namespace torchlight::Object

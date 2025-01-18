@@ -16,6 +16,8 @@ cmake --build build --config Debug
 ./build/TEST_BYTES
 ./build/TEST_INTEGER
 ./build/TEST_DECIMAL
+./build/TEST_MAP
+./build/TEST_PYINTEGER
 
 
 # 生成最终覆盖率数据

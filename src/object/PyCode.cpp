@@ -1,20 +1,20 @@
-#include "object/PyCode.h"
-#include "collections/impl/Bytes.h"
-#include "collections/impl/String.h"
-#include "object/ByteCode.h"
-#include "object/Klass.h"
-#include "object/PyBytes.h"
-#include "object/PyList.h"
-#include "object/PyObject.h"
-#include "object/PyString.h"
+#include "Collections/BytesHelper.h"
+#include "Collections/IntegerHelper.h"
+#include "Collections/StringHelper.h"
+#include "Object/ByteCode.h"
+#include "Object/Klass.h"
+#include "Object/PyBytes.h"
+#include "Object/PyCode.h"
+#include "Object/PyInteger.h"
+#include "Object/PyList.h"
+#include "Object/PyObject.h"
+#include "Object/PyString.h"
 
 #include <cstring>
 #include <memory>
 #include <stdexcept>
 
-namespace torchlight::object {
-using collections::CreateStringWithCString;
-using collections::ToString;
+namespace torchlight::Object {
 
 PyCode::PyCode(
   const PyObjPtr& byteCodes,
@@ -22,7 +22,7 @@ PyCode::PyCode(
   const PyObjPtr& names,
   const PyObjPtr& varNames,
   const PyObjPtr& name,
-  collections::Index nLocals
+  Index nLocals
 )
   : PyObject(CodeKlass::Self()) {
   if (byteCodes->Klass() != BytesKlass::Self()) {
@@ -77,46 +77,67 @@ PyListPtr PyCode::VarNames() const {
   return varNames;
 }
 
-collections::Index PyCode::NLocals() const {
+Index PyCode::NLocals() const {
   return nLocals;
 }
 
-CodeKlass::CodeKlass() : object::Klass(CreateStringWithCString("code")) {}
+CodeKlass::CodeKlass()
+  : Object::Klass(Collections::CreateStringWithCString("code")) {}
 
-object::KlassPtr CodeKlass::Self() {
-  static object::KlassPtr instance = std::make_shared<CodeKlass>();
+Object::KlassPtr CodeKlass::Self() {
+  static Object::KlassPtr instance = std::make_shared<CodeKlass>();
   return instance;
 }
 
 PyObjPtr CodeKlass::repr(PyObjPtr self) {
   if (self->Klass() != Self()) {
-    return nullptr;
+    throw std::runtime_error("PyCode::repr(): obj is not a code object");
   }
   auto code = std::dynamic_pointer_cast<PyCode>(self);
-  PyObjPtr s = std::make_shared<PyString>(
-    CreateStringWithCString("<code object ")
-      .Concat(code->Name()->Value())
-      .Concat(CreateStringWithCString(" at "))
-      .Concat(ToString(reinterpret_cast<uint64_t>(self.get())))
-      .Concat(CreateStringWithCString(">"))
+  PyObjPtr repr =
+    CreatePyString(Collections::CreateStringWithCString("<code>\n"));
+  repr =
+    repr->add(CreatePyString(Collections::CreateStringWithCString("consts:\n"))
+    );
+  repr = repr->add(code->Consts()->repr());
+  repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
+  repr =
+    repr->add(CreatePyString(Collections::CreateStringWithCString("names:\n")));
+  repr = repr->add(code->Names()->repr());
+  repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
+  repr =
+    repr->add(CreatePyString(Collections::CreateStringWithCString("varNames:\n")
+    ));
+  repr = repr->add(code->VarNames()->repr());
+  repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
+  repr =
+    repr->add(CreatePyString(Collections::CreateStringWithCString("name:\n")));
+  repr = repr->add(code->Name()->repr());
+  repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
+  repr =
+    repr->add(CreatePyString(Collections::CreateStringWithCString("nLocals: "))
+    );
+  repr = repr->add(
+    CreatePyInteger(Collections::CreateIntegerWithU64(code->NLocals()))->repr()
   );
-  return s;
+  repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
+  return repr;
 }
 
 PyObjPtr CodeKlass::_serialize_(PyObjPtr self) {
   if (self->Klass() != Self()) {
-    return nullptr;
+    throw std::runtime_error("PyCode::_serialize_(): obj is not a code object");
   }
   auto code = std::dynamic_pointer_cast<PyCode>(self);
   PyObjPtr result =
-    std::make_shared<PyBytes>(Serialize(Literal::CODE))
+    CreatePyBytes(Collections::Serialize(Literal::CODE))
       ->add(code->Consts()->_serialize_())
       ->add(code->Names()->_serialize_())
       ->add(code->VarNames()->_serialize_())
       ->add(code->Name()->_serialize_())
-      ->add(std::make_shared<PyBytes>(collections::Serialize(code->NLocals())))
+      ->add(CreatePyBytes(Collections::Serialize(code->NLocals())))
       ->add(code->ByteCode()->_serialize_());
   return result;
 }
 
-}  // namespace torchlight::object
+}  // namespace torchlight::Object
