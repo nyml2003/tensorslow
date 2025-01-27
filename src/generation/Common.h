@@ -15,9 +15,18 @@ struct FunctionCall;
 struct Identifier;
 struct Atom;
 struct List;
+struct MemberAccess;
+struct AtomList;
 
-using ExpressionKind =
-  std::variant<Binary, Unary, Atom, FunctionCall, Identifier, List>;
+using ExpressionKind = std::variant<
+  Binary,
+  Unary,
+  Atom,
+  FunctionCall,
+  Identifier,
+  List,
+  MemberAccess,
+  AtomList>;
 
 struct Expression;
 

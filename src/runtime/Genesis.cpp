@@ -3,9 +3,9 @@
 #include "Function/PyFunction.h"
 #include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
-#include "Object/Klass.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
+#include "Object/PyMatrix.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
@@ -27,8 +27,8 @@ Object::PyObjPtr Genesis() {
   Object::FunctionKlass::Self()->Initialize();
   Object::InstKlass::Self()->Initialize();
   Object::CodeKlass::Self()->Initialize();
+  Object::MatrixKlass::Self()->Initialize();
   Runtime::FrameKlass::Self()->Initialize();
-
 
   auto builtins = Object::CreatePyDict();
   builtins->setitem(
@@ -46,6 +46,10 @@ Object::PyObjPtr Genesis() {
   builtins->setitem(
     Object::CreatePyString(Collections::CreateStringWithCString("print")),
     CreatePyNativeFunction(Object::Print)
+  );
+  builtins->setitem(
+    Object::CreatePyString(Collections::CreateStringWithCString("len")),
+    CreatePyNativeFunction(Object::Matrix)
   );
   return builtins;
 }

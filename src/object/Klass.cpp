@@ -209,4 +209,9 @@ PyObjPtr Klass::str(PyObjPtr obj) {
   return obj->repr();
 }
 
+PyObjPtr Klass::matmul(PyObjPtr lhs, PyObjPtr rhs) {
+  ThrowUnsupportedOperandError(lhs, rhs, CreatePyString("__matmul__"));
+  return CreatePyNone();
+}
+
 }  // namespace torchlight::Object

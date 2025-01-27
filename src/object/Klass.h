@@ -50,6 +50,8 @@ class Klass {
 
   virtual PyObjPtr div(PyObjPtr lhs, PyObjPtr rhs);
 
+  virtual PyObjPtr matmul(PyObjPtr lhs, PyObjPtr rhs);
+
   virtual PyObjPtr gt(PyObjPtr lhs, PyObjPtr rhs);
 
   virtual PyObjPtr lt(PyObjPtr lhs, PyObjPtr rhs);

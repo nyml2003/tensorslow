@@ -222,6 +222,10 @@ void ParseByteCode(const Object::PyCodePtr& code) {
         insts.Push(Object::CreateLoadAttr(ReadU64(iter)));
         break;
       }
+      case Object::ByteCode::BUILD_LIST: {
+        insts.Push(Object::CreateBuildList(ReadU64(iter)));
+        break;
+      }
       default:
         throw std::runtime_error(
           "Unknown byte code:" + std::to_string(static_cast<int>(iter.Get()))

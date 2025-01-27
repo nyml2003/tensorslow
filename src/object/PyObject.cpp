@@ -39,6 +39,10 @@ PyObjPtr PyObject::div(PyObjPtr other) {
   return klass->div(shared_from_this(), std::move(other));
 }
 
+PyObjPtr PyObject::matmul(PyObjPtr other) {
+  return klass->matmul(shared_from_this(), std::move(other));
+}
+
 PyObjPtr PyObject::gt(PyObjPtr other) {
   return klass->gt(shared_from_this(), std::move(other));
 }

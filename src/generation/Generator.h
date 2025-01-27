@@ -20,7 +20,7 @@ class Generator : public Python3ParserBaseVisitor {
   Object::PyObjPtr Generate();
   antlrcpp::Any visitFile_input(Python3Parser::File_inputContext* ctx) override;
   antlrcpp::Any visitAtom(Python3Parser::AtomContext* ctx) override;
-
+  antlrcpp::Any visitTrailer(Python3Parser::TrailerContext* ctx) override;
   antlrcpp::Any visitExpr(Python3Parser::ExprContext* ctx) override;
 
   antlrcpp::Any visitAtom_expr(Python3Parser::Atom_exprContext* ctx) override;
@@ -44,6 +44,9 @@ class Generator : public Python3ParserBaseVisitor {
   antlrcpp::Any visitNot_test(Python3Parser::Not_testContext* ctx) override;
 
   antlrcpp::Any visitComparison(Python3Parser::ComparisonContext* ctx) override;
+
+  antlrcpp::Any visitTestlist_comp(Python3Parser::Testlist_compContext* ctx
+  ) override;
 };
 
 void LoadConst(
@@ -61,6 +64,17 @@ void LoadName(
 void StoreName(
   const Object::PyObjPtr& name,
   const Object::PyObjPtr& names,
+  const Object::PyObjPtr& instructions
+);
+
+void LoadAttr(
+  const Object::PyObjPtr& attribute,
+  const Object::PyObjPtr& names,
+  const Object::PyObjPtr& instructions
+);
+
+void BuildList(
+  const Object::PyObjPtr& list,
   const Object::PyObjPtr& instructions
 );
 
@@ -108,6 +122,20 @@ void CodegenIdentifier(
 
 void CodegenList(
   const List& list,
+  const Object::PyObjPtr& consts,
+  const Object::PyObjPtr& names,
+  const Object::PyObjPtr& instructions
+);
+
+void CodegenMemberAccess(
+  const MemberAccess& memberAccess,
+  const Object::PyObjPtr& consts,
+  const Object::PyObjPtr& names,
+  const Object::PyObjPtr& instructions
+);
+
+void CodegenAtomList(
+  const AtomList& atomList,
   const Object::PyObjPtr& consts,
   const Object::PyObjPtr& names,
   const Object::PyObjPtr& instructions

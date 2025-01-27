@@ -23,7 +23,7 @@ Expr CreateAtom(Object::PyObjPtr obj) {
   return std::make_shared<Expression>(Atom{.obj = std::move(obj)});
 }
 
-Expr CreateFunctionCall(Identifier functionName, List arguments) {
+Expr CreateFunctionCall(Expr functionName, List arguments) {
   return std::make_shared<Expression>(FunctionCall{
     .functionName = std::move(functionName), .arguments = std::move(arguments)
   });
@@ -35,6 +35,16 @@ Expr CreateIdentifier(Object::PyObjPtr name) {
 
 Expr CreateList(Collections::List<Expr> elements) {
   return std::make_shared<Expression>(List{.elements = std::move(elements)});
+}
+
+Expr CreateMemberAccess(Expr object, Identifier attribute) {
+  return std::make_shared<Expression>(
+    MemberAccess{.object = std::move(object), .attribute = std::move(attribute)}
+  );
+}
+
+Expr CreateAtomList(List list) {
+  return std::make_shared<Expression>(AtomList{.elements = list.elements});
 }
 
 }  // namespace torchlight::Generation

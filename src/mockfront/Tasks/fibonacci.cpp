@@ -101,6 +101,6 @@ class Task_fibonacci {
   }
 };
 
- REGISTER_TASK(Task_fibonacci, "fibonacci");
+// REGISTER_TASK(Task_fibonacci, "fibonacci");
 
 }  // namespace torchlight::MockFront

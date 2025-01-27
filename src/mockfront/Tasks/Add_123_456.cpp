@@ -50,6 +50,6 @@ class Task_Add_123_456 {
   }
 };
 
-REGISTER_TASK(Task_Add_123_456, "Add_123_456");
+// REGISTER_TASK(Task_Add_123_456, "Add_123_456");
 
 }  // namespace torchlight::MockFront

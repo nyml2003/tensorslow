@@ -10,6 +10,7 @@
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
+#include <memory>
 #include "Object/PyNone.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
@@ -70,9 +71,7 @@ PyObjPtr ListKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
   }
   auto left = std::dynamic_pointer_cast<PyList>(lhs);
   auto right = std::dynamic_pointer_cast<PyList>(rhs);
-  Collections::List<PyObjPtr> result = left->Value().Copy();
-  result.Add(right->Value());
-  return CreatePyList(result, result.Size());
+  return CreatePyList(left->Value().Add(right->Value()));
 }
 
 PyObjPtr ListKlass::repr(PyObjPtr obj) {

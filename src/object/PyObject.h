@@ -35,6 +35,8 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
 
   PyObjPtr div(PyObjPtr other);
 
+  PyObjPtr matmul(PyObjPtr other);
+
   PyObjPtr gt(PyObjPtr other);
 
   PyObjPtr lt(PyObjPtr other);

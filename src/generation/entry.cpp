@@ -10,6 +10,7 @@
 #include "Object/PyDictionary.h"
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
+#include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
 #include "Python3Lexer.h"
@@ -72,32 +73,57 @@ void parseFileWithANTLR(const fs::path& filePath) {
 
   antlr4::tree::ParseTree* tree = parser.file_input();
 
-  // 输出AST
-  std::cout << "AST for file: " << filePath << std::endl;
+  std::cout << "AST tree: " << std::endl;
   std::cout << tree->toStringTree(&parser) << std::endl;
 
   Generator visitor(Object::CreatePyString(filePath.string()));
   visitor.visit(tree);
   auto code = visitor.Generate();
+  Object::DebugPrint(code);
   Collections::Bytes data =
     std::dynamic_pointer_cast<Object::PyBytes>(code->_serialize_())->Value();
   auto writePath = fs::path(filePath).replace_extension(".pyc");
-  Collections::Write(data, Collections::CreateStringWithCString(writePath.c_str()));
+  Collections::Write(
+    data, Collections::CreateStringWithCString(writePath.c_str())
+  );
 }
 
 int main(int argc, char** argv) {
   std::string integrationTestDir = "/app/test/integration";
-  if (argc > 1) {
-    integrationTestDir = argv[1];
+  std::string singleFile;
+
+  // 解析命令行参数
+  for (int i = 1; i < argc; ++i) {
+    std::string arg = argv[i];
+    if (arg == "-d" && i + 1 < argc) {
+      integrationTestDir = argv[++i];
+    } else if (arg == "-f" && i + 1 < argc) {
+      singleFile = argv[++i];
+    } else {
+      std::cerr << "Unknown option or missing argument: " << arg << std::endl;
+      return 1;
+    }
   }
 
   InitPyObj();
 
-  for (const auto& file : getFilesInDirectory(integrationTestDir)) {
-    std::cout << "Parsing file: " << file << std::endl;
-    // 如果是.py文件，则使用ANTLR解析
-    if (file.extension() == ".py") {
-      parseFileWithANTLR(file);
+  if (!singleFile.empty()) {
+    // 如果指定了单个文件，则只解析该文件
+    fs::path filePath(singleFile);
+    if (fs::exists(filePath) && filePath.extension() == ".py") {
+      parseFileWithANTLR(filePath);
+    } else {
+      std::cerr << "Invalid file or not a .py file: " << singleFile
+                << std::endl;
+      return 1;
+    }
+  } else {
+    // 否则扫描目录下的所有文件
+    for (const auto& file : getFilesInDirectory(integrationTestDir)) {
+      if (file.extension() == ".py") {
+        std::cout << "Parsing file: " << file << std::endl;
+        parseFileWithANTLR(file);
+      }
     }
   }
 

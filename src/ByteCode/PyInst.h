@@ -68,6 +68,8 @@ PyInstPtr CreatePopTop();
 
 PyInstPtr CreateLoadAttr(Index index);
 
+PyInstPtr CreateBuildList(Index size);
+
 }  // namespace torchlight::Object
 
 #endif

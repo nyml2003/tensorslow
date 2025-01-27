@@ -302,6 +302,17 @@ void Interpreter::EvalFrame() {
         frameObject->NextProgramCounter();
         break;
       }
+      case Object::ByteCode::BUILD_LIST: {
+        auto size = std::get<Index>(inst->Operand());
+        Collections::List<Object::PyObjPtr> elements(size);
+        for (Index i = 0; i < size; i++) {
+          elements.Push(frameObject->Stack().Pop());
+        }
+        elements.Reverse();
+        frameObject->Stack().Push(CreatePyList(elements));
+        frameObject->NextProgramCounter();
+        break;
+      }
       case Object::ByteCode::ERROR: {
         throw std::runtime_error("Unknown byte code");
         break;

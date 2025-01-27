@@ -71,6 +71,6 @@ class Task_Upper {
   }
 };
 
-REGISTER_TASK(Task_Upper, "Upper");
+// REGISTER_TASK(Task_Upper, "Upper");
 
 }  // namespace torchlight::MockFront

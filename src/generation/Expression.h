@@ -53,13 +53,22 @@ struct Atom {
   Object::PyObjPtr obj;
 };
 
+struct AtomList {
+  Collections::List<Expr> elements;
+};
+
 struct List {
   Collections::List<Expr> elements;
 };
 
 struct FunctionCall {
-  Identifier functionName;
+  Expr functionName;
   List arguments;
+};
+
+struct MemberAccess {
+  Expr object;
+  Identifier attribute;
 };
 
 struct Expression {
@@ -73,11 +82,15 @@ Expr CreateUnary(UnaryOperator oprt, Expr operand);
 
 Expr CreateAtom(Object::PyObjPtr obj);
 
-Expr CreateFunctionCall(Identifier functionName, List arguments);
+Expr CreateFunctionCall(Expr functionName, List arguments);
 
 Expr CreateIdentifier(Object::PyObjPtr name);
 
 Expr CreateList(Collections::List<Expr> elements);
+
+Expr CreateMemberAccess(Expr object, Identifier attribute);
+
+Expr CreateAtomList(List list);
 }  // namespace torchlight::Generation
 
 #endif  // TORCHLIGHT_GENERATION_EXPRESSION_H

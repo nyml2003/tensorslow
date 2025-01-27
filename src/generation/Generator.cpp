@@ -1,4 +1,4 @@
-#include <utility>
+
 
 #include "generation/Generator.h"
 
@@ -14,8 +14,12 @@
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
+#include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "support/Any.h"
+
+#include <utility>
+#include <variant>
 
 namespace torchlight::Generation {
 
@@ -28,6 +32,7 @@ Generator::Generator(Object::PyObjPtr filename)
 
 Object::PyObjPtr Generator::Generate() {
   Index nLocals = 0;
+  Object::DebugPrint(instructions);
   return std::make_shared<Object::PyCode>(
     instructions->_serialize_(), consts, names, Object::CreatePyList({}),
     filename, nLocals
@@ -37,14 +42,21 @@ Object::PyObjPtr Generator::Generate() {
 antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
 ) {
   visitChildren(ctx);
-  DebugPrint(consts);
-  DebugPrint(names);
-  DebugPrint(instructions);
   return nullptr;
 }
 
+antlrcpp::Any Generator::visitTestlist_comp(
+  Python3Parser::Testlist_compContext* ctx
+) {
+  auto testlist = ctx->test();
+  Collections::List<Expr> tests(static_cast<uint64_t>(testlist.size()));
+  for (auto& test : testlist) {
+    tests.Push(visitTest(test).as<Expr>());
+  }
+  return CreateList(tests);
+}
+
 antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
-  std::cout << "visitAtom" << std::endl;
   if (ctx->OPEN_PAREN() != nullptr) {
     // 情况 1: '(' (yield_expr | testlist_comp)? ')'
     std::cout << "atom: '(' (yield_expr | testlist_comp)? ')'" << std::endl;
@@ -55,10 +67,13 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
     // }
   } else if (ctx->OPEN_BRACK() != nullptr) {
     // 情况 2: '[' testlist_comp? ']'
-    std::cout << "atom: '[' testlist_comp? ']'" << std::endl;
-    // if (ctx->testlist_comp()) {
-    //   visitTestlist_comp(ctx->testlist_comp());
-    // }
+    auto testlist_comp = visitTestlist_comp(ctx->testlist_comp()).as<Expr>();
+    if (std::holds_alternative<List>(testlist_comp->kind)) {
+      auto list = std::get<List>(testlist_comp->kind);
+      return CreateAtomList(list);
+    }
+    std::cerr << "visitAtom: testlist_comp is not a List" << std::endl;
+
   } else if (ctx->OPEN_BRACE() != nullptr) {
     // 情况 3: '{' dictorsetmaker? '}'
     std::cout << "atom: '{' dictorsetmaker? '}'" << std::endl;
@@ -77,10 +92,13 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
     ));
   } else if (!ctx->STRING().empty()) {
     // 情况 6: STRING+
-    std::cout << "atom: STRING+" << std::endl;
-    for (auto* str : ctx->STRING()) {
-      std::cout << "  STRING: " << str->getText() << std::endl;
+    Object::PyObjPtr str = Object::CreatePyString("");
+    for (auto* string : ctx->STRING()) {
+      auto rawString = string->getText();
+      rawString = rawString.substr(1, rawString.size() - 2);
+      str = str->add(Object::CreatePyString(rawString));
     }
+    return CreateAtom(str);
   } else if (ctx->ELLIPSIS() != nullptr) {
     // 情况 7: '...'
     std::cout << "atom: '...'" << std::endl;
@@ -101,10 +119,8 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
 }
 
 antlrcpp::Any Generator::visitExpr(Python3Parser::ExprContext* ctx) {
-  std::cout << "visitExpr" << std::endl;
   if (ctx->atom_expr() != nullptr) {
     // 情况 1: atom_expr
-    std::cout << "atom_expr" << std::endl;
     return visitAtom_expr(ctx->atom_expr());
   }
   if (ctx->expr().size() == 2 && ctx->POWER() != nullptr) {
@@ -138,7 +154,6 @@ antlrcpp::Any Generator::visitExpr(Python3Parser::ExprContext* ctx) {
   } else if (ctx->expr().size() == 2 &&
              (ctx->ADD().size() == 1 || ctx->MINUS().size() == 1)) {
     // 情况 5: expr ('+' | '-') expr
-    std::cout << "expr ('+' | '-') expr" << std::endl;
     bool isAdd = (ctx->ADD().size() == 1);
     bool isMinus = (ctx->MINUS().size() == 1);
     auto left = visitExpr(ctx->expr(0));
@@ -174,8 +189,6 @@ antlrcpp::Any Generator::visitExpr(Python3Parser::ExprContext* ctx) {
 }
 
 antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
-  std::cout << "visitExpr_stmt" << std::endl;
-
   // 处理类型注解赋值 (annassign)
   if (ctx->annassign() != nullptr) {
     std::cout << "Annotation assignment" << std::endl;
@@ -198,43 +211,14 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
 
   // 处理普通赋值或多重赋值
   if (!ctx->ASSIGN().empty()) {
-    std::cout << "Assignment statement" << std::endl;
-
     auto rvalue =
       visitTestlist_star_expr(ctx->testlist_star_expr(1)).as<Expr>();
     // Atom Binary Unary
-    std::visit(
-      overload{
-        [this](const Atom& atom) { LoadConst(atom.obj, consts, instructions); },
-        [this](const Binary& binary) { std::cout << "Binary: " << std::endl; },
-        [this](const Unary& unary) { std::cout << "Unary: " << std::endl; },
-        [this](const FunctionCall& call) {
-          std::cout << "Function call: " << std::endl;
-        },
-        [this](const Identifier& identifier) {
-          LoadName(identifier.name, names, instructions);
-        },
-        [this](const List& list) { std::cout << "List: " << std::endl; },
-      },
-      rvalue->kind
-    );
+    CodegenExpr(rvalue, consts, names, instructions);
     auto lvalue =
       visitTestlist_star_expr(ctx->testlist_star_expr(0)).as<Expr>();
-    std::visit(
-      overload{
-        [this](const Atom& atom) { std::cout << "Atom: " << std::endl; },
-        [this](const Binary& binary) { std::cout << "Binary: " << std::endl; },
-        [this](const Unary& unary) { std::cout << "Unary: " << std::endl; },
-        [this](const FunctionCall& call) {
-          std::cout << "Function call: " << std::endl;
-        },
-        [this](const Identifier& identifier) {
-          StoreName(identifier.name, names, instructions);
-        },
-        [this](const List& list) { std::cout << "List: " << std::endl; },
-      },
-      lvalue->kind
-    );
+    auto identifier = std::get<Identifier>(lvalue->kind);
+    StoreName(identifier.name, names, instructions);
     // 遍历所有赋值右侧的表达式
     // for (auto* exprIt : ctx->testlist_star_expr()) {
     //   auto expr = visitTestlist_star_expr(exprIt).as<Object::PyObjPtr>();
@@ -255,7 +239,6 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
 }
 
 antlrcpp::Any Generator::visitArglist(Python3Parser::ArglistContext* ctx) {
-  std::cout << "visitArglist" << std::endl;
   auto arglist = ctx->argument();
   Collections::List<Expr> args(static_cast<uint64_t>(arglist.size()));
   for (auto& arg : arglist) {
@@ -265,12 +248,33 @@ antlrcpp::Any Generator::visitArglist(Python3Parser::ArglistContext* ctx) {
 }
 
 antlrcpp::Any Generator::visitArgument(Python3Parser::ArgumentContext* ctx) {
-  std::cout << "visitArgument" << std::endl;
   return visitTest(ctx->test(0));
 }
 
+antlrcpp::Any Generator::visitTrailer(Python3Parser::TrailerContext* ctx) {
+  if (ctx->OPEN_PAREN() != nullptr) {
+    if (ctx->arglist() != nullptr) {
+      return visitArglist(ctx->arglist());
+    }
+    return CreateList(Collections::List<Expr>({}));
+  } else if (ctx->OPEN_BRACK() != nullptr) {
+    // 情况 2: '[' subscriptlist ']'
+    std::cout << "trailer: '[' subscriptlist ']'" << std::endl;
+    // if (ctx->subscriptlist() != nullptr) {
+    //   visitSubscriptlist(ctx->subscriptlist());
+    // }
+  } else if (ctx->DOT() != nullptr) {
+    return CreateIdentifier(
+      Object::CreatePyString(ctx->name()->NAME()->getText().c_str())
+    );
+  } else {
+    // 其他情况
+    std::cout << "trailer: Unknown type" << std::endl;
+  }
+  return nullptr;
+}
+
 antlrcpp::Any Generator::visitAtom_expr(Python3Parser::Atom_exprContext* ctx) {
-  std::cout << "visitAtom_expr" << std::endl;
   if (ctx->trailer().empty()) {
     if (ctx->atom() != nullptr) {
       return visitAtom(ctx->atom());
@@ -279,30 +283,20 @@ antlrcpp::Any Generator::visitAtom_expr(Python3Parser::Atom_exprContext* ctx) {
   }
   auto atom = visitAtom(ctx->atom()).as<Expr>();
   auto identifier = std::get<Identifier>(atom->kind);
-  auto* trailer = ctx->trailer(0);
-  if (trailer->OPEN_PAREN() != nullptr) {
-    auto argList = visitArglist(trailer->arglist()).as<Expr>();
-    auto args = std::get<List>(argList->kind);
-    return CreateFunctionCall(identifier, args);
-
-  } else if (trailer->OPEN_BRACK() != nullptr) {
-    // 情况 2: '[' subscriptlist ']'
-    std::cout << "atom_expr: '[' subscriptlist ']'" << std::endl;
-    // if (trailer->subscriptlist() != nullptr) {
-    //   visitSubscriptlist(trailer->subscriptlist());
-    // }
-  } else if (trailer->DOT() != nullptr) {
-    // 情况 3: '.' NAME
-    std::cout << "atom_expr: '.' NAME" << std::endl;
-    // if (trailer->NAME() != nullptr) {
-    //   visitName(trailer->NAME());
-    // }
-  } else {
-    // 其他情况
-    std::cout << "atom_expr: Unknown type" << std::endl;
+  Collections::List<Expr> trailer(static_cast<uint64_t>(ctx->trailer().size()));
+  for (auto* trailerIt : ctx->trailer()) {
+    trailer.Push(visitTrailer(trailerIt).as<Expr>());
   }
-
-  return nullptr;
+  Expr result = atom;
+  for (auto it = Collections::Iterator<Expr>::Begin(trailer); !it.End();
+       it.Next()) {
+    if (std::holds_alternative<List>(it.Get()->kind)) {
+      result = CreateFunctionCall(result, std::get<List>(it.Get()->kind));
+    } else if (std::holds_alternative<Identifier>(it.Get()->kind)) {
+      result = CreateMemberAccess(result, std::get<Identifier>(it.Get()->kind));
+    }
+  }
+  return result;
 }
 
 antlrcpp::Any Generator::visitTestlist_star_expr(
@@ -353,10 +347,6 @@ void LoadName(
   const Object::PyObjPtr& names,
   const Object::PyObjPtr& instructions
 ) {
-  Object::DebugPrint(name);
-  Object::DebugPrint(names);
-  Object::DebugPrint(instructions);
-  Object::DebugPrint(Object::CreatePyString("------"));
   auto index = IndexOfName(name, names);
 
   Object::Invoke(
@@ -427,7 +417,7 @@ void CodegenFunctionCall(
   const Object::PyObjPtr& names,
   const Object::PyObjPtr& instructions
 ) {
-  CodegenIdentifier(call.functionName, names, instructions);
+  CodegenExpr(call.functionName, consts, names, instructions);
   CodegenList(call.arguments, consts, names, instructions);
   CallFunction(call.arguments.elements.Size(), instructions);
 }
@@ -500,9 +490,57 @@ void CodegenExpr(
       [consts, names, instructions](const List& list) {
         CodegenList(list, consts, names, instructions);
       },
+      [consts, names, instructions](const MemberAccess& memberAccess) {
+        CodegenMemberAccess(memberAccess, consts, names, instructions);
+      },
+      [consts, names, instructions](const AtomList& atomList) {
+        CodegenAtomList(atomList, consts, names, instructions);
+      },
     },
     expr->kind
   );
+}
+
+void CodegenMemberAccess(
+  const MemberAccess& memberAccess,
+  const Object::PyObjPtr& consts,
+  const Object::PyObjPtr& names,
+  const Object::PyObjPtr& instructions
+) {
+  CodegenExpr(memberAccess.object, consts, names, instructions);
+  LoadAttr(memberAccess.attribute.name, names, instructions);
+}
+
+void LoadAttr(
+  const Object::PyObjPtr& attribute,
+  const Object::PyObjPtr& names,
+  const Object::PyObjPtr& instructions
+) {
+  auto index = IndexOfName(attribute, names);
+  Object::Invoke(
+    instructions, Object::CreatePyString("append"),
+    {Object::CreateLoadAttr(Object::ToU64(index))}
+  );
+}
+
+void BuildList(Index size, const Object::PyObjPtr& instructions) {
+  Object::Invoke(
+    instructions, Object::CreatePyString("append"),
+    {Object::CreateBuildList(size)}
+  );
+}
+
+void CodegenAtomList(
+  const AtomList& atomList,
+  const Object::PyObjPtr& consts,
+  const Object::PyObjPtr& names,
+  const Object::PyObjPtr& instructions
+) {
+  for (auto it = Collections::Iterator<Expr>::Begin(atomList.elements);
+       !it.End(); it.Next()) {
+    CodegenExpr(it.Get(), consts, names, instructions);
+  }
+  BuildList(atomList.elements.Size(), instructions);
 }
 
 }  // namespace torchlight::Generation
