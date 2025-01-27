@@ -3,7 +3,9 @@
 
 #include "Object/Klass.h"
 #include "Object/PyBytes.h"
+#include "Object/PyList.h"
 #include "Object/PyObject.h"
+#include "Object/PyString.h"
 
 namespace torchlight::Object {
 
@@ -48,14 +50,16 @@ class PyCode : public PyObject {
 
 using PyCodePtr = std::shared_ptr<PyCode>;
 
-class CodeKlass : public Object::Klass {
+class CodeKlass : public Klass {
  public:
   explicit CodeKlass();
-  static Object::KlassPtr Self();
+  static KlassPtr Self();
 
   PyObjPtr repr(PyObjPtr self) override;
 
   PyObjPtr _serialize_(PyObjPtr self) override;
+
+  void Initialize() override;
 };
 
 }  // namespace torchlight::Object

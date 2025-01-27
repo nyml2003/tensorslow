@@ -49,22 +49,32 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
 
   PyObjPtr repr();
 
+  PyObjPtr str();
+
   PyObjPtr getitem(PyObjPtr key);
 
   PyObjPtr setitem(PyObjPtr key, PyObjPtr value);
 
   PyObjPtr delitem(PyObjPtr key);
 
+  PyObjPtr contains(PyObjPtr key);
+
+  PyObjPtr len();
+
   PyObjPtr _bool_();
 
   PyObjPtr _serialize_();
-};
 
-using PyObjPtr = std::shared_ptr<PyObject>;
+  PyObjPtr getattr(PyObjPtr key);
+};
 
 bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
-void print(const PyObjPtr& obj);
+bool operator!=(const PyObjPtr& lhs, const PyObjPtr& rhs);
+
+void DebugPrint(const PyObjPtr& obj);
+
+PyObjPtr Print(PyObjPtr args);
 
 }  // namespace torchlight::Object
 

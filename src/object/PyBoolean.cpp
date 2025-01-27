@@ -1,12 +1,12 @@
+#include "ByteCode/ByteCode.h"
 #include "Collections/IntegerHelper.h"
 #include "Collections/StringHelper.h"
-#include "Object/ByteCode.h"
-#include "Object/MixinCollections.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
+#include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
 #include "Object/PyString.h"
-
+#include "Object/PyType.h"
 
 namespace torchlight::Object {
 
@@ -15,8 +15,14 @@ KlassPtr BooleanKlass::Self() {
   return instance;
 }
 
-BooleanKlass::BooleanKlass()
-  : Klass(Collections::CreateStringWithCString("bool")) {}
+BooleanKlass::BooleanKlass() = default;
+
+void BooleanKlass::Initialize() {
+  SetType(CreatePyType(Self()));
+  SetName(CreatePyString("bool"));
+  SetAttributes(CreatePyDict());
+  Klass::Initialize();
+}
 
 PyBoolean::PyBoolean(bool value)
   : PyInteger(
@@ -35,7 +41,7 @@ PyBoolPtr PyBoolean::False() {
   return instance;
 }
 
-PyBoolPtr CreatePyBoolean(bool value) {
+PyObjPtr CreatePyBoolean(bool value) {
   return value ? PyBoolean::True() : PyBoolean::False();
 }
 
@@ -75,6 +81,27 @@ PyObjPtr BooleanKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
   auto left = std::dynamic_pointer_cast<PyBoolean>(lhs);
   auto right = std::dynamic_pointer_cast<PyBoolean>(rhs);
   return CreatePyBoolean(left->Value() == right->Value());
+}
+
+bool IsTrue(const PyObjPtr& obj) {
+  auto booleanObj = obj->_bool_();
+  if (booleanObj->Klass() != BooleanKlass::Self()) {
+    throw std::runtime_error("Cannot get value of non-boolean object");
+  }
+  auto boolean = std::dynamic_pointer_cast<PyBoolean>(booleanObj);
+  return boolean->Value();
+}
+
+PyObjPtr Not(const PyObjPtr& obj) {
+  return CreatePyBoolean(!IsTrue(obj));
+}
+
+PyObjPtr And(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return CreatePyBoolean(IsTrue(lhs) && IsTrue(rhs));
+}
+
+PyObjPtr Or(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return CreatePyBoolean(IsTrue(lhs) || IsTrue(rhs));
 }
 
 }  // namespace torchlight::Object

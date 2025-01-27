@@ -1,7 +1,7 @@
 #ifndef TORCHLIGHT_RUNTIME_PYINST_H
 #define TORCHLIGHT_RUNTIME_PYINST_H
 
-#include "Object/ByteCode.h"
+#include "ByteCode/ByteCode.h"
 #include "Object/Klass.h"
 #include "Object/PyObject.h"
 
@@ -30,6 +30,8 @@ class InstKlass : public Klass {
   PyObjPtr _serialize_(PyObjPtr obj) override;
 
   PyObjPtr repr(PyObjPtr obj) override;
+
+  void Initialize() override;
 };
 
 PyInstPtr CreateLoadConst(Index index);
@@ -38,7 +40,7 @@ PyInstPtr CreateBinaryAdd();
 
 PyInstPtr CreateBinarySubtract();
 
-PyInstPtr CreatePrint();
+PyInstPtr CreateBinaryMultiply();
 
 PyInstPtr CreateStoreName(Index index);
 
@@ -61,6 +63,10 @@ PyInstPtr CreateCallFunction(Index argumentCount);
 PyInstPtr CreateReturnValue();
 
 PyInstPtr CreateLoadGlobal(Index index);
+
+PyInstPtr CreatePopTop();
+
+PyInstPtr CreateLoadAttr(Index index);
 
 }  // namespace torchlight::Object
 

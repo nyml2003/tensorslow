@@ -1,7 +1,9 @@
 #ifndef TORCHLIGHT_RUNTIME_INTERPRETER_H
 #define TORCHLIGHT_RUNTIME_INTERPRETER_H
 
-#include "Object/PyCode.h"
+#include "ByteCode/PyCode.h"
+#include "Object/Common.h"
+
 namespace torchlight::Runtime {
 
 class Interpreter {
@@ -10,6 +12,8 @@ class Interpreter {
 
   Object::PyObjPtr returnValue;
 
+  Object::PyDictPtr builtins;
+
  public:
   explicit Interpreter();
 
@@ -17,7 +21,7 @@ class Interpreter {
 
   void BuildFrameWithFunction(
     const Object::PyObjPtr& func,
-    const Collections::List<Object::PyObjPtr>& arguments
+    const Object::PyObjPtr& _arguments
   );
 
   void EvalFrame();

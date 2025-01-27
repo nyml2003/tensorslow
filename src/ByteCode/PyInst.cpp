@@ -1,8 +1,10 @@
+#include "ByteCode/PyInst.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
 #include "Object/PyBytes.h"
-#include "Object/PyInst.h"
+#include "Object/PyDictionary.h"
 #include "Object/PyString.h"
+#include "Object/PyType.h"
 
 namespace torchlight::Object {
 
@@ -17,7 +19,14 @@ PyInst::PyInst(ByteCode code, OperandKind operand)
   return operand;
 }
 
-InstKlass::InstKlass() : Klass(Collections::CreateStringWithCString("inst")) {}
+InstKlass::InstKlass() = default;
+
+void InstKlass::Initialize() {
+  SetType(CreatePyType(Self()));
+  SetName(CreatePyString("inst"));
+  SetAttributes(CreatePyDict());
+  Klass::Initialize();
+}
 
 KlassPtr InstKlass::Self() {
   static KlassPtr instance = std::make_shared<InstKlass>();
@@ -26,7 +35,8 @@ KlassPtr InstKlass::Self() {
 
 PyObjPtr InstKlass::_serialize_(PyObjPtr obj) {
   if (obj->Klass() != Self()) {
-    throw std::runtime_error("PyInst::_serialize_(): obj is not an inst object");
+    throw std::runtime_error("PyInst::_serialize_(): obj is not an inst object"
+    );
   }
   auto inst = std::dynamic_pointer_cast<PyInst>(obj);
   Collections::Bytes bytes = Collections::Serialize(inst->Code());
@@ -70,8 +80,8 @@ PyInstPtr CreateBinaryAdd() {
   return std::make_shared<PyInst>(ByteCode::BINARY_ADD);
 }
 
-PyInstPtr CreatePrint() {
-  return std::make_shared<PyInst>(ByteCode::PRINT);
+PyInstPtr CreateBinaryMultiply() {
+  return std::make_shared<PyInst>(ByteCode::BINARY_MULTIPLY);
 }
 
 PyInstPtr CreateStoreName(Index index) {
@@ -120,6 +130,14 @@ PyInstPtr CreateLoadGlobal(Index index) {
 
 PyInstPtr CreateBinarySubtract() {
   return std::make_shared<PyInst>(ByteCode::BINARY_SUBTRACT);
+}
+
+PyInstPtr CreatePopTop() {
+  return std::make_shared<PyInst>(ByteCode::POP_TOP);
+}
+
+PyInstPtr CreateLoadAttr(Index index) {
+  return std::make_shared<PyInst>(ByteCode::LOAD_ATTR, index);
 }
 
 }  // namespace torchlight::Object

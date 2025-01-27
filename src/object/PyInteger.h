@@ -2,7 +2,6 @@
 #define TORCHLIGHT_OBJECT_PYINTEGER_H
 
 #include "Collections/Integer.h"
-#include "Object/Common.h"
 #include "Object/Klass.h"
 #include "Object/PyObject.h"
 
@@ -17,12 +16,6 @@ class PyInteger : public PyObject {
 
   [[nodiscard]] Collections::Integer Value() const;
 };
-
-using PyIntPtr = std::shared_ptr<PyInteger>;
-
-PyIntPtr CreatePyInteger(Collections::Integer value);
-
-PyIntPtr CreatePyInteger(uint64_t value);
 
 class IntegerKlass : public Klass {
  public:
@@ -50,20 +43,22 @@ class IntegerKlass : public Klass {
 
   PyObjPtr gt(PyObjPtr lhs, PyObjPtr rhs) override;
 
-  PyObjPtr lt(PyObjPtr lhs, PyObjPtr rhs) override;
-
   PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs) override;
-
-  PyObjPtr ge(PyObjPtr lhs, PyObjPtr rhs) override;
-
-  PyObjPtr le(PyObjPtr lhs, PyObjPtr rhs) override;
-
-  PyObjPtr ne(PyObjPtr lhs, PyObjPtr rhs) override;
 
   PyObjPtr repr(PyObjPtr obj) override;
 
   PyObjPtr _serialize_(PyObjPtr obj) override;
+
+  void Initialize() override;
 };
+
+PyObjPtr CreatePyInteger(Collections::Integer value);
+
+PyObjPtr CreatePyInteger(uint64_t value);
+
+uint64_t ToU64(const PyObjPtr& obj);
+using PyIntPtr = std::shared_ptr<PyInteger>;
+
 
 }  // namespace torchlight::Object
 

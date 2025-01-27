@@ -92,8 +92,11 @@ String ToString(int32_t value) {
   return CreateStringWithCString(buffer);
 }
 String ToString(uint64_t value) {
-  char buffer[32];
-  snprintf(buffer, sizeof(buffer), "%lu", value);
+  char buffer[32];  // 足够大的缓冲区
+  // 使用 %llu 格式化 uint64_t
+  snprintf(
+    buffer, sizeof(buffer), "%llu", static_cast<unsigned long long>(value)
+  );
   return CreateStringWithCString(buffer);
 }
 String ToString(int64_t value) {

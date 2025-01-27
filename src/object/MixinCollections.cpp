@@ -6,7 +6,7 @@
 namespace torchlight::Collections {
 
 std::string ToCppString(const Object::PyObjPtr& obj) {
-  auto repr = obj->repr();
+  auto repr = obj->str();
   if (repr->Klass() != Object::StringKlass::Self()) {
     throw std::runtime_error("obj is not a string");
   }

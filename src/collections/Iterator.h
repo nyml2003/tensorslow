@@ -22,6 +22,7 @@ class Iterator {
   void Next();
   [[nodiscard]] Index GetCurrentIndex() const;
   [[nodiscard]] bool End() const;
+  [[nodiscard]] bool First() const;
   static Iterator Begin(const List<T>& list);
   static Iterator RBegin(const List<T>& list);
   [[nodiscard]] const List<T>& GetList() const;
@@ -81,6 +82,16 @@ Index Iterator<T>::GetCurrentIndex() const {
 template <typename T>
 bool Iterator<T>::End() const {
   return isEnd;
+}
+template <typename T>
+bool Iterator<T>::First() const {
+  switch (order) {
+    case IteratorOrder::Forward:
+      return currentIndex == 0;
+    case IteratorOrder::Reverse:
+      return currentIndex == listRef.Size() - 1;
+  }
+  return false;
 }
 template <typename T>
 Iterator<T> Iterator<T>::Begin(const List<T>& list) {

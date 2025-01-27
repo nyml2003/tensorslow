@@ -34,7 +34,7 @@ options {
     tokenVocab = Python3Lexer;
 }
 
-// Insert here @header for C++ parser.
+@header {#include "Python3ParserBase.h"}
 
 // All comments that start with "///" are copy-pasted from
 // The Python Language Reference
@@ -368,7 +368,7 @@ closed_pattern
     ;
 
 literal_pattern
-    : signed_number { this.CannotBePlusMinus() }?
+    : signed_number { this->CannotBePlusMinus() }?
     | complex_number
     | strings
     | 'None'
@@ -377,7 +377,7 @@ literal_pattern
     ;
 
 literal_expr
-    : signed_number { this.CannotBePlusMinus() }?
+    : signed_number { this->CannotBePlusMinus() }?
     | complex_number
     | strings
     | 'None'
@@ -413,7 +413,7 @@ capture_pattern
     ;
 
 pattern_capture_target
-    : /* cannot be '_' */ name { this.CannotBeDotLpEq() }?
+    : /* cannot be '_' */ name { this->CannotBeDotLpEq() }?
     ;
 
 wildcard_pattern
@@ -421,7 +421,7 @@ wildcard_pattern
     ;
 
 value_pattern
-    : attr { this.CannotBeDotLpEq() }?
+    : attr { this->CannotBeDotLpEq() }?
     ;
 
 attr

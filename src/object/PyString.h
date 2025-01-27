@@ -1,7 +1,7 @@
 #ifndef TORCHLIGHT_OBJECT_PYSTRING_H
 #define TORCHLIGHT_OBJECT_PYSTRING_H
 
-#include "Object/Common.h"
+#include "Collections/String.h"
 #include "Object/Klass.h"
 #include "Object/PyObject.h"
 
@@ -17,23 +17,31 @@ class PyString : public PyObject {
   [[nodiscard]] Collections::String Value() const;
 };
 
-using PyStrPtr = std::shared_ptr<PyString>;
-
-PyStrPtr CreatePyString(Collections::String value);
-
 class StringKlass : public Klass {
  public:
   explicit StringKlass();
+
+  void Initialize() override;
+
   static KlassPtr Self();
 
   PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs) override;
 
   PyObjPtr repr(PyObjPtr obj) override;
 
+  PyObjPtr str(PyObjPtr obj) override;
+
   PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs) override;
 
   PyObjPtr _serialize_(PyObjPtr obj) override;
 };
+PyObjPtr CreatePyString(Collections::String value);
+PyObjPtr CreatePyString(const char* value);
+PyObjPtr CreatePyString(const std::string& value);
+
+using PyStrPtr = std::shared_ptr<PyString>;
+
+PyObjPtr Upper(PyObjPtr args);
 
 }  // namespace torchlight::Object
 

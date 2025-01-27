@@ -1,10 +1,16 @@
+#include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
-#include "Object/ByteCode.h"
-#include "Object/Klass.h"
+#include "Function/PyNativeFunction.h"
+#include "Object/Common.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
+#include "Object/PyDictionary.h"
+#include "Object/PyInteger.h"
+#include "Object/PyList.h"
+#include "Object/PyObject.h"
 #include "Object/PyString.h"
+#include "Object/PyType.h"
 
 namespace torchlight::Object {
 
@@ -15,16 +21,32 @@ Collections::String PyString::Value() const {
   return value;
 }
 
-StringKlass::StringKlass()
-  : Klass(Collections::CreateStringWithCString("str")) {}
+StringKlass::StringKlass() = default;
+
+void StringKlass::Initialize() {
+  SetType(CreatePyType(Self()));
+  SetName(CreatePyString("str"));
+  Collections::Map<PyObjPtr, PyObjPtr> methods;
+  methods.Put(CreatePyString("upper"), CreatePyNativeFunction(Upper));
+  SetAttributes(CreatePyDict(methods));
+  Klass::Initialize();
+}
 
 KlassPtr StringKlass::Self() {
   static KlassPtr instance = std::make_shared<StringKlass>();
   return instance;
 }
 
-PyStrPtr CreatePyString(Collections::String value) {
+PyObjPtr CreatePyString(Collections::String value) {
   return std::make_shared<PyString>(value);
+}
+
+PyObjPtr CreatePyString(const char* value) {
+  return CreatePyString(Collections::CreateStringWithCString(value));
+}
+
+PyObjPtr CreatePyString(const std::string& value) {
+  return CreatePyString(Collections::CreateStringWithCString(value.c_str()));
 }
 
 PyObjPtr StringKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
@@ -44,8 +66,16 @@ PyObjPtr StringKlass::repr(PyObjPtr obj) {
     throw std::runtime_error("obj is not a string");
   }
   return CreatePyString(Collections::CreateStringWithCString("\"")
-                         .Add(std::dynamic_pointer_cast<PyString>(obj)->Value())
-                         .Add(Collections::CreateStringWithCString("\"")));
+                          .Add(std::dynamic_pointer_cast<PyString>(obj)->Value()
+                          )
+                          .Add(Collections::CreateStringWithCString("\"")));
+}
+
+PyObjPtr StringKlass::str(PyObjPtr obj) {
+  if (obj->Klass() != StringKlass::Self()) {
+    throw std::runtime_error("obj is not a string");
+  }
+  return obj;
 }
 
 PyObjPtr StringKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
@@ -68,4 +98,21 @@ PyObjPtr StringKlass::_serialize_(PyObjPtr obj) {
   return CreatePyBytes(Collections::Serialize(Literal::STRING)
                          .Add(Collections::Serialize(string->Value())));
 }
+
+PyObjPtr Upper(PyObjPtr args) {
+  if (args->Klass() != ListKlass::Self()) {
+    throw std::runtime_error("Upper() argument must be a list");
+  }
+  if (args->len() != CreatePyInteger(1)) {
+    throw std::runtime_error("Upper() argument must be a list with one element"
+    );
+  }
+  auto value = args->getitem(CreatePyInteger(0));
+  if (value->Klass() != StringKlass::Self()) {
+    throw std::runtime_error("Upper() argument must be a string");
+  }
+  auto str = std::dynamic_pointer_cast<PyString>(value);
+  return CreatePyString(str->Value().Upper());
+}
+
 }  // namespace torchlight::Object

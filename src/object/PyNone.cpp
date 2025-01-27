@@ -1,13 +1,14 @@
+#include "ByteCode/ByteCode.h"
 #include "Collections/StringHelper.h"
-#include "Object/ByteCode.h"
 #include "Object/PyBytes.h"
+#include "Object/PyDictionary.h"
 #include "Object/PyNone.h"
 #include "Object/PyString.h"
+#include "Object/PyType.h"
 
 namespace torchlight::Object {
 
-NoneKlass::NoneKlass()
-  : Klass(Collections::CreateStringWithCString("NoneType")) {}
+NoneKlass::NoneKlass() = default;
 
 KlassPtr NoneKlass::Self() {
   static KlassPtr instance = std::make_shared<NoneKlass>();
@@ -35,7 +36,14 @@ PyObjPtr PyNone::Instance() {
   return instance;
 }
 
-PyNonePtr CreatePyNone() {
+PyObjPtr CreatePyNone() {
   return std::make_shared<PyNone>();
 }
+
+void NoneKlass::Initialize() {
+  SetType(CreatePyType(Self()));
+  SetAttributes(CreatePyDict());
+  Klass::Initialize();
+}
+
 }  // namespace torchlight::Object

@@ -40,7 +40,7 @@ options {
     superClass = Python3LexerBase;
 }
 
-// Insert here @header for C++ lexer.
+@header {#include "Python3LexerBase.h"}
 
 /*
  * lexer rules
@@ -91,7 +91,7 @@ WHILE      : 'while';
 WITH       : 'with';
 YIELD      : 'yield';
 
-NEWLINE: ({this.atStartOfInput()}? SPACES | ( '\r'? '\n' | '\r' | '\f') SPACES?) {this.onNewLine();};
+NEWLINE: ({this->atStartOfInput()}? SPACES | ( '\r'? '\n' | '\r' | '\f') SPACES?) {this->onNewLine();};
 
 /// identifier   ::=  id_start id_continue*
 NAME: ID_START ID_CONTINUE*;
@@ -126,15 +126,15 @@ IMAG_NUMBER: ( FLOAT_NUMBER | INT_PART) [jJ];
 DOT                : '.';
 ELLIPSIS           : '...';
 STAR               : '*';
-OPEN_PAREN         : '(' {this.openBrace();};
-CLOSE_PAREN        : ')' {this.closeBrace();};
+OPEN_PAREN         : '(' {this->openBrace();};
+CLOSE_PAREN        : ')' {this->closeBrace();};
 COMMA              : ',';
 COLON              : ':';
 SEMI_COLON         : ';';
 POWER              : '**';
 ASSIGN             : '=';
-OPEN_BRACK         : '[' {this.openBrace();};
-CLOSE_BRACK        : ']' {this.closeBrace();};
+OPEN_BRACK         : '[' {this->openBrace();};
+CLOSE_BRACK        : ']' {this->closeBrace();};
 OR_OP              : '|';
 XOR                : '^';
 AND_OP             : '&';
@@ -146,8 +146,8 @@ DIV                : '/';
 MOD                : '%';
 IDIV               : '//';
 NOT_OP             : '~';
-OPEN_BRACE         : '{' {this.openBrace();};
-CLOSE_BRACE        : '}' {this.closeBrace();};
+OPEN_BRACE         : '{' {this->openBrace();};
+CLOSE_BRACE        : '}' {this->closeBrace();};
 LESS_THAN          : '<';
 GREATER_THAN       : '>';
 EQUALS             : '==';

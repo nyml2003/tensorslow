@@ -1,10 +1,13 @@
+#include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
-#include "Object/ByteCode.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
+#include "Object/PyDictionary.h"
 #include "Object/PyFloat.h"
 #include "Object/PyString.h"
+#include "Object/PyType.h"
+
 
 namespace torchlight::Object {
 
@@ -14,12 +17,18 @@ double PyFloat::Value() const {
   return value;
 }
 
-PyFloatPtr CreatePyFloat(double value) {
+PyObjPtr CreatePyFloat(double value) {
   return std::make_shared<PyFloat>(value);
 }
 
-FloatKlass::FloatKlass()
-  : Klass(Collections::CreateStringWithCString("float")) {}
+FloatKlass::FloatKlass() = default;
+
+void FloatKlass::Initialize() {
+  SetType(CreatePyType(Self()));
+  SetName(CreatePyString("float"));
+  SetAttributes(CreatePyDict());
+  Klass::Initialize();
+}
 
 KlassPtr FloatKlass::Self() {
   static KlassPtr instance = std::make_shared<FloatKlass>();

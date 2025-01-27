@@ -1,13 +1,14 @@
 #ifndef TORCHLIGHT_RUNTIME_PYFRAME_H
 #define TORCHLIGHT_RUNTIME_PYFRAME_H
 
+#include "ByteCode/PyCode.h"
+#include "ByteCode/PyInst.h"
 #include "Collections/Stack.h"
+#include "Function/PyFunction.h"
 #include "Object/Klass.h"
-#include "Object/PyCode.h"
 #include "Object/PyDictionary.h"
-#include "Object/PyInst.h"
+#include "Object/PyList.h"
 #include "Object/PyObject.h"
-#include "Runtime/PyFunction.h"
 
 namespace torchlight::Runtime {
 class PyFrame : public Object::PyObject {
@@ -23,11 +24,11 @@ class PyFrame : public Object::PyObject {
 
  public:
   explicit PyFrame(
-    Object::PyCodePtr code,
-    Object::PyDictPtr locals,
-    Object::PyDictPtr globals,
-    Object::PyListPtr fastLocals,
-    Object::PyObjPtr caller
+    Object::PyCodePtr _code,
+    Object::PyObjPtr _locals,      // 传入的是 PyObjPtr
+    Object::PyObjPtr _globals,     // 传入的是 PyObjPtr
+    Object::PyObjPtr _fastLocals,  // 传入的是 PyObjPtr
+    Object::PyObjPtr _caller
   );
 
   void SetProgramCounter(Index pc);
@@ -60,8 +61,8 @@ using PyFramePtr = std::shared_ptr<PyFrame>;
 PyFramePtr CreateFrameWithCode(const Object::PyCodePtr& code);
 
 PyFramePtr CreateFrameWithFunction(
-  const PyFunctionPtr& function,
-  const Collections::List<Object::PyObjPtr>& arguments,
+  const Object::PyObjPtr& _function,
+  const Object::PyObjPtr& _arguments,
   Object::PyObjPtr caller
 );
 
@@ -71,6 +72,8 @@ class FrameKlass : public Object::Klass {
   static Object::KlassPtr Self();
 
   Object::PyObjPtr repr(Object::PyObjPtr obj) override;
+
+  void Initialize() override;
 };
 
 void ParseByteCode(const Object::PyCodePtr& code);

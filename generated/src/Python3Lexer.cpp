@@ -1,3 +1,4 @@
+#include "Python3LexerBase.h"
 
 // Generated from /app/grammar/Python3Lexer.g4 by ANTLR 4.9.2
 

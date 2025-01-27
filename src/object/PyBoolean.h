@@ -18,9 +18,9 @@ class BooleanKlass : public Klass {
   PyObjPtr repr(PyObjPtr obj) override;
 
   PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs) override;
-};
 
-PyBoolPtr CreatePyBoolean(bool value);
+  void Initialize() override;
+};
 
 class PyBoolean : public PyInteger {
  public:
@@ -32,7 +32,12 @@ class PyBoolean : public PyInteger {
   bool Value() const;
 };
 
+PyObjPtr CreatePyBoolean(bool value);
 using PyBoolPtr = std::shared_ptr<PyBoolean>;
+bool IsTrue(const PyObjPtr& obj);
+PyObjPtr Not(const PyObjPtr& obj);
+PyObjPtr And(const PyObjPtr& lhs, const PyObjPtr& rhs);
+PyObjPtr Or(const PyObjPtr& lhs, const PyObjPtr& rhs);
 }  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_PYBOOLEAN_H

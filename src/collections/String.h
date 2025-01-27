@@ -27,6 +27,7 @@ class String {
    * @return
    */
   [[nodiscard]] Index Find(String& sub, Index start = 0) const;
+  [[nodiscard]] String Upper() const;
   void Concat(const String& rhs);
   String Add(const String& rhs);
   [[nodiscard]] String Copy() const;

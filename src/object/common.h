@@ -21,17 +21,21 @@ class ListKlass;
 
 class DictionaryKlass;
 
-class TupleKlass;
-
-class TypeKlass;
-
 class NoneKlass;
 
-class NotImplementedKlass;
+class BytesKlass;
+
+class NotImplementKlass;
+
+class TypeKlass;
 
 class PyObject;
 
 using PyObjPtr = std::shared_ptr<PyObject>;
+
+class PyNotNotImplement;
+
+using PyNotImplementedPtr = std::shared_ptr<PyNotNotImplement>;
 
 class PyInteger;
 
@@ -57,25 +61,18 @@ class PyDictionary;
 
 using PyDictPtr = std::shared_ptr<PyDictionary>;
 
-class PyTuple;
+class PyNone;
 
-using PyTuplePtr = std::shared_ptr<PyTuple>;
+using PyNonePtr = std::shared_ptr<PyNone>;
+
+class PyBytes;
+
+using PyBytesPtr = std::shared_ptr<PyBytes>;
 
 class PyType;
 
 using PyTypePtr = std::shared_ptr<PyType>;
 
-class PyNone;
-
-using PyNonePtr = std::shared_ptr<PyNone>;
-
-class PyNotImplemented;
-
-using PyNotImplementedPtr = std::shared_ptr<PyNotImplemented>;
-
-class PyBytes;
-
-using PyBytesPtr = std::shared_ptr<PyBytes>;
 }  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_COMMON_H

@@ -113,9 +113,6 @@ template <typename K, typename V>
 void Map<K, V>::Put(K key, V value) noexcept {
   for (Index i = 0; i < entries.Size(); i++) {
     if (entries.Get(i).Key() == key) {
-      if (entries.Get(i).Value() == value) {
-        return;
-      }
       entries.Set(i, MapEntry<K, V>(key, value));
       return;
     }

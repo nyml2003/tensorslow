@@ -2,6 +2,7 @@
 #define TORCHLIGHT_OBJECT_PYNONE_H
 
 #include "Object/Klass.h"
+#include "Object/PyObject.h"
 
 namespace torchlight::Object {
 
@@ -13,6 +14,8 @@ class NoneKlass : public Klass {
   PyObjPtr _serialize_(PyObjPtr obj) override;
 
   PyObjPtr repr(PyObjPtr obj) override;
+
+  void Initialize() override;
 };
 
 class PyNone : public PyObject {
@@ -21,9 +24,7 @@ class PyNone : public PyObject {
   static PyObjPtr Instance();
 };
 
-using PyNonePtr = std::shared_ptr<PyNone>;
-
-PyNonePtr CreatePyNone();
+PyObjPtr CreatePyNone();
 
 }  // namespace torchlight::Object
 

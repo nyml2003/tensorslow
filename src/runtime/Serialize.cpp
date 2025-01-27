@@ -1,8 +1,8 @@
+#include "ByteCode/ByteCode.h"
 #include "Collections/Bytes.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/List.h"
 #include "Collections/StringHelper.h"
-#include "Object/ByteCode.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
 #include "Object/PyInteger.h"
@@ -57,27 +57,27 @@ uint8_t ReadU8(Collections::Iterator<Byte>& byteIter) {
   return result;
 }
 
-Object::PyStrPtr ReadString(Collections::Iterator<Byte>& byteIter) {
+Object::PyObjPtr ReadString(Collections::Iterator<Byte>& byteIter) {
   auto size = ReadU64(byteIter);
   return Object::CreatePyString(
     Collections::CreateStringWithBytes(ReadBytes(byteIter, size))
   );
 }
 
-Object::PyBytesPtr ReadBytes(Collections::Iterator<Byte>& byteIter) {
+Object::PyObjPtr ReadBytes(Collections::Iterator<Byte>& byteIter) {
   uint64_t size = ReadU64(byteIter);
   return Object::CreatePyBytes(Collections::Bytes(ReadBytes(byteIter, size)));
 }
 
-Object::PyIntPtr ReadInteger(Collections::Iterator<Byte>& byteIter) {
+Object::PyObjPtr ReadInteger(Collections::Iterator<Byte>& byteIter) {
   uint64_t size = ReadSize(byteIter);
   auto bytes = ReadBytes(byteIter, size * 2 + sizeof(uint64_t) + 1);
   return Object::CreatePyInteger(Collections::DeserializeInteger(bytes));
 }
-Object::PyFloatPtr ReadFloat(Collections::Iterator<Byte>& byteIter) {
+Object::PyObjPtr ReadFloat(Collections::Iterator<Byte>& byteIter) {
   return Object::CreatePyFloat(ReadDouble(byteIter));
 }
-Object::PyListPtr ReadList(Collections::Iterator<Byte>& byteIter) {
+Object::PyObjPtr ReadList(Collections::Iterator<Byte>& byteIter) {
   uint64_t size = ReadU64(byteIter);
   if (size == 0) {
     return Object::CreatePyList(0);
@@ -119,7 +119,7 @@ Object::PyObjPtr ReadObject(Collections::Iterator<Byte>& byteIter) {
   throw std::runtime_error("Unknown type");
 }
 
-Object::PyCodePtr ReadCode(Collections::Iterator<Byte>& byteIter) {
+Object::PyObjPtr ReadCode(Collections::Iterator<Byte>& byteIter) {
   auto consts = ReadObject(byteIter);
   auto names = ReadObject(byteIter);
   auto varNames = ReadObject(byteIter);
@@ -131,8 +131,11 @@ Object::PyCodePtr ReadCode(Collections::Iterator<Byte>& byteIter) {
   );
 }
 
-Object::PyCodePtr MakeCode(const Object::PyBytesPtr& byteCode) {
-  auto bytes = byteCode->Value().Value();
+Object::PyCodePtr MakeCode(const Object::PyObjPtr& byteCode) {
+  if (byteCode->Klass() != Object::BytesKlass::Self()) {
+    throw std::runtime_error("Invalid byte code");
+  }
+  auto bytes = std::dynamic_pointer_cast<Object::PyBytes>(byteCode)->Value().Value();
   Collections::Iterator<Byte> byteIter =
     Collections::Iterator<Byte>::Begin(bytes);
   auto obj = ReadObject(byteIter);

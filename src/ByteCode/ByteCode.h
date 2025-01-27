@@ -94,7 +94,6 @@ enum class ByteCode {
   LOAD_METHOD = 160,
   CALL_METHOD = 161,
 
-  PRINT = 0xFE,  // 临时字节码
   ERROR = 0xFF
 };
 

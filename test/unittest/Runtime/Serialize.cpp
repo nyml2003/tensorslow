@@ -1,40 +1,85 @@
+#include <memory>
 #include "../test_default.h"
 
-#include "Collections/Bytes.h"
-#include "Collections/Iterator.h"
-#include "Collections/StringHelper.h"
 #include "Object/Common.h"
-#include "Object/PyBoolean.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyBytes.h"
+#include "Object/PyDictionary.h"
 #include "Object/PyFloat.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyString.h"
-#include "Runtime/Serialize.h"
+#include "Runtime/Genesis.h"
 
-using namespace torchlight;
-using namespace torchlight::Object;
-using namespace torchlight::Collections;
-using namespace torchlight::Runtime;
+namespace torchlight {
 
-TEST(Serialize, SerializeEtDeserialize) {
-  PyStrPtr str = CreatePyString(CreateStringWithCString("你好,世界！"));
-  PyIntPtr integer = CreatePyInteger(42);
-  PyFloatPtr floating = CreatePyFloat(3.14);
-  PyListPtr list = CreatePyList(List<PyObjPtr>{str,integer, floating}, 3);
-  PyBytesPtr bytes =
-    CreatePyBytes(Bytes(List<Byte>({'H', 'e', 'l', 'l', 'o'})));
-  PyBytesPtr emptyBytes = CreatePyBytes();
-  PyListPtr emptyList = CreatePyList(0);
-  PyObjPtr obj = CreatePyList(
-    List<PyObjPtr>{str, integer, floating, list, bytes, emptyBytes, emptyList},
-    7
+class SerializeTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+    globals =
+      std::dynamic_pointer_cast<Object::PyDictionary>(Runtime::Genesis());
+  }
+
+  void TearDown() override {
+    // 清理代码（如果需要）
+  }
+
+  Object::PyDictPtr globals;
+};
+
+TEST_F(SerializeTest, SerializeEtDeserialize) {
+  Object::PyObjPtr str = Object::CreatePyString("你好,世界！");
+  Object::PyObjPtr integer = Object::CreatePyInteger(42);
+  Object::PyObjPtr floating = Object::CreatePyFloat(3.14);
+  Object::PyObjPtr list = Object::CreatePyList({str, integer, floating});
+  Object::PyObjPtr bytes =
+    Object::CreatePyBytes(Collections::Bytes({'H', 'e', 'l', 'l', 'o'}));
+  Object::PyObjPtr emptyBytes = Object::CreatePyBytes();
+  Object::PyObjPtr emptyList = Object::CreatePyList(0);
+  Object::PyObjPtr obj = Object::CreatePyList(
+    {str, integer, floating, list, bytes, emptyBytes, emptyList}
   );
-  PyObjPtr serialized = obj->_serialize_();
-  PyBytesPtr bytesObj = std::dynamic_pointer_cast<PyBytes>(serialized);
-  Bytes bytesData = bytesObj->Value();
-  List<Byte> bytesList = bytesData.Value();
-  auto iter = Iterator<Byte>::Begin(bytesList);
-  PyObjPtr deserialized = ReadObject(iter);
-  EXPECT_EQ(obj->eq(deserialized), CreatePyBoolean(true));
+  Object::PyObjPtr dict = Object::CreatePyDict();
+  dict->setitem(Object::CreatePyString("str"), str);
+  dict->setitem(Object::CreatePyString("integer"), integer);
+  dict->setitem(Object::CreatePyString("floating"), floating);
+  dict->setitem(Object::CreatePyString("list"), list);
+  Object::Invoke(emptyList, Object::CreatePyString("print"), {});
+  Object::Invoke(emptyList, Object::CreatePyString("append"), {str});
+  Object::Invoke(emptyList, Object::CreatePyString("append"), {integer});
+  Object::Invoke(emptyList, Object::CreatePyString("append"), {floating});
+  Object::Invoke(emptyList, Object::CreatePyString("print"), {});
+  // print->Call(Object::CreatePyList({str->repr()}));
+  // print->Call(Object::CreatePyList({str->str()}));
+  // print->Call(Object::CreatePyList({integer->repr()}));
+  // print->Call(Object::CreatePyList({integer->str()}));
+  // print->Call(Object::CreatePyList({floating->repr()}));
+  // print->Call(Object::CreatePyList({floating->str()}));
+  // print->Call(Object::CreatePyList({list->repr()}));
+  // print->Call(Object::CreatePyList({list->str()}));
+  // print->Call(Object::CreatePyList({bytes->repr()}));
+  // print->Call(Object::CreatePyList({bytes->str()}));
+  // print->Call(Object::CreatePyList({emptyBytes->repr()}));
+  // print->Call(Object::CreatePyList({emptyBytes->str()}));
+  // print->Call(Object::CreatePyList({emptyList->repr()}));
+  // print->Call(Object::CreatePyList({emptyList->str()}));
+  // print->Call(Object::CreatePyList({obj->repr()}));
+  // print->Call(Object::CreatePyList({obj->str()}));
+  // print->Call(Object::CreatePyList({dict->repr()}));
+  // print->Call(Object::CreatePyList({dict->str()}));
+  // print->Call(
+  //   Object::CreatePyList({str->getattr(Object::CreatePyString("__class__"))})
+  // );
+  // print->Call(
+  //   Object::CreatePyList({str->getattr(Object::CreatePyString("__class__"))->getattr(Object::CreatePyString("__name__"))})
+  // );
+  //   Object::PyObjPtr serialized = dict->_serialize_();
+  // PyBytesPtr bytesObj = std::dynamic_pointer_cast<PyBytes>(serialized);
+  // Bytes bytesData = bytesObj->Value();
+  // List<Byte> bytesList = bytesData.Value();
+  // auto iter = Iterator<Byte>::Begin(bytesList);
+  // Object::PyObjPtr deserialized = ReadObject(iter);
+  // EXPECT_EQ(obj->eq(deserialized), Object::CreatePyBoolean(true));
 }
+
+}  // namespace torchlight

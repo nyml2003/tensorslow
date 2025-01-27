@@ -1,23 +1,34 @@
-
 #include "Collections/Iterator.h"
-#include "Collections/StringHelper.h"
+#include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
+#include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
+#include "Object/PyType.h"
 
 namespace torchlight::Object {
 
 PyDictionary::PyDictionary(Collections::Map<PyObjPtr, PyObjPtr> dict)
   : PyObject(DictionaryKlass::Self()), dict(std::move(dict)) {}
 
-PyDictPtr CreatePyDict() {
+PyObjPtr CreatePyDict() {
   return std::make_shared<PyDictionary>(Collections::Map<PyObjPtr, PyObjPtr>());
 }
 
-DictionaryKlass::DictionaryKlass()
-  : Klass(Collections::CreateStringWithCString("dict")) {}
+PyObjPtr CreatePyDict(Collections::Map<PyObjPtr, PyObjPtr> dict) {
+  return std::make_shared<PyDictionary>(std::move(dict));
+}
+
+DictionaryKlass::DictionaryKlass() = default;
+
+void DictionaryKlass::Initialize() {
+  SetType(CreatePyType(Self()));
+  SetName(CreatePyString("dict"));
+  SetAttributes(CreatePyDict());
+  Klass::Initialize();
+}
 
 KlassPtr DictionaryKlass::Self() {
   static KlassPtr self = std::make_shared<DictionaryKlass>();
@@ -60,26 +71,29 @@ PyObjPtr DictionaryKlass::repr(PyObjPtr obj) {
     throw std::runtime_error("PyDictionary::repr(): obj is not a dict");
   }
   auto dict = std::dynamic_pointer_cast<PyDictionary>(obj);
-  PyObjPtr result = CreatePyString(Collections::CreateStringWithCString("{"));
-  PyListPtr entrites = CreatePyList(0);
-  for (auto it =
-         Collections::Iterator<Collections::MapEntry<PyObjPtr, PyObjPtr>>::
-           Begin(dict->Value().Entries());
+  auto entriesRaw = dict->Value().Entries();
+  auto entriesObj = CreatePyList(entriesRaw.Size());
+  for (auto it = Collections::Iterator<
+         Collections::MapEntry<PyObjPtr, PyObjPtr>>::Begin(entriesRaw);
        !it.End(); it.Next()) {
     auto key = it.Get().Key()->repr();
     auto value = it.Get().Value()->repr();
-    entrites->Append(
-      CreatePyString(Collections::CreateStringWithCString("  "))
-        ->add(key)
-        ->add(CreatePyString(Collections::CreateStringWithCString(": ")))
-        ->add(value)
+    entriesObj->setitem(
+      CreatePyInteger(it.GetCurrentIndex()),
+      key->add(CreatePyString(": "))->add(value)
     );
   }
-  result = result->add(
-    entrites->Join(CreatePyString(Collections::CreateStringWithCString("\n")))
-  );
-  result =
-    result->add(CreatePyString(Collections::CreateStringWithCString("}")));
-  return result;
+  return CreatePyString("{")
+    ->add(Join(CreatePyList({entriesObj, CreatePyString(", ")})))
+    ->add(CreatePyString("}"));
 }
+
+PyObjPtr DictionaryKlass::contains(PyObjPtr obj, PyObjPtr key) {
+  if (obj->Klass() != Self()) {
+    throw std::runtime_error("PyDictionary::contains(): obj is not a dict");
+  }
+  auto dict = std::dynamic_pointer_cast<PyDictionary>(obj);
+  return CreatePyBoolean(dict->Value().Contains(key));
+}
+
 }  // namespace torchlight::Object

@@ -143,4 +143,16 @@ String& String::operator=(String&& other) noexcept {
   codePoints = std::move(other.codePoints);
   return *this;
 }
+
+String String::Upper() const {
+  List<Unicode> upper;
+  for (Index i = 0; i < Size(); i++) {
+    if (Get(i) >= 'a' && Get(i) <= 'z') {
+      upper.Push(Get(i) - Unicode_Upper_Lower_Diff);
+    } else {
+      upper.Push(Get(i));
+    }
+  }
+  return String(upper);
+}
 }  // namespace torchlight::Collections

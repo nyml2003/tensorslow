@@ -1,14 +1,16 @@
+#include "ByteCode/ByteCode.h"
+#include "ByteCode/PyCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/IntegerHelper.h"
 #include "Collections/StringHelper.h"
-#include "Object/ByteCode.h"
 #include "Object/Klass.h"
 #include "Object/PyBytes.h"
-#include "Object/PyCode.h"
+#include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
+#include "Object/PyType.h"
 
 #include <cstring>
 #include <memory>
@@ -81,11 +83,17 @@ Index PyCode::NLocals() const {
   return nLocals;
 }
 
-CodeKlass::CodeKlass()
-  : Object::Klass(Collections::CreateStringWithCString("code")) {}
+CodeKlass::CodeKlass() = default;
 
-Object::KlassPtr CodeKlass::Self() {
-  static Object::KlassPtr instance = std::make_shared<CodeKlass>();
+void CodeKlass::Initialize() {
+  SetType(CreatePyType(Self()));
+  SetName(CreatePyString("code"));
+  SetAttributes(CreatePyDict());
+  Klass::Initialize();
+}
+
+KlassPtr CodeKlass::Self() {
+  static KlassPtr instance = std::make_shared<CodeKlass>();
   return instance;
 }
 
@@ -120,7 +128,9 @@ PyObjPtr CodeKlass::repr(PyObjPtr self) {
   repr = repr->add(
     CreatePyInteger(Collections::CreateIntegerWithU64(code->NLocals()))->repr()
   );
-  repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
+  repr =
+    repr->add(CreatePyString(Collections::CreateStringWithCString("\n</code>\n")
+    ));
   return repr;
 }
 

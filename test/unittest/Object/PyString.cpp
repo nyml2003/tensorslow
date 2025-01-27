@@ -1,8 +1,9 @@
+#include <memory>
 #include "../test_default.h"
 
 #include "../Collections/Collections.h"
+#include "ByteCode/ByteCode.h"
 #include "Object.h"
-#include "Object/ByteCode.h"
 
 using namespace torchlight::Object;
 using namespace torchlight::Collections;
@@ -12,9 +13,15 @@ namespace torchlight::Object {
 class PyStringTest : public ::testing::Test {
  protected:
   void SetUp() override {
-    str1 = CreatePyString(Collections::CreateStringWithCString("hello"));
-    str2 = CreatePyString(Collections::CreateStringWithCString("world"));
-    str3 = CreatePyString(Collections::CreateStringWithCString("hello"));
+    str1 = std::dynamic_pointer_cast<PyString>(
+      CreatePyString(Collections::CreateStringWithCString("hello"))
+    );
+    str2 = std::dynamic_pointer_cast<PyString>(
+      CreatePyString(Collections::CreateStringWithCString("world"))
+    );
+    str3 = std::dynamic_pointer_cast<PyString>(
+      CreatePyString(Collections::CreateStringWithCString("hello"))
+    );
   }
 
   PyStrPtr str1;
@@ -23,7 +30,7 @@ class PyStringTest : public ::testing::Test {
 };
 
 TEST_F(PyStringTest, Constructor) {
-  PyStrPtr str = CreatePyString(Collections::CreateStringWithCString("test"));
+  PyStrPtr str = std::dynamic_pointer_cast<PyString>(CreatePyString(Collections::CreateStringWithCString("test")));
   EXPECT_EQ(str->Value(), Collections::CreateStringWithCString("test"));
 }
 
@@ -36,9 +43,7 @@ TEST_F(PyStringTest, Add) {
 TEST_F(PyStringTest, Repr) {
   auto result = StringKlass::Self()->repr(str1);
   auto pystr = std::dynamic_pointer_cast<PyString>(result);
-  EXPECT_EQ(
-    pystr->Value(), Collections::CreateStringWithCString("<str 'hello'>")
-  );
+  EXPECT_EQ(pystr->Value(), Collections::CreateStringWithCString("\"hello\""));
 }
 
 TEST_F(PyStringTest, Eq) {

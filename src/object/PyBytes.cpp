@@ -1,23 +1,25 @@
+#include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/Iterator.h"
 #include "Collections/StringHelper.h"
-#include "Object/ByteCode.h"
 #include "Object/Klass.h"
-#include "Object/PyBytes.h"
 #include "Object/PyBoolean.h"
+#include "Object/PyBytes.h"
+#include "Object/PyDictionary.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
+#include "Object/PyType.h"
 
 namespace torchlight::Object {
 
 PyBytes::PyBytes(Collections::Bytes value)
   : PyObject(BytesKlass::Self()), value(std::move(value)) {}
 
-PyBytesPtr CreatePyBytes(Collections::Bytes value) {
+PyObjPtr CreatePyBytes(Collections::Bytes value) {
   return std::make_shared<PyBytes>(value);
 }
 
-PyBytesPtr CreatePyBytes() {
+PyObjPtr CreatePyBytes() {
   return std::make_shared<PyBytes>(Collections::Bytes());
 }
 
@@ -25,8 +27,14 @@ PyBytesPtr CreatePyBytes() {
   return value;
 }
 
-BytesKlass::BytesKlass()
-  : Klass(Collections::CreateStringWithCString("bytes")) {}
+BytesKlass::BytesKlass() = default;
+
+void BytesKlass::Initialize() {
+  SetType(CreatePyType(Self()));
+  SetName(CreatePyString("bytes"));
+  SetAttributes(CreatePyDict());
+  Klass::Initialize();
+}
 
 KlassPtr BytesKlass::Self() {
   static KlassPtr instance = std::make_shared<BytesKlass>();
@@ -59,13 +67,13 @@ PyObjPtr BytesKlass::repr(PyObjPtr obj) {
   auto bytes = std::dynamic_pointer_cast<PyBytes>(obj);
   Collections::List<Collections::String> reprs;
   auto bytesValue = bytes->Value().Value();
-  for (auto it = Collections::Iterator<Byte>::Begin(bytesValue);
-       !it.End(); it.Next()) {
+  for (auto it = Collections::Iterator<Byte>::Begin(bytesValue); !it.End();
+       it.Next()) {
     reprs.Push(Collections::ReprByte(it.Get()));
   }
-  return CreatePyString(Collections::CreateStringWithCString("Byte{").Add(
-    Collections::Join(reprs, Collections::CreateStringWithCString(","))
-      .Add(Collections::CreateStringWithCString("}"))
+  return CreatePyString(Collections::CreateStringWithCString("b'").Add(
+    Collections::Join(reprs, Collections::CreateStringWithCString(""))
+      .Add(Collections::CreateStringWithCString("'"))
   ));
 }
 

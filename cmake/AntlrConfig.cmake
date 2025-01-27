@@ -27,7 +27,3 @@ add_custom_target(
 include_directories(/usr/include/antlr4-runtime)
 
 set(torchlight_frontend_files ${torchlight_frontend_files} ${torchlight_antlr4_generated_files})
-
-add_custom_command(
-    
-)

@@ -9,9 +9,9 @@
 #include <stdexcept>
 namespace torchlight::Collections {
 String ReprByte(Byte byte) {
-  // 用16进制表示一个字节
-  char buffer[3];
-  std::snprintf(buffer, sizeof(buffer), "%02X", byte);
+  // 使用 \x 格式表示一个字节
+  char buffer[5];  // 需要 5 个字符：\x + 2 个十六进制字符 + 终止符
+  std::snprintf(buffer, sizeof(buffer), "\\x%02X", byte);
   return CreateStringWithCString(buffer);
 }
 Bytes CreateBytesWithCString(const char* str) {

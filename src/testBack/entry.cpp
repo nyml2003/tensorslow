@@ -15,7 +15,8 @@ std::vector<fs::path> getFilesInDirectory(const fs::path& directoryPath) {
   std::vector<fs::path> fileNames;
   if (fs::exists(directoryPath) && fs::is_directory(directoryPath)) {
     for (const auto& entry : fs::directory_iterator(directoryPath)) {
-      if (fs::is_regular_file(entry.status())) {
+      if (fs::is_regular_file(entry.status()) &&
+          entry.path().extension() == ".pyc") {
         fileNames.push_back(entry.path());
       }
     }
@@ -28,8 +29,10 @@ std::vector<fs::path> getFilesInDirectory(const fs::path& directoryPath) {
 
 int main() {
   std::string integrationTestDir = "/app/test/integration";
+  // 重定向std::cout到log.txt
+  // std::freopen("/app/log/log.txt", "w", stdout);
   for (const auto& file : getFilesInDirectory(integrationTestDir)) {
-    std::cout << "Running test: " << file.stem() << std::endl;
+     std::cout << "Running test: " << file.stem() << std::endl;
     torchlight::Runtime::BinaryFileParser parser(
       std::make_unique<torchlight::Runtime::BufferedInputStream>(
         file.string().c_str()

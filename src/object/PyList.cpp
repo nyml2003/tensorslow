@@ -1,21 +1,25 @@
+#include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/IntegerHelper.h"
 #include "Collections/Iterator.h"
 #include "Collections/StringHelper.h"
-#include "Object/ByteCode.h"
+#include "Common.h"
+#include "Function/PyNativeFunction.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
+#include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
 #include "Object/PyString.h"
+#include "Object/PyType.h"
 
 namespace torchlight::Object {
 
 PyList::PyList(Collections::List<PyObjPtr> value)
   : PyObject(ListKlass::Self()), value(std::move(value)) {}
 
-PyListPtr CreatePyList(Index capacity) {
+PyObjPtr CreatePyList(Index capacity) {
   if (capacity == 0) {
     return std::make_shared<PyList>(Collections::List<PyObjPtr>());
   }
@@ -24,7 +28,7 @@ PyListPtr CreatePyList(Index capacity) {
   return std::make_shared<PyList>(list);
 }
 
-PyListPtr CreatePyList(Collections::List<PyObjPtr> list, Index capacity) {
+PyObjPtr CreatePyList(Collections::List<PyObjPtr> list, Index capacity) {
   if (list.Size() >= capacity) {
     return std::make_shared<PyList>(list);
   }
@@ -34,11 +38,26 @@ PyListPtr CreatePyList(Collections::List<PyObjPtr> list, Index capacity) {
   return std::make_shared<PyList>(list);
 }
 
+PyObjPtr CreatePyList(Collections::List<PyObjPtr> list) {
+  return std::make_shared<PyList>(list);
+}
+
 Collections::List<PyObjPtr>& PyList::Value() {
   return value;
 }
 
-ListKlass::ListKlass() : Klass(Collections::CreateStringWithCString("list")) {}
+ListKlass::ListKlass() = default;
+
+void ListKlass::Initialize() {
+  SetType(CreatePyType(Self()));
+  SetName(CreatePyString("list"));
+  Collections::Map<PyObjPtr, PyObjPtr> methods;
+  methods.Put(CreatePyString("join"), CreatePyNativeFunction(Join));
+  methods.Put(CreatePyString("append"), CreatePyNativeFunction(Append));
+  methods.Put(CreatePyString("index"), CreatePyNativeFunction(ListIndex));
+  SetAttributes(CreatePyDict(std::move(methods)));
+  Klass::Initialize();
+}
 
 KlassPtr ListKlass::Self() {
   static KlassPtr instance = std::make_shared<ListKlass>();
@@ -47,7 +66,7 @@ KlassPtr ListKlass::Self() {
 
 PyObjPtr ListKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
-    throw std::runtime_error("List does not support add operation");
+    Klass::add(lhs, rhs);
   }
   auto left = std::dynamic_pointer_cast<PyList>(lhs);
   auto right = std::dynamic_pointer_cast<PyList>(rhs);
@@ -123,17 +142,89 @@ void PyList::Append(PyObjPtr obj) {
   value.Push(std::move(obj));
 }
 
-PyStrPtr PyList::Join(const PyStrPtr& separator) {
+PyObjPtr PyList::Join(const PyObjPtr& separator) {
+  if (separator->Klass() != StringKlass::Self()) {
+    throw std::runtime_error("List::Join(): separator is not a string");
+  }
   Collections::List<Collections::String> reprs;
   for (auto it = Collections::Iterator<PyObjPtr>::Begin(value); !it.End();
        it.Next()) {
-    auto repr = it.Get()->repr();
+    auto repr = it.Get()->str();
     if (repr->Klass() != StringKlass::Self()) {
       throw std::runtime_error("List element is not a string");
     }
     reprs.Push(std::dynamic_pointer_cast<PyString>(repr)->Value());
   }
-  return CreatePyString(Collections::Join(reprs, separator->Value()));
+  auto separator_str = std::dynamic_pointer_cast<PyString>(separator)->Value();
+  return CreatePyString(Collections::Join(reprs, separator_str));
 }
 
+PyObjPtr ListKlass::len(PyObjPtr obj) {
+  if (obj->Klass() != Self()) {
+    throw std::runtime_error("List does not support len operation");
+  }
+  auto list = std::dynamic_pointer_cast<PyList>(obj);
+  return CreatePyInteger(list->Value().Size());
+}
+
+PyObjPtr ListKlass::contains(PyObjPtr obj, PyObjPtr key) {
+  if (obj->Klass() != Self()) {
+    throw std::runtime_error("List does not support contains operation");
+  }
+  auto list = std::dynamic_pointer_cast<PyList>(obj);
+  return CreatePyBoolean(list->Value().Contains(key));
+}
+
+PyObjPtr Join(PyObjPtr args) {
+  if (args->Klass() != ListKlass::Self()) {
+    throw std::runtime_error("Join(): args is not a list");
+  }
+  auto list = std::dynamic_pointer_cast<PyList>(args);
+  if (list->Value().Size() != 2) {
+    throw std::runtime_error("Join(): args does not have 2 elements");
+  }
+  auto separator = list->Value().Get(1);
+  auto list_obj = list->Value().Get(0);
+  if (separator->Klass() != StringKlass::Self() ||
+      list_obj->Klass() != ListKlass::Self()) {
+    throw std::runtime_error(
+      "Join(): separator is not a string or list is not a list"
+    );
+  }
+  return std::dynamic_pointer_cast<PyList>(list_obj)->Join(separator);
+}
+
+PyObjPtr Append(PyObjPtr args) {
+  if (args->Klass() != ListKlass::Self()) {
+    throw std::runtime_error("Append(): args is not a list");
+  }
+  auto list = std::dynamic_pointer_cast<PyList>(args);
+  if (list->Value().Size() != 2) {
+    throw std::runtime_error("Append(): args does not have 2 elements");
+  }
+  auto obj = list->Value().Get(1);
+  auto list_obj = list->Value().Get(0);
+  if (list_obj->Klass() != ListKlass::Self()) {
+    throw std::runtime_error("Append(): list is not a list");
+  }
+  std::dynamic_pointer_cast<PyList>(list_obj)->Append(obj);
+  return CreatePyNone();
+}
+
+PyObjPtr ListIndex(PyObjPtr args) {
+  if (args->Klass() != ListKlass::Self()) {
+    throw std::runtime_error("ListIndex(): args is not a list");
+  }
+  auto list = std::dynamic_pointer_cast<PyList>(args);
+  if (list->Value().Size() != 2) {
+    throw std::runtime_error("ListIndex(): args does not have 2 elements");
+  }
+  auto obj = list->Value().Get(1);
+  auto list_obj = list->Value().Get(0);
+  if (list_obj->Klass() != ListKlass::Self()) {
+    throw std::runtime_error("ListIndex(): list is not a list");
+  }
+  auto list_value = std::dynamic_pointer_cast<PyList>(list_obj)->Value();
+  return CreatePyInteger(list_value.IndexOf(obj));
+}
 }  // namespace torchlight::Object

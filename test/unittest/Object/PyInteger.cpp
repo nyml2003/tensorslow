@@ -1,8 +1,9 @@
+#include <memory>
 #include "../test_default.h"
 
 #include "../Collections/Collections.h"
+#include "ByteCode/ByteCode.h"
 #include "Object.h"
-#include "Object/ByteCode.h"
 
 using namespace torchlight::Object;
 using namespace torchlight::Collections;
@@ -13,9 +14,9 @@ class PyIntegerTest : public ::testing::Test {
  protected:
   void SetUp() override {
     // 初始化操作，如创建测试对象等
-    integer1 = CreatePyInteger(10);
-    integer2 = CreatePyInteger(20);
-    integer3 = CreatePyInteger(10);
+    integer1 = std::dynamic_pointer_cast<PyInteger>(CreatePyInteger(10));
+    integer2 = std::dynamic_pointer_cast<PyInteger>(CreatePyInteger(20));
+    integer3 = std::dynamic_pointer_cast<PyInteger>(CreatePyInteger(10));
   }
 
   PyIntPtr integer1;
@@ -59,7 +60,7 @@ TEST_F(PyIntegerTest, TestDiv) {
 TEST_F(PyIntegerTest, TestRepr) {
   auto result = IntegerKlass::Self()->repr(integer1);
   EXPECT_TRUE(std::dynamic_pointer_cast<PyString>(result)->Value().Equal(
-    CreateStringWithCString("<int 10>")
+    CreateStringWithCString("10")
   ));
 }
 

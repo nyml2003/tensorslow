@@ -1,6 +1,6 @@
+#include "ByteCode/ByteCode.h"
 #include "Collections/Bytes.h"
 #include "Collections/StringHelper.h"
-#include "Object/ByteCode.h"
 
 namespace torchlight::Object {
 
@@ -78,7 +78,6 @@ std::map<ByteCode, const char*> ByteCodeNames = {
   {ByteCode::CALL_FUNCTION, "CALL_FUNCTION"},
   {ByteCode::LOAD_METHOD, "LOAD_METHOD"},
   {ByteCode::CALL_METHOD, "CALL_METHOD"},
-  {ByteCode::PRINT, "PRINT"},
   {ByteCode::ERROR, "ERROR"},
 };
 

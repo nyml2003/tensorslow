@@ -14,6 +14,8 @@ const Unicode Unicode_a = 0x0061;  // Unicode_a 是字符 'a' 的 Unicode 编码
 const Unicode Unicode_f = 0x0066;  // Unicode_f 是字符 'f' 的 Unicode 编码
 const Unicode Unicode_X = 0x0058;  // Unicode_X 是字符 'X' 的 Unicode 编码
 const Unicode Unicode_x = 0x0078;  // Unicode_x 是字符 'x' 的 Unicode 编码
+const Unicode Unicode_Upper_Lower_Diff =
+  0x0020;  // Unicode_Upper_Lower_Diff 是大写字母和小写字母的 Unicode 编码差值
 const Unicode UnicodeMinus = 0x2D;  // UnicodeMinus 是字符 '-' 的 Unicode 编码
 const Unicode UnicodePlus = 0x2B;  // UnicodePlus 是字符 '+' 的 Unicode 编码
 template <class... Ts>

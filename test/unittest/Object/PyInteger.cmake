@@ -4,6 +4,8 @@ add_executable(
     ${test_name}
     ${torchlight_Collections_files}
     ${torchlight_Object_files}
+    ${torchlight_Function_files}
+    ${torchlight_ByteCode_files}
     ${torchlight_dir}/test/unittest/Object/PyInteger.cpp
 )
 
