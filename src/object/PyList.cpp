@@ -1,19 +1,22 @@
+#include "Object/PyList.h"
+
 #include "ByteCode/ByteCode.h"
+#include "ByteCode/PyCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/IntegerHelper.h"
 #include "Collections/Iterator.h"
 #include "Collections/StringHelper.h"
-#include "Common.h"
 #include "Function/PyNativeFunction.h"
+#include "Object/Klass.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
-#include "Object/PyList.h"
-#include <memory>
 #include "Object/PyNone.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
+
+#include <memory>
 
 namespace torchlight::Object {
 
@@ -120,7 +123,7 @@ PyObjPtr ListKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
 
 PyObjPtr ListKlass::getitem(PyObjPtr obj, PyObjPtr key) {
   if (obj->Klass() != Self() || key->Klass() != IntegerKlass::Self()) {
-    throw std::runtime_error("List does not support getitem operation");
+    ThrowUnsupportedOperandError(obj, key, CreatePyString("__getitem__"));
   }
   auto list = std::dynamic_pointer_cast<PyList>(obj);
   auto index = std::dynamic_pointer_cast<PyInteger>(key);
@@ -226,4 +229,5 @@ PyObjPtr ListIndex(PyObjPtr args) {
   auto list_value = std::dynamic_pointer_cast<PyList>(list_obj)->Value();
   return CreatePyInteger(list_value.IndexOf(obj));
 }
+
 }  // namespace torchlight::Object

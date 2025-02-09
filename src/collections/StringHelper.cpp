@@ -120,4 +120,5 @@ String Join(const List<String>& list, const String& separator) {
   }
   return str;
 }
+
 }  // namespace torchlight::Collections

@@ -113,7 +113,7 @@ class List {
    * @param end 切片的结束索引（不包含）
    * @return 列表在 [start, end) 之间的元素组成的列表
    */
-  List<T> Slice(Index start, Index end) const;
+  [[nodiscard]] List<T> Slice(Index start, Index end) const;
   /**
    * @brief 移除指定位置的元素
    * @param index 要移除的元素的索引
@@ -175,7 +175,7 @@ class List {
    * @brief 深拷贝当前列表
    * @return 深拷贝后的列表
    */
-  List<T> Copy() const;
+  [[nodiscard]] List<T> Copy() const;
 };
 template <typename T>
 List<T>::~List() = default;
@@ -471,5 +471,6 @@ template <typename T>
 T* List<T>::Data() {
   return elements.get();
 }
+
 }  // namespace torchlight::Collections
 #endif  // TORCHLIGHT_COLLECTIONS_LIST_H

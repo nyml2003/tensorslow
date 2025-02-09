@@ -11,6 +11,9 @@ class Stack {
   void Push(const T& value) { content.Push(value); }
   T Pop() { return content.Pop(); }
   List<T> GetContent() const { return content; }
+  T Top() const { return content.Back(); }
+  [[nodiscard]] bool Empty() const { return content.Empty(); }
+  [[nodiscard]] Index Size() const { return content.Size(); }
 };
 }  // namespace torchlight::Collections
 #endif  // TORCHLIGHT_STACK_H

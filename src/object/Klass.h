@@ -83,6 +83,8 @@ class Klass {
   virtual PyObjPtr len(PyObjPtr obj);
 
   virtual PyObjPtr getattr(PyObjPtr obj, PyObjPtr key);
+
+  virtual PyObjPtr setattr(PyObjPtr obj, PyObjPtr key, PyObjPtr value);
 };
 
 void ThrowUnsupportedOperandError(

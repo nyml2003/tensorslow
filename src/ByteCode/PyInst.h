@@ -70,6 +70,8 @@ PyInstPtr CreateLoadAttr(Index index);
 
 PyInstPtr CreateBuildList(Index size);
 
+PyInstPtr CreateBinaryMatrixMultiply();
+
 }  // namespace torchlight::Object
 
 #endif

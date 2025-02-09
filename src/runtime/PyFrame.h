@@ -21,6 +21,7 @@ class PyFrame : public Object::PyObject {
   Object::PyDictPtr globals;
   Object::PyListPtr fastLocals;
   Object::PyObjPtr caller;
+  bool isParsed = false;
 
  public:
   explicit PyFrame(

@@ -1,4 +1,5 @@
 #include "ByteCode/PyInst.h"
+#include "ByteCode/PyCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
 #include "Object/PyBytes.h"
@@ -84,6 +85,10 @@ PyInstPtr CreateBinaryMultiply() {
   return std::make_shared<PyInst>(ByteCode::BINARY_MULTIPLY);
 }
 
+PyInstPtr CreateBinaryMatrixMultiply() {
+  return std::make_shared<PyInst>(ByteCode::BINARY_MATRIX_MULTIPLY);
+}
+
 PyInstPtr CreateStoreName(Index index) {
   return std::make_shared<PyInst>(ByteCode::STORE_NAME, index);
 }
@@ -143,4 +148,6 @@ PyInstPtr CreateLoadAttr(Index index) {
 PyInstPtr CreateBuildList(Index size) {
   return std::make_shared<PyInst>(ByteCode::BUILD_LIST, size);
 }
+
+
 }  // namespace torchlight::Object

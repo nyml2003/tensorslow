@@ -30,11 +30,27 @@ class MatrixKlass : public Klass {
   PyObjPtr repr(PyObjPtr obj) override;
 
   PyObjPtr matmul(PyObjPtr lhs, PyObjPtr rhs) override;
+
+  PyObjPtr mul(PyObjPtr lhs, PyObjPtr rhs) override;
+
+  PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs) override;
 };
 
 PyObjPtr Transpose(PyObjPtr args);
 
 PyObjPtr Matrix(PyObjPtr args);
+
+PyObjPtr Eye(PyObjPtr args);
+
+PyObjPtr Zeros(PyObjPtr args);
+
+PyObjPtr Ones(PyObjPtr args);
+
+PyObjPtr Diagnostic(PyObjPtr args);
+
+PyObjPtr Reshape(PyObjPtr args);
+
+PyObjPtr Shape(PyObjPtr args);
 
 }  // namespace torchlight::Object
 

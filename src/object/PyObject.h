@@ -68,6 +68,8 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   PyObjPtr _serialize_();
 
   PyObjPtr getattr(PyObjPtr key);
+
+  PyObjPtr setattr(PyObjPtr key, PyObjPtr value);
 };
 
 bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs);

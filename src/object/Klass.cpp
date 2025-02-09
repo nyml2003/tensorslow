@@ -1,8 +1,9 @@
+#include "Object/Klass.h"
 #include "Function/PyFunction.h"
+#include "Function/PyIife.h"
 #include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/Common.h"
-#include "Object/Klass.h"
 #include "Object/MixinCollections.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
@@ -13,6 +14,7 @@
 #include "Object/PyType.h"
 
 #include <iostream>
+#include <memory>
 
 namespace torchlight::Object {
 
@@ -23,10 +25,12 @@ Klass::Klass() {
 }
 
 void Klass::Initialize() {
-  auto dict = std::dynamic_pointer_cast<PyDictionary>(attributes);
-  dict->setitem(CreatePyString("__name__"), name);
-  dict->setitem(CreatePyString("__class__"), type);
-  dict->setitem(CreatePyString("print"), CreatePyNativeFunction(Print));
+  auto attrs = std::dynamic_pointer_cast<PyDictionary>(attributes);
+  auto attrsValue = attrs->Value();
+  attrsValue.Put(CreatePyString("__name__"), name);
+  attrsValue.Put(CreatePyString("__class__"), type);
+  attrsValue.Put(CreatePyString("print"), CreatePyNativeFunction(Print));
+  SetAttributes(CreatePyDict(attrsValue));
 }
 
 Klass::~Klass() = default;
@@ -106,8 +110,7 @@ PyObjPtr Klass::div(PyObjPtr lhs, PyObjPtr rhs) {
 
 PyObjPtr Klass::repr(PyObjPtr self) {
   return CreatePyString("<")
-    ->add(self->getattr(CreatePyString("__class__"))
-            ->getattr(CreatePyString("__name__")))
+    ->add(self->getattr(CreatePyString("__name__")->str()))
     ->add(CreatePyString(" object at ")
             ->add(CreatePyInteger(reinterpret_cast<uint64_t>(self.get()))->str()
             ))
@@ -202,7 +205,17 @@ PyObjPtr Klass::getattr(PyObjPtr obj, PyObjPtr key) {
   if (attr->Klass() == FunctionKlass::Self()) {
     return CreatePyMethod(obj, attr);
   }
+  if (attr->Klass() == IifeKlass::Self()) {
+    return std::dynamic_pointer_cast<PyIife>(attr)->Call(CreatePyList({obj}));
+  }
   return attr;
+}
+
+PyObjPtr Klass::setattr(PyObjPtr obj, PyObjPtr key, PyObjPtr value) {
+  auto dict = std::dynamic_pointer_cast<PyDictionary>(attributes);
+  auto dictValue = dict->Value();
+  dictValue.Put(key, value);
+  return CreatePyNone();
 }
 
 PyObjPtr Klass::str(PyObjPtr obj) {

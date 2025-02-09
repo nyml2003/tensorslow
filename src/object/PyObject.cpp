@@ -1,10 +1,10 @@
+#include "Object/PyObject.h"
 #include "Collections/Iterator.h"
 #include "Collections/StringHelper.h"
 #include "Object/MixinCollections.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
-#include "Object/PyObject.h"
 #include "Object/PyString.h"
 
 #include <iostream>
@@ -107,7 +107,17 @@ PyObjPtr PyObject::getattr(PyObjPtr key) {
   return klass->getattr(shared_from_this(), std::move(key));
 }
 
+PyObjPtr PyObject::setattr(PyObjPtr key, PyObjPtr value) {
+  return klass->setattr(shared_from_this(), std::move(key), std::move(value));
+}
+
 bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (lhs.get() == rhs.get()) {
+    return true;
+  }
+  if (lhs->Klass() != rhs->Klass()) {
+    return false;
+  }
   auto equal = lhs->eq(rhs);
   return std::dynamic_pointer_cast<PyBoolean>(equal)->Value();
 }
@@ -140,4 +150,5 @@ PyObjPtr Print(PyObjPtr args) {
   std::cout << std::endl;
   return CreatePyNone();
 }
+
 }  // namespace torchlight::Object

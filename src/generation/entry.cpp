@@ -1,3 +1,14 @@
+#include "Ast/AssignStmt.h"
+#include "Ast/Atom.h"
+#include "Ast/Binary.h"
+#include "Ast/ExprStmt.h"
+#include "Ast/FuncDef.h"
+#include "Ast/FunctionCall.h"
+#include "Ast/ReturnStmt.h"
+#include "Ast/Identifier.h"
+#include "Ast/List.h"
+#include "Ast/MemberAccess.h"
+#include "Ast/Module.h"
 #include "ByteCode/PyCode.h"
 #include "ByteCode/PyInst.h"
 #include "Collections/BytesHelper.h"
@@ -56,6 +67,17 @@ void InitPyObj() {
   Object::FunctionKlass::Self()->Initialize();
   Object::InstKlass::Self()->Initialize();
   Object::CodeKlass::Self()->Initialize();
+  Ast::ModuleKlass::Self()->Initialize();
+  Ast::FuncDefKlass::Self()->Initialize();
+  Ast::ExprStmtKlass::Self()->Initialize();
+  Ast::AssignStmtKlass::Self()->Initialize();
+  Ast::AtomKlass::Self()->Initialize();
+  Ast::BinaryKlass::Self()->Initialize();
+  Ast::FunctionCallKlass::Self()->Initialize();
+  Ast::IdentifierKlass::Self()->Initialize();
+  Ast::ListKlass::Self()->Initialize();
+  Ast::MemberAccessKlass::Self()->Initialize();
+  Ast::ReturnStmtKlass::Self()->Initialize();
 }
 
 // 使用ANTLR解析文件
@@ -73,13 +95,15 @@ void parseFileWithANTLR(const fs::path& filePath) {
 
   antlr4::tree::ParseTree* tree = parser.file_input();
 
-  std::cout << "AST tree: " << std::endl;
-  std::cout << tree->toStringTree(&parser) << std::endl;
+  // std::cout << "AST tree: " << std::endl;
+  // std::cout << tree->toStringTree(&parser) << std::endl;
 
   Generator visitor(Object::CreatePyString(filePath.string()));
   visitor.visit(tree);
-  auto code = visitor.Generate();
-  Object::DebugPrint(code);
+  visitor.Visit();
+  visitor.Emit();
+  auto code = visitor.Code();
+  Object::DebugPrint(code->repr());
   Collections::Bytes data =
     std::dynamic_pointer_cast<Object::PyBytes>(code->_serialize_())->Value();
   auto writePath = fs::path(filePath).replace_extension(".pyc");

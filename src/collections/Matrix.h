@@ -17,8 +17,11 @@ class Matrix {
 
  public:
   [[nodiscard]] String ToString() const;
-  Matrix(Index rows, Index cols);
-  Matrix(Index rows, Index cols, List<double> data);
+  explicit Matrix(Index rows, Index cols);
+  explicit Matrix(Index rows, Index cols, List<double> data);
+  explicit Matrix(List<List<double>> data);
+
+  void Set(Index row, Index col, double value);
 
   [[nodiscard]] Matrix Transpose() const;
 
@@ -29,8 +32,9 @@ class Matrix {
   [[nodiscard]] Index Rows() const;
   [[nodiscard]] Index Cols() const;
   [[nodiscard]] List<double> Data() const;
+  [[nodiscard]] List<Index> Shape() const;
   [[nodiscard]] double At(Index row, Index col) const;
-  [[nodiscard]] Matrix InplaceReshape(Index rows, Index cols) const;
+  [[nodiscard]] Matrix Reshape(Index rows, Index cols) const;
 
   [[nodiscard]] Matrix MatrixMultiply(const Matrix& other) const;
 

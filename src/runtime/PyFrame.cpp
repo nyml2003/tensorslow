@@ -1,3 +1,4 @@
+#include "Runtime/PyFrame.h"
 #include "ByteCode/ByteCode.h"
 #include "ByteCode/PyCode.h"
 #include "ByteCode/PyInst.h"
@@ -11,8 +12,8 @@
 #include "Object/PyNone.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
-#include "Runtime/PyFrame.h"
 #include "Runtime/Serialize.h"
+
 
 #include <cstring>
 #include <memory>
@@ -128,7 +129,7 @@ Object::PyInstPtr PyFrame::Instruction() const {
 }
 
 bool PyFrame::Finished() const {
-  if (!code->Instructions()) {
+  if (!isParsed) {
     ParseByteCode(code);
   }
   auto size = code->Instructions()->Value().Size();
@@ -224,6 +225,10 @@ void ParseByteCode(const Object::PyCodePtr& code) {
       }
       case Object::ByteCode::BUILD_LIST: {
         insts.Push(Object::CreateBuildList(ReadU64(iter)));
+        break;
+      }
+      case Object::ByteCode::BINARY_MATRIX_MULTIPLY: {
+        insts.Push(Object::CreateBinaryMatrixMultiply());
         break;
       }
       default:

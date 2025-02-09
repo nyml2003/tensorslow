@@ -1,8 +1,10 @@
 #include "../test_default.h"
 
-#include "Collections.h"
+#include "Collections/List.h"
+#include "Collections/ListHelper.h"
 
 using namespace torchlight::Collections;
+using torchlight::Index;
 TEST(List, Add) {
   List<char> list1 = {1, 2, 3};
   List<char> list2 = {4, 5, 6};

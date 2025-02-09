@@ -48,9 +48,34 @@ Object::PyObjPtr Genesis() {
     CreatePyNativeFunction(Object::Print)
   );
   builtins->setitem(
-    Object::CreatePyString(Collections::CreateStringWithCString("len")),
+    Object::CreatePyString(Collections::CreateStringWithCString("matrix")),
     CreatePyNativeFunction(Object::Matrix)
   );
+  builtins->setitem(
+    Object::CreatePyString(Collections::CreateStringWithCString("eye")),
+    CreatePyNativeFunction(Object::Eye)
+  );
+  builtins->setitem(
+    Object::CreatePyString(Collections::CreateStringWithCString("zeros")),
+    CreatePyNativeFunction(Object::Zeros)
+  );
+  builtins->setitem(
+    Object::CreatePyString(Collections::CreateStringWithCString("ones")),
+    CreatePyNativeFunction(Object::Ones)
+  );
+  builtins->setitem(
+    Object::CreatePyString(Collections::CreateStringWithCString("diag")),
+    CreatePyNativeFunction(Object::Diagnostic)
+  );
+  builtins->setitem(
+    Object::CreatePyString(Collections::CreateStringWithCString("transpose")),
+    CreatePyNativeFunction(Object::Transpose)
+  );
+  builtins->setitem(
+    Object::CreatePyString(Collections::CreateStringWithCString("reshape")),
+    CreatePyNativeFunction(Object::Reshape)
+  );
+
   return builtins;
 }
 

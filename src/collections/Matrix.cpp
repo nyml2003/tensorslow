@@ -12,6 +12,37 @@ Matrix::Matrix(Index rows, Index cols)
 Matrix::Matrix(Index rows, Index cols, List<double> data)
   : rows(rows), cols(cols), data(std::move(data)) {}
 
+Matrix::Matrix(List<List<double>> data) {
+  if (data.Empty()) {
+    throw std::invalid_argument("Matrix::Matrix: data is empty");
+  }
+  rows = data.Size();
+  cols = data[0].Size();
+  for (Index i = 1; i < rows; i++) {
+    if (data[i].Size() != cols) {
+      throw std::invalid_argument("Matrix::Matrix: data is not rectangular");
+    }
+  }
+  this->data = List<double>(rows * cols);
+  this->data.Fill(0);
+  for (Index i = 0; i < rows; i++) {
+    for (Index j = 0; j < cols; j++) {
+      this->data.Set(i * cols + j, data[i][j]);
+    }
+  }
+}
+
+List<Index> Matrix::Shape() const {
+  return List<Index>({rows, cols});
+}
+
+void Matrix::Set(Index row, Index col, double value) {
+  if (row >= rows || col >= cols) {
+    throw std::invalid_argument("Matrix::Set: Index out of range");
+  }
+  data.Set(row * cols + col, value);
+}
+
 String Matrix::ToString() const {
   String str;
   str.Concat(CreateStringWithCString("["));
@@ -181,11 +212,11 @@ double Matrix::At(Index row, Index col) const {
   return data.Get(row * cols + col);
 }
 
-Matrix Matrix::InplaceReshape(Index rows, Index cols) const {
+Matrix Matrix::Reshape(Index rows, Index cols) const {
   if (rows * cols != this->rows * this->cols) {
     throw std::invalid_argument("Matrix dimensions must be equal");
   }
-  return {rows, cols, data};
+  return Matrix(rows, cols, data);
 }
 
 Matrix Matrix::MatrixMultiply(const Matrix& other) const {

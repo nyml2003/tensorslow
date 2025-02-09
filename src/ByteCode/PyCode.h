@@ -9,17 +9,12 @@
 
 namespace torchlight::Object {
 
+class PyCode;
+
+using PyCodePtr = std::shared_ptr<PyCode>;
+enum class Scope { ERR = 0, LOCAL, GLOBAL, Closure };
 class PyCode : public PyObject {
   friend class CodeKlass;
-
- private:
-  PyBytesPtr byteCode;
-  PyListPtr instructions;
-  PyListPtr consts;
-  PyListPtr names;
-  PyListPtr varNames;
-  PyStrPtr name;
-  Index nLocals;
 
  public:
   explicit PyCode(
@@ -35,6 +30,12 @@ class PyCode : public PyObject {
 
   void SetInstructions(const PyListPtr& insts);
 
+  void SetByteCode(const PyBytesPtr& byteCodes);
+
+  void SetNLocals(Index nLocals);
+
+  void SetScope(Scope scope);
+
   PyBytesPtr ByteCode() const;
 
   [[nodiscard]] PyListPtr Consts() const;
@@ -46,6 +47,55 @@ class PyCode : public PyObject {
   [[nodiscard]] PyListPtr VarNames() const;
 
   [[nodiscard]] Index NLocals() const;
+
+  [[nodiscard]] Scope Scope() const;
+
+  Index IndexOfConst(const PyObjPtr& obj);
+
+  void RegisterConst(const PyObjPtr& obj);
+
+  Index IndexOfName(const PyObjPtr& name);
+
+  void RegisterName(const PyObjPtr& name);
+
+  Index IndexOfVarName(const PyObjPtr& name);
+
+  void RegisterVarName(const PyObjPtr& name);
+
+  /**
+   * @param obj 可以是String, Integer, Float, Boolean, None, List，Code
+   */
+  void LoadConst(const PyObjPtr& obj);
+
+  void LoadName(const PyObjPtr& obj);
+
+  void StoreName(const PyObjPtr& obj);
+
+  void LoadAttr(const PyObjPtr& obj);
+
+  void LoadGlobal(Index index);
+
+  void LoadFast(Index index);
+
+  void StoreFast(const PyObjPtr& obj);
+
+  void BuildList(Index size);
+
+  void CallFunction(Index nArgs);
+
+  void MakeFunction();
+
+  void ReturnValue();
+
+ private:
+  PyBytesPtr byteCode;
+  PyListPtr instructions;
+  PyListPtr consts;
+  PyListPtr names;
+  PyListPtr varNames;
+  PyStrPtr name;
+  Index nLocals;
+  enum Scope scope = Scope::ERR;
 };
 
 using PyCodePtr = std::shared_ptr<PyCode>;
@@ -57,10 +107,14 @@ class CodeKlass : public Klass {
 
   PyObjPtr repr(PyObjPtr self) override;
 
+  PyObjPtr str(PyObjPtr self) override;
+
   PyObjPtr _serialize_(PyObjPtr self) override;
 
   void Initialize() override;
 };
+
+PyObjPtr CreatePyCode(const PyObjPtr& name);
 
 }  // namespace torchlight::Object
 

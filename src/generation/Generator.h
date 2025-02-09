@@ -1,23 +1,24 @@
 #ifndef TORCHLIGHT_EVALVISITOR_H
 #define TORCHLIGHT_EVALVISITOR_H
 
-#include <antlr4-runtime.h>
-#include "Generation/Expression.h"
-#include "Object/Common.h"
+#include "Ast/INode.h"
+#include "Ast/Module.h"
 #include "Python3ParserBaseVisitor.h"
+
+#include <antlr4-runtime.h>
 
 namespace torchlight::Generation {
 
 class Generator : public Python3ParserBaseVisitor {
  private:
-  Object::PyObjPtr consts;
-  Object::PyObjPtr names;
-  Object::PyObjPtr instructions;
-  Object::PyObjPtr filename;
+  Object::PyListPtr codeList;
+  Ast::INodePtr context;
 
  public:
   explicit Generator(Object::PyObjPtr filename);
-  Object::PyObjPtr Generate();
+  void Visit();
+  void Emit();
+  [[nodiscard]] Object::PyCodePtr Code() const;
   antlrcpp::Any visitFile_input(Python3Parser::File_inputContext* ctx) override;
   antlrcpp::Any visitAtom(Python3Parser::AtomContext* ctx) override;
   antlrcpp::Any visitTrailer(Python3Parser::TrailerContext* ctx) override;
@@ -47,105 +48,31 @@ class Generator : public Python3ParserBaseVisitor {
 
   antlrcpp::Any visitTestlist_comp(Python3Parser::Testlist_compContext* ctx
   ) override;
+
+  antlrcpp::Any visitCompound_stmt(Python3Parser::Compound_stmtContext* ctx
+  ) override;
+
+  antlrcpp::Any visitFuncdef(Python3Parser::FuncdefContext* ctx) override;
+
+  antlrcpp::Any visitBlock(Python3Parser::BlockContext* ctx) override;
+
+  antlrcpp::Any visitSimple_stmts(Python3Parser::Simple_stmtsContext* ctx
+  ) override;
+
+  antlrcpp::Any visitStmt(Python3Parser::StmtContext* ctx) override;
+
+  antlrcpp::Any visitReturn_stmt(Python3Parser::Return_stmtContext* ctx
+  ) override;
+
+  antlrcpp::Any visitTestlist(Python3Parser::TestlistContext* ctx) override;
+
+  antlrcpp::Any visitParameters(Python3Parser::ParametersContext* ctx) override;
+
+  antlrcpp::Any visitTypedargslist(Python3Parser::TypedargslistContext* ctx
+  ) override;
+
+  antlrcpp::Any visitTfpdef(Python3Parser::TfpdefContext* ctx) override;
 };
-
-void LoadConst(
-  const Object::PyObjPtr& obj,
-  const Object::PyObjPtr& consts,
-  const Object::PyObjPtr& instructions
-);
-
-void LoadName(
-  const Object::PyObjPtr& name,
-  const Object::PyObjPtr& names,
-  const Object::PyObjPtr& instructions
-);
-
-void StoreName(
-  const Object::PyObjPtr& name,
-  const Object::PyObjPtr& names,
-  const Object::PyObjPtr& instructions
-);
-
-void LoadAttr(
-  const Object::PyObjPtr& attribute,
-  const Object::PyObjPtr& names,
-  const Object::PyObjPtr& instructions
-);
-
-void BuildList(
-  const Object::PyObjPtr& list,
-  const Object::PyObjPtr& instructions
-);
-
-void CallFunction(Index nArgs, const Object::PyObjPtr& instructions);
-
-void CodegenExpr(
-  const Expr& expr,
-  const Object::PyObjPtr& consts,
-  const Object::PyObjPtr& names,
-  const Object::PyObjPtr& instructions
-);
-
-void CodegenAtom(
-  const Atom& atom,
-  const Object::PyObjPtr& consts,
-  const Object::PyObjPtr& instructions
-);
-
-void CodegenBinary(
-  const Binary& binary,
-  const Object::PyObjPtr& consts,
-  const Object::PyObjPtr& names,
-  const Object::PyObjPtr& instructions
-);
-
-void CodegenUnary(
-  const Unary& unary,
-  const Object::PyObjPtr& consts,
-  const Object::PyObjPtr& names,
-  const Object::PyObjPtr& instructions
-);
-
-void CodegenFunctionCall(
-  const FunctionCall& call,
-  const Object::PyObjPtr& consts,
-  const Object::PyObjPtr& names,
-  const Object::PyObjPtr& instructions
-);
-
-void CodegenIdentifier(
-  const Identifier& identifier,
-  const Object::PyObjPtr& names,
-  const Object::PyObjPtr& instructions
-);
-
-void CodegenList(
-  const List& list,
-  const Object::PyObjPtr& consts,
-  const Object::PyObjPtr& names,
-  const Object::PyObjPtr& instructions
-);
-
-void CodegenMemberAccess(
-  const MemberAccess& memberAccess,
-  const Object::PyObjPtr& consts,
-  const Object::PyObjPtr& names,
-  const Object::PyObjPtr& instructions
-);
-
-void CodegenAtomList(
-  const AtomList& atomList,
-  const Object::PyObjPtr& consts,
-  const Object::PyObjPtr& names,
-  const Object::PyObjPtr& instructions
-);
-
-Object::PyObjPtr
-IndexOfConst(const Object::PyObjPtr& obj, const Object::PyObjPtr& consts);
-
-Object::PyObjPtr
-IndexOfName(const Object::PyObjPtr& name, const Object::PyObjPtr& names);
 
 }  // namespace torchlight::Generation
 

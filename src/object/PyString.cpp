@@ -1,3 +1,4 @@
+#include "Object/PyString.h"
 #include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
@@ -9,8 +10,8 @@
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyObject.h"
-#include "Object/PyString.h"
 #include "Object/PyType.h"
+
 
 namespace torchlight::Object {
 

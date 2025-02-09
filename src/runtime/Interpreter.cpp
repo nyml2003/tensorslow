@@ -1,3 +1,4 @@
+#include "Runtime/Interpreter.h"
 #include "ByteCode/ByteCode.h"
 #include "ByteCode/PyCode.h"
 #include "Collections/IntegerHelper.h"
@@ -13,7 +14,6 @@
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Runtime/Genesis.h"
-#include "Runtime/Interpreter.h"
 #include "Runtime/PyFrame.h"
 
 #include <memory>
@@ -194,6 +194,13 @@ void Interpreter::EvalFrame() {
         frameObject->NextProgramCounter();
         break;
       }
+      case Object::ByteCode::BINARY_MATRIX_MULTIPLY: {
+        auto right = frameObject->Stack().Pop();
+        auto left = frameObject->Stack().Pop();
+        frameObject->Stack().Push(left->matmul(right));
+        frameObject->NextProgramCounter();
+        break;
+      }
       case Object::ByteCode::BINARY_TRUE_DIVIDE:
       case Object::ByteCode::BINARY_FLOOR_DIVIDE:
       case Object::ByteCode::BINARY_XOR:
@@ -239,6 +246,7 @@ void Interpreter::EvalFrame() {
         for (Index i = 0; i < argumentCount; i++) {
           arguments.Push(frameObject->Stack().Pop());
         }
+        arguments.Reverse();
         BuildFrameWithFunction(
           frameObject->Stack().Pop(), CreatePyList(arguments)
         );
@@ -248,7 +256,21 @@ void Interpreter::EvalFrame() {
       case Object::ByteCode::LOAD_GLOBAL: {
         auto index = std::get<Index>(inst->Operand());
         auto key = frameObject->Code()->Names()->Value().Get(index);
-        auto value = frameObject->Globals()->getitem(key);
+        bool found = false;
+        Object::PyObjPtr value = Object::CreatePyNone();
+        if (Object::IsTrue(frameObject->Globals()->contains(key))) {
+          found = true;
+          value = frameObject->Globals()->getitem(key);
+        }
+        if (!found && Object::IsTrue(builtins->contains(key))) {
+          found = true;
+          value = builtins->getitem(key);
+        }
+        if (!found) {
+          throw std::runtime_error(
+            "NameError: " + Collections::ToCppString(key) + " not found"
+          );
+        }
         frameObject->Stack().Push(value);
         frameObject->NextProgramCounter();
         break;
@@ -281,8 +303,9 @@ void Interpreter::EvalFrame() {
           value = builtins->getitem(key);
         }
         if (!found) {
-          Object::DebugPrint(key);
-          throw std::runtime_error("NameError: name is not defined");
+          throw std::runtime_error(
+            "NameError: " + Collections::ToCppString(key) + " not found"
+          );
         }
         frameObject->Stack().Push(value);
         frameObject->NextProgramCounter();
@@ -309,7 +332,8 @@ void Interpreter::EvalFrame() {
           elements.Push(frameObject->Stack().Pop());
         }
         elements.Reverse();
-        frameObject->Stack().Push(CreatePyList(elements));
+        auto list = Object::CreatePyList(elements);
+        frameObject->Stack().Push(list);
         frameObject->NextProgramCounter();
         break;
       }
