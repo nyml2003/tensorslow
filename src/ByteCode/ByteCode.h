@@ -104,6 +104,10 @@ enum class CompareOp {
   LESS_THAN_EQUAL = 1,
   GREATER_THAN = 4,
   GREATER_THAN_EQUAL = 5,
+  IS = 8,
+  IS_NOT = 9,
+  IN = 6,
+  NOT_IN = 7,
 };
 
 using OperandKind = std::variant<CompareOp, None, Index, int64_t>;

@@ -25,6 +25,7 @@ class Binary : public Ast::INode {
     MATMUL,     // @
     MOD,        // %
     FLOOR_DIV,  // "//"
+    SUBSCR,     // []
   };
 
   explicit Binary(

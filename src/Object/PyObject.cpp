@@ -1,8 +1,10 @@
 #include "Object/PyObject.h"
 #include "Collections/Iterator.h"
 #include "Collections/StringHelper.h"
+#include "Object/Common.h"
 #include "Object/MixinCollections.h"
 #include "Object/PyBoolean.h"
+#include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
 #include "Object/PyString.h"
@@ -149,6 +151,18 @@ PyObjPtr Print(PyObjPtr args) {
   }
   std::cout << std::endl;
   return CreatePyNone();
+}
+
+PyObjPtr Len(PyObjPtr args) {
+  if (args->Klass() != ListKlass::Self()) {
+    throw std::runtime_error("len() argument must be a list");
+  }
+  auto list = std::dynamic_pointer_cast<PyList>(args);
+  if (ToU64(list->len()) != 1) {
+    throw std::runtime_error("len() argument must be a list of length 1");
+  }
+  auto value = list->getitem(CreatePyInteger(0));
+  return value->len();
 }
 
 }  // namespace torchlight::Object

@@ -72,6 +72,12 @@ PyInstPtr CreateBuildList(Index size);
 
 PyInstPtr CreateBinaryMatrixMultiply();
 
+PyInstPtr CreateJumpAbsolute(Index index);
+
+PyInstPtr CreateBinarySubscr();
+
+PyInstPtr CreateStoreSubscr();
+
 }  // namespace torchlight::Object
 
 #endif

@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
   }
 
   // 重定向std::cout到log.txt（如果需要）
-   // std::freopen("/app/log/log.txt", "w", stdout);
+  // std::freopen("/app/log/log.txt", "w", stdout);
 
   if (!singleFile.empty()) {
     // 如果指定了单个文件，则只运行该文件

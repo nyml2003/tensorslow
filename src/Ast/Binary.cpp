@@ -78,9 +78,44 @@ BinaryKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
       break;
     case Binary::Operator::MATMUL:
       inst = Object::CreateBinaryMatrixMultiply();
+    case Binary::Operator::EQ:
+      inst = Object::CreateCompareOp(Object::CompareOp::EQUAL);
+      break;
+    case Binary::Operator::GE:
+      inst = Object::CreateCompareOp(Object::CompareOp::GREATER_THAN_EQUAL);
+      break;
+    case Binary::Operator::LE:
+      inst = Object::CreateCompareOp(Object::CompareOp::LESS_THAN_EQUAL);
+      break;
+    case Binary::Operator::NE:
+      inst = Object::CreateCompareOp(Object::CompareOp::NOT_EQUAL);
+      break;
+    case Binary::Operator::LT:
+      inst = Object::CreateCompareOp(Object::CompareOp::LESS_THAN);
+      break;
+    case Binary::Operator::GT:
+      inst = Object::CreateCompareOp(Object::CompareOp::GREATER_THAN);
+      break;
+    case Binary::Operator::IS:
+      inst = Object::CreateCompareOp(Object::CompareOp::IS);
+      break;
+    case Binary::Operator::IS_NOT:
+      inst = Object::CreateCompareOp(Object::CompareOp::IS_NOT);
+      break;
+    case Binary::Operator::IN:
+      inst = Object::CreateCompareOp(Object::CompareOp::IN);
+      break;
+    case Binary::Operator::NOT_IN:
+      inst = Object::CreateCompareOp(Object::CompareOp::NOT_IN);
+      break;
+    case Binary::Operator::SUBSCR:
+      inst = Object::CreateBinarySubscr();
       break;
     default:
       break;
+  }
+  if (inst == nullptr) {
+    throw std::runtime_error("BinaryKlass::emit(): unsupported operator");
   }
   auto code = GetCodeFromList(codeList, binary);
   code->Instructions()->Append(inst);

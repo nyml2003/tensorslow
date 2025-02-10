@@ -1,6 +1,7 @@
 #include "Ast/AssignStmt.h"
 #include <memory>
 #include <utility>
+#include "Ast/Binary.h"
 #include "Ast/INode.h"
 #include "Ast/Identifier.h"
 #include "Ast/MemberAccess.h"
@@ -64,6 +65,23 @@ AssignStmtKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
       code->StoreName(name);
     }
   } else if (target->Klass() == MemberAccessKlass::Self()) {
+    // 有误
+    // target->emit(codeList);
+    // auto code = GetCodeFromList(codeList, target);
+    // code->StoreSubscr();
+  } else if (target->Klass() == BinaryKlass::Self()) {
+    auto binary = std::dynamic_pointer_cast<Binary>(target);
+    auto oprt = binary->Oprt();
+    if (oprt != Binary::Operator::SUBSCR) {
+      throw std::runtime_error("Unknown target type");
+    }
+    auto left = binary->Left();
+    left->emit(codeList);
+    auto right = binary->Right();
+    right->emit(codeList);
+    auto code = GetCodeFromList(codeList, target);
+    code->StoreSubscr();
+    return Object::CreatePyNone();
   }
   return Object::CreatePyNone();
 }
@@ -90,6 +108,17 @@ AssignStmtKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
       }
     }
   } else if (target->Klass() == MemberAccessKlass::Self()) {
+  } else if (target->Klass() == BinaryKlass::Self()) {
+    auto binary = std::dynamic_pointer_cast<Binary>(target);
+    auto oprt = binary->Oprt();
+    if (oprt != Binary::Operator::SUBSCR) {
+      throw std::runtime_error("Unknown target type");
+    }
+    auto left = binary->Left();
+    left->visit(codeList);
+    auto right = binary->Right();
+    right->visit(codeList);
+    return Object::CreatePyNone();
   }
   return Object::CreatePyNone();
 }

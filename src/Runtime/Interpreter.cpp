@@ -128,6 +128,30 @@ void Interpreter::EvalFrame() {
             auto result = left->ge(right);
             break;
           }
+          case Object::CompareOp::IN: {
+            frameObject->Stack().Push(right->contains(left));
+            auto result = right->contains(left);
+            break;
+          }
+          case Object::CompareOp::NOT_IN: {
+            frameObject->Stack().Push(Not(right->contains(left)));
+            auto result = Not(right->contains(left));
+            break;
+          }
+          case Object::CompareOp::IS: {
+            frameObject->Stack().Push(
+              Object::CreatePyBoolean(left.get() == right.get())
+            );
+            auto result = Object::CreatePyBoolean(left.get() == right.get());
+            break;
+          }
+          case Object::CompareOp::IS_NOT: {
+            frameObject->Stack().Push(
+              Not(Object::CreatePyBoolean(left.get() == right.get()))
+            );
+            auto result = Object::CreatePyBoolean(left.get() != right.get());
+            break;
+          }
           default:
             throw std::runtime_error("Unknown compare operation");
         }
@@ -144,9 +168,8 @@ void Interpreter::EvalFrame() {
         if (bool_needJump == nullptr) {
           throw std::runtime_error("Cannot jump if not boolean");
         }
-        if (bool_needJump->Value()) {
-          frameObject->NextProgramCounter();
-        } else {
+        frameObject->NextProgramCounter();
+        if (!bool_needJump->Value()) {
           frameObject->SetProgramCounter(Collections::safe_add(
             frameObject->ProgramCounter(), std::get<int64_t>(inst->Operand())
           ));
@@ -163,13 +186,11 @@ void Interpreter::EvalFrame() {
         if (bool_needJump == nullptr) {
           throw std::runtime_error("Cannot jump if not boolean");
         }
+        frameObject->NextProgramCounter();
         if (bool_needJump->Value()) {
           frameObject->SetProgramCounter(Collections::safe_add(
             frameObject->ProgramCounter(), std::get<int64_t>(inst->Operand())
           ));
-
-        } else {
-          frameObject->NextProgramCounter();
         }
         break;
       }
@@ -211,6 +232,13 @@ void Interpreter::EvalFrame() {
       case Object::ByteCode::BINARY_LSHIFT:
       case Object::ByteCode::BINARY_RSHIFT:
         break;
+      case Object::ByteCode::BINARY_SUBSCR: {
+        auto index = frameObject->Stack().Pop();
+        auto obj = frameObject->Stack().Pop();
+        frameObject->Stack().Push(obj->getitem(index));
+        frameObject->NextProgramCounter();
+        break;
+      }
       case Object::ByteCode::RETURN_VALUE: {
         returnValue = frameObject->Stack().Pop();
         if (frameObject->HasCaller()) {
@@ -334,6 +362,18 @@ void Interpreter::EvalFrame() {
         elements.Reverse();
         auto list = Object::CreatePyList(elements);
         frameObject->Stack().Push(list);
+        frameObject->NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::JUMP_ABSOLUTE: {
+        frameObject->SetProgramCounter(std::get<Index>(inst->Operand()));
+        break;
+      }
+      case Object::ByteCode::STORE_SUBSCR: {
+        auto index = frameObject->Stack().Pop();
+        auto obj = frameObject->Stack().Pop();
+        auto value = frameObject->Stack().Pop();
+        obj->setitem(index, value);
         frameObject->NextProgramCounter();
         break;
       }

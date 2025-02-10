@@ -91,14 +91,15 @@ FuncDefKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
     code->RegisterVarName(params[i]);
   }
   Object::Invoke(codeList, Object::CreatePyString("append"), {code});
+  auto parent = GetCodeFromList(codeList, funcDef->Parent());
+  parent->RegisterName(funcDef->Name());
   Collections::List<Object::PyObjPtr> stmts = funcDef->Body()->Value();
   for (auto stmt = Collections::Iterator<Object::PyObjPtr>::Begin(stmts);
        !stmt.End(); stmt.Next()) {
     auto stmtNode = std::dynamic_pointer_cast<INode>(stmt.Get());
     stmtNode->visit(codeList);
   }
-  auto parent = GetCodeFromList(codeList, funcDef->Parent());
-  parent->RegisterName(funcDef->Name());
+  
   parent->RegisterConst(code);
   parent->RegisterConst(funcDef->Name());
   return Object::CreatePyNone();

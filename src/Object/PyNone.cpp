@@ -1,10 +1,11 @@
+#include "Object/PyNone.h"
 #include "ByteCode/ByteCode.h"
 #include "Collections/StringHelper.h"
 #include "Object/PyBytes.h"
 #include "Object/PyDictionary.h"
-#include "Object/PyNone.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
+
 
 namespace torchlight::Object {
 
@@ -37,12 +38,13 @@ PyObjPtr PyNone::Instance() {
 }
 
 PyObjPtr CreatePyNone() {
-  return std::make_shared<PyNone>();
+  return PyNone::Instance();
 }
 
 void NoneKlass::Initialize() {
   SetType(CreatePyType(Self()));
   SetAttributes(CreatePyDict());
+  SetName(CreatePyString("None"));
   Klass::Initialize();
 }
 

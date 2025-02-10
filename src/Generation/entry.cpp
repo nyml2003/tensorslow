@@ -4,11 +4,13 @@
 #include "Ast/ExprStmt.h"
 #include "Ast/FuncDef.h"
 #include "Ast/FunctionCall.h"
-#include "Ast/ReturnStmt.h"
 #include "Ast/Identifier.h"
+#include "Ast/IfStmt.h"
 #include "Ast/List.h"
 #include "Ast/MemberAccess.h"
 #include "Ast/Module.h"
+#include "Ast/ReturnStmt.h"
+#include "Ast/WhileStmt.h"
 #include "ByteCode/PyCode.h"
 #include "ByteCode/PyInst.h"
 #include "Collections/BytesHelper.h"
@@ -19,7 +21,9 @@
 #include "Generation/Generator.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
+#include "Object/PyInteger.h"
 #include "Object/PyList.h"
+#include "Object/PyMatrix.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
@@ -67,6 +71,8 @@ void InitPyObj() {
   Object::FunctionKlass::Self()->Initialize();
   Object::InstKlass::Self()->Initialize();
   Object::CodeKlass::Self()->Initialize();
+  Object::IntegerKlass::Self()->Initialize();
+  Object::BytesKlass::Self()->Initialize();
   Ast::ModuleKlass::Self()->Initialize();
   Ast::FuncDefKlass::Self()->Initialize();
   Ast::ExprStmtKlass::Self()->Initialize();
@@ -78,6 +84,8 @@ void InitPyObj() {
   Ast::ListKlass::Self()->Initialize();
   Ast::MemberAccessKlass::Self()->Initialize();
   Ast::ReturnStmtKlass::Self()->Initialize();
+  Ast::IfStmtKlass::Self()->Initialize();
+  Ast::WhileStmtKlass::Self()->Initialize();
 }
 
 // 使用ANTLR解析文件

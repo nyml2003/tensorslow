@@ -8,14 +8,15 @@
 #include "Ast/FunctionCall.h"
 #include "Ast/INode.h"
 #include "Ast/Identifier.h"
+#include "Ast/IfStmt.h"
 #include "Ast/List.h"
 #include "Ast/MemberAccess.h"
 #include "Ast/Module.h"
 #include "Ast/ReturnStmt.h"
+#include "Ast/WhileStmt.h"
 #include "ByteCode/PyCode.h"
 #include "Collections/IntegerHelper.h"
 #include "Collections/Iterator.h"
-#include "Object/Common.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyFloat.h"
 #include "Object/PyInteger.h"
@@ -114,6 +115,9 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
     // }
   } else if (ctx->OPEN_BRACK() != nullptr) {
     // 情况 2: '[' testlist_comp? ']'
+    if (ctx->testlist_comp() == nullptr) {
+      return Ast::CreateList(Object::CreatePyList({}), context);
+    }
     auto testlist_comp =
       visitTestlist_comp(ctx->testlist_comp()).as<Object::PyObjPtr>();
     if (testlist_comp->Klass() == Object::ListKlass::Self()) {
@@ -281,8 +285,10 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
 
   // 处理普通赋值或多重赋值
   if (!ctx->ASSIGN().empty()) {
-    auto source = visitTestlist_star_expr(ctx->testlist_star_expr(1));
-    auto target = visitTestlist_star_expr(ctx->testlist_star_expr(0));
+    auto source =
+      visitTestlist_star_expr(ctx->testlist_star_expr(1)).as<Ast::INodePtr>();
+    auto target =
+      visitTestlist_star_expr(ctx->testlist_star_expr(0)).as<Ast::INodePtr>();
     return Ast::CreateAssignStmt(target, source, context);
     // 遍历所有赋值右侧的表达式
     // for (auto* exprIt : ctx->testlist_star_expr()) {
@@ -321,13 +327,9 @@ antlrcpp::Any Generator::visitTrailer(Python3Parser::TrailerContext* ctx) {
     }
     return Object::CreatePyList({});
   } else if (ctx->OPEN_BRACK() != nullptr) {
-    // 情况 2: '[' subscriptlist ']'
-    std::cout << "trailer: '[' subscriptlist ']'" << std::endl;
-    // if (ctx->subscriptlist() != nullptr) {
-    //   visitSubscriptlist(ctx->subscriptlist());
-    // }
+    return visitSubscriptlist(ctx->subscriptlist());
   } else if (ctx->DOT() != nullptr) {
-    return Object::CreatePyString(ctx->name()->NAME()->getText().c_str());
+    throw std::runtime_error("visitTrailer: DOT is handled by visitAtom_expr");
   } else {
     // 其他情况
     std::cout << "trailer: Unknown type" << std::endl;
@@ -343,21 +345,19 @@ antlrcpp::Any Generator::visitAtom_expr(Python3Parser::Atom_exprContext* ctx) {
     return nullptr;
   }
   auto identifier = visitAtom(ctx->atom()).as<Ast::INodePtr>();
-  Collections::List<Object::PyObjPtr> trailer(
-    static_cast<uint64_t>(ctx->trailer().size())
-  );
-  auto trailerCtx = ctx->trailer();
-  for (auto* it : trailerCtx) {
-    trailer.Push(visitTrailer(it).as<Object::PyObjPtr>());
-  }
   auto result = identifier;
-  for (auto it = Collections::Iterator<Object::PyObjPtr>::Begin(trailer);
-       !it.End(); it.Next()) {
-    auto element = it.Get();
-    if (element->Klass() == Object::ListKlass::Self()) {
-      result = Ast::CreateFunctionCall(result, element, context);
-    } else if (element->Klass() == Object::StringKlass::Self()) {
-      result = Ast::CreateMemberAccess(result, element, context);
+  auto trailers = ctx->trailer();
+  for (auto& trailer : trailers) {
+    if (trailer->OPEN_PAREN() != nullptr) {  // '('
+      auto args = visitTrailer(trailer).as<Object::PyObjPtr>();
+      result = Ast::CreateFunctionCall(result, args, context);
+    } else if (trailer->OPEN_BRACK() != nullptr) {  // '['
+      auto args = visitTrailer(trailer);
+      result =
+        Ast::CreateBinary(Ast::Binary::Operator::SUBSCR, result, args, context);
+    } else if (trailer->DOT() != nullptr) {  // '.'
+      auto args = Object::CreatePyString(trailer->name()->getText().c_str());
+      result = Ast::CreateMemberAccess(result, args, context);
     }
   }
   return result;
@@ -390,7 +390,43 @@ antlrcpp::Any Generator::visitNot_test(Python3Parser::Not_testContext* ctx) {
 
 antlrcpp::Any Generator::visitComparison(Python3Parser::ComparisonContext* ctx
 ) {
-  return visitExpr(ctx->expr(0));
+  if (ctx->comp_op().empty()) {
+    return visitExpr(ctx->expr(0));
+  }
+  auto left = visitExpr(ctx->expr(0));
+  auto right = visitExpr(ctx->expr(1));
+  if (ctx->comp_op(0)->GT_EQ() != nullptr) {
+    return CreateBinary(Ast::Binary::Operator::GE, left, right, context);
+  }
+  if (ctx->comp_op(0)->LT_EQ() != nullptr) {
+    return CreateBinary(Ast::Binary::Operator::LE, left, right, context);
+  }
+  if (ctx->comp_op(0)->EQUALS() != nullptr) {
+    return CreateBinary(Ast::Binary::Operator::EQ, left, right, context);
+  }
+  if ((ctx->comp_op(0)->NOT_EQ_1() != nullptr) ||
+      (ctx->comp_op(0)->NOT_EQ_2() != nullptr)) {
+    return CreateBinary(Ast::Binary::Operator::NE, left, right, context);
+  }
+  if (ctx->comp_op(0)->LESS_THAN() != nullptr) {
+    return CreateBinary(Ast::Binary::Operator::LT, left, right, context);
+  }
+  if (ctx->comp_op(0)->GREATER_THAN() != nullptr) {
+    return CreateBinary(Ast::Binary::Operator::GT, left, right, context);
+  }
+  if (ctx->comp_op(0)->getText() == "in") {
+    return CreateBinary(Ast::Binary::Operator::IN, left, right, context);
+  }
+  if (ctx->comp_op(0)->getText() == "notin") {
+    return CreateBinary(Ast::Binary::Operator::NOT_IN, left, right, context);
+  }
+  if (ctx->comp_op(0)->getText() == "is") {
+    return CreateBinary(Ast::Binary::Operator::IS, left, right, context);
+  }
+  if (ctx->comp_op(0)->getText() == "isnot") {
+    return CreateBinary(Ast::Binary::Operator::IS_NOT, left, right, context);
+  }
+  return nullptr;
 }
 
 antlrcpp::Any Generator::visitCompound_stmt(
@@ -470,17 +506,18 @@ antlrcpp::Any Generator::visitBlock(Python3Parser::BlockContext* ctx) {
       static_cast<uint64_t>(statements.size())
     );
     for (auto* it : statements) {
-      auto stmt = visitStmt(it).as<Object::PyObjPtr>();
-      if (stmt->Klass() == Object::ListKlass::Self()) {
+      auto stmt = visitStmt(it);
+      if (stmt.is<Object::PyObjPtr>()) {
         auto stmtsList =
-          std::dynamic_pointer_cast<Object::PyList>(stmt)->Value();
+          std::dynamic_pointer_cast<Object::PyList>(stmt.as<Object::PyObjPtr>())
+            ->Value();
         for (auto it =
                Collections::Iterator<Object::PyObjPtr>::Begin(stmtsList);
              !it.End(); it.Next()) {
           stmts.Push(it.Get());
         }
       } else {
-        stmts.Push(stmt);
+        stmts.Push(stmt.as<Ast::INodePtr>());
       }
     }
     return Object::CreatePyList(stmts);
@@ -539,6 +576,43 @@ antlrcpp::Any Generator::visitTypedargslist(
 
 antlrcpp::Any Generator::visitTfpdef(Python3Parser::TfpdefContext* ctx) {
   return Object::CreatePyString(ctx->getText().c_str());
+}
+
+antlrcpp::Any Generator::visitIf_stmt(Python3Parser::If_stmtContext* ctx) {
+  auto condition = visitTest(ctx->test(0)).as<Ast::INodePtr>();
+  auto thenStmts = visitBlock(ctx->block(0)).as<Object::PyObjPtr>();
+  auto ifStmt = Ast::CreateIfStmt(condition, thenStmts, context);
+  return ifStmt;
+}
+
+antlrcpp::Any Generator::visitWhile_stmt(Python3Parser::While_stmtContext* ctx
+) {
+  auto condition = visitTest(ctx->test()).as<Ast::INodePtr>();
+  auto body = visitBlock(ctx->block(0)).as<Object::PyObjPtr>();
+  return Ast::CreateWhileStmt(condition, body, context);
+}
+
+antlrcpp::Any Generator::visitSubscriptlist(
+  Python3Parser::SubscriptlistContext* ctx
+) {
+  if (ctx->subscript_().size() == 1) {
+    return visitSubscript_(ctx->subscript_(0));
+  }
+  Collections::List<Object::PyObjPtr> subscripts(
+    static_cast<uint64_t>(ctx->subscript_().size())
+  );
+  for (auto* it : ctx->subscript_()) {
+    subscripts.Push(visitSubscript_(it).as<Object::PyObjPtr>());
+  }
+  return Ast::CreateAtom(Object::CreatePyList(subscripts), context);
+}
+
+antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx
+) {
+  if (ctx->test().size() == 1) {
+    return visitTest(ctx->test(0));
+  }
+  return nullptr;
 }
 
 }  // namespace torchlight::Generation

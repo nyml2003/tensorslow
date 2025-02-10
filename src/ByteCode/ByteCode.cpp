@@ -103,6 +103,14 @@ Collections::String ToString(Object::CompareOp kind) {
       return Collections::CreateStringWithCString(">");
     case Object::CompareOp::GREATER_THAN_EQUAL:
       return Collections::CreateStringWithCString(">=");
+    case Object::CompareOp::IN:
+      return Collections::CreateStringWithCString("IN");
+    case Object::CompareOp::NOT_IN:
+      return Collections::CreateStringWithCString("NOT IN");
+    case Object::CompareOp::IS:
+      return Collections::CreateStringWithCString("IS");
+    case Object::CompareOp::IS_NOT:
+      return Collections::CreateStringWithCString("IS NOT");
   }
   return Collections::CreateStringWithCString("UNKNOWN");
 }

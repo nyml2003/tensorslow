@@ -8,3 +8,4 @@ lib/*.so
 grammar/.antlr/
 temp
 log
+*.pyc

@@ -29,6 +29,14 @@ void Klass::Initialize() {
   auto attrsValue = attrs->Value();
   attrsValue.Put(CreatePyString("__name__"), name);
   attrsValue.Put(CreatePyString("__class__"), type);
+  attrsValue.Put(
+    CreatePyString("__setitem__"), CreatePyNativeFunction([](PyObjPtr args) {
+      auto self = args->getitem(CreatePyInteger(0));
+      auto key = args->getitem(CreatePyInteger(1));
+      auto value = args->getitem(CreatePyInteger(2));
+      return self->setitem(key, value);
+    })
+  );
   attrsValue.Put(CreatePyString("print"), CreatePyNativeFunction(Print));
   SetAttributes(CreatePyDict(attrsValue));
 }

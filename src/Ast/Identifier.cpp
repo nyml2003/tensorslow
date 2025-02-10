@@ -35,11 +35,19 @@ IdentifierKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
     Object::CreatePyString("print"),
     Object::CreatePyString("matrix"),
     Object::CreatePyString("reshape"),
+    Object::CreatePyString("len"),
   });
   auto identifier = std::dynamic_pointer_cast<Identifier>(obj);
+  auto code = GetCodeFromList(codeList, identifier);
   if (Object::IsTrue(builtinStr->contains(identifier->Name()))) {
-    auto code = GetCodeFromList(codeList, identifier);
     code->RegisterName(identifier->Name());
+  }
+  if (code->Scope() == Object::Scope::LOCAL) {
+    auto module = identifier->Parent()->Parent();
+    auto moduleCode = GetCodeFromList(codeList, module);
+    if (Object::IsTrue(moduleCode->Names()->contains(identifier->Name()))) {
+      code->RegisterName(identifier->Name());
+    }
   }
   return Object::CreatePyNone();
 }
@@ -56,7 +64,7 @@ IdentifierKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
     auto module = identifier->Parent()->Parent();
     auto moduleCode = GetCodeFromList(codeList, module);
     if (Object::IsTrue(moduleCode->Names()->contains(identifier->Name()))) {
-      code->LoadGlobal(moduleCode->IndexOfName(identifier->Name()));
+      code->LoadGlobal(code->IndexOfName(identifier->Name()));
     } else if (Object::IsTrue(code->VarNames()->contains(identifier->Name()))) {
       code->LoadFast(code->IndexOfVarName(identifier->Name()));
     } else {

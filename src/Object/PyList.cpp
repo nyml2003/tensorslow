@@ -13,6 +13,7 @@
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
 #include "Object/PyNone.h"
+#include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
 
@@ -151,7 +152,8 @@ PyObjPtr PyList::Join(const PyObjPtr& separator) {
   Collections::List<Collections::String> reprs;
   for (auto it = Collections::Iterator<PyObjPtr>::Begin(value); !it.End();
        it.Next()) {
-    auto repr = it.Get()->str();
+    auto item = it.Get();
+    auto repr = item->str();
     if (repr->Klass() != StringKlass::Self()) {
       throw std::runtime_error("List element is not a string");
     }

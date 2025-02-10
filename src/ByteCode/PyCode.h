@@ -87,6 +87,14 @@ class PyCode : public PyObject {
 
   void ReturnValue();
 
+  Index PopJumpIfFalse();
+
+  void JumpAbsolute(Index index);
+
+  void PopTop();
+
+  void StoreSubscr();
+
  private:
   PyBytesPtr byteCode;
   PyListPtr instructions;

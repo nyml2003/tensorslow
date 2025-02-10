@@ -40,6 +40,8 @@ ExprStmtKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto stmt = std::dynamic_pointer_cast<ExprStmt>(obj);
   auto content = stmt->Content();
   content->emit(codeList);
+  auto code = GetCodeFromList(codeList, stmt);
+  code->PopTop();
   return Object::CreatePyNone();
 }
 

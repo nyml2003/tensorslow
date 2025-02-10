@@ -80,6 +80,8 @@ void DebugPrint(const PyObjPtr& obj);
 
 PyObjPtr Print(PyObjPtr args);
 
+PyObjPtr Len(PyObjPtr args);
+
 }  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_PYOBJECT_H

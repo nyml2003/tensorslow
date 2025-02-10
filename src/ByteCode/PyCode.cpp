@@ -186,7 +186,7 @@ PyObjPtr CodeKlass::_serialize_(PyObjPtr self) {
 
 Index PyCode::IndexOfConst(const PyObjPtr& obj) {
   if (!consts->Value().Contains(obj)) {
-    Object::DebugPrint(obj->str());
+    DebugPrint(obj);
     throw std::runtime_error("PyCode::IndexOfConst(): obj not found");
   }
   return consts->Value().IndexOf(obj);
@@ -213,8 +213,6 @@ void PyCode::RegisterName(const PyObjPtr& name) {
 
 Index PyCode::IndexOfVarName(const PyObjPtr& name) {
   if (!varNames->Value().Contains(name)) {
-    DebugPrint(name->str());
-    DebugPrint(varNames->str());
     throw std::runtime_error("PyCode::IndexOfVarName(): name not found");
   }
   return varNames->Value().IndexOf(name);
@@ -247,6 +245,9 @@ void PyCode::LoadAttr(const PyObjPtr& obj) {
 }
 
 void PyCode::LoadGlobal(Index index) {
+  if (index == 5) {
+    ;
+  }
   instructions->Append(CreateLoadGlobal(index));
 }
 
@@ -273,6 +274,23 @@ void PyCode::MakeFunction() {
 
 void PyCode::ReturnValue() {
   instructions->Append(CreateReturnValue());
+}
+
+Index PyCode::PopJumpIfFalse() {
+  instructions->Append(CreatePopJumpIfFalse(0));
+  return ToU64(instructions->len());
+}
+
+void PyCode::JumpAbsolute(Index index) {
+  instructions->Append(CreateJumpAbsolute(index));
+}
+
+void PyCode::PopTop() {
+  instructions->Append(CreatePopTop());
+}
+
+void PyCode::StoreSubscr() {
+  instructions->Append(CreateStoreSubscr());
 }
 
 PyObjPtr CreatePyCode(const PyObjPtr& name) {

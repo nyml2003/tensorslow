@@ -3,7 +3,7 @@ project(torchlight)
 include(cmake/GlobalSettings.cmake)
 
 include(cmake/AntlrConfig.cmake)
-include(cmake/tools.cmake)
+
 include(src/source.cmake)
 include(test/unittest/unittest.cmake)
 message(STATUS "torchlight_frontend_files: ${torchlight_frontend_files}")
@@ -31,3 +31,5 @@ torchlight_mockfront
 ${torchlight_mock_frontend_files}
 ${torchlight_common_files}
 )
+
+include(cmake/tools.cmake)

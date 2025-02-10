@@ -14,7 +14,6 @@
 #include "Object/PyType.h"
 #include "Runtime/Serialize.h"
 
-
 #include <cstring>
 #include <memory>
 #include <stdexcept>
@@ -229,6 +228,18 @@ void ParseByteCode(const Object::PyCodePtr& code) {
       }
       case Object::ByteCode::BINARY_MATRIX_MULTIPLY: {
         insts.Push(Object::CreateBinaryMatrixMultiply());
+        break;
+      }
+      case Object::ByteCode::JUMP_ABSOLUTE: {
+        insts.Push(Object::CreateJumpAbsolute(ReadU64(iter)));
+        break;
+      }
+      case Object::ByteCode::BINARY_SUBSCR: {
+        insts.Push(Object::CreateBinarySubscr());
+        break;
+      }
+      case Object::ByteCode::STORE_SUBSCR: {
+        insts.Push(Object::CreateStoreSubscr());
         break;
       }
       default:

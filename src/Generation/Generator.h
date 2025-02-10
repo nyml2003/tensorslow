@@ -72,6 +72,15 @@ class Generator : public Python3ParserBaseVisitor {
   ) override;
 
   antlrcpp::Any visitTfpdef(Python3Parser::TfpdefContext* ctx) override;
+
+  antlrcpp::Any visitIf_stmt(Python3Parser::If_stmtContext* ctx) override;
+
+  antlrcpp::Any visitWhile_stmt(Python3Parser::While_stmtContext* ctx) override;
+
+  antlrcpp::Any visitSubscriptlist(Python3Parser::SubscriptlistContext* ctx
+  ) override;
+
+  antlrcpp::Any visitSubscript_(Python3Parser::Subscript_Context* ctx) override;
 };
 
 }  // namespace torchlight::Generation

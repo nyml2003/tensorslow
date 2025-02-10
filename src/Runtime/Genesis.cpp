@@ -1,3 +1,4 @@
+#include "Runtime/Genesis.h"
 #include "ByteCode/PyInst.h"
 #include "Collections/StringHelper.h"
 #include "Function/PyFunction.h"
@@ -10,7 +11,6 @@
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
-#include "Runtime/Genesis.h"
 #include "Runtime/PyFrame.h"
 
 namespace torchlight::Runtime {
@@ -27,6 +27,8 @@ Object::PyObjPtr Genesis() {
   Object::FunctionKlass::Self()->Initialize();
   Object::InstKlass::Self()->Initialize();
   Object::CodeKlass::Self()->Initialize();
+  Object::IntegerKlass::Self()->Initialize();
+  Object::BytesKlass::Self()->Initialize();
   Object::MatrixKlass::Self()->Initialize();
   Runtime::FrameKlass::Self()->Initialize();
 
@@ -46,6 +48,10 @@ Object::PyObjPtr Genesis() {
   builtins->setitem(
     Object::CreatePyString(Collections::CreateStringWithCString("print")),
     CreatePyNativeFunction(Object::Print)
+  );
+  builtins->setitem(
+    Object::CreatePyString(Collections::CreateStringWithCString("len")),
+    CreatePyNativeFunction(Object::Len)
   );
   builtins->setitem(
     Object::CreatePyString(Collections::CreateStringWithCString("matrix")),
