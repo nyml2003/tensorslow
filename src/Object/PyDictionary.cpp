@@ -1,6 +1,6 @@
+#include "Object/PyDictionary.h"
 #include "Collections/Iterator.h"
 #include "Object/PyBoolean.h"
-#include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
@@ -33,6 +33,20 @@ void DictionaryKlass::Initialize() {
 KlassPtr DictionaryKlass::Self() {
   static KlassPtr self = std::make_shared<DictionaryKlass>();
   return self;
+}
+
+PyObjPtr DictionaryKlass::allocateInstance(PyObjPtr klass, PyObjPtr args) {
+  if (Self()->Type() != klass) {
+    throw std::runtime_error(
+      "PyDictionary::allocateInstance(): klass is not a dict"
+    );
+  }
+  if (args->len() != CreatePyInteger(0)) {
+    throw std::runtime_error(
+      "PyDictionary::allocateInstance(): args must be empty"
+    );
+  }
+  return CreatePyDict();
 }
 
 PyObjPtr DictionaryKlass::setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) {

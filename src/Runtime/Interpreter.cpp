@@ -13,6 +13,7 @@
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
+#include "Object/PyType.h"
 #include "Runtime/Genesis.h"
 #include "Runtime/PyFrame.h"
 #include "Tools/Tools.h"
@@ -61,6 +62,13 @@ void Interpreter::BuildFrameWithFunction(
     Object::PyObjPtr new_arguments =
       Object::CreatePyList({owner})->add(arguments);
     BuildFrameWithFunction(function, new_arguments);
+    return;
+  }
+  if (func->Klass() == Object::TypeKlass::Self()) {
+    auto type = std::dynamic_pointer_cast<Object::PyType>(func);
+    auto instance = type->Owner()->allocateInstance(type, arguments);
+    auto frameObject = std::dynamic_pointer_cast<PyFrame>(frame);
+    frameObject->Stack().Push(instance);
     return;
   }
   throw std::runtime_error(

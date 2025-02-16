@@ -25,6 +25,8 @@ class StringKlass : public Klass {
 
   static KlassPtr Self();
 
+  PyObjPtr allocateInstance(PyObjPtr klass, PyObjPtr args) override;
+
   PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs) override;
 
   PyObjPtr repr(PyObjPtr obj) override;

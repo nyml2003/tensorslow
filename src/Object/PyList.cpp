@@ -69,6 +69,23 @@ KlassPtr ListKlass::Self() {
   return instance;
 }
 
+PyObjPtr ListKlass::allocateInstance(PyObjPtr type, PyObjPtr args) {
+  if (Self()->Type() != type) {
+    Klass::allocateInstance(type, args);
+  }
+  if (ToU64(args->len()) == 0) {
+    return CreatePyList({});
+  }
+  if (ToU64(args->len()) != 1) {
+    throw std::runtime_error("List allocation takes exactly 1 argument");
+  }
+  auto value = args->getitem(CreatePyInteger(0));
+  if (value->Klass() != ListKlass::Self()) {
+    throw std::runtime_error("List allocation argument must be a list");
+  }
+  return value;
+}
+
 PyObjPtr ListKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     Klass::add(lhs, rhs);

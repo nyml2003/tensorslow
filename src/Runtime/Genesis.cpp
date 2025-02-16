@@ -1,11 +1,18 @@
 #include "Runtime/Genesis.h"
+
 #include "Function/PyNativeFunction.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
+#include "Object/PyFloat.h"
+#include "Object/PyInteger.h"
 #include "Object/PyMatrix.h"
 #include "Object/PyNone.h"
+#include "Object/PyObject.h"
+#include "Object/PyType.h"
 #include "Runtime/PyFrame.h"
 #include "Runtime/RuntimeHelper.h"
+
+#include <memory>
 
 namespace torchlight::Runtime {
 
@@ -64,6 +71,33 @@ Object::PyObjPtr Genesis() {
   builtins->setitem(
     Object::CreatePyString("input"), CreatePyNativeFunction(Input)
   );
+  builtins->setitem(
+    Object::CreatePyString("int"), std::dynamic_pointer_cast<Object::PyObject>(
+                                     Object::IntegerKlass::Self()->Type()
+                                   )
+  );
+  builtins->setitem(
+    Object::CreatePyString("float"),
+    std::dynamic_pointer_cast<Object::PyObject>(
+      Object::FloatKlass::Self()->Type()
+    )
+  );
+  builtins->setitem(
+    Object::CreatePyString("str"), std::dynamic_pointer_cast<Object::PyObject>(
+                                     Object::StringKlass::Self()->Type()
+                                   )
+  );
+  builtins->setitem(
+    Object::CreatePyString("list"), std::dynamic_pointer_cast<Object::PyObject>(
+                                      Object::ListKlass::Self()->Type()
+                                    )
+  );
+  builtins->setitem(
+    Object::CreatePyString("dict"), std::dynamic_pointer_cast<Object::PyObject>(
+                                      Object::DictionaryKlass::Self()->Type()
+                                    )
+  );
+
   return builtins;
 }
 

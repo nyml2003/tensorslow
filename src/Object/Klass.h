@@ -46,6 +46,8 @@ class Klass {
 
   [[nodiscard]] PyDictPtr Attributes() const;
 
+  virtual PyObjPtr allocateInstance(PyObjPtr klass, PyObjPtr args);
+
   virtual PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs);
 
   virtual PyObjPtr sub(PyObjPtr lhs, PyObjPtr rhs);

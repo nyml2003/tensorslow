@@ -10,3 +10,4 @@ temp
 log
 *.pyc
 *.out
+/app/test/dev

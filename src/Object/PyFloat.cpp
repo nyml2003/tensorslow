@@ -1,13 +1,12 @@
+#include "Object/PyFloat.h"
 #include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
 #include "Object/PyDictionary.h"
-#include "Object/PyFloat.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
-
 
 namespace torchlight::Object {
 
@@ -33,7 +32,28 @@ void FloatKlass::Initialize() {
 KlassPtr FloatKlass::Self() {
   static KlassPtr instance = std::make_shared<FloatKlass>();
   return instance;
-}  // namespace torchlight::Object
+}
+
+PyObjPtr FloatKlass::allocateInstance(PyObjPtr klass, PyObjPtr args) {
+  if (Self()->Type() != klass) {
+    throw std::runtime_error("PyFloat::allocateInstance(): klass is not a float"
+    );
+  }
+  if (ToU64(args->len()) == 0) {
+    return CreatePyFloat(0.0);
+  }
+  if (args->len() != CreatePyInteger(1)) {
+    throw std::runtime_error(
+      "PyFloat::allocateInstance(): args must be a list with one element"
+    );
+  }
+  auto value = args->getitem(CreatePyInteger(0));
+  if (value->Klass() != FloatKlass::Self()) {
+    throw std::runtime_error("PyFloat::allocateInstance(): value is not a float"
+    );
+  }
+  return value;
+}
 
 PyObjPtr FloatKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {

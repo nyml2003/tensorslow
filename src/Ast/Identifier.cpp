@@ -35,7 +35,10 @@ IdentifierKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
     {Object::CreatePyString("print"), Object::CreatePyString("matrix"),
      Object::CreatePyString("reshape"), Object::CreatePyString("len"),
      Object::CreatePyString("__name__"), Object::CreatePyString("randint"),
-     Object::CreatePyString("sleep"), Object::CreatePyString("input")}
+     Object::CreatePyString("sleep"), Object::CreatePyString("input"),
+     Object::CreatePyString("int"), Object::CreatePyString("float"),
+     Object::CreatePyString("str"), Object::CreatePyString("list"),
+     Object::CreatePyString("tuple"), Object::CreatePyString("dict")}
   );
   auto identifier = std::dynamic_pointer_cast<Identifier>(obj);
   auto code = GetCodeFromList(codeList, identifier);

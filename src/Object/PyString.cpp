@@ -49,6 +49,25 @@ PyObjPtr CreatePyString(const std::string& value) {
   return CreatePyString(Collections::CreateStringWithCString(value.c_str()));
 }
 
+PyObjPtr StringKlass::allocateInstance(PyObjPtr klass, PyObjPtr args) {
+  if (Self()->Type() != klass) {
+    throw std::runtime_error("allocateInstance(): klass is not a string");
+  }
+  if (ToU64(args->len()) == 0) {
+    return CreatePyString("");
+  }
+  if (args->len() != CreatePyInteger(1)) {
+    throw std::runtime_error(
+      "allocateInstance(): args must be a list with one element"
+    );
+  }
+  auto value = args->getitem(CreatePyInteger(0));
+  if (value->Klass() != StringKlass::Self()) {
+    throw std::runtime_error("allocateInstance(): value is not a string");
+  }
+  return value;
+}
+
 PyObjPtr StringKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
   if (lhs->Klass() != StringKlass::Self()) {
     throw std::runtime_error("lhs is not a string");

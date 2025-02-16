@@ -41,6 +41,8 @@ class ListKlass : public Klass {
 
   PyObjPtr contains(PyObjPtr obj, PyObjPtr key) override;
 
+  PyObjPtr allocateInstance(PyObjPtr type, PyObjPtr args) override;
+
   void Initialize() override;
 };
 

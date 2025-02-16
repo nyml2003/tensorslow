@@ -1,3 +1,4 @@
+#include "Object/PyInteger.h"
 #include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/IntegerHelper.h"
@@ -6,7 +7,6 @@
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
 #include "Object/PyDictionary.h"
-#include "Object/PyInteger.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
 
@@ -51,6 +51,29 @@ IntegerKlass::~IntegerKlass() = default;
 KlassPtr IntegerKlass::Self() {
   static KlassPtr instance = std::make_shared<IntegerKlass>();
   return instance;
+}
+
+PyObjPtr IntegerKlass::allocateInstance(PyObjPtr klass, PyObjPtr args) {
+  if (Self()->Type() != klass) {
+    throw std::runtime_error(
+      "PyInteger::allocateInstance(): klass is not an integer"
+    );
+  }
+  if (ToU64(args->len()) == 0) {
+    return CreatePyInteger(Collections::CreateIntegerZero());
+  }
+  if (args->len() != CreatePyInteger(1)) {
+    throw std::runtime_error(
+      "PyInteger::allocateInstance(): args must be a list with one element"
+    );
+  }
+  auto value = args->getitem(CreatePyInteger(0));
+  if (value->Klass() != IntegerKlass::Self()) {
+    throw std::runtime_error(
+      "PyInteger::allocateInstance(): value is not an integer"
+    );
+  }
+  return value;
 }
 
 PyObjPtr IntegerKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
@@ -126,7 +149,5 @@ PyObjPtr IntegerKlass::_serialize_(PyObjPtr obj) {
   return CreatePyBytes(Collections::Serialize(Literal::INTEGER)
                          .Add(Collections::Serialize(integer->Value())));
 }
-
-
 
 }  // namespace torchlight::Object

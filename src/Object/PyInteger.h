@@ -33,6 +33,8 @@ class IntegerKlass : public Klass {
 
   IntegerKlass& operator=(IntegerKlass&& other) noexcept = delete;
 
+  PyObjPtr allocateInstance(PyObjPtr klass, PyObjPtr args) override;
+
   PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs) override;
 
   PyObjPtr sub(PyObjPtr lhs, PyObjPtr rhs) override;
@@ -58,7 +60,6 @@ PyObjPtr CreatePyInteger(uint64_t value);
 
 uint64_t ToU64(const PyObjPtr& obj);
 using PyIntPtr = std::shared_ptr<PyInteger>;
-
 
 }  // namespace torchlight::Object
 

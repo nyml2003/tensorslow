@@ -100,6 +100,11 @@ void ThrowUnsupportedOperandError(
 UnsupportedOperandError::UnsupportedOperandError(const std::string& message)
   : std::runtime_error(message) {}
 
+PyObjPtr Klass::allocateInstance(PyObjPtr klass, PyObjPtr args) {
+  ThrowUnsupportedOperandError(klass, args, CreatePyString("allocateInstance"));
+  return CreatePyNone();
+}
+
 PyObjPtr Klass::add(PyObjPtr lhs, PyObjPtr rhs) {
   ThrowUnsupportedOperandError(lhs, rhs, CreatePyString("__add__"));
   return CreatePyNone();

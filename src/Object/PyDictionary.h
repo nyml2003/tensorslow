@@ -23,6 +23,8 @@ class DictionaryKlass : public Klass {
   explicit DictionaryKlass();
   static KlassPtr Self();
 
+  PyObjPtr allocateInstance(PyObjPtr klass, PyObjPtr args) override;
+
   PyObjPtr setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) override;
 
   PyObjPtr getitem(PyObjPtr obj, PyObjPtr key) override;
