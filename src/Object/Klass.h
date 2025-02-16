@@ -2,7 +2,9 @@
 #define TORCHLIGHT_OBJECT_KLASS_H
 
 #include "Object/Common.h"
+#include "Tools/Tools.h"
 
+#include <memory>
 #include <stdexcept>
 
 namespace torchlight::Object {
@@ -11,6 +13,7 @@ class Klass {
   PyStrPtr name;
   PyDictPtr attributes;
   PyTypePtr type;
+  bool initialized = false;
 
  protected:
   void SetName(PyObjPtr name);
@@ -18,6 +21,7 @@ class Klass {
   void SetType(PyObjPtr type);
 
  public:
+  static void SetDualOutput(const std::string& filename);
   explicit Klass();
 
   // Copy constructor

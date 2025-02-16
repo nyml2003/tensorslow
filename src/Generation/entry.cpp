@@ -1,35 +1,13 @@
-#include "Ast/AssignStmt.h"
-#include "Ast/Atom.h"
-#include "Ast/Binary.h"
-#include "Ast/ExprStmt.h"
-#include "Ast/FuncDef.h"
-#include "Ast/FunctionCall.h"
-#include "Ast/Identifier.h"
-#include "Ast/IfStmt.h"
-#include "Ast/List.h"
-#include "Ast/MemberAccess.h"
-#include "Ast/Module.h"
-#include "Ast/ReturnStmt.h"
-#include "Ast/WhileStmt.h"
-#include "ByteCode/PyCode.h"
-#include "ByteCode/PyInst.h"
+#include "Ast/AstHelper.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
-#include "Function/PyFunction.h"
-#include "Function/PyMethod.h"
-#include "Function/PyNativeFunction.h"
 #include "Generation/Generator.h"
-#include "Object/PyBoolean.h"
-#include "Object/PyDictionary.h"
-#include "Object/PyInteger.h"
-#include "Object/PyList.h"
-#include "Object/PyMatrix.h"
-#include "Object/PyNone.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
-#include "Object/PyType.h"
 #include "Python3Lexer.h"
 #include "Python3Parser.h"
+#include "Tools/Tools.h"
 
 #include <antlr4-runtime.h>
 #include <filesystem>
@@ -43,58 +21,63 @@ using antlr4::ANTLRInputStream;
 using antlr4::CommonTokenStream;
 using torchlight::Generation::Generator;
 using namespace torchlight;
-// 获取目录下的所有文件
-std::vector<fs::path> getFilesInDirectory(const fs::path& directoryPath) {
-  std::vector<fs::path> fileNames;
-  if (fs::exists(directoryPath) && fs::is_directory(directoryPath)) {
-    for (const auto& entry : fs::directory_iterator(directoryPath)) {
-      if (fs::is_regular_file(entry.status())) {
-        fileNames.push_back(entry.path());
-      }
-    }
-  } else {
-    std::cerr << "The directory does not exist or is not a directory."
-              << std::endl;
-  }
-  return fileNames;
+void DefineOption() {
+  Schema schema;
+  schema.Add(Parameter(
+    "file",
+    [](const std::string& value) {
+      // 文件系统里有没有这个文件
+      bool file_exists = std::filesystem::exists(value);
+      // 后缀名是.py 且文件是一个普通文件
+      bool is_py = value.substr(value.find_last_of('.') + 1) == "py";
+      bool is_regular = std::filesystem::is_regular_file(value);
+      return file_exists && is_py && is_regular;
+    },
+    "/app/test/dev/dev.py"
+  ));
+  schema.Add(Parameter(
+    "dir",
+    [](const std::string& value) {
+      // 文件系统里有没有这个文件夹
+      bool dir_exists = std::filesystem::exists(value);
+      // 文件是一个目录
+      bool is_dir = std::filesystem::is_directory(value);
+      return dir_exists && is_dir;
+    },
+    "/app/test/integration"
+  ));
+  schema.Add(Parameter(
+    "show_ast",
+    [](const std::string& value) {
+      // value 是 "true" 或 "false"
+      return value == "true" || value == "false";
+    },
+    "false"
+  ));
+  schema.Add(Parameter(
+    "show_code_object",
+    [](const std::string& value) {
+      // value 是 "true" 或 "false"
+      return value == "true" || value == "false";
+    },
+    "false"
+  ));
+  ArgsHelper::SetSchema(schema);
 }
 
 void InitPyObj() {
-  Object::StringKlass::Self()->Initialize();
-  Object::BooleanKlass::Self()->Initialize();
-  Object::NoneKlass::Self()->Initialize();
-  Object::ListKlass::Self()->Initialize();
-  Object::DictionaryKlass::Self()->Initialize();
-  Object::TypeKlass::Self()->Initialize();
-  Object::MethodKlass::Self()->Initialize();
-  Object::NativeFunctionKlass::Self()->Initialize();
-  Object::FunctionKlass::Self()->Initialize();
-  Object::InstKlass::Self()->Initialize();
-  Object::CodeKlass::Self()->Initialize();
-  Object::IntegerKlass::Self()->Initialize();
-  Object::BytesKlass::Self()->Initialize();
-  Ast::ModuleKlass::Self()->Initialize();
-  Ast::FuncDefKlass::Self()->Initialize();
-  Ast::ExprStmtKlass::Self()->Initialize();
-  Ast::AssignStmtKlass::Self()->Initialize();
-  Ast::AtomKlass::Self()->Initialize();
-  Ast::BinaryKlass::Self()->Initialize();
-  Ast::FunctionCallKlass::Self()->Initialize();
-  Ast::IdentifierKlass::Self()->Initialize();
-  Ast::ListKlass::Self()->Initialize();
-  Ast::MemberAccessKlass::Self()->Initialize();
-  Ast::ReturnStmtKlass::Self()->Initialize();
-  Ast::IfStmtKlass::Self()->Initialize();
-  Ast::WhileStmtKlass::Self()->Initialize();
+  Object::BasicKlassLoad();
+  Ast::AstKlassLoad();
 }
 
 // 使用ANTLR解析文件
-void parseFileWithANTLR(const fs::path& filePath) {
+void ParseAndGenerate(const fs::path& filePath) {
   std::ifstream stream(filePath);
   if (!stream.is_open()) {
     std::cerr << "Failed to open file: " << filePath << std::endl;
     return;
   }
+  std::cout << "正在解析文件: " << filePath << std::endl;
 
   ANTLRInputStream inputStream(stream);
   Python3Lexer lexer(&inputStream);
@@ -103,15 +86,19 @@ void parseFileWithANTLR(const fs::path& filePath) {
 
   antlr4::tree::ParseTree* tree = parser.file_input();
 
-  // std::cout << "AST tree: " << std::endl;
-  // std::cout << tree->toStringTree(&parser) << std::endl;
+  if (ArgsHelper::Instance().Get("show_ast") == "true") {
+    std::cout << "AST tree: " << std::endl;
+    std::cout << tree->toStringTree(&parser) << std::endl;
+  }
 
   Generator visitor(Object::CreatePyString(filePath.string()));
   visitor.visit(tree);
   visitor.Visit();
   visitor.Emit();
   auto code = visitor.Code();
-  Object::DebugPrint(code->repr());
+  if (ArgsHelper::Instance().Get("show_code_object") == "true") {
+    Object::DebugPrint(code->repr());
+  }
   Collections::Bytes data =
     std::dynamic_pointer_cast<Object::PyBytes>(code->_serialize_())->Value();
   auto writePath = fs::path(filePath).replace_extension(".pyc");
@@ -121,43 +108,33 @@ void parseFileWithANTLR(const fs::path& filePath) {
 }
 
 int main(int argc, char** argv) {
-  std::string integrationTestDir = "/app/test/integration";
-  std::string singleFile;
-
-  // 解析命令行参数
-  for (int i = 1; i < argc; ++i) {
-    std::string arg = argv[i];
-    if (arg == "-d" && i + 1 < argc) {
-      integrationTestDir = argv[++i];
-    } else if (arg == "-f" && i + 1 < argc) {
-      singleFile = argv[++i];
-    } else {
-      std::cerr << "Unknown option or missing argument: " << arg << std::endl;
-      return 1;
-    }
-  }
-
+  DefineOption();
+  ArgsHelper::Instance().Accept(argc, argv);
   InitPyObj();
 
-  if (!singleFile.empty()) {
-    // 如果指定了单个文件，则只解析该文件
-    fs::path filePath(singleFile);
-    if (fs::exists(filePath) && filePath.extension() == ".py") {
-      parseFileWithANTLR(filePath);
-    } else {
-      std::cerr << "Invalid file or not a .py file: " << singleFile
-                << std::endl;
-      return 1;
-    }
-  } else {
-    // 否则扫描目录下的所有文件
-    for (const auto& file : getFilesInDirectory(integrationTestDir)) {
-      if (file.extension() == ".py") {
-        std::cout << "Parsing file: " << file << std::endl;
-        parseFileWithANTLR(file);
+  if (ArgsHelper::Instance().Has("file")) {
+    ParseAndGenerate(ArgsHelper::Instance().Get("file"));
+    return 0;
+  }
+  if (ArgsHelper::Instance().Has("dir")) {
+    auto dir = ArgsHelper::Instance().Get("dir");
+    std::vector<fs::path> subdirs;
+    for (const auto& entry : fs::directory_iterator(dir)) {
+      if (entry.is_directory()) {
+        subdirs.push_back(entry.path());
       }
     }
+    for (const auto& subdir : subdirs) {
+      auto files = GetFilesInDirectory(subdir.string(), ".py");
+      std::cout << "测试用例:" << subdir.filename().string() << std::endl;
+      for (const auto& file : files) {
+        ParseAndGenerate(file);
+      }
+    }
+    return 0;
   }
+  auto file = ArgsHelper::Instance().Get("file");
+  ParseAndGenerate(file);
 
   return 0;
 }

@@ -43,6 +43,8 @@ using PyStrPtr = std::shared_ptr<PyString>;
 
 PyObjPtr Upper(PyObjPtr args);
 
+PyObjPtr StartsWith(PyObjPtr args);
+
 }  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_PYSTRING_H

@@ -3,7 +3,6 @@
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
 #include "Function/PyNativeFunction.h"
-#include "Object/Common.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
 #include "Object/PyDictionary.h"
@@ -11,7 +10,6 @@
 #include "Object/PyList.h"
 #include "Object/PyObject.h"
 #include "Object/PyType.h"
-
 
 namespace torchlight::Object {
 
@@ -29,6 +27,7 @@ void StringKlass::Initialize() {
   SetName(CreatePyString("str"));
   Collections::Map<PyObjPtr, PyObjPtr> methods;
   methods.Put(CreatePyString("upper"), CreatePyNativeFunction(Upper));
+  methods.Put(CreatePyString("startswith"), CreatePyNativeFunction(StartsWith));
   SetAttributes(CreatePyDict(methods));
   Klass::Initialize();
 }
@@ -114,6 +113,29 @@ PyObjPtr Upper(PyObjPtr args) {
   }
   auto str = std::dynamic_pointer_cast<PyString>(value);
   return CreatePyString(str->Value().Upper());
+}
+
+PyObjPtr StartsWith(PyObjPtr args) {
+  if (args->Klass() != ListKlass::Self()) {
+    throw std::runtime_error("StartsWith() argument must be a list");
+  }
+  if (args->len() != CreatePyInteger(2)) {
+    throw std::runtime_error(
+      "StartsWith() argument must be a list with two elements"
+    );
+  }
+  auto value = args->getitem(CreatePyInteger(0));
+  if (value->Klass() != StringKlass::Self()) {
+    throw std::runtime_error("StartsWith() argument must be a string");
+  }
+  auto str = std::dynamic_pointer_cast<PyString>(value);
+  auto prefix = args->getitem(CreatePyInteger(1));
+  if (prefix->Klass() != StringKlass::Self()) {
+    throw std::runtime_error("StartsWith() argument must be a string");
+  }
+  return CreatePyBoolean(str->Value().StartsWith(
+    std::dynamic_pointer_cast<PyString>(prefix)->Value()
+  ));
 }
 
 }  // namespace torchlight::Object

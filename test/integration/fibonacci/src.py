@@ -1,4 +1,3 @@
-
 def fibonacci(a):
     if a == 1:
         return 1

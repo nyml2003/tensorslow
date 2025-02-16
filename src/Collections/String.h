@@ -36,6 +36,8 @@ class String {
   void RemoveAt(Index index);
   void Clear();
   [[nodiscard]] String Slice(Index start, Index end) const;
+  [[nodiscard]] bool StartsWith(const String& prefix) const;
+  [[nodiscard]] bool EndsWith(const String& suffix) const;
   void Reverse();
   void Push(Unicode codePoint);
   [[nodiscard]] bool Equal(const String& rhs) const;

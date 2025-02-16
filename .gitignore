@@ -9,3 +9,4 @@ grammar/.antlr/
 temp
 log
 *.pyc
+*.out

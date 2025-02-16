@@ -25,6 +25,10 @@ Klass::Klass() {
 }
 
 void Klass::Initialize() {
+  if (initialized) {
+    return;
+  }
+  initialized = true;
   auto attrs = std::dynamic_pointer_cast<PyDictionary>(attributes);
   auto attrsValue = attrs->Value();
   attrsValue.Put(CreatePyString("__name__"), name);

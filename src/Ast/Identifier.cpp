@@ -31,12 +31,12 @@ Ast::INodePtr CreateIdentifier(Object::PyObjPtr name, Ast::INodePtr parent) {
 
 Object::PyObjPtr
 IdentifierKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
-  auto builtinStr = Object::CreatePyList({
-    Object::CreatePyString("print"),
-    Object::CreatePyString("matrix"),
-    Object::CreatePyString("reshape"),
-    Object::CreatePyString("len"),
-  });
+  auto builtinStr = Object::CreatePyList(
+    {Object::CreatePyString("print"), Object::CreatePyString("matrix"),
+     Object::CreatePyString("reshape"), Object::CreatePyString("len"),
+     Object::CreatePyString("__name__"), Object::CreatePyString("randint"),
+     Object::CreatePyString("sleep"), Object::CreatePyString("input")}
+  );
   auto identifier = std::dynamic_pointer_cast<Identifier>(obj);
   auto code = GetCodeFromList(codeList, identifier);
   if (Object::IsTrue(builtinStr->contains(identifier->Name()))) {

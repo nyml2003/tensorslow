@@ -8,6 +8,7 @@ namespace torchlight::Object {
 class PyObject : public std::enable_shared_from_this<PyObject> {
  private:
   KlassPtr klass;
+  
 
  protected:
   void setKlass(KlassPtr klass);

@@ -6,6 +6,7 @@ include(cmake/AntlrConfig.cmake)
 
 include(src/source.cmake)
 include(test/unittest/unittest.cmake)
+include(test/extra/extra.cmake)
 message(STATUS "torchlight_frontend_files: ${torchlight_frontend_files}")
 message(STATUS "torchlight_backend_files: ${torchlight_backend_files}")
 message(STATUS "torchlight_common_files: ${torchlight_common_files}")
@@ -18,10 +19,8 @@ ${torchlight_common_files}
 
 add_executable(
 torchlight_backend
-${torchlight_src_dir}/testBack/entry.cpp
 ${torchlight_common_files}
 ${torchlight_backend_files}
-
 )
 
  target_link_libraries(torchlight_frontend antlr4-runtime)

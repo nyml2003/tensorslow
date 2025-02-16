@@ -11,6 +11,7 @@
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
+#include "Tools/Tools.h"
 
 namespace torchlight::Ast {
 
@@ -84,7 +85,6 @@ FuncDefKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto code = std::dynamic_pointer_cast<Object::PyCode>(
     Object::CreatePyCode(funcDef->Name())
   );
-  code->SetNLocals(Object::ToU64(funcDef->Parameters()->len()));
   code->SetScope(Object::Scope::LOCAL);
   auto params = funcDef->Parameters()->Value();
   for (Index i = 0; i < params.Size(); i++) {
@@ -99,7 +99,7 @@ FuncDefKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
     auto stmtNode = std::dynamic_pointer_cast<INode>(stmt.Get());
     stmtNode->visit(codeList);
   }
-  
+
   parent->RegisterConst(code);
   parent->RegisterConst(funcDef->Name());
   return Object::CreatePyNone();
@@ -115,14 +115,21 @@ FuncDefKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
     auto stmtNode = std::dynamic_pointer_cast<INode>(stmt.Get());
     stmtNode->emit(codeList);
   }
+  if (selfCode->VarNames()->len()->ge(funcDef->Parameters()->len())) {
+    selfCode->SetNLocals(Object::ToU64(selfCode->VarNames()->len()));
+  } else {
+    selfCode->SetNLocals(Object::ToU64(funcDef->Parameters()->len()));
+  }
   auto parent = GetCodeFromList(codeList, funcDef->Parent());
 
   parent->LoadConst(selfCode);
   parent->LoadConst(funcDef->Name());
   parent->MakeFunction();
   parent->StoreName(funcDef->Name());
+  if (ArgsHelper::Instance().Get("show_code_object") == "true") {
+    Object::DebugPrint(selfCode->repr());
+  }
 
-  Object::DebugPrint(selfCode->repr());
   return Object::CreatePyNone();
 }
 

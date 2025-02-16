@@ -1,87 +1,69 @@
 #include "Runtime/Genesis.h"
-#include "ByteCode/PyInst.h"
-#include "Collections/StringHelper.h"
-#include "Function/PyFunction.h"
-#include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
-#include "Object/PyDictionary.h"
 #include "Object/PyMatrix.h"
 #include "Object/PyNone.h"
-#include "Object/PyObject.h"
-#include "Object/PyString.h"
-#include "Object/PyType.h"
 #include "Runtime/PyFrame.h"
+#include "Runtime/RuntimeHelper.h"
 
 namespace torchlight::Runtime {
 
-Object::PyObjPtr Genesis() {
-  Object::StringKlass::Self()->Initialize();
-  Object::BooleanKlass::Self()->Initialize();
-  Object::NoneKlass::Self()->Initialize();
-  Object::ListKlass::Self()->Initialize();
-  Object::DictionaryKlass::Self()->Initialize();
-  Object::TypeKlass::Self()->Initialize();
-  Object::MethodKlass::Self()->Initialize();
-  Object::NativeFunctionKlass::Self()->Initialize();
-  Object::FunctionKlass::Self()->Initialize();
-  Object::InstKlass::Self()->Initialize();
-  Object::CodeKlass::Self()->Initialize();
-  Object::IntegerKlass::Self()->Initialize();
-  Object::BytesKlass::Self()->Initialize();
-  Object::MatrixKlass::Self()->Initialize();
+void RuntimeKlassLoad() {
   Runtime::FrameKlass::Self()->Initialize();
+}
 
+Object::PyObjPtr Genesis() {
+  Object::BasicKlassLoad();
+  RuntimeKlassLoad();
   auto builtins = Object::CreatePyDict();
+  builtins->setitem(Object::CreatePyString("None"), Object::CreatePyNone());
   builtins->setitem(
-    Object::CreatePyString(Collections::CreateStringWithCString("None")),
-    Object::CreatePyNone()
+    Object::CreatePyString("True"), Object::CreatePyBoolean(true)
   );
   builtins->setitem(
-    Object::CreatePyString(Collections::CreateStringWithCString("True")),
-    Object::CreatePyBoolean(true)
+    Object::CreatePyString("False"), Object::CreatePyBoolean(false)
   );
   builtins->setitem(
-    Object::CreatePyString(Collections::CreateStringWithCString("False")),
-    Object::CreatePyBoolean(false)
+    Object::CreatePyString("print"), CreatePyNativeFunction(Object::Print)
   );
   builtins->setitem(
-    Object::CreatePyString(Collections::CreateStringWithCString("print")),
-    CreatePyNativeFunction(Object::Print)
+    Object::CreatePyString("len"), CreatePyNativeFunction(Object::Len)
   );
   builtins->setitem(
-    Object::CreatePyString(Collections::CreateStringWithCString("len")),
-    CreatePyNativeFunction(Object::Len)
+    Object::CreatePyString("matrix"), CreatePyNativeFunction(Object::Matrix)
   );
   builtins->setitem(
-    Object::CreatePyString(Collections::CreateStringWithCString("matrix")),
-    CreatePyNativeFunction(Object::Matrix)
+    Object::CreatePyString("eye"), CreatePyNativeFunction(Object::Eye)
   );
   builtins->setitem(
-    Object::CreatePyString(Collections::CreateStringWithCString("eye")),
-    CreatePyNativeFunction(Object::Eye)
+    Object::CreatePyString("zeros"), CreatePyNativeFunction(Object::Zeros)
   );
   builtins->setitem(
-    Object::CreatePyString(Collections::CreateStringWithCString("zeros")),
-    CreatePyNativeFunction(Object::Zeros)
+    Object::CreatePyString("ones"), CreatePyNativeFunction(Object::Ones)
   );
   builtins->setitem(
-    Object::CreatePyString(Collections::CreateStringWithCString("ones")),
-    CreatePyNativeFunction(Object::Ones)
+    Object::CreatePyString("diag"), CreatePyNativeFunction(Object::Diagnostic)
   );
   builtins->setitem(
-    Object::CreatePyString(Collections::CreateStringWithCString("diag")),
-    CreatePyNativeFunction(Object::Diagnostic)
-  );
-  builtins->setitem(
-    Object::CreatePyString(Collections::CreateStringWithCString("transpose")),
+    Object::CreatePyString("transpose"),
     CreatePyNativeFunction(Object::Transpose)
   );
   builtins->setitem(
-    Object::CreatePyString(Collections::CreateStringWithCString("reshape")),
-    CreatePyNativeFunction(Object::Reshape)
+    Object::CreatePyString("reshape"), CreatePyNativeFunction(Object::Reshape)
   );
-
+  builtins->setitem(
+    Object::CreatePyString("__name__"), Object::CreatePyString("__main__")
+  );
+  builtins->setitem(
+    Object::CreatePyString("randint"), CreatePyNativeFunction(RandInt)
+  );
+  builtins->setitem(
+    Object::CreatePyString("sleep"), CreatePyNativeFunction(Sleep)
+  );
+  builtins->setitem(
+    Object::CreatePyString("input"), CreatePyNativeFunction(Input)
+  );
   return builtins;
 }
 

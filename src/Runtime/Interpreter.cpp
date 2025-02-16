@@ -15,6 +15,7 @@
 #include "Object/PyString.h"
 #include "Runtime/Genesis.h"
 #include "Runtime/PyFrame.h"
+#include "Tools/Tools.h"
 
 #include <memory>
 #include <stdexcept>
@@ -27,6 +28,7 @@ Interpreter::Interpreter() {
 
 void Interpreter::Run(const Object::PyCodePtr& code) {
   frame = CreateFrameWithCode(code);
+
   EvalFrame();
   DestroyFrame();
 }
@@ -73,8 +75,10 @@ void Interpreter::EvalFrame() {
   while (!std::dynamic_pointer_cast<PyFrame>(frame)->Finished()) {
     auto frameObject = std::dynamic_pointer_cast<PyFrame>(frame);
     const auto& inst = frameObject->Instruction();
-    // Object::DebugPrint(Object::CreatePyString("-------------------"));
-    // Object::DebugPrint(frameObject);
+    if (ArgsHelper::Instance().Get("debug") == "true") {
+      Object::DebugPrint(Object::CreatePyString("-------------------"));
+      Object::DebugPrint(frameObject);
+    }
     switch (inst->Code()) {
       case Object::ByteCode::LOAD_CONST: {
         auto key = std::get<Index>(inst->Operand());

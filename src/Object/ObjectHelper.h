@@ -5,10 +5,11 @@
 
 namespace torchlight::Object {
 PyObjPtr Invoke(
-  PyObjPtr obj,
-  PyObjPtr methodName,
+  const PyObjPtr& obj,
+  const PyObjPtr& methodName,
   std::initializer_list<PyObjPtr> arguments
 );
-}
+void BasicKlassLoad();
+}  // namespace torchlight::Object
 
 #endif

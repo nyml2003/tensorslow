@@ -1,5 +1,6 @@
-#include <stdexcept>
 #include "Collections/String.h"
+#include <stdexcept>
+
 namespace torchlight::Collections {
 String::~String() = default;
 String::String(const List<Unicode>& codePoints) : codePoints(codePoints) {}
@@ -44,6 +45,28 @@ List<String> String::Split(String& delimiter) const {
 }
 String String::Slice(Index start, Index end) const {
   return String(codePoints.Slice(start, end));
+}
+bool String::StartsWith(const String& prefix) const {
+  if (prefix.Size() > Size()) {
+    return false;
+  }
+  for (Index i = 0; i < prefix.Size(); i++) {
+    if (Get(i) != prefix.Get(i)) {
+      return false;
+    }
+  }
+  return true;
+}
+bool String::EndsWith(const String& suffix) const {
+  if (suffix.Size() > Size()) {
+    return false;
+  }
+  for (Index i = 0; i < suffix.Size(); i++) {
+    if (Get(Size() - suffix.Size() + i) != suffix.Get(i)) {
+      return false;
+    }
+  }
+  return true;
 }
 Index String::Find(String& sub, Index start) const {
   if (sub.Size() == 0) {
