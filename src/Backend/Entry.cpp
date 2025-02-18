@@ -112,6 +112,7 @@ void HandleResultEnd(fs::path filename) {
       std::getline(expected_stream, expected_line);
       if (write_line != expected_line) {
         std::cout << "❌ 测试失败" << std::endl;
+        exit(1);
         return;
       }
     }
