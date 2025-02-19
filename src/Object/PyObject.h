@@ -2,13 +2,13 @@
 #define TORCHLIGHT_OBJECT_PYOBJECT_H
 
 #include "Object/Common.h"
+#include "Object/Klass.h"
 
 namespace torchlight::Object {
 
 class PyObject : public std::enable_shared_from_this<PyObject> {
  private:
   KlassPtr klass;
-  
 
  protected:
   void setKlass(KlassPtr klass);
@@ -82,6 +82,11 @@ void DebugPrint(const PyObjPtr& obj);
 PyObjPtr Print(PyObjPtr args);
 
 PyObjPtr Len(PyObjPtr args);
+
+class ObjectKlass : public Klass {
+ public:
+  
+};
 
 }  // namespace torchlight::Object
 

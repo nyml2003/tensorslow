@@ -6,6 +6,7 @@
 #include "Object/PyNone.h"
 #include "Object/PyString.h"
 
+#include <iostream>
 #include <random>
 #include <thread>
 

@@ -2,9 +2,6 @@
 #define TORCHLIGHT_OBJECT_KLASS_H
 
 #include "Object/Common.h"
-#include "Tools/Tools.h"
-
-#include <memory>
 #include <stdexcept>
 
 namespace torchlight::Object {
@@ -13,6 +10,8 @@ class Klass {
   PyStrPtr name;
   PyDictPtr attributes;
   PyTypePtr type;
+  PyListPtr super;
+  PyListPtr mro;
   bool initialized = false;
 
  protected:
@@ -103,6 +102,16 @@ class UnsupportedOperandError : public std::runtime_error {
  public:
   explicit UnsupportedOperandError(const std::string& message);
 };
+
+enum class KlassComparison {
+  GREATER,
+  LESS,
+  EQUAL,
+};
+
+KlassComparison CompareKlasses(PyObjPtr lhs, PyObjPtr rhs);
+
+PyObjPtr CreatePyKlass(const std::string& name);
 
 }  // namespace torchlight::Object
 
