@@ -83,7 +83,7 @@ void Interpreter::EvalFrame() {
   while (!std::dynamic_pointer_cast<PyFrame>(frame)->Finished()) {
     auto frameObject = std::dynamic_pointer_cast<PyFrame>(frame);
     const auto& inst = frameObject->Instruction();
-    if (ArgsHelper::Instance().Get("debug") == "true") {
+    if (ArgsHelper::Instance().Has("debug")) {
       Object::DebugPrint(Object::CreatePyString("-------------------"));
       Object::DebugPrint(frameObject);
     }

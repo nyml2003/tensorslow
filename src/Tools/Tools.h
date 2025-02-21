@@ -6,11 +6,7 @@
 #include <functional>
 #include <iostream>
 #include <map>
-#include <memory>
-#include <optional>
-#include <ostream>
 #include <string>
-#include <variant>
 
 namespace fs = std::filesystem;
 
@@ -21,17 +17,20 @@ class Parameter {
   Parameter(
     std::string name,
     std::function<bool(const std::string&)> validator,
-    std::string defaultValue = "true"
+    std::string defaultValue = "true",
+    std::string tip = ""
   );
 
   [[nodiscard]] std::string Name() const;
   [[nodiscard]] std::string DefaultValue() const;
   [[nodiscard]] bool validate(const std::string& value) const;
+  [[nodiscard]] std::string Tip() const { return tip; }
 
  private:
   std::string name;
   std::function<bool(const std::string&)> validator;
   std::string defaultValue;
+  std::string tip;
 };
 
 // 参数 Schema 类
@@ -40,7 +39,7 @@ class Schema {
   void Add(const Parameter& param);
   void Check(std::string option, std::string value) const;
   Parameter Find(std::string option);
-
+  void PrintUsage() const;  // 打印使用说明
  private:
   std::map<std::string, Parameter> parameters;  // 参数存储
 };
@@ -59,6 +58,9 @@ class ArgsHelper {
   ArgsHelper() = default;                         // 私有构造函数
   Schema schema;                                  // 参数 Schema
   std::map<std::string, std::string> parameters;  // 参数存储
+
+  void HandleDefaultParameters(const std::string& option
+  ) const;  // 处理默认参数
 };
 
 std::vector<fs::path> GetFilesInDirectory(

@@ -33,7 +33,7 @@ void DefineOption() {
       bool is_regular = std::filesystem::is_regular_file(value);
       return file_exists && is_py && is_regular;
     },
-    "/app/test/dev/dev.py"
+    "/app/test/dev/dev.py", "单文件模式，指定要解析的文件"
   ));
   schema.Add(Parameter(
     "dir",
@@ -44,23 +44,25 @@ void DefineOption() {
       bool is_dir = std::filesystem::is_directory(value);
       return dir_exists && is_dir;
     },
-    "/app/test/integration"
+    "/app/test/integration",
+    "目录模式，指定要解析的目录, "
+    "认为目录下有且仅有包，将每个包下的所有.py文件都解析"
   ));
   schema.Add(Parameter(
     "show_ast",
     [](const std::string& value) {
       // value 是 "true" 或 "false"
-      return value == "true" || value == "false";
+      return value == "true" || value == "";
     },
-    "false"
+    "true", "是否显示AST树"
   ));
   schema.Add(Parameter(
     "show_code_object",
     [](const std::string& value) {
       // value 是 "true" 或 "false"
-      return value == "true" || value == "false";
+      return value == "true" || value == "";
     },
-    "false"
+    "true", "是否显示生成的code object"
   ));
   ArgsHelper::SetSchema(schema);
 }
@@ -86,7 +88,7 @@ void ParseAndGenerate(const fs::path& filePath) {
 
   antlr4::tree::ParseTree* tree = parser.file_input();
 
-  if (ArgsHelper::Instance().Get("show_ast") == "true") {
+  if (ArgsHelper::Instance().Has("show_ast")) {
     std::cout << "AST tree: " << std::endl;
     std::cout << tree->toStringTree(&parser) << std::endl;
   }
@@ -96,7 +98,7 @@ void ParseAndGenerate(const fs::path& filePath) {
   visitor.Visit();
   visitor.Emit();
   auto code = visitor.Code();
-  if (ArgsHelper::Instance().Get("show_code_object") == "true") {
+  if (ArgsHelper::Instance().Has("show_code_object")) {
     Object::DebugPrint(code->repr());
   }
   Collections::Bytes data =

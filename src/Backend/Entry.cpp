@@ -21,7 +21,7 @@ void DefineOption() {
       bool is_regular = std::filesystem::is_regular_file(value);
       return file_exists && is_py && is_regular;
     },
-    "/app/test/dev/dev.pyc"
+    "/app/test/dev/dev.pyc", "单文件模式，指定要解析的文件"
   ));
   schema.Add(Parameter(
     "dir",
@@ -32,39 +32,35 @@ void DefineOption() {
       bool is_dir = std::filesystem::is_directory(value);
       return dir_exists && is_dir;
     },
-    "/app/test/integration"
+    "/app/test/integration",
+    "目录模式，指定要解析的目录, "
+    "认为目录下有且仅有包，将每个包下的所有.py文件都解析"
   ));
   schema.Add(Parameter(
     "debug",
-    [](const std::string& value) {
-      // value 是 "true" 或 "false"
-      return value == "true" || value == "false";
-    },
-    "false"
+    [](const std::string& value) { return value == "true" || value == ""; },
+    "true", "是否开启调试模式"
   ));
   schema.Add(Parameter(
     "compare_result",
-    [](const std::string& value) {
-      // value 是 "true" 或 "false"
-      return value == "true" || value == "false";
-    },
-    "false"
+    [](const std::string& value) { return value == "true" || value == ""; },
+    "true", "是否和预期结果比较"
   ));
   schema.Add(Parameter(
     "show_result",
     [](const std::string& value) {
       // value 是 "true" 或 "false"
-      return value == "true" || value == "false";
+      return value == "true" || value == "";
     },
-    "false"
+    "true", "是否直接输出结果"
   ));
   ArgsHelper::SetSchema(schema);
 }
 
 void HandleResultBegin(fs::path filename) {
-  bool compare_result = ArgsHelper::Instance().Get("compare_result") == "true";
-  bool show_result = ArgsHelper::Instance().Get("show_result") == "true";
-  bool debug = ArgsHelper::Instance().Get("debug") == "true";
+  bool compare_result = ArgsHelper::Instance().Has("compare_result");
+  bool show_result = ArgsHelper::Instance().Has("show_result");
+  bool debug = ArgsHelper::Instance().Has("debug");
   if (compare_result && show_result) {
     throw std::runtime_error("compare_result 和 show_result 不能同时为 true");
   }
@@ -89,14 +85,22 @@ void HandleResultBegin(fs::path filename) {
   }
   if (debug) {
     std::cout << "本次测试模式：调试模式" << std::endl;
-    redirectCout.redirectToFile("/app/log/" / filename.filename() / ".log");
+    std::cout << "输出结果到:"
+              << (fs::path("/app/log") /
+                  (filename.stem().replace_extension(".log")).filename())
+              << std::endl;
+    redirectCout.redirectToFile(
+      (fs::path("/app/log") /
+       (filename.stem().replace_extension(".log")).filename())
+        .string()
+    );
     return;
   }
 }
 
 void HandleResultEnd(fs::path filename) {
   redirectCout.restore();
-  bool compare_result = ArgsHelper::Instance().Get("compare_result") == "true";
+  bool compare_result = ArgsHelper::Instance().Has("compare_result");
   if (compare_result) {
     auto filename_dir = filename.parent_path();
     auto write_filename =

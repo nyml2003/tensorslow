@@ -126,7 +126,7 @@ FuncDefKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   parent->LoadConst(funcDef->Name());
   parent->MakeFunction();
   parent->StoreName(funcDef->Name());
-  if (ArgsHelper::Instance().Get("show_code_object") == "true") {
+  if (ArgsHelper::Instance().Has("show_code_object")) {
     Object::DebugPrint(selfCode->repr());
   }
 

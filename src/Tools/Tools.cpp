@@ -8,11 +8,13 @@ namespace torchlight {
 Parameter::Parameter(
   std::string name,
   std::function<bool(const std::string&)> validator,
-  std::string defaultValue
+  std::string defaultValue,
+  std::string tip
 )
   : name(std::move(name)),
     validator(std::move(validator)),
-    defaultValue(std::move(defaultValue)) {}
+    defaultValue(std::move(defaultValue)),
+    tip(std::move(tip)) {}
 
 std::string Parameter::Name() const {
   return name;
@@ -38,6 +40,7 @@ void Schema::Add(const Parameter& param) {
 Parameter Schema::Find(std::string option) {
   auto parameter = parameters.find(option);
   if (parameter == parameters.end()) {
+    PrintUsage();
     throw std::out_of_range("Invalid parameter name: " + option);
   }
   return parameter->second;
@@ -46,6 +49,7 @@ Parameter Schema::Find(std::string option) {
 void Schema::Check(std::string option, std::string value) const {
   auto parameter = parameters.find(option);
   if (parameter == parameters.end()) {
+    PrintUsage();
     throw std::out_of_range("Invalid parameter name: " + option);
   }
   const Parameter& param = parameter->second;
@@ -71,6 +75,7 @@ void ArgsHelper::Accept(int argc, char** argv) {
       continue;
     }
     token = token.substr(2);
+    HandleDefaultParameters(token);
     size_t equalPos = token.find('=');
     std::string option = token.substr(0, equalPos);
     std::string value;
@@ -81,6 +86,32 @@ void ArgsHelper::Accept(int argc, char** argv) {
     }
     schema.Check(option, value);
     Instance().parameters.insert_or_assign(option, value);
+  }
+}
+
+void Schema::PrintUsage() const {
+  std::cout << "Usage: program [options]" << std::endl;
+  std::cout << "Options:" << std::endl;
+
+  // 遍历 Schema 中的参数并打印
+  for (const auto& [name, param] : parameters) {
+    std::cout << "  --" << name
+              << "=<value>  (default: " << param.DefaultValue() << ")"
+              << " tip: " << param.Tip() << std::endl;
+  }
+
+  // 打印默认参数
+  std::cout << "  --help  Display this help message" << std::endl;
+  std::cout << "  --version  Display version information" << std::endl;
+}
+
+void ArgsHelper::HandleDefaultParameters(const std::string& option) const {
+  if (option == "help") {
+    schema.PrintUsage();
+    exit(0);
+  } else if (option == "version") {
+    std::cout << "Version: 1.0.0" << std::endl;
+    exit(0);
   }
 }
 
