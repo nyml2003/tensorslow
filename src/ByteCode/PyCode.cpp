@@ -293,6 +293,15 @@ void PyCode::StoreSubscr() {
   instructions->Append(CreateStoreSubscr());
 }
 
+void PyCode::GetIter() {
+  instructions->Append(CreateGetIter());
+}
+
+Index PyCode::ForIter(Index index) {
+  instructions->Append(CreateForIter(index));
+  return instructions->Length();
+}
+
 PyObjPtr CreatePyCode(const PyObjPtr& name) {
   auto byteCode = CreatePyBytes();
   auto consts = CreatePyList({});

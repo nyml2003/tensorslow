@@ -62,10 +62,16 @@ PyObjPtr StringKlass::allocateInstance(PyObjPtr klass, PyObjPtr args) {
     );
   }
   auto value = args->getitem(CreatePyInteger(0));
-  if (value->Klass() != StringKlass::Self()) {
-    throw std::runtime_error("allocateInstance(): value is not a string");
+  if (value->Klass() == StringKlass::Self()) {
+    return value;
   }
-  return value;
+  if (value->Klass() == IntegerKlass::Self()) {
+    auto integer = std::dynamic_pointer_cast<PyInteger>(value);
+    auto integerValue = integer->Value();
+    return CreatePyString(integerValue.ToString());
+  }
+
+  throw std::runtime_error("allocateInstance(): value is not a string");
 }
 
 PyObjPtr StringKlass::add(PyObjPtr lhs, PyObjPtr rhs) {

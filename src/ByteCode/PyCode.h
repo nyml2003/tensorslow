@@ -94,6 +94,8 @@ class PyCode : public PyObject {
   void PopTop();
 
   void StoreSubscr();
+  void GetIter();
+  Index ForIter(Index index);
 
  private:
   PyBytesPtr byteCode;

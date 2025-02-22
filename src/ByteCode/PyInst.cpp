@@ -161,4 +161,12 @@ PyInstPtr CreateStoreSubscr() {
   return std::make_shared<PyInst>(ByteCode::STORE_SUBSCR);
 }
 
+PyInstPtr CreateGetIter() {
+  return std::make_shared<PyInst>(ByteCode::GET_ITER);
+}
+
+PyInstPtr CreateForIter(Index index) {
+  return std::make_shared<PyInst>(ByteCode::FOR_ITER, static_cast<int64_t>(index));
+}
+
 }  // namespace torchlight::Object

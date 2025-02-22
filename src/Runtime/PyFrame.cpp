@@ -239,6 +239,14 @@ void ParseByteCode(const Object::PyCodePtr& code) {
         insts.Push(Object::CreateStoreSubscr());
         break;
       }
+      case Object::ByteCode::GET_ITER: {
+        insts.Push(Object::CreateGetIter());
+        break;
+      }
+      case Object::ByteCode::FOR_ITER: {
+        insts.Push(Object::CreateForIter(ReadI64(iter)));
+        break;
+      }
       default:
         throw std::runtime_error(
           "Unknown byte code:" + std::to_string(static_cast<int>(iter.Get()))

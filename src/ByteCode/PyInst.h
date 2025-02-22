@@ -78,6 +78,10 @@ PyInstPtr CreateBinarySubscr();
 
 PyInstPtr CreateStoreSubscr();
 
+PyInstPtr CreateGetIter();
+
+PyInstPtr CreateForIter(Index index);
+
 }  // namespace torchlight::Object
 
 #endif

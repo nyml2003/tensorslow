@@ -3,6 +3,7 @@
 #include "Ast/Atom.h"
 #include "Ast/Binary.h"
 #include "Ast/ExprStmt.h"
+#include "Ast/ForStmt.h"
 #include "Ast/FuncDef.h"
 #include "Ast/FunctionCall.h"
 #include "Ast/Identifier.h"
@@ -29,6 +30,7 @@ void AstKlassLoad() {
   Ast::ReturnStmtKlass::Self()->Initialize();
   Ast::IfStmtKlass::Self()->Initialize();
   Ast::WhileStmtKlass::Self()->Initialize();
+  Ast::ForStmtKlass::Self()->Initialize();
 }
 
 }  // namespace torchlight::Ast

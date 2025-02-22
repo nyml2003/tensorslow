@@ -4,6 +4,7 @@
 #include "Ast/Atom.h"
 #include "Ast/Binary.h"
 #include "Ast/ExprStmt.h"
+#include "Ast/ForStmt.h"
 #include "Ast/FuncDef.h"
 #include "Ast/FunctionCall.h"
 #include "Ast/INode.h"
@@ -16,7 +17,6 @@
 #include "Ast/WhileStmt.h"
 #include "ByteCode/PyCode.h"
 #include "Collections/IntegerHelper.h"
-#include "Collections/Iterator.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyFloat.h"
@@ -612,6 +612,17 @@ antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx
     return visitTest(ctx->test(0));
   }
   return nullptr;
+}
+
+antlrcpp::Any Generator::visitFor_stmt(Python3Parser::For_stmtContext* ctx) {
+  auto target = visitExprlist(ctx->exprlist()).as<Ast::INodePtr>();
+  auto iter = visitTestlist(ctx->testlist()).as<Ast::INodePtr>();
+  auto body = visitBlock(ctx->block(0)).as<Object::PyObjPtr>();
+  return Ast::CreateForStmt(target, iter, body, context);
+}
+
+antlrcpp::Any Generator::visitExprlist(Python3Parser::ExprlistContext* ctx) {
+  return visitExpr(ctx->expr(0));
 }
 
 }  // namespace torchlight::Generation

@@ -6,7 +6,9 @@
 #include "Function/PyFunction.h"
 #include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
+#include "Object/Iterator.h"
 #include "Object/MixinCollections.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
@@ -387,6 +389,27 @@ void Interpreter::EvalFrame() {
         auto value = frameObject->Stack().Pop();
         obj->setitem(index, value);
         frameObject->NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::GET_ITER: {
+        auto obj = frameObject->Stack().Pop();
+        auto iter = obj->iter();
+        frameObject->Stack().Push(iter);
+        frameObject->NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::FOR_ITER: {
+        auto iter = frameObject->Stack().Pop();
+        auto value = iter->next();
+        if (Object::IsType(value, Object::IterDoneKlass::Self())) {
+          frameObject->SetProgramCounter(Collections::safe_add(
+            frameObject->ProgramCounter(), std::get<int64_t>(inst->Operand())
+          ));
+        } else {
+          frameObject->Stack().Push(iter);
+          frameObject->Stack().Push(value);
+          frameObject->NextProgramCounter();
+        }
         break;
       }
       case Object::ByteCode::ERROR: {

@@ -1,5 +1,6 @@
 #include "Object/Iterator.h"
 #include "Object/PyDictionary.h"
+#include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
@@ -63,6 +64,14 @@ PyObjPtr ListIteratorKlass::next(PyObjPtr obj) {
   auto value = list->GetItem(iterator->Index());
   iterator->Next();
   return value;
+}
+
+PyObjPtr ListIteratorKlass::str(PyObjPtr obj) {
+  auto iterator = std::dynamic_pointer_cast<ListIterator>(obj);
+  return CreatePyString("ListIterator at ")
+    ->add(CreatePyInteger(iterator->Index())->str())
+    ->add(CreatePyString(" of "))
+    ->add(iterator->List()->str());
 }
 
 void ListIterator::Next() {
