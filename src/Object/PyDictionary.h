@@ -2,7 +2,6 @@
 #define TORCHLIGHT_OBJECT_PYDICTIONARY_H
 
 #include "Collections/Map.h"
-#include "Object/Common.h"
 #include "Object/Klass.h"
 #include "Object/PyObject.h"
 

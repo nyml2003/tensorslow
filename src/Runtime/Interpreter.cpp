@@ -275,7 +275,7 @@ void Interpreter::EvalFrame() {
       }
       case Object::ByteCode::LOAD_FAST: {
         auto index = std::get<Index>(inst->Operand());
-        auto value = frameObject->FastLocals()->Value().Get(index);
+        auto value = frameObject->FastLocals()->GetItem(index);
         frameObject->Stack().Push(value);
         frameObject->NextProgramCounter();
         break;
@@ -295,7 +295,7 @@ void Interpreter::EvalFrame() {
       }
       case Object::ByteCode::LOAD_GLOBAL: {
         auto index = std::get<Index>(inst->Operand());
-        auto key = frameObject->Code()->Names()->Value().Get(index);
+        auto key = frameObject->Code()->Names()->GetItem(index);
         bool found = false;
         Object::PyObjPtr value = Object::CreatePyNone();
         if (Object::IsTrue(frameObject->Globals()->contains(key))) {
@@ -317,7 +317,7 @@ void Interpreter::EvalFrame() {
       }
       case Object::ByteCode::STORE_NAME: {
         auto index = std::get<Index>(inst->Operand());
-        auto key = frameObject->Code()->Names()->Value().Get(index);
+        auto key = frameObject->Code()->Names()->GetItem(index);
         auto value = frameObject->Stack().Pop();
         frameObject->Globals()->setitem(key, value);
         frameObject->NextProgramCounter();
@@ -325,7 +325,7 @@ void Interpreter::EvalFrame() {
       }
       case Object::ByteCode::LOAD_NAME: {
         auto index = std::get<Index>(inst->Operand());
-        auto key = frameObject->Code()->Names()->Value().Get(index);
+        auto key = frameObject->Code()->Names()->GetItem(index);
         // LEGB rule
         // local -> enclosing -> global -> built-in
         bool found = false;
@@ -358,7 +358,7 @@ void Interpreter::EvalFrame() {
       }
       case Object::ByteCode::LOAD_ATTR: {
         auto index = std::get<Index>(inst->Operand());
-        auto key = frameObject->Code()->Names()->Value().Get(index);
+        auto key = frameObject->Code()->Names()->GetItem(index);
         auto obj = frameObject->Stack().Pop();
         auto value = obj->getattr(key);
         frameObject->Stack().Push(value);

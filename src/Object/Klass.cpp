@@ -3,7 +3,6 @@
 #include "Function/PyIife.h"
 #include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
-#include "Object/Common.h"
 #include "Object/MixinCollections.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
@@ -242,6 +241,18 @@ PyObjPtr Klass::str(PyObjPtr obj) {
 PyObjPtr Klass::matmul(PyObjPtr lhs, PyObjPtr rhs) {
   ThrowUnsupportedOperandError(lhs, rhs, CreatePyString("__matmul__"));
   return CreatePyNone();
+}
+
+PyObjPtr Klass::iter(PyObjPtr obj) {
+  throw std::runtime_error(
+    Collections::ToCppString(name) + " does not support iter operation"
+  );
+}
+
+PyObjPtr Klass::next(PyObjPtr obj) {
+  throw std::runtime_error(
+    Collections::ToCppString(name) + " does not support next operation"
+  );
 }
 
 }  // namespace torchlight::Object

@@ -61,24 +61,26 @@ ModuleKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   );
   code->SetScope(Object::Scope::GLOBAL);
   Object::Invoke(codeList, Object::CreatePyString("append"), {code});
-  Collections::List<Object::PyObjPtr> stmts = module->Body()->Value();
-  for (auto stmt = Collections::Iterator<Object::PyObjPtr>::Begin(stmts);
-       !stmt.End(); stmt.Next()) {
-    auto stmtNode = std::dynamic_pointer_cast<INode>(stmt.Get());
-    stmtNode->visit(codeList);
-  }
+  Object::ForEach(
+    module->Body(),
+    [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
+      auto stmtNode = std::dynamic_pointer_cast<INode>(stmt);
+      stmtNode->visit(codeList);
+    }
+  );
   return Object::CreatePyNone();
 }
 
 Object::PyObjPtr
 ModuleKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto module = std::dynamic_pointer_cast<Module>(obj);
-  Collections::List<Object::PyObjPtr> stmts = module->Body()->Value();
-  for (auto stmt = Collections::Iterator<Object::PyObjPtr>::Begin(stmts);
-       !stmt.End(); stmt.Next()) {
-    auto stmtNode = std::dynamic_pointer_cast<INode>(stmt.Get());
-    stmtNode->emit(codeList);
-  }
+  Object::ForEach(
+    module->Body(),
+    [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
+      auto stmtNode = std::dynamic_pointer_cast<INode>(stmt);
+      stmtNode->emit(codeList);
+    }
+  );
   return Object::CreatePyNone();
 }
 

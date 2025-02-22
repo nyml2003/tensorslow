@@ -1,7 +1,6 @@
 #ifndef TORCHLIGHT_FUNCTION_IIFE_H
 #define TORCHLIGHT_FUNCTION_IIFE_H
 
-#include "Object/Common.h"
 #include "Object/Klass.h"
 #include "Object/PyObject.h"
 

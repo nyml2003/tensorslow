@@ -2,7 +2,6 @@
 #define TORCHLIGHT_RUNTIME_INTERPRETER_H
 
 #include "ByteCode/PyCode.h"
-#include "Object/Common.h"
 
 namespace torchlight::Runtime {
 

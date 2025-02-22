@@ -1,8 +1,8 @@
 #ifndef TORCHLIGHT_OBJECT_KLASS_H
 #define TORCHLIGHT_OBJECT_KLASS_H
 
-#include "Object/Common.h"
 #include <stdexcept>
+#include "Object/Object.h"
 
 namespace torchlight::Object {
 class Klass {
@@ -90,6 +90,10 @@ class Klass {
   virtual PyObjPtr getattr(PyObjPtr obj, PyObjPtr key);
 
   virtual PyObjPtr setattr(PyObjPtr obj, PyObjPtr key, PyObjPtr value);
+
+  virtual PyObjPtr iter(PyObjPtr obj);
+
+  virtual PyObjPtr next(PyObjPtr obj);
 };
 
 void ThrowUnsupportedOperandError(

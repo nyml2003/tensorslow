@@ -7,6 +7,8 @@
 #include "Function/PyIife.h"
 #include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
+#include "Object/Iterator.h"
+#include "Object/MixinCollections.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyList.h"
@@ -47,6 +49,24 @@ void BasicKlassLoad() {
   Object::BytesKlass::Self()->Initialize();
   Object::MatrixKlass::Self()->Initialize();
   Object::IifeKlass::Self()->Initialize();
+  Object::IterDoneKlass::Self()->Initialize();
+  Object::ListIteratorKlass::Self()->Initialize();
 }
 
+bool IsType(const PyObjPtr& obj, const KlassPtr& type) {
+  return obj->Klass() == type;
+}
+
+void ForEach(
+  const PyObjPtr& obj,
+  const std::function<
+    void(const PyObjPtr& value, Index index, const PyObjPtr& list)>& func
+) {
+  auto iter = std::dynamic_pointer_cast<ListIterator>(obj->iter());
+  auto value = iter->next();
+  while (!IsType(value, IterDoneKlass::Self())) {
+    func(value, iter->Index(), obj);
+    value = iter->next();
+  }
+}
 }  // namespace torchlight::Object

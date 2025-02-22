@@ -1,8 +1,8 @@
 #ifndef TORCHLIGHT_OBJECT_PYOBJECT_H
 #define TORCHLIGHT_OBJECT_PYOBJECT_H
 
-#include "Object/Common.h"
 #include "Object/Klass.h"
+#include "Object/Object.h"
 
 namespace torchlight::Object {
 
@@ -71,6 +71,10 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   PyObjPtr getattr(PyObjPtr key);
 
   PyObjPtr setattr(PyObjPtr key, PyObjPtr value);
+
+  PyObjPtr iter();
+
+  PyObjPtr next();
 };
 
 bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs);
@@ -79,14 +83,11 @@ bool operator!=(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
 void DebugPrint(const PyObjPtr& obj);
 
-PyObjPtr Print(PyObjPtr args);
+PyObjPtr Print(const PyObjPtr& args);
 
-PyObjPtr Len(PyObjPtr args);
+PyObjPtr Len(const PyObjPtr& args);
 
-class ObjectKlass : public Klass {
- public:
-  
-};
+using PyObjPtr = std::shared_ptr<PyObject>;
 
 }  // namespace torchlight::Object
 

@@ -2,6 +2,7 @@
 #include "Ast/INode.h"
 #include "ByteCode/PyInst.h"
 #include "Collections/Iterator.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
 #include "Object/PyNone.h"
@@ -53,14 +54,14 @@ IfStmtKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto condition = stmt->Condition();
   auto thenStmts = stmt->ThenStmts();
   condition->visit(codeList);
-  auto thenStmtsList =
-    std::dynamic_pointer_cast<Object::PyList>(thenStmts)->Value();
-  for (auto stmt =
-         Collections::Iterator<Object::PyObjPtr>::Begin(thenStmtsList);
-       !stmt.End(); stmt.Next()) {
-    auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt.Get());
-    stmtObj->visit(codeList);
-  }
+  Object::ForEach(
+    thenStmts,
+    [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
+      auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
+      stmtObj->visit(codeList);
+    }
+  );
+
   return Object::CreatePyNone();
 }
 
@@ -70,19 +71,18 @@ IfStmtKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto condition = stmt->Condition();
   auto thenStmts = stmt->ThenStmts();
   condition->emit(codeList);
-  auto thenStmtsList =
-    std::dynamic_pointer_cast<Object::PyList>(thenStmts)->Value();
   auto code = GetCodeFromList(codeList, stmt);
   auto jumpStart = code->PopJumpIfFalse();
-  for (auto stmt =
-         Collections::Iterator<Object::PyObjPtr>::Begin(thenStmtsList);
-       !stmt.End(); stmt.Next()) {
-    auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt.Get());
-    stmtObj->emit(codeList);
-  }
+  Object::ForEach(
+    thenStmts,
+    [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
+      auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
+      stmtObj->emit(codeList);
+    }
+  );
   auto jumpEnd = Object::ToU64(code->Instructions()->len());
   auto offset = static_cast<int64_t>(jumpEnd - jumpStart);
-  code->Instructions()->Value().Set(
+  code->Instructions()->SetItem(
     jumpStart - 1, Object::CreatePopJumpIfFalse(offset)
   );
   return Object::CreatePyNone();

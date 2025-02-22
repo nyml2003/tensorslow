@@ -1,8 +1,10 @@
 #include "Object/PyObject.h"
-#include "Collections/Iterator.h"
 #include "Collections/StringHelper.h"
-#include "Object/Common.h"
+#include "Function/PyNativeFunction.h"
+#include "Object/Iterator.h"
 #include "Object/MixinCollections.h"
+#include "Object/Object.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
@@ -134,35 +136,30 @@ void DebugPrint(const PyObjPtr& obj) {
   std::cout << Collections::ToCppString(str) << std::endl;
 }
 
-PyObjPtr Print(PyObjPtr args) {
-  if (args->Klass() != ListKlass::Self()) {
-    throw std::runtime_error("print() argument must be a list");
-  }
-  Collections::List<PyObjPtr> rawList =
-    std::dynamic_pointer_cast<PyList>(args)->Value();
-  for (auto it = Collections::Iterator<PyObjPtr>::Begin(rawList); !it.End();
-       it.Next()) {
-    auto value = it.Get();
-    if (it.First()) {
-      std::cout << Collections::ToCppString(value->str());
-    } else {
-      std::cout << "," << Collections::ToCppString(value->str());
+PyObjPtr Print(const PyObjPtr& args) {
+  CheckNativeFunctionArguments(args);
+  ForEach(args, [](const PyObjPtr& value, Index index, const PyObjPtr&) {
+    if (index != 1) {
+      std::cout << ",";
     }
-  }
+    std::cout << Collections::ToCppString(value->str());
+  });
   std::cout << std::endl;
   return CreatePyNone();
 }
 
-PyObjPtr Len(PyObjPtr args) {
-  if (args->Klass() != ListKlass::Self()) {
-    throw std::runtime_error("len() argument must be a list");
-  }
-  auto list = std::dynamic_pointer_cast<PyList>(args);
-  if (ToU64(list->len()) != 1) {
-    throw std::runtime_error("len() argument must be a list of length 1");
-  }
-  auto value = list->getitem(CreatePyInteger(0));
+PyObjPtr Len(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
+  auto value = args->getitem(CreatePyInteger(0));
   return value->len();
+}
+
+PyObjPtr PyObject::iter() {
+  return klass->iter(shared_from_this());
+}
+
+PyObjPtr PyObject::next() {
+  return klass->next(shared_from_this());
 }
 
 }  // namespace torchlight::Object

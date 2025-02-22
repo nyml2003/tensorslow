@@ -5,7 +5,6 @@
 #include "Ast/INode.h"
 #include "Ast/Identifier.h"
 #include "Ast/MemberAccess.h"
-#include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyNone.h"

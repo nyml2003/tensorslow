@@ -3,7 +3,7 @@
 #include "Ast/INode.h"
 #include "ByteCode/PyCode.h"
 #include "Collections/Iterator.h"
-#include "Object/Common.h"
+
 #include "Object/ObjectHelper.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
@@ -86,19 +86,22 @@ FuncDefKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
     Object::CreatePyCode(funcDef->Name())
   );
   code->SetScope(Object::Scope::LOCAL);
-  auto params = funcDef->Parameters()->Value();
-  for (Index i = 0; i < params.Size(); i++) {
-    code->RegisterVarName(params[i]);
-  }
+  Object::ForEach(
+    funcDef->Parameters(),
+    [&code](const Object::PyObjPtr& param, Index, const Object::PyObjPtr&) {
+      code->RegisterVarName(param);
+    }
+  );
   Object::Invoke(codeList, Object::CreatePyString("append"), {code});
   auto parent = GetCodeFromList(codeList, funcDef->Parent());
   parent->RegisterName(funcDef->Name());
-  Collections::List<Object::PyObjPtr> stmts = funcDef->Body()->Value();
-  for (auto stmt = Collections::Iterator<Object::PyObjPtr>::Begin(stmts);
-       !stmt.End(); stmt.Next()) {
-    auto stmtNode = std::dynamic_pointer_cast<INode>(stmt.Get());
-    stmtNode->visit(codeList);
-  }
+  Object::ForEach(
+    funcDef->Body(),
+    [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
+      auto stmtNode = std::dynamic_pointer_cast<INode>(stmt);
+      stmtNode->visit(codeList);
+    }
+  );
 
   parent->RegisterConst(code);
   parent->RegisterConst(funcDef->Name());
@@ -108,20 +111,20 @@ FuncDefKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
 Object::PyObjPtr
 FuncDefKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto funcDef = std::dynamic_pointer_cast<FuncDef>(obj);
-  Collections::List<Object::PyObjPtr> stmts = funcDef->Body()->Value();
   auto selfCode = GetCodeFromList(codeList, funcDef);
-  for (auto stmt = Collections::Iterator<Object::PyObjPtr>::Begin(stmts);
-       !stmt.End(); stmt.Next()) {
-    auto stmtNode = std::dynamic_pointer_cast<INode>(stmt.Get());
-    stmtNode->emit(codeList);
-  }
+  Object::ForEach(
+    funcDef->Body(),
+    [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
+      auto stmtNode = std::dynamic_pointer_cast<INode>(stmt);
+      stmtNode->emit(codeList);
+    }
+  );
   if (selfCode->VarNames()->len()->ge(funcDef->Parameters()->len())) {
     selfCode->SetNLocals(Object::ToU64(selfCode->VarNames()->len()));
   } else {
     selfCode->SetNLocals(Object::ToU64(funcDef->Parameters()->len()));
   }
   auto parent = GetCodeFromList(codeList, funcDef->Parent());
-
   parent->LoadConst(selfCode);
   parent->LoadConst(funcDef->Name());
   parent->MakeFunction();

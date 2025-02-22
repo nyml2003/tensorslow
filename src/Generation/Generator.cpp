@@ -17,6 +17,7 @@
 #include "ByteCode/PyCode.h"
 #include "Collections/IntegerHelper.h"
 #include "Collections/Iterator.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyFloat.h"
 #include "Object/PyInteger.h"
@@ -66,13 +67,12 @@ antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
   for (auto* it : stmts) {
     auto stmt = visitStmt(it);
     if (stmt.is<Object::PyObjPtr>()) {
-      auto stmtsList =
-        std::dynamic_pointer_cast<Object::PyList>(stmt.as<Object::PyObjPtr>())
-          ->Value();
-      for (auto it = Collections::Iterator<Object::PyObjPtr>::Begin(stmtsList);
-           !it.End(); it.Next()) {
-        statements.Push(it.Get());
-      }
+      Object::ForEach(
+        std::dynamic_pointer_cast<Object::PyList>(stmt.as<Object::PyObjPtr>()),
+        [&statements](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
+          statements.Push(stmt);
+        }
+      );
     } else {
       statements.Push(stmt.as<Ast::INodePtr>());
     }
@@ -508,14 +508,13 @@ antlrcpp::Any Generator::visitBlock(Python3Parser::BlockContext* ctx) {
     for (auto* it : statements) {
       auto stmt = visitStmt(it);
       if (stmt.is<Object::PyObjPtr>()) {
-        auto stmtsList =
-          std::dynamic_pointer_cast<Object::PyList>(stmt.as<Object::PyObjPtr>())
-            ->Value();
-        for (auto it =
-               Collections::Iterator<Object::PyObjPtr>::Begin(stmtsList);
-             !it.End(); it.Next()) {
-          stmts.Push(it.Get());
-        }
+        Object::ForEach(
+          std::dynamic_pointer_cast<Object::PyList>(stmt.as<Object::PyObjPtr>()
+          ),
+          [&stmts](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
+            stmts.Push(stmt);
+          }
+        );
       } else {
         stmts.Push(stmt.as<Ast::INodePtr>());
       }

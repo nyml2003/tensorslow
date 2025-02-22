@@ -2,7 +2,7 @@
 #define TORCHLIGHT_AST_AST_NODE_BASE_H
 
 #include "ByteCode/PyCode.h"
-#include "Object/Common.h"
+
 #include "Object/Klass.h"
 #include "Object/PyObject.h"
 namespace torchlight::Ast {

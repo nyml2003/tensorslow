@@ -1,7 +1,8 @@
 #ifndef TORCHLIGHT_FUNCTION_PYNATIVEFUNCTION_H
 #define TORCHLIGHT_FUNCTION_PYNATIVEFUNCTION_H
 
-#include "Object/Common.h"
+#include "Collections/List.h"
+#include "Common.h"
 #include "Object/Klass.h"
 #include "Object/PyObject.h"
 
@@ -35,6 +36,16 @@ class PyNativeFunction : public PyObject {
 using PyNativeFunctionPtr = std::shared_ptr<PyNativeFunction>;
 
 PyObjPtr CreatePyNativeFunction(TypeFunction nativeFunction);
+
+void CheckNativeFunctionArguments(const PyObjPtr& args);
+void CheckNativeFunctionArgumentsWithExpectedLength(
+  const PyObjPtr& args,
+  Index expected
+);
+void CheckNativeFunctionArgumentsWithTypes(
+  const PyObjPtr& args,
+  const Collections::List<KlassPtr>& types
+);
 
 }  // namespace torchlight::Object
 

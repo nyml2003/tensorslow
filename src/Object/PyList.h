@@ -7,17 +7,27 @@
 
 namespace torchlight::Object {
 class PyList : public PyObject {
+  friend class ListKlass;
+
  private:
   Collections::List<PyObjPtr> value;
 
  public:
   explicit PyList(Collections::List<PyObjPtr> value);
 
-  [[nodiscard]] Collections::List<PyObjPtr>& Value();
-
   void Append(PyObjPtr obj);
 
   PyObjPtr Join(const PyObjPtr& separator);
+
+  Index Length() const;
+
+  bool Contains(const PyObjPtr& obj) const;
+
+  Index IndexOf(const PyObjPtr& obj) const;
+
+  PyObjPtr GetItem(Index index) const;
+
+  void SetItem(Index index, const PyObjPtr& obj);
 };
 
 class ListKlass : public Klass {
@@ -43,22 +53,22 @@ class ListKlass : public Klass {
 
   PyObjPtr allocateInstance(PyObjPtr type, PyObjPtr args) override;
 
+  PyObjPtr iter(PyObjPtr obj) override;
+
   void Initialize() override;
 };
 
 PyObjPtr CreatePyList(Index capacity);
 
-PyObjPtr CreatePyList(Collections::List<PyObjPtr> list, Index capacity);
-
 PyObjPtr CreatePyList(Collections::List<PyObjPtr> list);
 
 using PyListPtr = std::shared_ptr<PyList>;
 
-PyObjPtr Join(PyObjPtr args);
+PyObjPtr Join(const PyObjPtr& args);
 
-PyObjPtr Append(PyObjPtr args);
+PyObjPtr Append(const PyObjPtr& args);
 
-PyObjPtr ListIndex(PyObjPtr args);
+PyObjPtr ListIndex(const PyObjPtr& args);
 }  // namespace torchlight::Object
 
 #endif

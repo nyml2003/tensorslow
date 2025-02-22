@@ -1,8 +1,5 @@
 #include "Ast/FunctionCall.h"
 #include "Ast/INode.h"
-#include "ByteCode/PyCode.h"
-#include "ByteCode/PyInst.h"
-#include "Collections/Iterator.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
@@ -54,12 +51,13 @@ FunctionCallKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto func = functionCall->Func();
   auto args = functionCall->Args();
   func->emit(codeList);
-  auto argsList = std::dynamic_pointer_cast<Object::PyList>(args)->Value();
-  for (auto arg = Collections::Iterator<Object::PyObjPtr>::Begin(argsList);
-       !arg.End(); arg.Next()) {
-    auto argNode = std::dynamic_pointer_cast<INode>(arg.Get());
-    argNode->emit(codeList);
-  }
+  Object::ForEach(
+    std::dynamic_pointer_cast<Object::PyList>(args),
+    [&codeList](const Object::PyObjPtr& arg, Index, const Object::PyObjPtr&) {
+      auto argNode = std::dynamic_pointer_cast<INode>(arg);
+      argNode->emit(codeList);
+    }
+  );
   auto code = GetCodeFromList(codeList, functionCall);
   code->CallFunction(ToU64(args->len()));
   return Object::CreatePyNone();
@@ -71,12 +69,13 @@ FunctionCallKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto func = functionCall->Func();
   auto args = functionCall->Args();
   func->visit(codeList);
-  auto argsList = std::dynamic_pointer_cast<Object::PyList>(args)->Value();
-  for (auto arg = Collections::Iterator<Object::PyObjPtr>::Begin(argsList);
-       !arg.End(); arg.Next()) {
-    auto argNode = std::dynamic_pointer_cast<INode>(arg.Get());
-    argNode->visit(codeList);
-  }
+  Object::ForEach(
+    std::dynamic_pointer_cast<Object::PyList>(args),
+    [&codeList](const Object::PyObjPtr& arg, Index, const Object::PyObjPtr&) {
+      auto argNode = std::dynamic_pointer_cast<INode>(arg);
+      argNode->visit(codeList);
+    }
+  );
   return Object::CreatePyNone();
 }
 

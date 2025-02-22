@@ -1,7 +1,6 @@
 #include <memory>
 #include "../test_default.h"
 
-#include "Object/Common.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBytes.h"
 #include "Object/PyDictionary.h"

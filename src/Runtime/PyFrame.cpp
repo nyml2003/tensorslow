@@ -5,7 +5,7 @@
 #include "Collections/IntegerHelper.h"
 #include "Collections/Stack.h"
 #include "Collections/StringHelper.h"
-#include "Object/Common.h"
+
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
@@ -79,13 +79,11 @@ PyFramePtr CreateFrameWithFunction(
   auto globals = function->Globals();
   auto locals = Object::CreatePyDict();
   Index nLocals = code->NLocals();
-  Index argumentsSize = Object::ToU64(arguments->len());
-  Collections::List<Object::PyObjPtr> fastLocalsList =
-    arguments->Value().Copy();
-  auto fastLocals =
-    Object::CreatePyList(fastLocalsList, std::max(nLocals, argumentsSize));
+  for (Index i = arguments->Length(); i < nLocals; i++) {
+    arguments->Append(Object::PyNone::Instance());
+  }
   return std::make_shared<PyFrame>(
-    code, locals, globals, fastLocals, std::move(caller)
+    code, locals, globals, arguments, std::move(caller)
   );
 }
 
@@ -122,16 +120,15 @@ Object::PyInstPtr PyFrame::Instruction() const {
     ParseByteCode(code);
   }
   auto insts = std::dynamic_pointer_cast<Object::PyList>(code->Instructions());
-  return std::dynamic_pointer_cast<Object::PyInst>(
-    insts->Value().Get(programCounter)
-  );
+  return std::dynamic_pointer_cast<Object::PyInst>(insts->GetItem(programCounter
+  ));
 }
 
 bool PyFrame::Finished() const {
   if (!isParsed) {
     ParseByteCode(code);
   }
-  auto size = code->Instructions()->Value().Size();
+  auto size = code->Instructions()->Length();
   return programCounter >= size;
 }
 

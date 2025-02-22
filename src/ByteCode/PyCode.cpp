@@ -185,41 +185,41 @@ PyObjPtr CodeKlass::_serialize_(PyObjPtr self) {
 }
 
 Index PyCode::IndexOfConst(const PyObjPtr& obj) {
-  if (!consts->Value().Contains(obj)) {
+  if (!consts->Contains(obj)) {
     DebugPrint(obj);
     throw std::runtime_error("PyCode::IndexOfConst(): obj not found");
   }
-  return consts->Value().IndexOf(obj);
+  return consts->IndexOf(obj);
 }
 
 void PyCode::RegisterConst(const PyObjPtr& obj) {
-  if (!consts->Value().Contains(obj)) {
+  if (!consts->Contains(obj)) {
     consts->Append(obj);
   }
 }
 
 Index PyCode::IndexOfName(const PyObjPtr& name) {
-  if (!names->Value().Contains(name)) {
+  if (!names->Contains(name)) {
     throw std::runtime_error("PyCode::IndexOfName(): name not found");
   }
-  return names->Value().IndexOf(name);
+  return names->IndexOf(name);
 }
 
 void PyCode::RegisterName(const PyObjPtr& name) {
-  if (!names->Value().Contains(name)) {
+  if (!names->Contains(name)) {
     names->Append(name);
   }
 }
 
 Index PyCode::IndexOfVarName(const PyObjPtr& name) {
-  if (!varNames->Value().Contains(name)) {
+  if (!varNames->Contains(name)) {
     throw std::runtime_error("PyCode::IndexOfVarName(): name not found");
   }
-  return varNames->Value().IndexOf(name);
+  return varNames->IndexOf(name);
 }
 
 void PyCode::RegisterVarName(const PyObjPtr& name) {
-  if (!varNames->Value().Contains(name)) {
+  if (!varNames->Contains(name)) {
     varNames->Append(name);
   }
 }

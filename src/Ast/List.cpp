@@ -1,6 +1,7 @@
 #include "Ast/List.h"
 #include "Ast/INode.h"
 #include "Collections/Iterator.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyNone.h"
 #include "Object/PyString.h"
@@ -34,16 +35,15 @@ Object::PyObjPtr
 ListKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto list = std::dynamic_pointer_cast<List>(obj);
   auto elements = list->Elements();
-  auto elementsList =
-    std::dynamic_pointer_cast<Object::PyList>(elements)->Value();
-  for (auto element =
-         Collections::Iterator<Object::PyObjPtr>::Begin(elementsList);
-       !element.End(); element.Next()) {
-    auto elementNode = std::dynamic_pointer_cast<INode>(element.Get());
-    elementNode->emit(codeList);
-  }
+  Object::ForEach(
+    std::dynamic_pointer_cast<Object::PyList>(elements),
+    [&codeList](const Object::PyObjPtr& element, Index, const Object::PyObjPtr&) {
+      auto elementNode = std::dynamic_pointer_cast<INode>(element);
+      elementNode->emit(codeList);
+    }
+  );
   auto code = GetCodeFromList(codeList, list);
-  code->BuildList(elementsList.Size());
+  code->BuildList(elements->Length());
   return Object::CreatePyNone();
 }
 
@@ -51,14 +51,13 @@ Object::PyObjPtr
 ListKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto list = std::dynamic_pointer_cast<List>(obj);
   auto elements = list->Elements();
-  auto elementsList =
-    std::dynamic_pointer_cast<Object::PyList>(elements)->Value();
-  for (auto element =
-         Collections::Iterator<Object::PyObjPtr>::Begin(elementsList);
-       !element.End(); element.Next()) {
-    auto elementNode = std::dynamic_pointer_cast<INode>(element.Get());
-    elementNode->visit(codeList);
-  }
+  Object::ForEach(
+    std::dynamic_pointer_cast<Object::PyList>(elements),
+    [&codeList](const Object::PyObjPtr& element, Index, const Object::PyObjPtr&) {
+      auto elementNode = std::dynamic_pointer_cast<INode>(element);
+      elementNode->visit(codeList);
+    }
+  );
   return Object::CreatePyNone();
 }
 
