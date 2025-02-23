@@ -115,7 +115,7 @@ KlassPtr CodeKlass::Self() {
   return instance;
 }
 
-PyObjPtr CodeKlass::repr(PyObjPtr self) {
+PyObjPtr CodeKlass::repr(const PyObjPtr& self) {
   if (self->Klass() != Self()) {
     throw std::runtime_error("PyCode::repr(): obj is not a code object");
   }
@@ -157,7 +157,7 @@ PyObjPtr CodeKlass::repr(PyObjPtr self) {
   return repr;
 }
 
-PyObjPtr CodeKlass::str(PyObjPtr self) {
+PyObjPtr CodeKlass::str(const PyObjPtr& self) {
   // 返回内存地址
   return CreatePyString(Collections::CreateStringWithCString("<code object "))
     ->add(std::dynamic_pointer_cast<PyCode>(self)->Name())
@@ -168,7 +168,7 @@ PyObjPtr CodeKlass::str(PyObjPtr self) {
     ->add(CreatePyString(Collections::CreateStringWithCString(">")));
 }
 
-PyObjPtr CodeKlass::_serialize_(PyObjPtr self) {
+PyObjPtr CodeKlass::_serialize_(const PyObjPtr& self) {
   if (self->Klass() != Self()) {
     throw std::runtime_error("PyCode::_serialize_(): obj is not a code object");
   }
@@ -245,9 +245,6 @@ void PyCode::LoadAttr(const PyObjPtr& obj) {
 }
 
 void PyCode::LoadGlobal(Index index) {
-  if (index == 5) {
-    ;
-  }
   instructions->Append(CreateLoadGlobal(index));
 }
 

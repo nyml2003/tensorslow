@@ -6,10 +6,12 @@
 #include "Object/Object.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
+#include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
 #include "Object/PyString.h"
+#include "Object/PyType.h"
 
 #include <iostream>
 
@@ -160,6 +162,19 @@ PyObjPtr PyObject::iter() {
 
 PyObjPtr PyObject::next() {
   return klass->next(shared_from_this());
+}
+
+ObjectKlass::ObjectKlass() = default;
+
+KlassPtr ObjectKlass::Self() {
+  static auto instance = std::make_shared<ObjectKlass>();
+  return instance;
+}
+
+void ObjectKlass::Initialize() {
+  SetName(CreatePyString("object"));
+  SetType(CreatePyType(Self()));
+  SetAttributes(CreatePyDict());
 }
 
 }  // namespace torchlight::Object

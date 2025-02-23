@@ -18,7 +18,7 @@ class NativeFunctionKlass : public Klass {
 
   static KlassPtr Self();
 
-  PyObjPtr repr(PyObjPtr self) override;
+  PyObjPtr repr(const PyObjPtr& self) override;
 
   void Initialize() override;
 };
@@ -30,7 +30,7 @@ class PyNativeFunction : public PyObject {
  public:
   explicit PyNativeFunction(TypeFunction nativeFunction);
 
-  PyObjPtr Call(PyObjPtr args);
+  PyObjPtr Call(const PyObjPtr& args);
 };
 
 using PyNativeFunctionPtr = std::shared_ptr<PyNativeFunction>;

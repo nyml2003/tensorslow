@@ -6,6 +6,7 @@
 #include "Collections/Stack.h"
 #include "Collections/StringHelper.h"
 
+#include "Function/PyFunction.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
@@ -35,23 +36,23 @@ Object::KlassPtr FrameKlass::Self() {
 }
 
 PyFrame::PyFrame(
-  Object::PyCodePtr _code,
-  Object::PyObjPtr _locals,      // 传入的是 PyObjPtr
-  Object::PyObjPtr _globals,     // 传入的是 PyObjPtr
-  Object::PyObjPtr _fastLocals,  // 传入的是 PyObjPtr
-  Object::PyObjPtr _caller
+  const Object::PyCodePtr& _code,
+  const Object::PyObjPtr& _locals,      // 传入的是 PyObjPtr
+  const Object::PyObjPtr& _globals,     // 传入的是 PyObjPtr
+  const Object::PyObjPtr& _fastLocals,  // 传入的是 PyObjPtr
+  const Object::PyObjPtr& _caller
 )
   : Object::PyObject(FrameKlass::Self()),
     stack(),
     programCounter(0),
-    code(std::move(_code)),
+    code(_code),
     locals(std::dynamic_pointer_cast<Object::PyDictionary>(_locals)
     ),  // 转换为 PyDictPtr
     globals(std::dynamic_pointer_cast<Object::PyDictionary>(_globals)
     ),  // 转换为 PyDictPtr
     fastLocals(std::dynamic_pointer_cast<Object::PyList>(_fastLocals)
     ),  // 转换为 PyListPtr
-    caller(std::move(_caller)) {}
+    caller(_caller) {}
 
 PyFramePtr CreateFrameWithCode(const Object::PyCodePtr& code) {
   auto locals = Object::CreatePyDict();
@@ -87,8 +88,8 @@ PyFramePtr CreateFrameWithFunction(
   );
 }
 
-void PyFrame::SetProgramCounter(Index pc) {
-  programCounter = pc;
+void PyFrame::SetProgramCounter(Index _pc) {
+  programCounter = _pc;
 }
 
 Object::PyCodePtr PyFrame::Code() const {
@@ -145,7 +146,7 @@ void ParseByteCode(const Object::PyCodePtr& code) {
   iter.Next();
   Index size = ReadU64(iter);
   auto insts = Collections::List<Object::PyObjPtr>(size);
-  while (size--) {
+  while ((size--) != 0U) {
     auto byte = iter.Get();
     iter.Next();
     switch (static_cast<Object::ByteCode>(byte)) {
@@ -257,7 +258,7 @@ void ParseByteCode(const Object::PyCodePtr& code) {
   code->SetInstructions(std::make_shared<Object::PyList>(insts));
 }
 
-Object::PyObjPtr FrameKlass::repr(Object::PyObjPtr obj) {
+Object::PyObjPtr FrameKlass::repr(const Object::PyObjPtr& obj) {
   if (obj->Klass() != FrameKlass::Self()) {
     throw std::runtime_error("Cannot repr non-frame object");
   }

@@ -25,17 +25,18 @@ class StringKlass : public Klass {
 
   static KlassPtr Self();
 
-  PyObjPtr allocateInstance(PyObjPtr klass, PyObjPtr args) override;
+  PyObjPtr allocateInstance(const PyObjPtr& klass, const PyObjPtr& args)
+    override;
 
-  PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
-  PyObjPtr repr(PyObjPtr obj) override;
+  PyObjPtr repr(const PyObjPtr& obj) override;
 
-  PyObjPtr str(PyObjPtr obj) override;
+  PyObjPtr str(const PyObjPtr& obj) override;
 
-  PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
-  PyObjPtr _serialize_(PyObjPtr obj) override;
+  PyObjPtr _serialize_(const PyObjPtr& obj) override;
 };
 PyObjPtr CreatePyString(Collections::String value);
 PyObjPtr CreatePyString(const char* value);
@@ -43,9 +44,9 @@ PyObjPtr CreatePyString(const std::string& value);
 
 using PyStrPtr = std::shared_ptr<PyString>;
 
-PyObjPtr Upper(PyObjPtr args);
+PyObjPtr Upper(const PyObjPtr& args);
 
-PyObjPtr StartsWith(PyObjPtr args);
+PyObjPtr StartsWith(const PyObjPtr& args);
 
 }  // namespace torchlight::Object
 

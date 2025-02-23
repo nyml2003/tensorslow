@@ -1,10 +1,10 @@
+#include "Object/PyBytes.h"
 #include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/Iterator.h"
 #include "Collections/StringHelper.h"
 #include "Object/Klass.h"
 #include "Object/PyBoolean.h"
-#include "Object/PyBytes.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
@@ -41,7 +41,7 @@ KlassPtr BytesKlass::Self() {
   return instance;
 }
 
-PyObjPtr BytesKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr BytesKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     throw std::runtime_error("PyBytes::add(): lhs or rhs is not a bytes");
   }
@@ -50,7 +50,7 @@ PyObjPtr BytesKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
   return CreatePyBytes(left->Value().Add(right->Value()));
 }
 
-PyObjPtr BytesKlass::_serialize_(PyObjPtr obj) {
+PyObjPtr BytesKlass::_serialize_(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyBytes::_serialize_(): obj is not a bytes");
   }
@@ -60,7 +60,7 @@ PyObjPtr BytesKlass::_serialize_(PyObjPtr obj) {
   );
 }
 
-PyObjPtr BytesKlass::repr(PyObjPtr obj) {
+PyObjPtr BytesKlass::repr(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyBytes::repr(): obj is not a bytes");
   }
@@ -77,7 +77,7 @@ PyObjPtr BytesKlass::repr(PyObjPtr obj) {
   ));
 }
 
-PyObjPtr BytesKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr BytesKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     return CreatePyBoolean(false);
   }

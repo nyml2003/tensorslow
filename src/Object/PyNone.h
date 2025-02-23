@@ -11,9 +11,9 @@ class NoneKlass : public Klass {
   explicit NoneKlass();
   static KlassPtr Self();
 
-  PyObjPtr _serialize_(PyObjPtr obj) override;
+  PyObjPtr _serialize_(const PyObjPtr& obj) override;
 
-  PyObjPtr repr(PyObjPtr obj) override;
+  PyObjPtr repr(const PyObjPtr& obj) override;
 
   void Initialize() override;
 };

@@ -115,11 +115,11 @@ class CodeKlass : public Klass {
   explicit CodeKlass();
   static KlassPtr Self();
 
-  PyObjPtr repr(PyObjPtr self) override;
+  PyObjPtr repr(const PyObjPtr& self) override;
 
-  PyObjPtr str(PyObjPtr self) override;
+  PyObjPtr str(const PyObjPtr& self) override;
 
-  PyObjPtr _serialize_(PyObjPtr self) override;
+  PyObjPtr _serialize_(const PyObjPtr& self) override;
 
   void Initialize() override;
 };

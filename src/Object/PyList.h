@@ -35,25 +35,30 @@ class ListKlass : public Klass {
   explicit ListKlass();
   static KlassPtr Self();
 
-  PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
-  PyObjPtr repr(PyObjPtr obj) override;
+  PyObjPtr repr(const PyObjPtr& obj) override;
 
-  PyObjPtr _serialize_(PyObjPtr obj) override;
+  PyObjPtr _serialize_(const PyObjPtr& obj) override;
 
-  PyObjPtr getitem(PyObjPtr obj, PyObjPtr key) override;
+  PyObjPtr getitem(const PyObjPtr& obj, const PyObjPtr& key) override;
 
-  PyObjPtr setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) override;
+  PyObjPtr setitem(
+    const PyObjPtr& obj,
+    const PyObjPtr& key,
+    const PyObjPtr& value
+  ) override;
 
-  PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
-  PyObjPtr len(PyObjPtr obj) override;
+  PyObjPtr len(const PyObjPtr& obj) override;
 
-  PyObjPtr contains(PyObjPtr obj, PyObjPtr key) override;
+  PyObjPtr contains(const PyObjPtr& obj, const PyObjPtr& key) override;
 
-  PyObjPtr allocateInstance(PyObjPtr type, PyObjPtr args) override;
+  PyObjPtr allocateInstance(const PyObjPtr& type, const PyObjPtr& args)
+    override;
 
-  PyObjPtr iter(PyObjPtr obj) override;
+  PyObjPtr iter(const PyObjPtr& obj) override;
 
   void Initialize() override;
 };

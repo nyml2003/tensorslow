@@ -10,7 +10,7 @@ class MethodKlass : public Klass {
  public:
   MethodKlass();
   static KlassPtr Self();
-  PyObjPtr repr(PyObjPtr obj) override;
+  PyObjPtr repr(const PyObjPtr& obj) override;
 
   void Initialize() override;
 };

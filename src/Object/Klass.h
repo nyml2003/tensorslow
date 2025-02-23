@@ -15,9 +15,9 @@ class Klass {
   bool initialized = false;
 
  protected:
-  void SetName(PyObjPtr name);
-  void SetAttributes(PyObjPtr attributes);
-  void SetType(PyObjPtr type);
+  void SetName(const PyObjPtr& name);
+  void SetAttributes(const PyObjPtr& attributes);
+  void SetType(const PyObjPtr& type);
 
  public:
   static void SetDualOutput(const std::string& filename);
@@ -45,61 +45,64 @@ class Klass {
 
   [[nodiscard]] PyDictPtr Attributes() const;
 
-  virtual PyObjPtr allocateInstance(PyObjPtr klass, PyObjPtr args);
+  virtual PyObjPtr
+  allocateInstance(const PyObjPtr& klass, const PyObjPtr& args);
 
-  virtual PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs);
+  virtual PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
-  virtual PyObjPtr sub(PyObjPtr lhs, PyObjPtr rhs);
+  virtual PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
-  virtual PyObjPtr mul(PyObjPtr lhs, PyObjPtr rhs);
+  virtual PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
-  virtual PyObjPtr div(PyObjPtr lhs, PyObjPtr rhs);
+  virtual PyObjPtr div(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
-  virtual PyObjPtr matmul(PyObjPtr lhs, PyObjPtr rhs);
+  virtual PyObjPtr matmul(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
-  virtual PyObjPtr gt(PyObjPtr lhs, PyObjPtr rhs);
+  virtual PyObjPtr gt(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
-  virtual PyObjPtr lt(PyObjPtr lhs, PyObjPtr rhs);
+  virtual PyObjPtr lt(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
-  virtual PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs);
+  virtual PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
-  virtual PyObjPtr ge(PyObjPtr lhs, PyObjPtr rhs);
+  virtual PyObjPtr ge(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
-  virtual PyObjPtr le(PyObjPtr lhs, PyObjPtr rhs);
+  virtual PyObjPtr le(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
-  virtual PyObjPtr ne(PyObjPtr lhs, PyObjPtr rhs);
+  virtual PyObjPtr ne(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
-  virtual PyObjPtr repr(PyObjPtr obj);
+  virtual PyObjPtr repr(const PyObjPtr& self);
 
-  virtual PyObjPtr str(PyObjPtr obj);
+  virtual PyObjPtr str(const PyObjPtr& self);
 
-  virtual PyObjPtr _bool_(PyObjPtr obj);
+  virtual PyObjPtr _bool_(const PyObjPtr& obj);
 
-  virtual PyObjPtr _serialize_(PyObjPtr obj);
+  virtual PyObjPtr _serialize_(const PyObjPtr& obj);
 
-  virtual PyObjPtr getitem(PyObjPtr obj, PyObjPtr key);
+  virtual PyObjPtr getitem(const PyObjPtr& obj, const PyObjPtr& key);
 
-  virtual PyObjPtr setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value);
+  virtual PyObjPtr
+  setitem(const PyObjPtr& obj, const PyObjPtr& key, const PyObjPtr& value);
 
-  virtual PyObjPtr delitem(PyObjPtr obj, PyObjPtr key);
+  virtual PyObjPtr delitem(const PyObjPtr& obj, const PyObjPtr& key);
 
-  virtual PyObjPtr contains(PyObjPtr obj, PyObjPtr key);
+  virtual PyObjPtr contains(const PyObjPtr& obj, const PyObjPtr& key);
 
-  virtual PyObjPtr len(PyObjPtr obj);
+  virtual PyObjPtr len(const PyObjPtr& obj);
 
-  virtual PyObjPtr getattr(PyObjPtr obj, PyObjPtr key);
+  virtual PyObjPtr getattr(const PyObjPtr& obj, const PyObjPtr& key);
 
-  virtual PyObjPtr setattr(PyObjPtr obj, PyObjPtr key, PyObjPtr value);
+  virtual PyObjPtr
+  setattr(const PyObjPtr& obj, const PyObjPtr& key, const PyObjPtr& value);
 
-  virtual PyObjPtr iter(PyObjPtr obj);
+  virtual PyObjPtr iter(const PyObjPtr& obj);
 
-  virtual PyObjPtr next(PyObjPtr obj);
+  virtual PyObjPtr next(const PyObjPtr& obj);
 };
 
 void ThrowUnsupportedOperandError(
-  PyObjPtr lhs,
-  PyObjPtr rhs,
-  PyObjPtr magicMethod
+  const PyObjPtr& lhs,
+  const PyObjPtr& rhs,
+  const PyObjPtr& magicMethod
 );
 
 class UnsupportedOperandError : public std::runtime_error {
@@ -113,7 +116,7 @@ enum class KlassComparison {
   EQUAL,
 };
 
-KlassComparison CompareKlasses(PyObjPtr lhs, PyObjPtr rhs);
+KlassComparison CompareKlasses(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
 PyObjPtr CreatePyKlass(const std::string& name);
 

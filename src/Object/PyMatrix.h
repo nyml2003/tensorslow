@@ -27,30 +27,30 @@ class MatrixKlass : public Klass {
 
   void Initialize() override;
 
-  PyObjPtr repr(PyObjPtr obj) override;
+  PyObjPtr repr(const PyObjPtr& obj) override;
 
-  PyObjPtr matmul(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr matmul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
-  PyObjPtr mul(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
-  PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 };
 
-PyObjPtr Transpose(PyObjPtr args);
+PyObjPtr Transpose(const PyObjPtr& args);
 
-PyObjPtr Matrix(PyObjPtr args);
+PyObjPtr Matrix(const PyObjPtr& args);
 
-PyObjPtr Eye(PyObjPtr args);
+PyObjPtr Eye(const PyObjPtr& args);
 
-PyObjPtr Zeros(PyObjPtr args);
+PyObjPtr Zeros(const PyObjPtr& args);
 
-PyObjPtr Ones(PyObjPtr args);
+PyObjPtr Ones(const PyObjPtr& args);
 
-PyObjPtr Diagnostic(PyObjPtr args);
+PyObjPtr Diagnostic(const PyObjPtr& args);
 
-PyObjPtr Reshape(PyObjPtr args);
+PyObjPtr Reshape(const PyObjPtr& args);
 
-PyObjPtr Shape(PyObjPtr args);
+PyObjPtr Shape(const PyObjPtr& args);
 
 }  // namespace torchlight::Object
 

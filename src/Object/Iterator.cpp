@@ -24,7 +24,7 @@ KlassPtr IterDoneKlass::Self() {
   return self;
 }
 
-ListIterator::ListIterator(PyObjPtr list)
+ListIterator::ListIterator(const PyObjPtr& list)
   : PyObject(ListIteratorKlass::Self()),
     list(std::dynamic_pointer_cast<PyList>(list)),
     index(0) {}
@@ -51,11 +51,11 @@ KlassPtr ListIteratorKlass::Self() {
   return self;
 }
 
-PyObjPtr ListIteratorKlass::iter(PyObjPtr obj) {
+PyObjPtr ListIteratorKlass::iter(const PyObjPtr& obj) {
   return obj;
 }
 
-PyObjPtr ListIteratorKlass::next(PyObjPtr obj) {
+PyObjPtr ListIteratorKlass::next(const PyObjPtr& obj) {
   auto iterator = std::dynamic_pointer_cast<ListIterator>(obj);
   auto list = iterator->List();
   if (iterator->Index() >= list->Length()) {
@@ -66,7 +66,7 @@ PyObjPtr ListIteratorKlass::next(PyObjPtr obj) {
   return value;
 }
 
-PyObjPtr ListIteratorKlass::str(PyObjPtr obj) {
+PyObjPtr ListIteratorKlass::str(const PyObjPtr& obj) {
   auto iterator = std::dynamic_pointer_cast<ListIterator>(obj);
   return CreatePyString("ListIterator at ")
     ->add(CreatePyInteger(iterator->Index())->str())

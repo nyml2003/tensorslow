@@ -25,7 +25,7 @@ class ListIterator : public PyObject {
   Index index;
 
  public:
-  explicit ListIterator(PyObjPtr list);
+  explicit ListIterator(const PyObjPtr& list);
   [[nodiscard]] PyListPtr List() const;
   [[nodiscard]] Index Index() const;
   void Next();
@@ -36,9 +36,9 @@ class ListIteratorKlass : public Klass {
   explicit ListIteratorKlass();
   static KlassPtr Self();
   void Initialize() override;
-  PyObjPtr iter(PyObjPtr obj) override;
-  PyObjPtr next(PyObjPtr obj) override;
-  PyObjPtr str(PyObjPtr obj) override;
+  PyObjPtr iter(const PyObjPtr& obj) override;
+  PyObjPtr next(const PyObjPtr& obj) override;
+  PyObjPtr str(const PyObjPtr& obj) override;
 };
 
 PyObjPtr CreateListIterator(const PyObjPtr& list);

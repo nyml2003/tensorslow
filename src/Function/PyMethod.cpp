@@ -1,5 +1,5 @@
-#include "Collections/StringHelper.h"
 #include "Function/PyMethod.h"
+#include "Collections/StringHelper.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
@@ -23,7 +23,7 @@ KlassPtr MethodKlass::Self() {
   return instance;
 }
 
-PyObjPtr MethodKlass::repr(PyObjPtr obj) {
+PyObjPtr MethodKlass::repr(const PyObjPtr& obj) {
   if (obj->Klass() != MethodKlass::Self()) {
     throw std::runtime_error("obj is not a method");
   }

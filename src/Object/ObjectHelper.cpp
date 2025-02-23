@@ -14,6 +14,7 @@
 #include "Object/PyList.h"
 #include "Object/PyMatrix.h"
 #include "Object/PyNone.h"
+#include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
 
@@ -51,6 +52,7 @@ void BasicKlassLoad() {
   Object::IifeKlass::Self()->Initialize();
   Object::IterDoneKlass::Self()->Initialize();
   Object::ListIteratorKlass::Self()->Initialize();
+  Object::ObjectKlass::Self()->Initialize();
 }
 
 bool IsType(const PyObjPtr& obj, const KlassPtr& type) {

@@ -1,6 +1,6 @@
+#include "Object/PyType.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyString.h"
-#include "Object/PyType.h"
 
 namespace torchlight::Object {
 
@@ -29,7 +29,7 @@ void TypeKlass::Initialize() {
   Klass::Initialize();
 }
 
-PyObjPtr TypeKlass::repr(PyObjPtr obj) {
+PyObjPtr TypeKlass::repr(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyType::repr(): obj is not a type object");
   }

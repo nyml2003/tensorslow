@@ -23,7 +23,7 @@ class TypeKlass : public Klass {
 
   void Initialize() override;
 
-  PyObjPtr repr(PyObjPtr obj) override;
+  PyObjPtr repr(const PyObjPtr& obj) override;
 };
 
 using PyTypePtr = std::shared_ptr<PyType>;

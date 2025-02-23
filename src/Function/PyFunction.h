@@ -11,7 +11,7 @@ class PyFunction : public PyObject {
   PyDictPtr globals;
 
  public:
-  PyFunction(PyObjPtr code, PyObjPtr globals);
+  PyFunction(const PyObjPtr& code, const PyObjPtr& globals);
 
   [[nodiscard]] PyCodePtr Code() const;
 
@@ -28,12 +28,12 @@ class FunctionKlass : public Klass {
 
   static KlassPtr Self();
 
-  PyObjPtr repr(PyObjPtr self) override;
+  PyObjPtr repr(const PyObjPtr& self) override;
 
   void Initialize() override;
 };
 
-PyObjPtr CreatePyFunction(PyObjPtr code, PyObjPtr globals);
+PyObjPtr CreatePyFunction(const PyObjPtr& code, const PyObjPtr& globals);
 
 }  // namespace torchlight::Object
 

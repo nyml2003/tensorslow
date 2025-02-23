@@ -1,7 +1,7 @@
+#include "Object/PyBoolean.h"
 #include "ByteCode/ByteCode.h"
 #include "Collections/IntegerHelper.h"
 #include "Collections/StringHelper.h"
-#include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
@@ -49,11 +49,11 @@ bool PyBoolean::Value() const {
   return PyInteger::Value().IsZero();
 }
 
-PyObjPtr BooleanKlass::_bool_(PyObjPtr obj) {
+PyObjPtr BooleanKlass::_bool_(const PyObjPtr& obj) {
   return obj;
 }
 
-PyObjPtr BooleanKlass::_serialize_(PyObjPtr obj) {
+PyObjPtr BooleanKlass::_serialize_(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyBoolean::_serialize_(): obj is not a bool");
   }
@@ -64,7 +64,7 @@ PyObjPtr BooleanKlass::_serialize_(PyObjPtr obj) {
   return CreatePyBytes(Collections::Serialize(Literal::FALSE));
 }
 
-PyObjPtr BooleanKlass::repr(PyObjPtr obj) {
+PyObjPtr BooleanKlass::repr(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyBoolean::repr(): obj is not a bool");
   }
@@ -74,7 +74,7 @@ PyObjPtr BooleanKlass::repr(PyObjPtr obj) {
   );
 }
 
-PyObjPtr BooleanKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr BooleanKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     return CreatePyBoolean(false);
   }

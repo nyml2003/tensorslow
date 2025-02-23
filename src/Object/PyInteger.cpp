@@ -2,7 +2,6 @@
 #include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/IntegerHelper.h"
-#include "Collections/StringHelper.h"
 
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
@@ -53,7 +52,8 @@ KlassPtr IntegerKlass::Self() {
   return instance;
 }
 
-PyObjPtr IntegerKlass::allocateInstance(PyObjPtr klass, PyObjPtr args) {
+PyObjPtr
+IntegerKlass::allocateInstance(const PyObjPtr& klass, const PyObjPtr& args) {
   if (Self()->Type() != klass) {
     throw std::runtime_error(
       "PyInteger::allocateInstance(): klass is not an integer"
@@ -76,7 +76,7 @@ PyObjPtr IntegerKlass::allocateInstance(PyObjPtr klass, PyObjPtr args) {
   return value;
 }
 
-PyObjPtr IntegerKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr IntegerKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     throw std::runtime_error("PyInteger::add(): lhs or rhs is not an integer");
   }
@@ -85,7 +85,7 @@ PyObjPtr IntegerKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
   return CreatePyInteger(left->Value().Add(right->Value()));
 }
 
-PyObjPtr IntegerKlass::sub(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr IntegerKlass::sub(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     throw std::runtime_error("PyInteger::sub(): lhs or rhs is not an integer");
   }
@@ -94,7 +94,7 @@ PyObjPtr IntegerKlass::sub(PyObjPtr lhs, PyObjPtr rhs) {
   return CreatePyInteger(left->Value().Subtract(right->Value()));
 }
 
-PyObjPtr IntegerKlass::mul(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr IntegerKlass::mul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     throw std::runtime_error("PyInteger::mul(): lhs or rhs is not an integer");
   }
@@ -103,7 +103,7 @@ PyObjPtr IntegerKlass::mul(PyObjPtr lhs, PyObjPtr rhs) {
   return CreatePyInteger(left->Value().Multiply(right->Value()));
 }
 
-PyObjPtr IntegerKlass::div(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr IntegerKlass::div(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     throw std::runtime_error("PyInteger::div(): lhs or rhs is not an integer");
   }
@@ -112,7 +112,7 @@ PyObjPtr IntegerKlass::div(PyObjPtr lhs, PyObjPtr rhs) {
   return CreatePyInteger(left->Value().Divide(right->Value()));
 }
 
-PyObjPtr IntegerKlass::repr(PyObjPtr obj) {
+PyObjPtr IntegerKlass::repr(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyInteger::repr(): obj is not an integer");
   }
@@ -120,7 +120,7 @@ PyObjPtr IntegerKlass::repr(PyObjPtr obj) {
   return CreatePyString((integer->Value().ToString()));
 }
 
-PyObjPtr IntegerKlass::gt(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr IntegerKlass::gt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     throw std::runtime_error("PyInteger::gt(): lhs or rhs is not an integer");
   }
@@ -129,7 +129,7 @@ PyObjPtr IntegerKlass::gt(PyObjPtr lhs, PyObjPtr rhs) {
   return CreatePyBoolean(left->Value().GreaterThan(right->Value()));
 }
 
-PyObjPtr IntegerKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr IntegerKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     throw std::runtime_error("PyInteger::eq(): lhs or rhs is not an integer");
   }
@@ -138,7 +138,7 @@ PyObjPtr IntegerKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
   return CreatePyBoolean(left->Value().Equal(right->Value()));
 }
 
-PyObjPtr IntegerKlass::_serialize_(PyObjPtr obj) {
+PyObjPtr IntegerKlass::_serialize_(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyInteger::_serialize_(): obj is not an integer");
   }

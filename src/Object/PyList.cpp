@@ -61,7 +61,8 @@ KlassPtr ListKlass::Self() {
   return instance;
 }
 
-PyObjPtr ListKlass::allocateInstance(PyObjPtr type, PyObjPtr args) {
+PyObjPtr
+ListKlass::allocateInstance(const PyObjPtr& type, const PyObjPtr& args) {
   if (Self()->Type() != type) {
     Klass::allocateInstance(type, args);
   }
@@ -78,7 +79,7 @@ PyObjPtr ListKlass::allocateInstance(PyObjPtr type, PyObjPtr args) {
   return value;
 }
 
-PyObjPtr ListKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr ListKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     Klass::add(lhs, rhs);
   }
@@ -87,7 +88,7 @@ PyObjPtr ListKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
   return CreatePyList(left->value.Add(right->value));
 }
 
-PyObjPtr ListKlass::repr(PyObjPtr obj) {
+PyObjPtr ListKlass::repr(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("List does not support repr operation");
   }
@@ -99,7 +100,7 @@ PyObjPtr ListKlass::repr(PyObjPtr obj) {
     ->add(CreatePyString(Collections::CreateStringWithCString("]")));
 }
 
-PyObjPtr ListKlass::_serialize_(PyObjPtr obj) {
+PyObjPtr ListKlass::_serialize_(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("List does not support serialization");
   }
@@ -116,7 +117,7 @@ PyObjPtr ListKlass::_serialize_(PyObjPtr obj) {
   return bytes;
 }
 
-PyObjPtr ListKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr ListKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     throw std::runtime_error("List does not support eq operation");
   }
@@ -133,7 +134,7 @@ PyObjPtr ListKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
   return CreatePyBoolean(true);
 }
 
-PyObjPtr ListKlass::getitem(PyObjPtr obj, PyObjPtr key) {
+PyObjPtr ListKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
   if (obj->Klass() != Self() || key->Klass() != IntegerKlass::Self()) {
     ThrowUnsupportedOperandError(obj, key, CreatePyString("__getitem__"));
   }
@@ -142,7 +143,11 @@ PyObjPtr ListKlass::getitem(PyObjPtr obj, PyObjPtr key) {
   return list->GetItem(Collections::ToU64(index->Value()));
 }
 
-PyObjPtr ListKlass::setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) {
+PyObjPtr ListKlass::setitem(
+  const PyObjPtr& obj,
+  const PyObjPtr& key,
+  const PyObjPtr& value
+) {
   if (obj->Klass() != Self() || key->Klass() != IntegerKlass::Self()) {
     throw std::runtime_error("PyList::setitem(): obj is not a list");
   }
@@ -174,7 +179,7 @@ PyObjPtr PyList::Join(const PyObjPtr& separator) {
   return CreatePyString(Collections::Join(reprs, separator_str));
 }
 
-PyObjPtr ListKlass::len(PyObjPtr obj) {
+PyObjPtr ListKlass::len(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("List does not support len operation");
   }
@@ -182,7 +187,7 @@ PyObjPtr ListKlass::len(PyObjPtr obj) {
   return CreatePyInteger(list->Length());
 }
 
-PyObjPtr ListKlass::contains(PyObjPtr obj, PyObjPtr key) {
+PyObjPtr ListKlass::contains(const PyObjPtr& obj, const PyObjPtr& key) {
   if (!IsType(obj, Self())) {
     throw std::runtime_error("List does not support contains operation");
   }
@@ -230,7 +235,7 @@ PyObjPtr ListIndex(const PyObjPtr& args) {
   return CreatePyInteger(list->IndexOf(obj));
 }
 
-PyObjPtr ListKlass::iter(PyObjPtr obj) {
+PyObjPtr ListKlass::iter(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("List does not support iter operation");
   }

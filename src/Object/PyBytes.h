@@ -23,13 +23,13 @@ class BytesKlass : public Klass {
 
   static KlassPtr Self();
 
-  PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
-  PyObjPtr _serialize_(PyObjPtr obj) override;
+  PyObjPtr _serialize_(const PyObjPtr& obj) override;
 
-  PyObjPtr repr(PyObjPtr obj) override;
+  PyObjPtr repr(const PyObjPtr& obj) override;
 
-  PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
   void Initialize() override;
 };

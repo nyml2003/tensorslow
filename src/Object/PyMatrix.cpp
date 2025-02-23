@@ -36,7 +36,7 @@ KlassPtr MatrixKlass::Self() {
   return instance;
 }
 
-PyObjPtr Transpose(PyObjPtr args) {
+PyObjPtr Transpose(const PyObjPtr& args) {
   if (args->Klass() != ListKlass::Self()) {
     throw std::runtime_error("Transpose(): args is not a list");
   }
@@ -48,7 +48,7 @@ PyObjPtr Transpose(PyObjPtr args) {
   return std::make_shared<PyMatrix>(matrix->Value().Transpose());
 }
 
-PyObjPtr MatrixKlass::repr(PyObjPtr obj) {
+PyObjPtr MatrixKlass::repr(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyMatrix::repr(): obj is not a matrix object");
   }
@@ -56,7 +56,7 @@ PyObjPtr MatrixKlass::repr(PyObjPtr obj) {
   return CreatePyString(matrix->Value().ToString());
 }
 
-PyObjPtr MatrixKlass::matmul(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr MatrixKlass::matmul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     ThrowUnsupportedOperandError(lhs, rhs, CreatePyString("__matmul__"));
   }
@@ -66,7 +66,7 @@ PyObjPtr MatrixKlass::matmul(PyObjPtr lhs, PyObjPtr rhs) {
   );
 }
 
-PyObjPtr MatrixKlass::mul(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr MatrixKlass::mul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     ThrowUnsupportedOperandError(lhs, rhs, CreatePyString("__mul__"));
   }
@@ -75,7 +75,7 @@ PyObjPtr MatrixKlass::mul(PyObjPtr lhs, PyObjPtr rhs) {
   return std::make_shared<PyMatrix>(left->Value().Multiply(right->Value()));
 }
 
-PyObjPtr MatrixKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr MatrixKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     ThrowUnsupportedOperandError(lhs, rhs, CreatePyString("__add__"));
   }
@@ -84,7 +84,7 @@ PyObjPtr MatrixKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
   return std::make_shared<PyMatrix>(left->Value().Add(right->Value()));
 }
 
-PyObjPtr Matrix(PyObjPtr args) {
+PyObjPtr Matrix(const PyObjPtr& args) {
   if (args->Klass() != ListKlass::Self()) {
     throw std::runtime_error("Matrix(): args is not a list");
   }
@@ -116,19 +116,19 @@ PyObjPtr Matrix(PyObjPtr args) {
   return std::make_shared<PyMatrix>(Collections::Matrix(data));
 }
 
-PyObjPtr Eye(PyObjPtr args) {
+PyObjPtr Eye(const PyObjPtr& args) {
   if (args->Klass() != ListKlass::Self()) {
     throw std::runtime_error("Eye(): args is not a list");
   }
   if (args->len() != CreatePyInteger(1)) {
     throw std::runtime_error("Eye(): args length is not 1");
   }
-  auto n =
+  auto dim =
     std::dynamic_pointer_cast<PyInteger>(args->getitem(CreatePyInteger(0)));
-  return std::make_shared<PyMatrix>(Collections::Matrix::eye(ToU64(n)));
+  return std::make_shared<PyMatrix>(Collections::Matrix::eye(ToU64(dim)));
 }
 
-PyObjPtr Zeros(PyObjPtr args) {
+PyObjPtr Zeros(const PyObjPtr& args) {
   if (args->Klass() != ListKlass::Self()) {
     throw std::runtime_error("Zeros(): args is not a list");
   }
@@ -144,7 +144,7 @@ PyObjPtr Zeros(PyObjPtr args) {
   );
 }
 
-PyObjPtr Ones(PyObjPtr args) {
+PyObjPtr Ones(const PyObjPtr& args) {
   if (args->Klass() != ListKlass::Self()) {
     throw std::runtime_error("Ones(): args is not a list");
   }
@@ -161,26 +161,24 @@ PyObjPtr Ones(PyObjPtr args) {
   );
 }
 
-PyObjPtr Diagnostic(PyObjPtr args) {
+PyObjPtr Diagnostic(const PyObjPtr& args) {
   if (args->Klass() != ListKlass::Self()) {
     throw std::runtime_error("Diagnostic(): args is not a list");
   }
   if (args->len() != CreatePyInteger(1)) {
     throw std::runtime_error("Diagnostic(): args length is not 1");
   }
-  auto n =
-    std::dynamic_pointer_cast<PyInteger>(args->getitem(CreatePyInteger(0)));
-  Collections::List<double> data(ToU64(n) * ToU64(n), 0.0);
-  Collections::Matrix matrix(ToU64(n), ToU64(n), data);
-  for (Index i = 0; i < ToU64(n); i++) {
+  auto dim =
+    ToU64(std::dynamic_pointer_cast<PyInteger>(args->getitem(CreatePyInteger(0))));
+  Collections::List<double> data(dim * dim, 0.0);
+  Collections::Matrix matrix(dim, dim, data);
+  for (Index i = 0; i < dim; i++) {
     matrix.Set(i, i, 1.0);
   }
-  return std::make_shared<PyMatrix>(
-    Collections::Matrix(ToU64(n), ToU64(n), data)
-  );
+  return std::make_shared<PyMatrix>(Collections::Matrix(dim, dim, data));
 }
 
-PyObjPtr Shape(PyObjPtr args) {
+PyObjPtr Shape(const PyObjPtr& args) {
   if (args->Klass() != ListKlass::Self()) {
     throw std::runtime_error("Shape(): args is not a list");
   }
@@ -193,7 +191,7 @@ PyObjPtr Shape(PyObjPtr args) {
   return CreatePyList({CreatePyInteger(shape[0]), CreatePyInteger(shape[1])});
 }
 
-PyObjPtr Reshape(PyObjPtr args) {
+PyObjPtr Reshape(const PyObjPtr& args) {
   if (args->Klass() != ListKlass::Self()) {
     throw std::runtime_error("Reshape(): args is not a list");
   }

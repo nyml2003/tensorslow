@@ -4,7 +4,6 @@
 #include "ByteCode/PyCode.h"
 #include "ByteCode/PyInst.h"
 #include "Collections/Stack.h"
-#include "Function/PyFunction.h"
 #include "Object/Klass.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyList.h"
@@ -25,14 +24,14 @@ class PyFrame : public Object::PyObject {
 
  public:
   explicit PyFrame(
-    Object::PyCodePtr _code,
-    Object::PyObjPtr _locals,      // 传入的是 PyObjPtr
-    Object::PyObjPtr _globals,     // 传入的是 PyObjPtr
-    Object::PyObjPtr _fastLocals,  // 传入的是 PyObjPtr
-    Object::PyObjPtr _caller
+    const Object::PyCodePtr& _code,
+    const Object::PyObjPtr& _locals,      // 传入的是 PyObjPtr
+    const Object::PyObjPtr& _globals,     // 传入的是 PyObjPtr
+    const Object::PyObjPtr& _fastLocals,  // 传入的是 PyObjPtr
+    const Object::PyObjPtr& _caller
   );
 
-  void SetProgramCounter(Index pc);
+  void SetProgramCounter(Index _pc);
 
   [[nodiscard]] Object::PyCodePtr Code() const;
 
@@ -72,7 +71,7 @@ class FrameKlass : public Object::Klass {
   explicit FrameKlass();
   static Object::KlassPtr Self();
 
-  Object::PyObjPtr repr(Object::PyObjPtr obj) override;
+  Object::PyObjPtr repr(const Object::PyObjPtr& obj) override;
 
   void Initialize() override;
 };

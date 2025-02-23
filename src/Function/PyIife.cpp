@@ -1,5 +1,5 @@
-#include "Collections/StringHelper.h"
 #include "Function/PyIife.h"
+#include "Collections/StringHelper.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
@@ -20,7 +20,7 @@ KlassPtr IifeKlass::Self() {
   return instance;
 }
 
-PyObjPtr IifeKlass::repr(PyObjPtr self) {
+PyObjPtr IifeKlass::repr(const PyObjPtr& self) {
   if (self->Klass() != Self()) {
     throw std::runtime_error("Iife does not support repr operation");
   }
@@ -34,7 +34,7 @@ PyObjPtr IifeKlass::repr(PyObjPtr self) {
 PyIife::PyIife(TypeFunction nativeFunction)
   : PyObject(IifeKlass::Self()), nativeFunction(std::move(nativeFunction)) {}
 
-PyObjPtr PyIife::Call(PyObjPtr args) {
+PyObjPtr PyIife::Call(const PyObjPtr& args) {
   return nativeFunction(std::move(args));
 }
 

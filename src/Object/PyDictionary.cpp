@@ -21,6 +21,22 @@ PyObjPtr CreatePyDict(Collections::Map<PyObjPtr, PyObjPtr> dict) {
   return std::make_shared<PyDictionary>(std::move(dict));
 }
 
+void PyDictionary::Put(const PyObjPtr& key, const PyObjPtr& value) {
+  dict.Put(key, value);
+}
+
+PyObjPtr PyDictionary::Get(const PyObjPtr& key) {
+  return dict.Get(key);
+}
+
+void PyDictionary::Remove(const PyObjPtr& key) {
+  dict.Remove(key);
+}
+
+bool PyDictionary::Contains(const PyObjPtr& key) {
+  return dict.Contains(key);
+}
+
 DictionaryKlass::DictionaryKlass() = default;
 
 void DictionaryKlass::Initialize() {
@@ -35,7 +51,8 @@ KlassPtr DictionaryKlass::Self() {
   return self;
 }
 
-PyObjPtr DictionaryKlass::allocateInstance(PyObjPtr klass, PyObjPtr args) {
+PyObjPtr
+DictionaryKlass::allocateInstance(const PyObjPtr& klass, const PyObjPtr& args) {
   if (Self()->Type() != klass) {
     throw std::runtime_error(
       "PyDictionary::allocateInstance(): klass is not a dict"
@@ -49,30 +66,33 @@ PyObjPtr DictionaryKlass::allocateInstance(PyObjPtr klass, PyObjPtr args) {
   return CreatePyDict();
 }
 
-PyObjPtr DictionaryKlass::setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) {
+PyObjPtr DictionaryKlass::setitem(
+  const PyObjPtr& obj,
+  const PyObjPtr& key,
+  const PyObjPtr& value
+) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyDictionary::setitem(): obj is not a dict");
   }
   auto dict = std::dynamic_pointer_cast<PyDictionary>(obj);
-  dict->Value().Put(std::move(key), std::move(value));
-  obj = dict;
+  dict->Put(key, value);
   return CreatePyNone();
 }
 
-PyObjPtr DictionaryKlass::getitem(PyObjPtr obj, PyObjPtr key) {
+PyObjPtr DictionaryKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyDictionary::getitem(): obj is not a dict");
   }
   auto dict = std::dynamic_pointer_cast<PyDictionary>(obj);
-  return dict->Value().Get(key);
+  return dict->Get(key);
 }
 
-PyObjPtr DictionaryKlass::delitem(PyObjPtr obj, PyObjPtr key) {
+PyObjPtr DictionaryKlass::delitem(const PyObjPtr& obj, const PyObjPtr& key) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyDictionary::delitem(): obj is not a dict");
   }
   auto dict = std::dynamic_pointer_cast<PyDictionary>(obj);
-  dict->Value().Remove(key);
+  dict->Remove(key);
   return obj;
 }
 
@@ -80,7 +100,7 @@ Collections::Map<PyObjPtr, PyObjPtr>& PyDictionary::Value() {
   return dict;
 }
 
-PyObjPtr DictionaryKlass::repr(PyObjPtr obj) {
+PyObjPtr DictionaryKlass::repr(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyDictionary::repr(): obj is not a dict");
   }
@@ -102,12 +122,12 @@ PyObjPtr DictionaryKlass::repr(PyObjPtr obj) {
     ->add(CreatePyString("}"));
 }
 
-PyObjPtr DictionaryKlass::contains(PyObjPtr obj, PyObjPtr key) {
+PyObjPtr DictionaryKlass::contains(const PyObjPtr& obj, const PyObjPtr& key) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyDictionary::contains(): obj is not a dict");
   }
   auto dict = std::dynamic_pointer_cast<PyDictionary>(obj);
-  return CreatePyBoolean(dict->Value().Contains(key));
+  return CreatePyBoolean(dict->Contains(key));
 }
 
 }  // namespace torchlight::Object

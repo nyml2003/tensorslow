@@ -108,10 +108,10 @@ void Interpreter::EvalFrame() {
         break;
       }
       case Object::ByteCode::COMPARE_OP: {
-        auto op = std::get<Object::CompareOp>(inst->Operand());
+        auto oprt = std::get<Object::CompareOp>(inst->Operand());
         auto right = frameObject->Stack().Pop();
         auto left = frameObject->Stack().Pop();
-        switch (op) {
+        switch (oprt) {
           case Object::CompareOp::EQUAL: {
             frameObject->Stack().Push(left->eq(right));
             auto result = left->eq(right);

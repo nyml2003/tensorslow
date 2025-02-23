@@ -49,7 +49,8 @@ PyObjPtr CreatePyString(const std::string& value) {
   return CreatePyString(Collections::CreateStringWithCString(value.c_str()));
 }
 
-PyObjPtr StringKlass::allocateInstance(PyObjPtr klass, PyObjPtr args) {
+PyObjPtr
+StringKlass::allocateInstance(const PyObjPtr& klass, const PyObjPtr& args) {
   if (Self()->Type() != klass) {
     throw std::runtime_error("allocateInstance(): klass is not a string");
   }
@@ -74,7 +75,7 @@ PyObjPtr StringKlass::allocateInstance(PyObjPtr klass, PyObjPtr args) {
   throw std::runtime_error("allocateInstance(): value is not a string");
 }
 
-PyObjPtr StringKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr StringKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != StringKlass::Self()) {
     throw std::runtime_error("lhs is not a string");
   }
@@ -86,7 +87,7 @@ PyObjPtr StringKlass::add(PyObjPtr lhs, PyObjPtr rhs) {
   return CreatePyString(left->Value().Add(right->Value()));
 }
 
-PyObjPtr StringKlass::repr(PyObjPtr obj) {
+PyObjPtr StringKlass::repr(const PyObjPtr& obj) {
   if (obj->Klass() != StringKlass::Self()) {
     throw std::runtime_error("obj is not a string");
   }
@@ -96,14 +97,14 @@ PyObjPtr StringKlass::repr(PyObjPtr obj) {
                           .Add(Collections::CreateStringWithCString("\"")));
 }
 
-PyObjPtr StringKlass::str(PyObjPtr obj) {
+PyObjPtr StringKlass::str(const PyObjPtr& obj) {
   if (obj->Klass() != StringKlass::Self()) {
     throw std::runtime_error("obj is not a string");
   }
   return obj;
 }
 
-PyObjPtr StringKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
+PyObjPtr StringKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self()) {
     throw std::runtime_error("lhs is not a string");
   }
@@ -115,7 +116,7 @@ PyObjPtr StringKlass::eq(PyObjPtr lhs, PyObjPtr rhs) {
   return CreatePyBoolean(left->Value() == right->Value());
 }
 
-PyObjPtr StringKlass::_serialize_(PyObjPtr obj) {
+PyObjPtr StringKlass::_serialize_(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("str does not support serialization");
   }
@@ -124,7 +125,7 @@ PyObjPtr StringKlass::_serialize_(PyObjPtr obj) {
                          .Add(Collections::Serialize(string->Value())));
 }
 
-PyObjPtr Upper(PyObjPtr args) {
+PyObjPtr Upper(const PyObjPtr& args) {
   if (args->Klass() != ListKlass::Self()) {
     throw std::runtime_error("Upper() argument must be a list");
   }
@@ -140,7 +141,7 @@ PyObjPtr Upper(PyObjPtr args) {
   return CreatePyString(str->Value().Upper());
 }
 
-PyObjPtr StartsWith(PyObjPtr args) {
+PyObjPtr StartsWith(const PyObjPtr& args) {
   if (args->Klass() != ListKlass::Self()) {
     throw std::runtime_error("StartsWith() argument must be a list");
   }

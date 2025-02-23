@@ -22,21 +22,22 @@ class FloatKlass : public Klass {
 
   static KlassPtr Self();
 
-  PyObjPtr allocateInstance(PyObjPtr klass, PyObjPtr args) override;
+  PyObjPtr allocateInstance(const PyObjPtr& klass, const PyObjPtr& args)
+    override;
 
-  PyObjPtr add(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
-  PyObjPtr sub(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
-  PyObjPtr mul(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
-  PyObjPtr div(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr div(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
-  PyObjPtr repr(PyObjPtr obj) override;
+  PyObjPtr repr(const PyObjPtr& obj) override;
 
-  PyObjPtr _serialize_(PyObjPtr obj) override;
+  PyObjPtr _serialize_(const PyObjPtr& obj) override;
 
-  PyObjPtr eq(PyObjPtr lhs, PyObjPtr rhs) override;
+  PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
   void Initialize() override;
 };

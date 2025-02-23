@@ -15,6 +15,14 @@ class PyDictionary : public PyObject {
   explicit PyDictionary(Collections::Map<PyObjPtr, PyObjPtr> dict);
 
   Collections::Map<PyObjPtr, PyObjPtr>& Value();
+
+  void Put(const PyObjPtr& key, const PyObjPtr& value);
+
+  PyObjPtr Get(const PyObjPtr& key);
+
+  void Remove(const PyObjPtr& key);
+
+  bool Contains(const PyObjPtr& key);
 };
 
 class DictionaryKlass : public Klass {
@@ -22,17 +30,22 @@ class DictionaryKlass : public Klass {
   explicit DictionaryKlass();
   static KlassPtr Self();
 
-  PyObjPtr allocateInstance(PyObjPtr klass, PyObjPtr args) override;
+  PyObjPtr allocateInstance(const PyObjPtr& klass, const PyObjPtr& args)
+    override;
 
-  PyObjPtr setitem(PyObjPtr obj, PyObjPtr key, PyObjPtr value) override;
+  PyObjPtr setitem(
+    const PyObjPtr& obj,
+    const PyObjPtr& key,
+    const PyObjPtr& value
+  ) override;
 
-  PyObjPtr getitem(PyObjPtr obj, PyObjPtr key) override;
+  PyObjPtr getitem(const PyObjPtr& obj, const PyObjPtr& key) override;
 
-  PyObjPtr delitem(PyObjPtr obj, PyObjPtr key) override;
+  PyObjPtr delitem(const PyObjPtr& obj, const PyObjPtr& key) override;
 
-  PyObjPtr contains(PyObjPtr obj, PyObjPtr key) override;
+  PyObjPtr contains(const PyObjPtr& obj, const PyObjPtr& key) override;
 
-  PyObjPtr repr(PyObjPtr obj) override;
+  PyObjPtr repr(const PyObjPtr& obj) override;
 
   void Initialize() override;
 };

@@ -16,7 +16,7 @@ class IifeKlass : public Klass {
 
   static KlassPtr Self();
 
-  PyObjPtr repr(PyObjPtr self) override;
+  PyObjPtr repr(const PyObjPtr& self) override;
 
   void Initialize() override;
 };
@@ -28,7 +28,7 @@ class PyIife : public PyObject {
  public:
   explicit PyIife(TypeFunction nativeFunction);
 
-  PyObjPtr Call(PyObjPtr args);
+  PyObjPtr Call(const PyObjPtr& args);
 };
 
 using PyIifePtr = std::shared_ptr<PyIife>;

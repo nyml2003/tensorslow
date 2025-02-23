@@ -6,7 +6,6 @@
 #include "Object/PyString.h"
 #include "Object/PyType.h"
 
-
 namespace torchlight::Object {
 
 NoneKlass::NoneKlass() = default;
@@ -16,14 +15,14 @@ KlassPtr NoneKlass::Self() {
   return instance;
 }
 
-PyObjPtr NoneKlass::_serialize_(PyObjPtr obj) {
+PyObjPtr NoneKlass::_serialize_(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("NoneType does not support serialization");
   }
   return CreatePyBytes(Collections::Serialize(Literal::NONE));
 }
 
-PyObjPtr NoneKlass::repr(PyObjPtr obj) {
+PyObjPtr NoneKlass::repr(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("NoneType does not support repr operation");
   }

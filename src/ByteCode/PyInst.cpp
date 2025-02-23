@@ -34,7 +34,7 @@ KlassPtr InstKlass::Self() {
   return instance;
 }
 
-PyObjPtr InstKlass::_serialize_(PyObjPtr obj) {
+PyObjPtr InstKlass::_serialize_(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyInst::_serialize_(): obj is not an inst object"
     );
@@ -53,7 +53,7 @@ PyObjPtr InstKlass::_serialize_(PyObjPtr obj) {
   return std::make_shared<PyBytes>(bytes);
 }
 
-PyObjPtr InstKlass::repr(PyObjPtr obj) {
+PyObjPtr InstKlass::repr(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyInst::repr(): obj is not an inst object");
   }
@@ -166,7 +166,9 @@ PyInstPtr CreateGetIter() {
 }
 
 PyInstPtr CreateForIter(Index index) {
-  return std::make_shared<PyInst>(ByteCode::FOR_ITER, static_cast<int64_t>(index));
+  return std::make_shared<PyInst>(
+    ByteCode::FOR_ITER, static_cast<int64_t>(index)
+  );
 }
 
 }  // namespace torchlight::Object

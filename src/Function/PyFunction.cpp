@@ -1,18 +1,18 @@
-#include "Collections/StringHelper.h"
 #include "Function/PyFunction.h"
+#include "Collections/StringHelper.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
 
 namespace torchlight::Object {
 
-PyFunction::PyFunction(PyObjPtr code, PyObjPtr globals)
+PyFunction::PyFunction(const PyObjPtr& code, const PyObjPtr& globals)
   : PyObject(FunctionKlass::Self()) {
   this->code = std::dynamic_pointer_cast<PyCode>(code);
   this->globals = std::dynamic_pointer_cast<PyDictionary>(globals);
 }
 
-PyObjPtr CreatePyFunction(PyObjPtr code, PyObjPtr globals) {
+PyObjPtr CreatePyFunction(const PyObjPtr& code, const PyObjPtr& globals) {
   return std::make_shared<PyFunction>(code, globals);
 }
 
@@ -42,7 +42,7 @@ KlassPtr FunctionKlass::Self() {
   return instance;
 }
 
-PyObjPtr FunctionKlass::repr(PyObjPtr self) {
+PyObjPtr FunctionKlass::repr(const PyObjPtr& self) {
   if (self->Klass() != Self()) {
     throw std::runtime_error("Function does not support repr operation");
   }

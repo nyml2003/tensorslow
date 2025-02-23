@@ -89,6 +89,13 @@ PyObjPtr Len(const PyObjPtr& args);
 
 using PyObjPtr = std::shared_ptr<PyObject>;
 
+class ObjectKlass : public Klass {
+ public:
+  explicit ObjectKlass();
+  static KlassPtr Self();
+  void Initialize() override;
+};
+
 }  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_PYOBJECT_H
