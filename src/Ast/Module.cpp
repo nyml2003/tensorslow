@@ -1,8 +1,6 @@
 #include "Ast/Module.h"
-#include "Ast/ExprStmt.h"
 #include "Ast/INode.h"
 #include "ByteCode/PyCode.h"
-#include "Collections/Iterator.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyList.h"
@@ -10,9 +8,6 @@
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
-
-#include <iostream>
-#include <memory>
 
 namespace torchlight::Ast {
 
@@ -60,6 +55,7 @@ ModuleKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
     Object::CreatePyCode(module->Name())
   );
   code->SetScope(Object::Scope::GLOBAL);
+  code->RegisterConst(Object::CreatePyNone());
   Object::Invoke(codeList, Object::CreatePyString("append"), {code});
   Object::ForEach(
     module->Body(),
@@ -68,6 +64,7 @@ ModuleKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
       stmtNode->visit(codeList);
     }
   );
+  
   return Object::CreatePyNone();
 }
 
@@ -81,6 +78,9 @@ ModuleKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
       stmtNode->emit(codeList);
     }
   );
+  auto selfCode = GetCodeFromList(codeList, module);
+  selfCode->LoadConst(Object::CreatePyNone());
+  selfCode->ReturnValue();
   return Object::CreatePyNone();
 }
 

@@ -1,6 +1,4 @@
 #include "Object/ObjectHelper.h"
-
-#include <utility>
 #include "ByteCode/PyCode.h"
 #include "ByteCode/PyInst.h"
 #include "Function/PyFunction.h"
@@ -8,7 +6,7 @@
 #include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/Iterator.h"
-#include "Object/MixinCollections.h"
+#include "Object/Object.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyList.h"
@@ -17,6 +15,10 @@
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
+#include "Runtime/Interpreter.h"
+#include "Runtime/PyFrame.h"
+
+#include <memory>
 
 namespace torchlight::Object {
 
@@ -25,13 +27,25 @@ PyObjPtr Invoke(
   const PyObjPtr& methodName,
   std::initializer_list<PyObjPtr> arguments
 ) {
+  if (!obj->Klass()->Attributes()->Contains(methodName)) {
+    return CreatePyNone();
+  }
+
+  Collections::List<PyObjPtr> argumentsList(arguments);
+  argumentsList.Unshift(obj);
+  PyListPtr args =
+    std::dynamic_pointer_cast<PyList>(CreatePyList(argumentsList));
   auto method =
-    std::dynamic_pointer_cast<Object::PyMethod>(obj->getattr(methodName));
-  auto nativeFunction =
-    std::dynamic_pointer_cast<Object::PyNativeFunction>(method->Method());
-  Collections::List<PyObjPtr> args(arguments);
-  args.Unshift(obj);
-  return nativeFunction->Call(CreatePyList(args));
+    std::dynamic_pointer_cast<Object::PyMethod>(obj->getattr(methodName))
+      ->Method();
+  auto isNative = std::dynamic_pointer_cast<PyNativeFunction>(method);
+  if (isNative) {
+    return isNative->Call(args);
+  }
+  return Runtime::CreateFrameWithPyFunction(
+           std::dynamic_pointer_cast<PyFunction>(method), args
+  )
+    ->EvalWithDestory();
 }
 
 void BasicKlassLoad() {
@@ -71,4 +85,12 @@ void ForEach(
     value = iter->next();
   }
 }
+
+PyObjPtr SetItem(const PyObjPtr& args) {
+  auto self = args->getitem(CreatePyInteger(0));
+  auto key = args->getitem(CreatePyInteger(1));
+  auto value = args->getitem(CreatePyInteger(2));
+  return self->setitem(key, value);
+}
+
 }  // namespace torchlight::Object

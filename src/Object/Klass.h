@@ -14,14 +14,15 @@ class Klass {
   PyListPtr mro;
   bool initialized = false;
 
- protected:
-  void SetName(const PyObjPtr& name);
-  void SetAttributes(const PyObjPtr& attributes);
-  void SetType(const PyObjPtr& type);
+  void LookupInMro(const PyObjPtr& obj, const PyObjPtr& key);
 
+ protected:
  public:
   static void SetDualOutput(const std::string& filename);
   explicit Klass();
+  void SetName(const PyObjPtr& name);
+  void SetAttributes(const PyObjPtr& attributes);
+  void SetType(const PyObjPtr& type);
 
   // Copy constructor
   Klass(const Klass& other) = delete;
@@ -118,7 +119,11 @@ enum class KlassComparison {
 
 KlassComparison CompareKlasses(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
-PyObjPtr CreatePyKlass(const std::string& name);
+KlassPtr CreatePyKlass(
+  const PyStrPtr& name,
+  const PyDictPtr& attributes,
+  const PyListPtr& super
+);
 
 }  // namespace torchlight::Object
 

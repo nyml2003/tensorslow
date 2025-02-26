@@ -1,8 +1,6 @@
 #include "Ast/FuncDef.h"
-#include <memory>
 #include "Ast/INode.h"
 #include "ByteCode/PyCode.h"
-#include "Collections/Iterator.h"
 
 #include "Object/ObjectHelper.h"
 #include "Object/PyDictionary.h"
@@ -92,6 +90,7 @@ FuncDefKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
       code->RegisterVarName(param);
     }
   );
+  code->RegisterConst(Object::CreatePyNone());
   Object::Invoke(codeList, Object::CreatePyString("append"), {code});
   auto parent = GetCodeFromList(codeList, funcDef->Parent());
   parent->RegisterName(funcDef->Name());
@@ -102,7 +101,6 @@ FuncDefKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
       stmtNode->visit(codeList);
     }
   );
-
   parent->RegisterConst(code);
   parent->RegisterConst(funcDef->Name());
   return Object::CreatePyNone();
@@ -124,15 +122,16 @@ FuncDefKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   } else {
     selfCode->SetNLocals(Object::ToU64(funcDef->Parameters()->len()));
   }
+  selfCode->LoadConst(Object::CreatePyNone());
+  selfCode->ReturnValue();
   auto parent = GetCodeFromList(codeList, funcDef->Parent());
   parent->LoadConst(selfCode);
   parent->LoadConst(funcDef->Name());
   parent->MakeFunction();
   parent->StoreName(funcDef->Name());
-  if (ArgsHelper::Instance().Has("show_code_object")) {
-    Object::DebugPrint(selfCode->repr());
+  if (ArgsHelper::Instance().Has("show_code")) {
+    Object::DebugPrint(selfCode->str());
   }
-
   return Object::CreatePyNone();
 }
 

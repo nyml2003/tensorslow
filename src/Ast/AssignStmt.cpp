@@ -1,6 +1,4 @@
 #include "Ast/AssignStmt.h"
-#include <memory>
-#include <utility>
 #include "Ast/Binary.h"
 #include "Ast/INode.h"
 #include "Ast/Identifier.h"
@@ -8,6 +6,7 @@
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyNone.h"
+#include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
 
@@ -53,6 +52,7 @@ AssignStmtKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto source = assignStmt->Source();
   source->emit(codeList);
   auto target = assignStmt->Target();
+  
   if (target->Klass() == IdentifierKlass::Self()) {
     auto targetIdentifier = std::dynamic_pointer_cast<Identifier>(target);
     auto name = targetIdentifier->Name();
@@ -64,10 +64,12 @@ AssignStmtKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
       code->StoreName(name);
     }
   } else if (target->Klass() == MemberAccessKlass::Self()) {
-    // 有误
-    // target->emit(codeList);
-    // auto code = GetCodeFromList(codeList, target);
-    // code->StoreSubscr();
+    auto memberAccess = std::dynamic_pointer_cast<MemberAccess>(target);
+    auto object = memberAccess->Obj();
+  object->emit(codeList);
+  auto member = memberAccess->Member();
+  auto code = GetCodeFromList(codeList, memberAccess);
+  code->StoreAttr(member);
   } else if (target->Klass() == BinaryKlass::Self()) {
     auto binary = std::dynamic_pointer_cast<Binary>(target);
     auto oprt = binary->Oprt();
@@ -107,6 +109,8 @@ AssignStmtKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
       }
     }
   } else if (target->Klass() == MemberAccessKlass::Self()) {
+    auto memberAccess = std::dynamic_pointer_cast<MemberAccess>(target);
+    memberAccess->visit(codeList);
   } else if (target->Klass() == BinaryKlass::Self()) {
     auto binary = std::dynamic_pointer_cast<Binary>(target);
     auto oprt = binary->Oprt();

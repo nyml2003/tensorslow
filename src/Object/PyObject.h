@@ -11,10 +11,9 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   KlassPtr klass;
 
  protected:
-  void setKlass(KlassPtr klass);
-
  public:
   explicit PyObject(KlassPtr klass);
+  void setKlass(KlassPtr klass);
 
   [[nodiscard]] KlassPtr Klass() const;
 
@@ -28,39 +27,39 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
 
   PyObject& operator=(PyObject&&) = delete;
 
-  PyObjPtr add(PyObjPtr other);
+  PyObjPtr add(const PyObjPtr& other);
 
-  PyObjPtr sub(PyObjPtr other);
+  PyObjPtr sub(const PyObjPtr& other);
 
-  PyObjPtr mul(PyObjPtr other);
+  PyObjPtr mul(const PyObjPtr& other);
 
-  PyObjPtr div(PyObjPtr other);
+  PyObjPtr div(const PyObjPtr& other);
 
-  PyObjPtr matmul(PyObjPtr other);
+  PyObjPtr matmul(const PyObjPtr& other);
 
-  PyObjPtr gt(PyObjPtr other);
+  PyObjPtr gt(const PyObjPtr& other);
 
-  PyObjPtr lt(PyObjPtr other);
+  PyObjPtr lt(const PyObjPtr& other);
 
-  PyObjPtr eq(PyObjPtr other);
+  PyObjPtr eq(const PyObjPtr& other);
 
-  PyObjPtr ge(PyObjPtr other);
+  PyObjPtr ge(const PyObjPtr& other);
 
-  PyObjPtr le(PyObjPtr other);
+  PyObjPtr le(const PyObjPtr& other);
 
-  PyObjPtr ne(PyObjPtr other);
+  PyObjPtr ne(const PyObjPtr& other);
 
   PyObjPtr repr();
 
   PyObjPtr str();
 
-  PyObjPtr getitem(PyObjPtr key);
+  PyObjPtr getitem(const PyObjPtr& key);
 
-  PyObjPtr setitem(PyObjPtr key, PyObjPtr value);
+  PyObjPtr setitem(const PyObjPtr& key, const PyObjPtr& value);
 
-  PyObjPtr delitem(PyObjPtr key);
+  PyObjPtr delitem(const PyObjPtr& key);
 
-  PyObjPtr contains(PyObjPtr key);
+  PyObjPtr contains(const PyObjPtr& key);
 
   PyObjPtr len();
 
@@ -68,9 +67,9 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
 
   PyObjPtr _serialize_();
 
-  PyObjPtr getattr(PyObjPtr key);
+  PyObjPtr getattr(const PyObjPtr& key);
 
-  PyObjPtr setattr(PyObjPtr key, PyObjPtr value);
+  PyObjPtr setattr(const PyObjPtr& key, const PyObjPtr& value);
 
   PyObjPtr iter();
 

@@ -8,6 +8,8 @@ namespace torchlight::Runtime {
 Object::PyObjPtr Genesis();
 
 void RuntimeKlassLoad();
+
+Object::PyObjPtr BuildClass(const Object::PyObjPtr& args);
 }  // namespace torchlight::Runtime
 
 #endif

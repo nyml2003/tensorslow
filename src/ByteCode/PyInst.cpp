@@ -171,4 +171,12 @@ PyInstPtr CreateForIter(Index index) {
   );
 }
 
+PyInstPtr CreateLoadBuildClass() {
+  return std::make_shared<PyInst>(ByteCode::LOAD_BUILD_CLASS);
+}
+
+PyInstPtr CreateStoreAttr(Index index) {
+  return std::make_shared<PyInst>(ByteCode::STORE_ATTR, index);
+}
+
 }  // namespace torchlight::Object

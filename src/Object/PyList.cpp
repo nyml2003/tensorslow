@@ -3,7 +3,6 @@
 #include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/IntegerHelper.h"
-#include "Collections/Iterator.h"
 #include "Collections/StringHelper.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/Iterator.h"
@@ -81,7 +80,7 @@ ListKlass::allocateInstance(const PyObjPtr& type, const PyObjPtr& args) {
 
 PyObjPtr ListKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
-    Klass::add(lhs, rhs);
+    throw std::runtime_error("List does not support add operation");
   }
   auto left = std::dynamic_pointer_cast<PyList>(lhs);
   auto right = std::dynamic_pointer_cast<PyList>(rhs);
@@ -166,15 +165,16 @@ PyObjPtr PyList::Join(const PyObjPtr& separator) {
     throw std::runtime_error("List::Join(): separator is not a string");
   }
   Collections::List<Collections::String> reprs;
-  for (auto it = Collections::Iterator<PyObjPtr>::Begin(value); !it.End();
-       it.Next()) {
-    auto item = it.Get();
-    auto repr = item->str();
-    if (repr->Klass() != StringKlass::Self()) {
-      throw std::runtime_error("List element is not a string");
+  ForEach(
+    shared_from_this(),
+    [&reprs](const PyObjPtr& value, Index, const PyObjPtr&) {
+      auto repr = value->str();
+      if (repr->Klass() != StringKlass::Self()) {
+        throw std::runtime_error("List element is not a string");
+      }
+      reprs.Push(std::dynamic_pointer_cast<PyString>(repr)->Value());
     }
-    reprs.Push(std::dynamic_pointer_cast<PyString>(repr)->Value());
-  }
+  );
   auto separator_str = std::dynamic_pointer_cast<PyString>(separator)->Value();
   return CreatePyString(Collections::Join(reprs, separator_str));
 }

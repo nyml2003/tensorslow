@@ -96,6 +96,8 @@ class PyCode : public PyObject {
   void StoreSubscr();
   void GetIter();
   Index ForIter(Index index);
+  void LoadBuildClass();
+  void StoreAttr(const PyObjPtr& obj);
 
  private:
   PyBytesPtr byteCode;
@@ -114,8 +116,6 @@ class CodeKlass : public Klass {
  public:
   explicit CodeKlass();
   static KlassPtr Self();
-
-  PyObjPtr repr(const PyObjPtr& self) override;
 
   PyObjPtr str(const PyObjPtr& self) override;
 

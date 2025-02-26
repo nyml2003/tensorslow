@@ -130,9 +130,9 @@ void RunTest(const fs::path& filename) {
     std::make_unique<Runtime::BufferedInputStream>(filename.string().c_str())
   );
   auto code = parser.Parse();
-  Runtime::Interpreter interpreter;
+  
   HandleResultBegin(filename);
-  interpreter.Run(code);
+  Runtime::Interpreter::Instance().Run(code);
   HandleResultEnd(filename);
 }
 int main(int argc, char** argv) {

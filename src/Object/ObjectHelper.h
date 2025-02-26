@@ -19,6 +19,9 @@ void ForEach(
   const std::function<
     void(const PyObjPtr& value, Index index, const PyObjPtr& list)>& func
 );
+
+PyObjPtr SetItem(const PyObjPtr& args);
+
 }  // namespace torchlight::Object
 
 #endif

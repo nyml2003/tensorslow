@@ -46,6 +46,8 @@ enum class ByteCode {
   INPLACE_POWER = 67,
   GET_ITER = 68,
 
+  LOAD_BUILD_CLASS = 71,
+
   INPLACE_LSHIFT = 75,
   INPLACE_RSHIFT = 76,
   INPLACE_AND = 77,

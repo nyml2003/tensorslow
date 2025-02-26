@@ -1,9 +1,9 @@
-#include <stdexcept>
 #include "Collections/DecimalHelper.h"
 #include "Collections/IntegerHelper.h"
 #include "Collections/Iterator.h"
 #include "Collections/StringHelper.h"
-#include "Common.h"
+
+#include <stdexcept>
 namespace torchlight::Collections {
 String Decimal::ToString() const {
   if (IsZero()) {

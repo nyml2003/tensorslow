@@ -28,8 +28,6 @@ class FunctionKlass : public Klass {
 
   static KlassPtr Self();
 
-  PyObjPtr repr(const PyObjPtr& self) override;
-
   void Initialize() override;
 };
 

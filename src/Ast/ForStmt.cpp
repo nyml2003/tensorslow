@@ -1,13 +1,8 @@
 #include "Ast/ForStmt.h"
-#include <memory>
-#include <utility>
-#include "Ast/Binary.h"
 #include "Ast/INode.h"
 #include "Ast/Identifier.h"
-#include "Ast/MemberAccess.h"
 #include "ByteCode/PyInst.h"
 #include "Object/ObjectHelper.h"
-#include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyNone.h"
 #include "Object/PyString.h"

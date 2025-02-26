@@ -3,6 +3,7 @@
 #include "Ast/AssignStmt.h"
 #include "Ast/Atom.h"
 #include "Ast/Binary.h"
+#include "Ast/ClassDef.h"
 #include "Ast/ExprStmt.h"
 #include "Ast/ForStmt.h"
 #include "Ast/FuncDef.h"
@@ -458,7 +459,7 @@ antlrcpp::Any Generator::visitCompound_stmt(
   }
   // 7. 如果是 classdef
   else if (ctx->classdef()) {
-    return visitClassdef(ctx->classdef());
+    return visitClassdef(ctx->classdef()).as<Ast::INodePtr>();
   }
   // 8. 如果是 decorated
   else if (ctx->decorated()) {
@@ -623,6 +624,20 @@ antlrcpp::Any Generator::visitFor_stmt(Python3Parser::For_stmtContext* ctx) {
 
 antlrcpp::Any Generator::visitExprlist(Python3Parser::ExprlistContext* ctx) {
   return visitExpr(ctx->expr(0));
+}
+
+antlrcpp::Any Generator::visitClassdef(Python3Parser::ClassdefContext* ctx) {
+  auto className = Object::CreatePyString(ctx->name()->getText().c_str());
+  auto bases = Object::CreatePyList({});
+  auto classDef = std::dynamic_pointer_cast<Ast::ClassDef>(
+    Ast::CreateClassDef(className, bases, context)
+  );
+  auto oldContext = context;
+  context = classDef;
+  auto body = visitBlock(ctx->block()).as<Object::PyObjPtr>();
+  classDef->SetBody(body);
+  context = oldContext;
+  return std::dynamic_pointer_cast<Ast::INode>(classDef);
 }
 
 }  // namespace torchlight::Generation

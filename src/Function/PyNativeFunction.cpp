@@ -22,23 +22,12 @@ KlassPtr NativeFunctionKlass::Self() {
   return instance;
 }
 
-PyObjPtr NativeFunctionKlass::repr(const PyObjPtr& self) {
-  if (self->Klass() != Self()) {
-    throw std::runtime_error("NativeFunction does not support repr operation");
-  }
-  return CreatePyString(
-    Collections::CreateStringWithCString("<native_function at ")
-      .Add(Collections::ToString(reinterpret_cast<uint64_t>(self.get())))
-      .Add(Collections::CreateStringWithCString(">"))
-  );
-}
-
 PyNativeFunction::PyNativeFunction(TypeFunction nativeFunction)
   : PyObject(NativeFunctionKlass::Self()),
     nativeFunction(std::move(nativeFunction)) {}
 
 PyObjPtr PyNativeFunction::Call(const PyObjPtr& args) {
-  return nativeFunction(std::move(args));
+  return nativeFunction(args);
 }
 
 PyObjPtr CreatePyNativeFunction(TypeFunction nativeFunction) {

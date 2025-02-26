@@ -1,9 +1,12 @@
 #include "Object/Klass.h"
+#include "Collections/IntegerHelper.h"
 #include "Function/PyFunction.h"
 #include "Function/PyIife.h"
 #include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/MixinCollections.h"
+#include "Object/Object.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
@@ -31,15 +34,7 @@ void Klass::Initialize() {
   auto attrs = std::dynamic_pointer_cast<PyDictionary>(attributes);
   attrs->Put(CreatePyString("__name__"), name);
   attrs->Put(CreatePyString("__class__"), type);
-  attrs->Put(
-    CreatePyString("__setitem__"),
-    CreatePyNativeFunction([](const PyObjPtr& args) {
-      auto self = args->getitem(CreatePyInteger(0));
-      auto key = args->getitem(CreatePyInteger(1));
-      auto value = args->getitem(CreatePyInteger(2));
-      return self->setitem(key, value);
-    })
-  );
+  attrs->Put(CreatePyString("__setitem__"), CreatePyNativeFunction(SetItem));
   attrs->Put(CreatePyString("print"), CreatePyNativeFunction(Print));
   SetAttributes(attrs);
 }
@@ -99,13 +94,21 @@ UnsupportedOperandError::UnsupportedOperandError(const std::string& message)
   : std::runtime_error(message) {}
 
 PyObjPtr Klass::allocateInstance(const PyObjPtr& klass, const PyObjPtr& args) {
-  ThrowUnsupportedOperandError(klass, args, CreatePyString("allocateInstance"));
-  return CreatePyNone();
+  auto instance =
+    std::make_shared<PyObject>(std::dynamic_pointer_cast<PyType>(klass)->Owner()
+    );
+  instance->setKlass(std::dynamic_pointer_cast<PyType>(klass)->Owner());
+  auto result = Invoke(instance, CreatePyString("__init__"), {instance, args});
+  if (IsType(result, NoneKlass::Self())) {
+    return instance;
+  }
+  return result;
 }
 
 PyObjPtr Klass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  ThrowUnsupportedOperandError(lhs, rhs, CreatePyString("__add__"));
-  return CreatePyNone();
+  // ThrowUnsupportedOperandError(lhs, rhs, CreatePyString("__add__"));
+  // return CreatePyNone();
+  return Invoke(lhs, CreatePyString("__add__"), {rhs});
 }
 
 PyObjPtr Klass::sub(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -127,8 +130,10 @@ PyObjPtr Klass::repr(const PyObjPtr& self) {
   return CreatePyString("<")
     ->add(self->getattr(CreatePyString("__name__")->str()))
     ->add(CreatePyString(" object at ")
-            ->add(CreatePyInteger(reinterpret_cast<uint64_t>(self.get()))->str()
-            ))
+            ->add(CreatePyString(Collections::CreateIntegerWithU64(
+                                   reinterpret_cast<uint64_t>(self.get())
+            )
+                                   .ToHexString())))
     ->add(CreatePyString(">"));
 }
 
@@ -258,6 +263,17 @@ PyObjPtr Klass::next(const PyObjPtr& /*obj*/) {
   throw std::runtime_error(
     Collections::ToCppString(name) + " does not support next operation"
   );
+}
+
+KlassPtr CreatePyKlass(
+  const PyStrPtr& name,
+  const PyDictPtr& attributes,
+  const PyListPtr& super
+) {
+  auto klass = std::make_shared<Klass>();
+  klass->SetName(name);
+  klass->SetAttributes(attributes);
+  return klass;
 }
 
 }  // namespace torchlight::Object

@@ -29,6 +29,8 @@ class PyMethod : public PyObject {
 };
 
 PyObjPtr CreatePyMethod(PyObjPtr owner, PyObjPtr method);
+
+using PyMethodPtr = std::shared_ptr<PyMethod>;
 }  // namespace torchlight::Object
 
 #endif

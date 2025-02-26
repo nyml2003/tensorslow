@@ -47,6 +47,7 @@ do
     $backend_exe --file="$source_code" --compare_result=true
     if [ $? -eq 0 ]; then
         test_passed=$((test_passed+1))
+        test_passed_names+=($subdir)
     else
         test_not_passed_names+=($subdir)
     fi
@@ -60,5 +61,6 @@ if [ $test_passed -eq $test_total ]; then
     echo "所有测试用例通过"
 else
     echo "不通过的测试用例数: ${#test_not_passed_names[@]}"
+    echo "不通过的测试用例: ${test_not_passed_names[@]}"
 fi
 

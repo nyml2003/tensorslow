@@ -20,22 +20,12 @@ KlassPtr IifeKlass::Self() {
   return instance;
 }
 
-PyObjPtr IifeKlass::repr(const PyObjPtr& self) {
-  if (self->Klass() != Self()) {
-    throw std::runtime_error("Iife does not support repr operation");
-  }
-  return CreatePyString(
-    Collections::CreateStringWithCString("<iife at ")
-      .Add(Collections::ToString(reinterpret_cast<uint64_t>(self.get())))
-      .Add(Collections::CreateStringWithCString(">"))
-  );
-}
 
 PyIife::PyIife(TypeFunction nativeFunction)
   : PyObject(IifeKlass::Self()), nativeFunction(std::move(nativeFunction)) {}
 
 PyObjPtr PyIife::Call(const PyObjPtr& args) {
-  return nativeFunction(std::move(args));
+  return nativeFunction(args);
 }
 
 PyObjPtr CreatePyIife(TypeFunction nativeFunction) {

@@ -1,8 +1,10 @@
-#include <cstring>
-#include <stdexcept>
+
+#include "Collections/StringHelper.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/String.h"
-#include "Collections/StringHelper.h"
+
+#include <cstring>
+#include <stdexcept>
 namespace torchlight::Collections {
 Unicode GetUnicode(
   Index& index,

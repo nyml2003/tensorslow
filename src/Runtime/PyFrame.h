@@ -4,12 +4,17 @@
 #include "ByteCode/PyCode.h"
 #include "ByteCode/PyInst.h"
 #include "Collections/Stack.h"
+#include "Function/PyFunction.h"
 #include "Object/Klass.h"
+#include "Object/Object.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyList.h"
 #include "Object/PyObject.h"
 
 namespace torchlight::Runtime {
+class PyFrame;
+using PyFramePtr = std::shared_ptr<PyFrame>;
+
 class PyFrame : public Object::PyObject {
  private:
   Collections::Stack<Object::PyObjPtr> stack;
@@ -19,16 +24,16 @@ class PyFrame : public Object::PyObject {
   Object::PyDictPtr locals;
   Object::PyDictPtr globals;
   Object::PyListPtr fastLocals;
-  Object::PyObjPtr caller;
+  PyFramePtr caller;
   bool isParsed = false;
 
  public:
   explicit PyFrame(
-    const Object::PyCodePtr& _code,
+    Object::PyCodePtr code,
     const Object::PyObjPtr& _locals,      // 传入的是 PyObjPtr
     const Object::PyObjPtr& _globals,     // 传入的是 PyObjPtr
     const Object::PyObjPtr& _fastLocals,  // 传入的是 PyObjPtr
-    const Object::PyObjPtr& _caller
+    PyFramePtr caller
   );
 
   void SetProgramCounter(Index _pc);
@@ -37,33 +42,36 @@ class PyFrame : public Object::PyObject {
 
   [[nodiscard]] Index ProgramCounter() const;
 
-  [[nodiscard]] Object::PyDictPtr& Locals();
-
-  [[nodiscard]] Object::PyDictPtr& Globals();
-
-  [[nodiscard]] Object::PyListPtr& FastLocals();
-
-  [[nodiscard]] Collections::Stack<Object::PyObjPtr>& Stack();
-
-  [[nodiscard]] Object::PyObjPtr Caller() const;
+  [[nodiscard]] PyFramePtr Caller() const;
 
   [[nodiscard]] Object::PyInstPtr Instruction() const;
+
+  Object::PyListPtr CurrentStack() const;
+
+  Object::PyDictPtr CurrentLocals() const;
+
+  Object::PyDictPtr CurrentGlobals() const;
+
+  Object::PyListPtr CurrentFastLocals() const;
 
   bool Finished() const;
 
   void NextProgramCounter();
 
   bool HasCaller() const;
+
+  [[nodiscard]] Object::PyObjPtr Eval();
+
+  [[nodiscard]] Object::PyObjPtr EvalWithDestory();
 };
 
 using PyFramePtr = std::shared_ptr<PyFrame>;
 
-PyFramePtr CreateFrameWithCode(const Object::PyCodePtr& code);
+PyFramePtr CreateModuleEntryFrame(const Object::PyCodePtr& code);
 
-PyFramePtr CreateFrameWithFunction(
-  const Object::PyObjPtr& _function,
-  const Object::PyObjPtr& _arguments,
-  Object::PyObjPtr caller
+PyFramePtr CreateFrameWithPyFunction(
+  const Object::PyFunctionPtr& function,
+  const Object::PyListPtr& arguments
 );
 
 class FrameKlass : public Object::Klass {

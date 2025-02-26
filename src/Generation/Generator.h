@@ -85,6 +85,8 @@ class Generator : public Python3ParserBaseVisitor {
   antlrcpp::Any visitFor_stmt(Python3Parser::For_stmtContext* ctx) override;
 
   antlrcpp::Any visitExprlist(Python3Parser::ExprlistContext* ctx) override;
+
+  antlrcpp::Any visitClassdef(Python3Parser::ClassdefContext* ctx) override;
 };
 
 }  // namespace torchlight::Generation

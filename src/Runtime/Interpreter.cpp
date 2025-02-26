@@ -1,437 +1,113 @@
 #include "Runtime/Interpreter.h"
-#include "ByteCode/ByteCode.h"
 #include "ByteCode/PyCode.h"
-#include "Collections/IntegerHelper.h"
 #include "Collections/List.h"
 #include "Function/PyFunction.h"
 #include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
-#include "Object/Iterator.h"
-#include "Object/MixinCollections.h"
+#include "Object/Object.h"
 #include "Object/ObjectHelper.h"
-#include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
-#include "Object/PyInteger.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
-#include "Object/PyString.h"
 #include "Object/PyType.h"
 #include "Runtime/Genesis.h"
 #include "Runtime/PyFrame.h"
-#include "Tools/Tools.h"
 
 #include <memory>
 #include <stdexcept>
 namespace torchlight::Runtime {
 
 Interpreter::Interpreter() {
-  frame = Object::PyNone::Instance();
+  frame = nullptr;
   builtins = std::dynamic_pointer_cast<Object::PyDictionary>(Genesis());
 }
 
-void Interpreter::Run(const Object::PyCodePtr& code) {
-  frame = CreateFrameWithCode(code);
-
-  EvalFrame();
-  DestroyFrame();
+Interpreter& Interpreter::Instance() {
+  static Interpreter instance;
+  return instance;
 }
 
-void Interpreter::BuildFrameWithFunction(
-  const Object::PyObjPtr& func,
-  const Object::PyObjPtr& _arguments
+PyFramePtr Interpreter::CurrentFrame() const {
+  return frame;
+}
+
+void Interpreter::SetFrame(const PyFramePtr& child) {
+  frame = child;
+}
+
+void Interpreter::Run(const Object::PyCodePtr& code) {
+  auto result = CreateModuleEntryFrame(code)->EvalWithDestory();
+  if (!Object::IsType(result, Object::NoneKlass::Self())) {
+    throw std::runtime_error("Module code did not return None");
+  }
+}
+
+Object::PyObjPtr Interpreter::EvalConstructor(
+  const Object::PyTypePtr& type,
+  const Object::PyListPtr& arguments
 ) {
-  if (_arguments->Klass() != Object::ListKlass::Self()) {
-    throw std::runtime_error("Cannot build frame with non-list arguments");
+  return type->Owner()->allocateInstance(type, arguments);
+}
+
+Object::PyObjPtr Interpreter::EvalMethod(
+  const Object::PyMethodPtr& func,
+  const Object::PyListPtr& arguments
+) {
+  auto owner = func->Owner();
+  auto function = func->Method();
+  auto extendArguments = std::dynamic_pointer_cast<Object::PyList>(
+    Object::CreatePyList({owner})->add(arguments)
+  );
+  return Eval(function, extendArguments);
+}
+
+Object::PyObjPtr Interpreter::EvalPyFunction(
+  const Object::PyFunctionPtr& func,
+  const Object::PyListPtr& arguments
+) {
+  return CreateFrameWithPyFunction(func, arguments)->EvalWithDestory();
+}
+
+Object::PyObjPtr Interpreter::EvalNativeFunction(
+  const Object::PyNativeFunctionPtr& func,
+  const Object::PyListPtr& arguments
+) {
+  return func->Call(arguments);
+}
+
+Object::PyObjPtr Interpreter::Eval(
+  const Object::PyObjPtr& func,
+  const Object::PyListPtr& arguments
+) {
+  if (Object::IsType(func, Object::MethodKlass::Self())) {
+    auto method = std::dynamic_pointer_cast<Object::PyMethod>(func);
+    return EvalMethod(method, arguments);
   }
-  auto arguments = std::dynamic_pointer_cast<Object::PyList>(_arguments);
-  if (func->Klass() == Object::FunctionKlass::Self()) {
-    PyFramePtr new_frame = CreateFrameWithFunction(func, arguments, frame);
-    frame = new_frame;
-    return;
+  if (Object::IsType(func, Object::FunctionKlass::Self())) {
+    auto pyFunction = std::dynamic_pointer_cast<Object::PyFunction>(func);
+    return EvalPyFunction(pyFunction, arguments);
   }
-  if (func->Klass() == Object::NativeFunctionKlass::Self()) {
+  if (Object::IsType(func, Object::NativeFunctionKlass::Self())) {
     auto nativeFunction =
       std::dynamic_pointer_cast<Object::PyNativeFunction>(func);
-    auto result = nativeFunction->Call(arguments);
-    auto frameObject = std::dynamic_pointer_cast<PyFrame>(frame);
-    frameObject->Stack().Push(result);
-    return;
+    return EvalNativeFunction(nativeFunction, arguments);
   }
-  if (func->Klass() == Object::MethodKlass::Self()) {
-    auto method = std::dynamic_pointer_cast<Object::PyMethod>(func);
-    auto owner = method->Owner();
-    auto function = method->Method();
-    Object::PyObjPtr new_arguments =
-      Object::CreatePyList({owner})->add(arguments);
-    BuildFrameWithFunction(function, new_arguments);
-    return;
-  }
-  if (func->Klass() == Object::TypeKlass::Self()) {
+  if (Object::IsType(func, Object::TypeKlass::Self())) {
     auto type = std::dynamic_pointer_cast<Object::PyType>(func);
-    auto instance = type->Owner()->allocateInstance(type, arguments);
-    auto frameObject = std::dynamic_pointer_cast<PyFrame>(frame);
-    frameObject->Stack().Push(instance);
-    return;
+    return EvalConstructor(type, arguments);
   }
-  throw std::runtime_error(
-    "Unknown function type" + Collections::ToCppString(func->Klass()->Name())
-  );
+  throw std::runtime_error("Unknown function type");
 }
 
-void Interpreter::EvalFrame() {
-  if (frame->Klass() != FrameKlass::Self()) {
-    throw std::runtime_error("Cannot evaluate non-frame object");
-  }
-  while (!std::dynamic_pointer_cast<PyFrame>(frame)->Finished()) {
-    auto frameObject = std::dynamic_pointer_cast<PyFrame>(frame);
-    const auto& inst = frameObject->Instruction();
-    if (ArgsHelper::Instance().Has("debug")) {
-      Object::DebugPrint(Object::CreatePyString("-------------------"));
-      Object::DebugPrint(frameObject);
-    }
-    switch (inst->Code()) {
-      case Object::ByteCode::LOAD_CONST: {
-        auto key = std::get<Index>(inst->Operand());
-        auto value =
-          frameObject->Code()->Consts()->getitem(Object::CreatePyInteger(key));
-        frameObject->Stack().Push(value);
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::STORE_FAST: {
-        auto index = std::get<Index>(inst->Operand());
-        auto value = frameObject->Stack().Pop();
-        frameObject->FastLocals()->setitem(
-          Object::CreatePyInteger(index), value
-        );
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::COMPARE_OP: {
-        auto oprt = std::get<Object::CompareOp>(inst->Operand());
-        auto right = frameObject->Stack().Pop();
-        auto left = frameObject->Stack().Pop();
-        switch (oprt) {
-          case Object::CompareOp::EQUAL: {
-            frameObject->Stack().Push(left->eq(right));
-            auto result = left->eq(right);
-            break;
-          }
-          case Object::CompareOp::NOT_EQUAL: {
-            frameObject->Stack().Push(left->ne(right));
-            auto result = left->ne(right);
-            break;
-          }
-          case Object::CompareOp::LESS_THAN: {
-            frameObject->Stack().Push(left->lt(right));
-            auto result = left->lt(right);
-            break;
-          }
-          case Object::CompareOp::LESS_THAN_EQUAL: {
-            frameObject->Stack().Push(left->le(right));
-            auto result = left->le(right);
-            break;
-          }
-          case Object::CompareOp::GREATER_THAN: {
-            frameObject->Stack().Push(left->gt(right));
-            auto result = left->gt(right);
-            break;
-          }
-          case Object::CompareOp::GREATER_THAN_EQUAL: {
-            frameObject->Stack().Push(left->ge(right));
-            auto result = left->ge(right);
-            break;
-          }
-          case Object::CompareOp::IN: {
-            frameObject->Stack().Push(right->contains(left));
-            auto result = right->contains(left);
-            break;
-          }
-          case Object::CompareOp::NOT_IN: {
-            frameObject->Stack().Push(Not(right->contains(left)));
-            auto result = Not(right->contains(left));
-            break;
-          }
-          case Object::CompareOp::IS: {
-            frameObject->Stack().Push(
-              Object::CreatePyBoolean(left.get() == right.get())
-            );
-            auto result = Object::CreatePyBoolean(left.get() == right.get());
-            break;
-          }
-          case Object::CompareOp::IS_NOT: {
-            frameObject->Stack().Push(
-              Not(Object::CreatePyBoolean(left.get() == right.get()))
-            );
-            auto result = Object::CreatePyBoolean(left.get() != right.get());
-            break;
-          }
-          default:
-            throw std::runtime_error("Unknown compare operation");
-        }
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::POP_JUMP_IF_FALSE: {
-        auto needJump = frameObject->Stack().Pop();
-        if (!(needJump->Klass() == Object::BooleanKlass::Self())) {
-          throw std::runtime_error("Cannot jump if not boolean");
-        }
-        auto bool_needJump =
-          std::dynamic_pointer_cast<Object::PyBoolean>(needJump);
-        if (bool_needJump == nullptr) {
-          throw std::runtime_error("Cannot jump if not boolean");
-        }
-        frameObject->NextProgramCounter();
-        if (!bool_needJump->Value()) {
-          frameObject->SetProgramCounter(Collections::safe_add(
-            frameObject->ProgramCounter(), std::get<int64_t>(inst->Operand())
-          ));
-        }
-        break;
-      }
-      case Object::ByteCode::POP_JUMP_IF_TRUE: {
-        auto needJump = frameObject->Stack().Pop();
-        if (!(needJump->Klass() == Object::BooleanKlass::Self())) {
-          throw std::runtime_error("Cannot jump if not boolean");
-        }
-        auto bool_needJump =
-          std::dynamic_pointer_cast<Object::PyBoolean>(needJump);
-        if (bool_needJump == nullptr) {
-          throw std::runtime_error("Cannot jump if not boolean");
-        }
-        frameObject->NextProgramCounter();
-        if (bool_needJump->Value()) {
-          frameObject->SetProgramCounter(Collections::safe_add(
-            frameObject->ProgramCounter(), std::get<int64_t>(inst->Operand())
-          ));
-        }
-        break;
-      }
-      case Object::ByteCode::BINARY_ADD: {
-        auto right = frameObject->Stack().Pop();
-        auto left = frameObject->Stack().Pop();
-        frameObject->Stack().Push(left->add(right));
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::BINARY_SUBTRACT: {
-        auto right = frameObject->Stack().Pop();
-        auto left = frameObject->Stack().Pop();
-        frameObject->Stack().Push(left->sub(right));
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::BINARY_MULTIPLY: {
-        auto right = frameObject->Stack().Pop();
-        auto left = frameObject->Stack().Pop();
-        frameObject->Stack().Push(left->mul(right));
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::BINARY_MATRIX_MULTIPLY: {
-        auto right = frameObject->Stack().Pop();
-        auto left = frameObject->Stack().Pop();
-        frameObject->Stack().Push(left->matmul(right));
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::BINARY_TRUE_DIVIDE:
-      case Object::ByteCode::BINARY_FLOOR_DIVIDE:
-      case Object::ByteCode::BINARY_XOR:
-      case Object::ByteCode::BINARY_AND:
-      case Object::ByteCode::BINARY_OR:
-      case Object::ByteCode::BINARY_POWER:
-      case Object::ByteCode::BINARY_MODULO:
-      case Object::ByteCode::BINARY_LSHIFT:
-      case Object::ByteCode::BINARY_RSHIFT:
-        break;
-      case Object::ByteCode::BINARY_SUBSCR: {
-        auto index = frameObject->Stack().Pop();
-        auto obj = frameObject->Stack().Pop();
-        frameObject->Stack().Push(obj->getitem(index));
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::RETURN_VALUE: {
-        returnValue = frameObject->Stack().Pop();
-        if (frameObject->HasCaller()) {
-          LeaveFrame();
-        }
-        break;
-      }
-      case Object::ByteCode::MAKE_FUNCTION: {
-        auto name = frameObject->Stack().Pop();
-        if (name->Klass() != Object::StringKlass::Self()) {
-          throw std::runtime_error("Function name must be string");
-        }
-        auto code = frameObject->Stack().Pop();
-        if (code->Klass() != Object::CodeKlass::Self()) {
-          throw std::runtime_error("Function code must be code object");
-        }
-
-        auto func = Object::CreatePyFunction(code, frameObject->Globals());
-        frameObject->Stack().Push(func);
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::LOAD_FAST: {
-        auto index = std::get<Index>(inst->Operand());
-        auto value = frameObject->FastLocals()->GetItem(index);
-        frameObject->Stack().Push(value);
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::CALL_FUNCTION: {
-        auto argumentCount = std::get<Index>(inst->Operand());
-        Collections::List<Object::PyObjPtr> arguments(argumentCount);
-        for (Index i = 0; i < argumentCount; i++) {
-          arguments.Push(frameObject->Stack().Pop());
-        }
-        arguments.Reverse();
-        BuildFrameWithFunction(
-          frameObject->Stack().Pop(), CreatePyList(arguments)
-        );
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::LOAD_GLOBAL: {
-        auto index = std::get<Index>(inst->Operand());
-        auto key = frameObject->Code()->Names()->GetItem(index);
-        bool found = false;
-        Object::PyObjPtr value = Object::CreatePyNone();
-        if (Object::IsTrue(frameObject->Globals()->contains(key))) {
-          found = true;
-          value = frameObject->Globals()->getitem(key);
-        }
-        if (!found && Object::IsTrue(builtins->contains(key))) {
-          found = true;
-          value = builtins->getitem(key);
-        }
-        if (!found) {
-          throw std::runtime_error(
-            "NameError: " + Collections::ToCppString(key) + " not found"
-          );
-        }
-        frameObject->Stack().Push(value);
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::STORE_NAME: {
-        auto index = std::get<Index>(inst->Operand());
-        auto key = frameObject->Code()->Names()->GetItem(index);
-        auto value = frameObject->Stack().Pop();
-        frameObject->Globals()->setitem(key, value);
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::LOAD_NAME: {
-        auto index = std::get<Index>(inst->Operand());
-        auto key = frameObject->Code()->Names()->GetItem(index);
-        // LEGB rule
-        // local -> enclosing -> global -> built-in
-        bool found = false;
-        Object::PyObjPtr value = Object::CreatePyNone();
-        if (Object::IsTrue(frameObject->Locals()->contains(key))) {
-          found = true;
-          value = frameObject->Locals()->getitem(key);
-        }
-        if (!found && Object::IsTrue(frameObject->Globals()->contains(key))) {
-          found = true;
-          value = frameObject->Globals()->getitem(key);
-        }
-        if (!found && Object::IsTrue(builtins->contains(key))) {
-          found = true;
-          value = builtins->getitem(key);
-        }
-        if (!found) {
-          throw std::runtime_error(
-            "NameError: " + Collections::ToCppString(key) + " not found"
-          );
-        }
-        frameObject->Stack().Push(value);
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::POP_TOP: {
-        frameObject->Stack().Pop();
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::LOAD_ATTR: {
-        auto index = std::get<Index>(inst->Operand());
-        auto key = frameObject->Code()->Names()->GetItem(index);
-        auto obj = frameObject->Stack().Pop();
-        auto value = obj->getattr(key);
-        frameObject->Stack().Push(value);
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::BUILD_LIST: {
-        auto size = std::get<Index>(inst->Operand());
-        Collections::List<Object::PyObjPtr> elements(size);
-        for (Index i = 0; i < size; i++) {
-          elements.Push(frameObject->Stack().Pop());
-        }
-        elements.Reverse();
-        auto list = Object::CreatePyList(elements);
-        frameObject->Stack().Push(list);
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::JUMP_ABSOLUTE: {
-        frameObject->SetProgramCounter(std::get<Index>(inst->Operand()));
-        break;
-      }
-      case Object::ByteCode::STORE_SUBSCR: {
-        auto index = frameObject->Stack().Pop();
-        auto obj = frameObject->Stack().Pop();
-        auto value = frameObject->Stack().Pop();
-        obj->setitem(index, value);
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::GET_ITER: {
-        auto obj = frameObject->Stack().Pop();
-        auto iter = obj->iter();
-        frameObject->Stack().Push(iter);
-        frameObject->NextProgramCounter();
-        break;
-      }
-      case Object::ByteCode::FOR_ITER: {
-        auto iter = frameObject->Stack().Pop();
-        auto value = iter->next();
-        if (Object::IsType(value, Object::IterDoneKlass::Self())) {
-          frameObject->SetProgramCounter(Collections::safe_add(
-            frameObject->ProgramCounter(), std::get<int64_t>(inst->Operand())
-          ));
-        } else {
-          frameObject->Stack().Push(iter);
-          frameObject->Stack().Push(value);
-          frameObject->NextProgramCounter();
-        }
-        break;
-      }
-      case Object::ByteCode::ERROR: {
-        throw std::runtime_error("Unknown byte code");
-        break;
-      }
-        throw std::runtime_error("Unknown byte code");
-    }
-  }
+Object::PyDictPtr Interpreter::Builtins() const {
+  return builtins;
 }
 
-void Interpreter::DestroyFrame() {
-  if (frame->Klass() != FrameKlass::Self()) {
+void Interpreter::BackToParentFrame() {
+  if (!Object::IsType(frame, FrameKlass::Self())) {
     throw std::runtime_error("Cannot destroy non-frame object");
   }
   frame = std::dynamic_pointer_cast<PyFrame>(frame)->Caller();
-}
-
-void Interpreter::LeaveFrame() {
-  DestroyFrame();
-  auto frameObject = std::dynamic_pointer_cast<PyFrame>(frame);
-  frameObject->Stack().Push(returnValue);
 }
 
 }  // namespace torchlight::Runtime

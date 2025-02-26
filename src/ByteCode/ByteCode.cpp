@@ -37,6 +37,7 @@ std::map<ByteCode, const char*> ByteCodeNames = {
   {ByteCode::BINARY_OR, "BINARY_OR"},
   {ByteCode::INPLACE_POWER, "INPLACE_POWER"},
   {ByteCode::GET_ITER, "GET_ITER"},
+  {ByteCode::LOAD_BUILD_CLASS, "LOAD_BUILD_CLASS"},
   {ByteCode::INPLACE_LSHIFT, "INPLACE_LSHIFT"},
   {ByteCode::INPLACE_RSHIFT, "INPLACE_RSHIFT"},
   {ByteCode::INPLACE_AND, "INPLACE_AND"},

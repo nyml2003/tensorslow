@@ -82,6 +82,10 @@ PyInstPtr CreateGetIter();
 
 PyInstPtr CreateForIter(Index index);
 
+PyInstPtr CreateLoadBuildClass();
+
+PyInstPtr CreateStoreAttr(Index index);
+
 }  // namespace torchlight::Object
 
 #endif

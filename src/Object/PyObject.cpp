@@ -1,14 +1,12 @@
 #include "Object/PyObject.h"
 #include "Collections/StringHelper.h"
 #include "Function/PyNativeFunction.h"
-#include "Object/Iterator.h"
 #include "Object/MixinCollections.h"
 #include "Object/Object.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
-#include "Object/PyList.h"
 #include "Object/PyNone.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
@@ -29,48 +27,48 @@ KlassPtr PyObject::Klass() const {
 
 PyObject::~PyObject() = default;
 
-PyObjPtr PyObject::add(PyObjPtr other) {
-  return klass->add(shared_from_this(), std::move(other));
+PyObjPtr PyObject::add(const PyObjPtr& other) {
+  return klass->add(shared_from_this(), other);
 }
 
-PyObjPtr PyObject::sub(PyObjPtr other) {
-  return klass->sub(shared_from_this(), std::move(other));
+PyObjPtr PyObject::sub(const PyObjPtr& other) {
+  return klass->sub(shared_from_this(), other);
 }
 
-PyObjPtr PyObject::mul(PyObjPtr other) {
-  return klass->mul(shared_from_this(), std::move(other));
+PyObjPtr PyObject::mul(const PyObjPtr& other) {
+  return klass->mul(shared_from_this(), other);
 }
 
-PyObjPtr PyObject::div(PyObjPtr other) {
-  return klass->div(shared_from_this(), std::move(other));
+PyObjPtr PyObject::div(const PyObjPtr& other) {
+  return klass->div(shared_from_this(), other);
 }
 
-PyObjPtr PyObject::matmul(PyObjPtr other) {
-  return klass->matmul(shared_from_this(), std::move(other));
+PyObjPtr PyObject::matmul(const PyObjPtr& other) {
+  return klass->matmul(shared_from_this(), other);
 }
 
-PyObjPtr PyObject::gt(PyObjPtr other) {
-  return klass->gt(shared_from_this(), std::move(other));
+PyObjPtr PyObject::gt(const PyObjPtr& other) {
+  return klass->gt(shared_from_this(), other);
 }
 
-PyObjPtr PyObject::lt(PyObjPtr other) {
-  return klass->lt(shared_from_this(), std::move(other));
+PyObjPtr PyObject::lt(const PyObjPtr& other) {
+  return klass->lt(shared_from_this(), other);
 }
 
-PyObjPtr PyObject::eq(PyObjPtr other) {
-  return klass->eq(shared_from_this(), std::move(other));
+PyObjPtr PyObject::eq(const PyObjPtr& other) {
+  return klass->eq(shared_from_this(), other);
 }
 
-PyObjPtr PyObject::ge(PyObjPtr other) {
-  return klass->ge(shared_from_this(), std::move(other));
+PyObjPtr PyObject::ge(const PyObjPtr& other) {
+  return klass->ge(shared_from_this(), other);
 }
 
-PyObjPtr PyObject::le(PyObjPtr other) {
-  return klass->le(shared_from_this(), std::move(other));
+PyObjPtr PyObject::le(const PyObjPtr& other) {
+  return klass->le(shared_from_this(), other);
 }
 
-PyObjPtr PyObject::ne(PyObjPtr other) {
-  return klass->ne(shared_from_this(), std::move(other));
+PyObjPtr PyObject::ne(const PyObjPtr& other) {
+  return klass->ne(shared_from_this(), other);
 }
 
 PyObjPtr PyObject::repr() {
@@ -89,32 +87,32 @@ PyObjPtr PyObject::_serialize_() {
   return klass->_serialize_(shared_from_this());
 }
 
-PyObjPtr PyObject::getitem(PyObjPtr key) {
-  return klass->getitem(shared_from_this(), std::move(key));
+PyObjPtr PyObject::getitem(const PyObjPtr& key) {
+  return klass->getitem(shared_from_this(), key);
 }
 
-PyObjPtr PyObject::setitem(PyObjPtr key, PyObjPtr value) {
-  return klass->setitem(shared_from_this(), std::move(key), std::move(value));
+PyObjPtr PyObject::setitem(const PyObjPtr& key, const PyObjPtr& value) {
+  return klass->setitem(shared_from_this(), key, value);
 }
 
-PyObjPtr PyObject::delitem(PyObjPtr key) {
-  return klass->delitem(shared_from_this(), std::move(key));
+PyObjPtr PyObject::delitem(const PyObjPtr& key) {
+  return klass->delitem(shared_from_this(), key);
 }
 
-PyObjPtr PyObject::contains(PyObjPtr key) {
-  return klass->contains(shared_from_this(), std::move(key));
+PyObjPtr PyObject::contains(const PyObjPtr& key) {
+  return klass->contains(shared_from_this(), key);
 }
 
 PyObjPtr PyObject::len() {
   return klass->len(shared_from_this());
 }
 
-PyObjPtr PyObject::getattr(PyObjPtr key) {
-  return klass->getattr(shared_from_this(), std::move(key));
+PyObjPtr PyObject::getattr(const PyObjPtr& key) {
+  return klass->getattr(shared_from_this(), key);
 }
 
-PyObjPtr PyObject::setattr(PyObjPtr key, PyObjPtr value) {
-  return klass->setattr(shared_from_this(), std::move(key), std::move(value));
+PyObjPtr PyObject::setattr(const PyObjPtr& key, const PyObjPtr& value) {
+  return klass->setattr(shared_from_this(), key, value);
 }
 
 bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -133,7 +131,7 @@ bool operator!=(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 void DebugPrint(const PyObjPtr& obj) {
-  auto repr = obj->str();
+  auto repr = obj->repr();
   auto str = std::dynamic_pointer_cast<PyString>(repr)->Value();
   std::cout << Collections::ToCppString(str) << std::endl;
 }
@@ -175,6 +173,7 @@ void ObjectKlass::Initialize() {
   SetName(CreatePyString("object"));
   SetType(CreatePyType(Self()));
   SetAttributes(CreatePyDict());
+  Klass::Initialize();
 }
 
 }  // namespace torchlight::Object

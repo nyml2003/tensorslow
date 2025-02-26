@@ -57,7 +57,7 @@ void DefineOption() {
     "true", "是否显示AST树"
   ));
   schema.Add(Parameter(
-    "show_code_object",
+    "show_code",
     [](const std::string& value) {
       // value 是 "true" 或 "false"
       return value == "true" || value == "";
@@ -98,8 +98,8 @@ void ParseAndGenerate(const fs::path& filePath) {
   visitor.Visit();
   visitor.Emit();
   auto code = visitor.Code();
-  if (ArgsHelper::Instance().Has("show_code_object")) {
-    Object::DebugPrint(code->repr());
+  if (ArgsHelper::Instance().Has("show_code")) {
+    Object::DebugPrint(code->str());
   }
   Collections::Bytes data =
     std::dynamic_pointer_cast<Object::PyBytes>(code->_serialize_())->Value();

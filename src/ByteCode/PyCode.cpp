@@ -115,7 +115,7 @@ KlassPtr CodeKlass::Self() {
   return instance;
 }
 
-PyObjPtr CodeKlass::repr(const PyObjPtr& self) {
+PyObjPtr CodeKlass::str(const PyObjPtr& self) {
   if (self->Klass() != Self()) {
     throw std::runtime_error("PyCode::repr(): obj is not a code object");
   }
@@ -155,17 +155,6 @@ PyObjPtr CodeKlass::repr(const PyObjPtr& self) {
     repr->add(CreatePyString(Collections::CreateStringWithCString("\n</code>\n")
     ));
   return repr;
-}
-
-PyObjPtr CodeKlass::str(const PyObjPtr& self) {
-  // 返回内存地址
-  return CreatePyString(Collections::CreateStringWithCString("<code object "))
-    ->add(std::dynamic_pointer_cast<PyCode>(self)->Name())
-    ->add(CreatePyString(Collections::CreateStringWithCString(" at ")))
-    ->add(CreatePyString(Collections::CreateStringWithCString(
-      std::to_string(reinterpret_cast<uint64_t>(self.get())).c_str()
-    )))
-    ->add(CreatePyString(Collections::CreateStringWithCString(">")));
 }
 
 PyObjPtr CodeKlass::_serialize_(const PyObjPtr& self) {
@@ -297,6 +286,15 @@ void PyCode::GetIter() {
 Index PyCode::ForIter(Index index) {
   instructions->Append(CreateForIter(index));
   return instructions->Length();
+}
+
+void PyCode::LoadBuildClass() {
+  instructions->Append(CreateLoadBuildClass());
+}
+
+void PyCode::StoreAttr(const PyObjPtr& obj) {
+  auto index = IndexOfName(obj);
+  instructions->Append(CreateStoreAttr(index));
 }
 
 PyObjPtr CreatePyCode(const PyObjPtr& name) {

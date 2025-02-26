@@ -1,9 +1,10 @@
-#include <limits>
-#include <stdexcept>
-#include "Collections/DecimalHelper.h"
 #include "Collections/IntegerHelper.h"
+#include "Collections/DecimalHelper.h"
 #include "Collections/Iterator.h"
 #include "Collections/StringHelper.h"
+
+#include <limits>
+#include <stdexcept>
 namespace torchlight::Collections {
 int8_t UnicodeToHex(Unicode unicode) noexcept {
   const Unicode UnicodeDigit_0 = 0x0030;
