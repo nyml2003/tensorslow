@@ -111,6 +111,9 @@ Object::PyObjPtr Genesis() {
       Object::ObjectKlass::Self()->Type()
     )
   );
+  builtins->setitem(
+    Object::CreatePyString("type"), CreatePyNativeFunction(Type)
+  );
 
   return builtins;
 }
@@ -146,6 +149,13 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
   auto type = Object::CreatePyKlass(name, class_dict, base);
   type->Initialize();
   return Object::CreatePyType(type);
+}
+
+Object::PyObjPtr Type(const Object::PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
+  auto obj = args->getitem(Object::CreatePyInteger(0));
+
+  return obj->Klass()->Type();
 }
 
 }  // namespace torchlight::Runtime
