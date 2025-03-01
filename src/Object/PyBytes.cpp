@@ -12,35 +12,6 @@
 
 namespace torchlight::Object {
 
-PyBytes::PyBytes(Collections::Bytes value)
-  : PyObject(BytesKlass::Self()), value(std::move(value)) {}
-
-PyObjPtr CreatePyBytes(Collections::Bytes value) {
-  return std::make_shared<PyBytes>(value);
-}
-
-PyObjPtr CreatePyBytes() {
-  return std::make_shared<PyBytes>(Collections::Bytes());
-}
-
-[[nodiscard]] Collections::Bytes PyBytes::Value() const {
-  return value;
-}
-
-BytesKlass::BytesKlass() = default;
-
-void BytesKlass::Initialize() {
-  SetType(CreatePyType(Self()));
-  SetName(CreatePyString("bytes"));
-  SetAttributes(CreatePyDict());
-  Klass::Initialize();
-}
-
-KlassPtr BytesKlass::Self() {
-  static KlassPtr instance = std::make_shared<BytesKlass>();
-  return instance;
-}
-
 PyObjPtr BytesKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     throw std::runtime_error("PyBytes::add(): lhs or rhs is not a bytes");

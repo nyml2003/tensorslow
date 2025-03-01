@@ -5,45 +5,55 @@
 
 namespace torchlight::Ast {
 
+class FunctionCallKlass : public INodeKlass {
+ public:
+  FunctionCallKlass() = default;
+
+  static Object::KlassPtr Self() {
+    static auto instance = std::make_shared<FunctionCallKlass>();
+    Object::LoadClass(
+      Object::CreatePyString("FunctionCall")->as<Object::PyString>(), instance
+    );
+    Object::ConfigureBasicAttributes(instance);
+    return instance;
+  }
+
+  Object::PyObjPtr
+  visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+
+  Object::PyObjPtr
+  emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+};
+
 class FunctionCall : public INode {
  public:
   FunctionCall(
-    Object::PyObjPtr _func,
-    Object::PyObjPtr _args,
-    Ast::INodePtr parent
-  );
+    const Object::PyObjPtr& _func,
+    const Object::PyObjPtr& _args,
+    INodePtr parent
+  )
+    : INode(FunctionCallKlass::Self(), std::move(parent)),
+      func(_func->as<INode>()),
+      args(_args->as<Object::PyList>()) {}
 
-  [[nodiscard]] Ast::INodePtr Func() const;
+  [[nodiscard]] INodePtr Func() const { return func; }
 
-  [[nodiscard]] Object::PyListPtr Args() const;
+  [[nodiscard]] Object::PyListPtr Args() const { return args; }
 
  private:
-  Ast::INodePtr func;
+  INodePtr func;
   Object::PyListPtr args;
-};
-
-class FunctionCallKlass : public INodeKlass {
- public:
-  FunctionCallKlass();
-
-  static Object::KlassPtr Self();
-
-  Object::PyObjPtr visit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  Object::PyObjPtr emit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  void Initialize() override;
 };
 
 using FunctionCallPtr = std::shared_ptr<FunctionCall>;
 
-Ast::INodePtr CreateFunctionCall(
-  Object::PyObjPtr func,
-  Object::PyObjPtr args,
-  Ast::INodePtr parent
-);
+inline INodePtr CreateFunctionCall(
+  const Object::PyObjPtr& func,
+  const Object::PyObjPtr& args,
+  INodePtr parent
+) {
+  return std::make_shared<FunctionCall>(func, args, std::move(parent));
+}
 
 }  // namespace torchlight::Ast
 

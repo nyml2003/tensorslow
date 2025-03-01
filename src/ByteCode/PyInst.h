@@ -2,8 +2,7 @@
 #define TORCHLIGHT_RUNTIME_PYINST_H
 
 #include "ByteCode/ByteCode.h"
-#include "Object/Klass.h"
-#include "Object/PyObject.h"
+#include "Object/PyString.h"
 
 namespace torchlight::Object {
 
@@ -24,14 +23,18 @@ using PyInstPtr = std::shared_ptr<PyInst>;
 
 class InstKlass : public Klass {
  public:
-  explicit InstKlass();
-  static KlassPtr Self();
+  explicit InstKlass() = default;
+
+  static KlassPtr Self() {
+    static KlassPtr instance = std::make_shared<InstKlass>();
+    LoadClass(CreatePyString("Instruction")->as<PyString>(), instance);
+    ConfigureBasicAttributes(instance);
+    return instance;
+  }
 
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 
   PyObjPtr repr(const PyObjPtr& obj) override;
-
-  void Initialize() override;
 };
 
 PyInstPtr CreateLoadConst(Index index);

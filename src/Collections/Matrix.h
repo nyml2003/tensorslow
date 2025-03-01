@@ -38,7 +38,7 @@ class Matrix {
 
   [[nodiscard]] Matrix MatrixMultiply(const Matrix& other) const;
 
-  static Matrix eye(Index n);
+  static Matrix Eye(Index n);
 };
 
 }  // namespace torchlight::Collections

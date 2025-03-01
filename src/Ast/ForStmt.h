@@ -6,48 +6,61 @@
 
 namespace torchlight::Ast {
 
+class ForStmtKlass : public INodeKlass {
+ public:
+  explicit ForStmtKlass() = default;
+
+  static Object::KlassPtr Self() {
+    static auto instance = std::make_shared<ForStmtKlass>();
+    LoadClass(
+      Object::CreatePyString("ForStmt")->as<Object::PyString>(), instance
+    );
+    ConfigureBasicAttributes(instance);
+    return instance;
+  }
+
+  Object::PyObjPtr
+  visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+
+  Object::PyObjPtr
+  emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+};
+
 class ForStmt : public INode {
  public:
   explicit ForStmt(
-    Ast::INodePtr target,
-    Ast::INodePtr iter,
+    INodePtr target,
+    INodePtr iter,
     Object::PyObjPtr body,
-    Ast::INodePtr parent
-  );
+    INodePtr parent
+  )
+    : INode(ForStmtKlass::Self(), std::move(parent)),
+      target(std::move(target)),
+      iter(std::move(iter)),
+      body(body->as<Object::PyList>()) {}
 
-  Ast::INodePtr Target() const;
+  INodePtr Target() const { return target; }
 
-  Ast::INodePtr Iter() const;
+  INodePtr Iter() const { return iter; }
 
-  Object::PyListPtr Body() const;
+  Object::PyListPtr Body() const { return body; }
 
  private:
-  Ast::INodePtr target;
-  Ast::INodePtr iter;
+  INodePtr target;
+  INodePtr iter;
   Object::PyListPtr body;
 };
 
-Ast::INodePtr CreateForStmt(
-  Ast::INodePtr target,
-  Ast::INodePtr iter,
+inline INodePtr CreateForStmt(
+  INodePtr target,
+  INodePtr iter,
   Object::PyObjPtr body,
-  Ast::INodePtr parent
-);
-
-class ForStmtKlass : public INodeKlass {
- public:
-  explicit ForStmtKlass();
-
-  static Object::KlassPtr Self();
-
-  Object::PyObjPtr visit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  Object::PyObjPtr emit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  void Initialize() override;
-};
+  INodePtr parent
+) {
+  return std::make_shared<ForStmt>(
+    std::move(target), std::move(iter), std::move(body), std::move(parent)
+  );
+}
 
 }  // namespace torchlight::Ast
 

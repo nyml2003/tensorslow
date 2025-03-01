@@ -1,36 +1,15 @@
 #include "Ast/Identifier.h"
 #include "ByteCode/PyCode.h"
 #include "Object/PyBoolean.h"
-#include "Object/PyDictionary.h"
 #include "Object/PyNone.h"
 #include "Object/PyString.h"
-#include "Object/PyType.h"
 
 namespace torchlight::Ast {
 
-Identifier::Identifier(Object::PyObjPtr _name, Ast::INodePtr parent)
-  : INode(IdentifierKlass::Self(), std::move(parent)),
-    name(std::dynamic_pointer_cast<Object::PyString>(_name)) {}
-
-Object::PyStrPtr Identifier::Name() const {
-  return name;
-}
-
-IdentifierKlass::IdentifierKlass() = default;
-
-void IdentifierKlass::Initialize() {
-  SetName(Object::CreatePyString("Identifier"));
-  SetType(CreatePyType(Self()));
-  SetAttributes(Object::CreatePyDict());
-  Klass::Initialize();
-}
-
-Ast::INodePtr CreateIdentifier(Object::PyObjPtr name, Ast::INodePtr parent) {
-  return std::make_shared<Identifier>(name, parent);
-}
-
-Object::PyObjPtr
-IdentifierKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
+Object::PyObjPtr IdentifierKlass::visit(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& codeList
+) {
   auto builtinStr = Object::CreatePyList(
     {Object::CreatePyString("print"),     Object::CreatePyString("matrix"),
      Object::CreatePyString("reshape"),   Object::CreatePyString("len"),
@@ -41,7 +20,7 @@ IdentifierKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
      Object::CreatePyString("input"),     Object::CreatePyString("int"),
      Object::CreatePyString("float"),     Object::CreatePyString("str"),
      Object::CreatePyString("list"),      Object::CreatePyString("object"),
-     Object::CreatePyString("type"),       Object::CreatePyString("dict")}
+     Object::CreatePyString("type"),      Object::CreatePyString("dict")}
   );
   auto identifier = std::dynamic_pointer_cast<Identifier>(obj);
   auto code = GetCodeFromList(codeList, identifier);
@@ -58,8 +37,10 @@ IdentifierKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   return Object::CreatePyNone();
 }
 
-Object::PyObjPtr
-IdentifierKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
+Object::PyObjPtr IdentifierKlass::emit(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& codeList
+) {
   auto identifier = std::dynamic_pointer_cast<Identifier>(obj);
   auto code = GetCodeFromList(codeList, identifier);
 
@@ -78,11 +59,6 @@ IdentifierKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
     }
   }
   return Object::CreatePyNone();
-}
-
-Object::KlassPtr IdentifierKlass::Self() {
-  static Object::KlassPtr instance = std::make_shared<IdentifierKlass>();
-  return instance;
 }
 
 }  // namespace torchlight::Ast

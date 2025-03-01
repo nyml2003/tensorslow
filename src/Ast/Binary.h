@@ -2,7 +2,28 @@
 #define TORCHLIGHT_AST_BINARY_H
 
 #include "Ast/INode.h"
+
 namespace torchlight::Ast {
+
+class BinaryKlass : public INodeKlass {
+ public:
+  explicit BinaryKlass() = default;
+
+  static Object::KlassPtr Self() {
+    static auto instance = std::make_shared<BinaryKlass>();
+    Object::LoadClass(
+      Object::CreatePyString("Binary")->as<Object::PyString>(), instance
+    );
+    Object::ConfigureBasicAttributes(instance);
+    return instance;
+  }
+
+  Object::PyObjPtr
+  visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+
+  Object::PyObjPtr
+  emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+};
 
 class Binary : public Ast::INode {
  public:
@@ -28,48 +49,34 @@ class Binary : public Ast::INode {
     SUBSCR,     // []
   };
 
-  explicit Binary(
-    Operator oprt,
-    Ast::INodePtr left,
-    Ast::INodePtr right,
-    Ast::INodePtr parent
-  );
+  explicit Binary(Operator oprt, INodePtr left, INodePtr right, INodePtr parent)
+    : INode(BinaryKlass::Self(), std::move(parent)),
+      oprt(oprt),
+      left(std::move(left)),
+      right(std::move(right)) {}
 
-  [[nodiscard]] Ast::INodePtr Left() const;
+  [[nodiscard]] INodePtr Left() const { return left; }
 
-  [[nodiscard]] Ast::INodePtr Right() const;
+  [[nodiscard]] INodePtr Right() const { return right; }
 
-  [[nodiscard]] Operator Oprt() const;
+  [[nodiscard]] Operator Oprt() const { return oprt; }
 
  private:
   Operator oprt;
-  Ast::INodePtr parent;
-  Ast::INodePtr left;
-  Ast::INodePtr right;
+  INodePtr left;
+  INodePtr right;
 };
 
-class BinaryKlass : public INodeKlass {
- public:
-  BinaryKlass();
-
-  static Object::KlassPtr Self();
-
-  Object::PyObjPtr visit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  Object::PyObjPtr emit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  void Initialize() override;
-};
-
-using BinaryPtr = std::shared_ptr<Binary>;
-Ast::INodePtr CreateBinary(
+inline INodePtr CreateBinary(
   Binary::Operator oprt,
-  Ast::INodePtr left,
-  Ast::INodePtr right,
-  Ast::INodePtr parent
-);
+  INodePtr left,
+  INodePtr right,
+  INodePtr parent
+) {
+  return std::make_shared<Binary>(
+    oprt, std::move(left), std::move(right), std::move(parent)
+  );
+}
 
 }  // namespace torchlight::Ast
 

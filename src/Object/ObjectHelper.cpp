@@ -1,8 +1,5 @@
 #include "Object/ObjectHelper.h"
-#include "ByteCode/PyCode.h"
-#include "ByteCode/PyInst.h"
 #include "Function/PyFunction.h"
-#include "Function/PyIife.h"
 #include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/Iterator.h"
@@ -10,16 +7,12 @@
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyList.h"
-#include "Object/PyMatrix.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
-#include "Runtime/Interpreter.h"
 #include "Runtime/PyFrame.h"
-
-#include <memory>
-
+#include "Collections/IntegerHelper.h"
 namespace torchlight::Object {
 
 PyObjPtr Invoke(
@@ -49,48 +42,36 @@ PyObjPtr Invoke(
 }
 
 void BasicKlassLoad() {
-  Object::StringKlass::Self()->Initialize();
-  Object::BooleanKlass::Self()->Initialize();
-  Object::NoneKlass::Self()->Initialize();
-  Object::ListKlass::Self()->Initialize();
-  Object::DictionaryKlass::Self()->Initialize();
-  Object::TypeKlass::Self()->Initialize();
-  Object::MethodKlass::Self()->Initialize();
-  Object::NativeFunctionKlass::Self()->Initialize();
-  Object::FunctionKlass::Self()->Initialize();
-  Object::InstKlass::Self()->Initialize();
-  Object::CodeKlass::Self()->Initialize();
-  Object::IntegerKlass::Self()->Initialize();
-  Object::BytesKlass::Self()->Initialize();
-  Object::MatrixKlass::Self()->Initialize();
-  Object::IifeKlass::Self()->Initialize();
-  Object::IterDoneKlass::Self()->Initialize();
-  Object::ListIteratorKlass::Self()->Initialize();
-  Object::ObjectKlass::Self()->Initialize();
-}
-
-bool IsType(const PyObjPtr& obj, const KlassPtr& type) {
-  return obj->Klass() == type;
+  Object::StringKlass::Initialize();
+  Object::ListKlass::Initialize();
+  Object::DictionaryKlass::Initialize();
+  Object::TypeKlass::Initialize();
+  Object::BooleanKlass::Initialize();
+  Object::NativeFunctionKlass::Initialize();
 }
 
 void ForEach(
   const PyObjPtr& obj,
   const std::function<
-    void(const PyObjPtr& value, Index index, const PyObjPtr& list)>& func
+    void(const PyObjPtr& value, Index index, const PyObjPtr& obj)>& func
 ) {
-  auto iter = std::dynamic_pointer_cast<ListIterator>(obj->iter());
+  auto iter = obj->iter();
+  auto iterable = std::dynamic_pointer_cast<IIterator>(iter);
+  if (!iterable) {
+    throw std::runtime_error("object is not iterable");
+  }
   auto value = iter->next();
-  while (!IsType(value, IterDoneKlass::Self())) {
-    func(value, iter->Index(), obj);
+  while (!value->is<IterDone>()) {
+    func(value, iterable->CurrentIndex(), obj);
     value = iter->next();
   }
 }
 
-PyObjPtr SetItem(const PyObjPtr& args) {
-  auto self = args->getitem(CreatePyInteger(0));
-  auto key = args->getitem(CreatePyInteger(1));
-  auto value = args->getitem(CreatePyInteger(2));
-  return self->setitem(key, value);
+PyObjPtr Identity(const PyObjPtr& obj) {
+  return CreatePyString(
+    Collections::CreateIntegerWithU64(reinterpret_cast<uint64_t>(obj.get()))
+      .ToHexString()
+  );
 }
 
 }  // namespace torchlight::Object

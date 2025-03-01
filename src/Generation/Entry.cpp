@@ -1,4 +1,4 @@
-#include "Ast/AstHelper.h"
+
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
 #include "Generation/Generator.h"
@@ -14,7 +14,6 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <vector>
 
 namespace fs = std::filesystem;
 using antlr4::ANTLRInputStream;
@@ -69,7 +68,6 @@ void DefineOption() {
 
 void InitPyObj() {
   Object::BasicKlassLoad();
-  Ast::AstKlassLoad();
 }
 
 // 使用ANTLR解析文件
@@ -98,7 +96,7 @@ void ParseAndGenerate(const fs::path& filePath) {
   visitor.Visit();
   visitor.Emit();
   auto code = visitor.Code();
-  if (ArgsHelper::Instance().Has("show_code")) {
+  if (ArgsHelper::Instance().Has("show_code") || true) {
     Object::DebugPrint(code->str());
   }
   Collections::Bytes data =

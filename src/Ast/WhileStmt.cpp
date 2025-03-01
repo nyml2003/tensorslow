@@ -1,55 +1,15 @@
 #include "Ast/WhileStmt.h"
 #include "Ast/INode.h"
 #include "ByteCode/PyInst.h"
-#include "Collections/Iterator.h"
 #include "Object/ObjectHelper.h"
-#include "Object/PyDictionary.h"
-#include "Object/PyInteger.h"
 #include "Object/PyNone.h"
-#include "Object/PyString.h"
-#include "Object/PyType.h"
 
 namespace torchlight::Ast {
 
-WhileStmt::WhileStmt(
-  Ast::INodePtr condition,
-  Object::PyListPtr body,
-  Ast::INodePtr parent
-)
-  : INode(WhileStmtKlass::Self(), std::move(parent)),
-    condition(std::move(condition)),
-    body(std::move(body)) {}
-
-Ast::INodePtr WhileStmt::Condition() const {
-  return condition;
-}
-
-Object::PyListPtr WhileStmt::Body() const {
-  return body;
-}
-
-Ast::INodePtr CreateWhileStmt(
-  Ast::INodePtr condition,
-  Object::PyObjPtr body,
-  Ast::INodePtr parent
+Object::PyObjPtr WhileStmtKlass::visit(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& codeList
 ) {
-  return std::make_shared<WhileStmt>(
-    std::move(condition), std::dynamic_pointer_cast<Object::PyList>(body),
-    parent
-  );
-}
-
-void WhileStmtKlass::Initialize() {
-  SetName(Object::CreatePyString("WhileStmt"));
-  SetType(CreatePyType(Self()));
-  SetAttributes(Object::CreatePyDict());
-  Klass::Initialize();
-}
-
-WhileStmtKlass::WhileStmtKlass() = default;
-
-Object::PyObjPtr
-WhileStmtKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto stmt = std::dynamic_pointer_cast<WhileStmt>(obj);
   auto condition = stmt->Condition();
   auto body = stmt->Body();
@@ -64,34 +24,31 @@ WhileStmtKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   return Object::CreatePyNone();
 }
 
-Object::PyObjPtr
-WhileStmtKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
+Object::PyObjPtr WhileStmtKlass::emit(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& codeList
+) {
   auto stmt = std::dynamic_pointer_cast<WhileStmt>(obj);
   auto condition = stmt->Condition();
   auto body = stmt->Body();
   auto code = GetCodeFromList(codeList, stmt);
-  auto condBegin = Object::ToU64(code->Instructions()->len());
+  auto condBegin =code->Instructions()->Length();
   condition->emit(codeList);
   auto jumpStart = code->PopJumpIfFalse();
   Object::ForEach(
     body,
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
-      stmtObj->emit(codeList);
+    auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
+    stmtObj->emit(codeList);
     }
   );
   code->JumpAbsolute(condBegin);
-  auto jumpEnd = Object::ToU64(code->Instructions()->len());
+  auto jumpEnd = code->Instructions()->Length();
   auto offset = static_cast<int64_t>(jumpEnd - jumpStart);
   code->Instructions()->SetItem(
     jumpStart - 1, Object::CreatePopJumpIfFalse(offset)
   );
   return Object::CreatePyNone();
-}
-
-Object::KlassPtr WhileStmtKlass::Self() {
-  static Object::KlassPtr instance = std::make_shared<WhileStmtKlass>();
-  return instance;
 }
 
 }  // namespace torchlight::Ast

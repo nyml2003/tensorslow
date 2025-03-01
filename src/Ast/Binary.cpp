@@ -1,56 +1,13 @@
 #include "Ast/Binary.h"
-#include "ByteCode/PyCode.h"
 #include "ByteCode/PyInst.h"
-#include "Object/PyDictionary.h"
 #include "Object/PyNone.h"
-#include "Object/PyString.h"
-#include "Object/PyType.h"
 
 namespace torchlight::Ast {
 
-Binary::Binary(
-  Operator oprt,
-  Ast::INodePtr left,
-  Ast::INodePtr right,
-  Ast::INodePtr parent
-)
-  : INode(BinaryKlass::Self(), std::move(parent)),
-    oprt(oprt),
-    left(std::move(left)),
-    right(std::move(right)) {}
-
-Ast::INodePtr Binary::Left() const {
-  return left;
-}
-
-Ast::INodePtr Binary::Right() const {
-  return right;
-}
-
-Binary::Operator Binary::Oprt() const {
-  return oprt;
-}
-
-Ast::INodePtr CreateBinary(
-  Binary::Operator oprt,
-  Ast::INodePtr left,
-  Ast::INodePtr right,
-  Ast::INodePtr parent
+Object::PyObjPtr BinaryKlass::visit(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& codeList
 ) {
-  return std::make_shared<Binary>(
-    oprt, std::move(left), std::move(right), parent
-  );
-}
-
-void BinaryKlass::Initialize() {
-  SetName(Object::CreatePyString("Binary"));
-  SetType(CreatePyType(Self()));
-  SetAttributes(Object::CreatePyDict());
-  Klass::Initialize();
-}
-
-Object::PyObjPtr
-BinaryKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto binary = std::dynamic_pointer_cast<Binary>(obj);
   auto left = binary->Left();
   auto right = binary->Right();
@@ -58,8 +15,10 @@ BinaryKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   right->visit(codeList);
   return Object::CreatePyNone();
 }
-Object::PyObjPtr
-BinaryKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
+Object::PyObjPtr BinaryKlass::emit(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& codeList
+) {
   auto binary = std::dynamic_pointer_cast<Binary>(obj);
   auto left = binary->Left();
   auto right = binary->Right();
@@ -120,13 +79,6 @@ BinaryKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto code = GetCodeFromList(codeList, binary);
   code->Instructions()->Append(inst);
   return Object::CreatePyNone();
-}
-
-BinaryKlass::BinaryKlass() = default;
-
-Object::KlassPtr BinaryKlass::Self() {
-  static Object::KlassPtr instance = std::make_shared<BinaryKlass>();
-  return instance;
 }
 
 }  // namespace torchlight::Ast

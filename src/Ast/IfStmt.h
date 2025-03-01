@@ -5,43 +5,55 @@
 
 namespace torchlight::Ast {
 
+class IfStmtKlass : public INodeKlass {
+ public:
+  explicit IfStmtKlass() = default;
+
+  static Object::KlassPtr Self() {
+    static auto instance = std::make_shared<IfStmtKlass>();
+    LoadClass(
+      Object::CreatePyString("IfStmt")->as<Object::PyString>(), instance
+    );
+    ConfigureBasicAttributes(instance);
+    return instance;
+  }
+
+  Object::PyObjPtr
+  visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+
+  Object::PyObjPtr
+  emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+};
+
 class IfStmt : public INode {
  public:
   explicit IfStmt(
-    Ast::INodePtr condition,
+    INodePtr condition,
     Object::PyListPtr thenStmts,
-    Ast::INodePtr parent
-  );
+    INodePtr parent
+  )
+    : INode(IfStmtKlass::Self(), std::move(parent)),
+      condition(std::move(condition)),
+      thenStmts(std::move(thenStmts)) {}
 
-  Ast::INodePtr Condition() const;
+  [[nodiscard]] INodePtr Condition() const { return condition; }
 
-  Object::PyListPtr ThenStmts() const;
+  [[nodiscard]] Object::PyListPtr ThenStmts() const { return thenStmts; }
 
  private:
-  Ast::INodePtr condition;
+  INodePtr condition;
   Object::PyListPtr thenStmts;
 };
 
-Ast::INodePtr CreateIfStmt(
-  Ast::INodePtr condition,
-  Object::PyObjPtr thenStmts,
-  Ast::INodePtr parent
-);
-
-class IfStmtKlass : public INodeKlass {
- public:
-  explicit IfStmtKlass();
-
-  static Object::KlassPtr Self();
-
-  Object::PyObjPtr visit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  Object::PyObjPtr emit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  void Initialize() override;
-};
+inline INodePtr CreateIfStmt(
+  const INodePtr& condition,
+  const Object::PyObjPtr& thenStmts,
+  INodePtr parent
+) {
+  return std::make_shared<IfStmt>(
+    condition, thenStmts->as<Object::PyList>(), std::move(parent)
+  );
+}
 
 }  // namespace torchlight::Ast
 

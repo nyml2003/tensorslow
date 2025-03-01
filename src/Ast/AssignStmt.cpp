@@ -4,55 +4,20 @@
 #include "Ast/Identifier.h"
 #include "Ast/MemberAccess.h"
 #include "Object/PyBoolean.h"
-#include "Object/PyDictionary.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
-#include "Object/PyString.h"
-#include "Object/PyType.h"
 
 namespace torchlight::Ast {
 
-AssignStmt::AssignStmt(
-  Ast::INodePtr target,
-  Ast::INodePtr source,
-  Ast::INodePtr parent
-)
-  : INode(AssignStmtKlass::Self(), std::move(parent)),
-    target(std::move(target)),
-    source(std::move(source)) {}
-
-Ast::INodePtr AssignStmt::Target() const {
-  return target;
-}
-
-Ast::INodePtr AssignStmt::Source() const {
-  return source;
-}
-
-Ast::INodePtr CreateAssignStmt(
-  Ast::INodePtr target,
-  Ast::INodePtr source,
-  Ast::INodePtr parent
+Object::PyObjPtr AssignStmtKlass::emit(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& codeList
 ) {
-  return std::make_shared<AssignStmt>(target, source, parent);
-}
-
-void AssignStmtKlass::Initialize() {
-  SetName(Object::CreatePyString("AssignStmt"));
-  SetType(CreatePyType(Self()));
-  SetAttributes(Object::CreatePyDict());
-  Klass::Initialize();
-}
-
-AssignStmtKlass::AssignStmtKlass() = default;
-
-Object::PyObjPtr
-AssignStmtKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto assignStmt = std::dynamic_pointer_cast<AssignStmt>(obj);
   auto source = assignStmt->Source();
   source->emit(codeList);
   auto target = assignStmt->Target();
-  
+
   if (target->Klass() == IdentifierKlass::Self()) {
     auto targetIdentifier = std::dynamic_pointer_cast<Identifier>(target);
     auto name = targetIdentifier->Name();
@@ -66,10 +31,10 @@ AssignStmtKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   } else if (target->Klass() == MemberAccessKlass::Self()) {
     auto memberAccess = std::dynamic_pointer_cast<MemberAccess>(target);
     auto object = memberAccess->Obj();
-  object->emit(codeList);
-  auto member = memberAccess->Member();
-  auto code = GetCodeFromList(codeList, memberAccess);
-  code->StoreAttr(member);
+    object->emit(codeList);
+    auto member = memberAccess->Member();
+    auto code = GetCodeFromList(codeList, memberAccess);
+    code->StoreAttr(member);
   } else if (target->Klass() == BinaryKlass::Self()) {
     auto binary = std::dynamic_pointer_cast<Binary>(target);
     auto oprt = binary->Oprt();
@@ -87,8 +52,10 @@ AssignStmtKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   return Object::CreatePyNone();
 }
 
-Object::PyObjPtr
-AssignStmtKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
+Object::PyObjPtr AssignStmtKlass::visit(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& codeList
+) {
   auto assignStmt = std::dynamic_pointer_cast<AssignStmt>(obj);
   auto source = assignStmt->Source();
   source->visit(codeList);
@@ -124,11 +91,6 @@ AssignStmtKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
     return Object::CreatePyNone();
   }
   return Object::CreatePyNone();
-}
-
-Object::KlassPtr AssignStmtKlass::Self() {
-  static Object::KlassPtr instance = std::make_shared<AssignStmtKlass>();
-  return instance;
 }
 
 }  // namespace torchlight::Ast

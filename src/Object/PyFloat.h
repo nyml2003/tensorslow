@@ -1,29 +1,22 @@
 #ifndef TORCHLIGHT_OBJECT_PYFLOAT_H
 #define TORCHLIGHT_OBJECT_PYFLOAT_H
 
-#include "Object/Klass.h"
-#include "Object/PyObject.h"
+#include "Object/PyString.h"
 
 namespace torchlight::Object {
 
-class PyFloat : public PyObject {
- private:
-  double value;
-
- public:
-  explicit PyFloat(double value);
-
-  [[nodiscard]] double Value() const;
-};
-
 class FloatKlass : public Klass {
  public:
-  explicit FloatKlass();
+  explicit FloatKlass() = default;
+  
+  static KlassPtr Self() {
+    static KlassPtr instance = std::make_shared<FloatKlass>();
+    LoadClass(CreatePyString("float")->as<PyString>(), instance);
+    ConfigureBasicAttributes(instance);
+    return instance;
+  }
 
-  static KlassPtr Self();
-
-  PyObjPtr allocateInstance(const PyObjPtr& klass, const PyObjPtr& args)
-    override;
+  PyObjPtr construct(const PyObjPtr& klass, const PyObjPtr& args) override;
 
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
@@ -38,11 +31,21 @@ class FloatKlass : public Klass {
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
-  void Initialize() override;
 };
 
-PyObjPtr CreatePyFloat(double value);
+class PyFloat : public PyObject {
+ private:
+  double value;
+
+ public:
+  explicit PyFloat(double value) : PyObject(FloatKlass::Self()), value(value) {}
+
+  [[nodiscard]] double Value() const { return value; }
+};
+
+inline PyObjPtr CreatePyFloat(double value) {
+  return std::make_shared<PyFloat>(value);
+}
 using PyFloatPtr = std::shared_ptr<PyFloat>;
 }  // namespace torchlight::Object
 

@@ -18,31 +18,31 @@ class Interpreter {
  public:
   static Interpreter& Instance();
 
-  void Run(const Object::PyCodePtr& code);
+  static void Run(const Object::PyCodePtr& code);
 
   [[nodiscard]] Object::PyDictPtr Builtins() const;
 
-  [[nodiscard]] Object::PyObjPtr EvalNativeFunction(
+  [[nodiscard]] static Object::PyObjPtr EvalNativeFunction(
     const Object::PyNativeFunctionPtr& func,
     const Object::PyListPtr& arguments
   );
 
-  [[nodiscard]] Object::PyObjPtr EvalMethod(
+  [[nodiscard]] static Object::PyObjPtr EvalMethod(
     const Object::PyMethodPtr& func,
     const Object::PyListPtr& arguments
   );
 
-  [[nodiscard]] Object::PyObjPtr EvalConstructor(
+  [[nodiscard]] static Object::PyObjPtr EvalConstructor(
     const Object::PyTypePtr& type,
     const Object::PyListPtr& arguments
   );
 
-  [[nodiscard]] Object::PyObjPtr EvalPyFunction(
+  [[nodiscard]] static Object::PyObjPtr EvalPyFunction(
     const Object::PyFunctionPtr& func,
     const Object::PyListPtr& arguments
   );
 
-  [[nodiscard]] Object::PyObjPtr
+  [[nodiscard]] static Object::PyObjPtr
   Eval(const Object::PyObjPtr& func, const Object::PyListPtr& arguments);
 
   void BackToParentFrame();

@@ -3,58 +3,14 @@
 #include "Ast/Identifier.h"
 #include "ByteCode/PyInst.h"
 #include "Object/ObjectHelper.h"
-#include "Object/PyDictionary.h"
 #include "Object/PyNone.h"
-#include "Object/PyString.h"
-#include "Object/PyType.h"
 
 namespace torchlight::Ast {
 
-ForStmt::ForStmt(
-  Ast::INodePtr target,
-  Ast::INodePtr iter,
-  Object::PyObjPtr body,
-  Ast::INodePtr parent
-)
-  : INode(ForStmtKlass::Self(), std::move(parent)),
-    target(std::move(target)),
-    iter(std::move(iter)),
-    body(std::dynamic_pointer_cast<Object::PyList>(body)) {}
-
-Ast::INodePtr ForStmt::Target() const {
-  return target;
-}
-
-Ast::INodePtr ForStmt::Iter() const {
-  return iter;
-}
-
-Object::PyListPtr ForStmt::Body() const {
-  return body;
-}
-
-Ast::INodePtr CreateForStmt(
-  Ast::INodePtr target,
-  Ast::INodePtr iter,
-  Object::PyObjPtr body,
-  Ast::INodePtr parent
+Object::PyObjPtr ForStmtKlass::emit(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& codeList
 ) {
-  return std::make_shared<ForStmt>(
-    std::move(target), std::move(iter), std::move(body), std::move(parent)
-  );
-}
-
-void ForStmtKlass::Initialize() {
-  SetName(Object::CreatePyString("ForStmt"));
-  SetType(CreatePyType(Self()));
-  SetAttributes(Object::CreatePyDict());
-  Klass::Initialize();
-}
-
-ForStmtKlass::ForStmtKlass() = default;
-
-Object::PyObjPtr
-ForStmtKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto stmt = std::dynamic_pointer_cast<ForStmt>(obj);
   auto iter = stmt->Iter();
   iter->emit(codeList);
@@ -62,7 +18,7 @@ ForStmtKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   code->GetIter();
   Index start = code->ForIter(0);
   auto target = stmt->Target();
-  if (Object::IsType(target, IdentifierKlass::Self())) {
+  if (target->is<Identifier>()) {
     auto identifier = std::dynamic_pointer_cast<Identifier>(target);
     code->StoreName(identifier->Name());
   } else {
@@ -84,14 +40,16 @@ ForStmtKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   return Object::CreatePyNone();
 }
 
-Object::PyObjPtr
-ForStmtKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
+Object::PyObjPtr ForStmtKlass::visit(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& codeList
+) {
   auto stmt = std::dynamic_pointer_cast<ForStmt>(obj);
   auto target = stmt->Target();
   auto iter = stmt->Iter();
   auto body = stmt->Body();
   iter->visit(codeList);
-  if (Object::IsType(target, IdentifierKlass::Self())) {
+  if (target->is<Identifier>()) {
     auto identifier = std::dynamic_pointer_cast<Identifier>(target);
     auto code = GetCodeFromList(codeList, stmt);
     code->RegisterName(identifier->Name());
@@ -107,11 +65,6 @@ ForStmtKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
     }
   );
   return Object::CreatePyNone();
-}
-
-Object::KlassPtr ForStmtKlass::Self() {
-  static Object::KlassPtr instance = std::make_shared<ForStmtKlass>();
-  return instance;
 }
 
 }  // namespace torchlight::Ast

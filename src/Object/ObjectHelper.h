@@ -1,10 +1,9 @@
 #ifndef TORCHLIGHT_OBJECT_HELPER_H
 #define TORCHLIGHT_OBJECT_HELPER_H
+#include "Common.h"
+#include "Object/PyObject.h"
 
 #include <functional>
-#include "Common.h"
-#include "Object/Object.h"
-#include "Object/PyObject.h"
 
 namespace torchlight::Object {
 PyObjPtr Invoke(
@@ -13,14 +12,12 @@ PyObjPtr Invoke(
   std::initializer_list<PyObjPtr> arguments
 );
 void BasicKlassLoad();
-bool IsType(const PyObjPtr& obj, const KlassPtr& type);
 void ForEach(
   const PyObjPtr& obj,
   const std::function<
-    void(const PyObjPtr& value, Index index, const PyObjPtr& list)>& func
+    void(const PyObjPtr& value, Index index, const PyObjPtr& obj)>& func
 );
-
-PyObjPtr SetItem(const PyObjPtr& args);
+PyObjPtr Identity(const PyObjPtr& obj);
 
 }  // namespace torchlight::Object
 

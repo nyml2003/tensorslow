@@ -5,34 +5,43 @@
 
 namespace torchlight::Ast {
 
+class IdentifierKlass : public INodeKlass {
+ public:
+  IdentifierKlass() = default;
+
+  static Object::KlassPtr Self() {
+    static auto instance = std::make_shared<IdentifierKlass>();
+    Object::LoadClass(
+      Object::CreatePyString("Identifier")->as<Object::PyString>(), instance
+    );
+    Object::ConfigureBasicAttributes(instance);
+    return instance;
+  }
+
+  Object::PyObjPtr
+  visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+  Object::PyObjPtr
+  emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+};
+
 class Identifier : public INode {
  public:
-  explicit Identifier(Object::PyObjPtr _name, Ast::INodePtr parent);
+  explicit Identifier(const Object::PyObjPtr& _name, const INodePtr& parent)
+    : INode(IdentifierKlass::Self(), std::move(parent)),
+      name(_name->as<Object::PyString>()) {}
 
-  [[nodiscard]] Object::PyStrPtr Name() const;
+  [[nodiscard]] Object::PyStrPtr Name() const { return name; }
 
  private:
   Object::PyStrPtr name;
 };
 
-class IdentifierKlass : public INodeKlass {
- public:
-  IdentifierKlass();
-
-  static Object::KlassPtr Self();
-
-  Object::PyObjPtr visit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-  Object::PyObjPtr emit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  void Initialize() override;
-};
-
 using IdentifierPtr = std::shared_ptr<Identifier>;
 
-Ast::INodePtr CreateIdentifier(Object::PyObjPtr name, Ast::INodePtr parent);
-
+inline INodePtr
+CreateIdentifier(const Object::PyObjPtr& name, INodePtr parent) {
+  return std::make_shared<Identifier>(name, parent);
+}
 }  // namespace torchlight::Ast
 
 #endif

@@ -4,35 +4,45 @@
 #include "Ast/INode.h"
 
 namespace torchlight::Ast {
+
+class ListKlass : public INodeKlass {
+ public:
+  ListKlass() = default;
+
+  static Object::KlassPtr Self() {
+    static auto instance = std::make_shared<ListKlass>();
+    Object::LoadClass(
+      Object::CreatePyString("List")->as<Object::PyString>(), instance
+    );
+    Object::ConfigureBasicAttributes(instance);
+    return instance;
+  }
+
+  Object::PyObjPtr
+  visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+
+  Object::PyObjPtr
+  emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+};
+
 // 作为右值的list
 class List : public INode {
  public:
-  explicit List(Object::PyObjPtr elements, Ast::INodePtr parent);
+  explicit List(const Object::PyObjPtr& elements, INodePtr parent)
+    : INode(ListKlass::Self(), std::move(parent)),
+      elements(elements->as<Object::PyList>()) {}
 
-  [[nodiscard]] Object::PyListPtr Elements() const;
+  [[nodiscard]] Object::PyListPtr Elements() const { return elements; }
 
  private:
   Object::PyListPtr elements;
 };
 
-class ListKlass : public INodeKlass {
- public:
-  ListKlass();
-
-  static Object::KlassPtr Self();
-
-  Object::PyObjPtr visit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  Object::PyObjPtr emit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  void Initialize() override;
-};
-
 using ListPtr = std::shared_ptr<List>;
 
-Ast::INodePtr CreateList(Object::PyObjPtr elements, Ast::INodePtr parent);
+inline INodePtr CreateList(Object::PyObjPtr elements, INodePtr parent) {
+  return std::make_shared<List>(elements, parent);
+}
 
 }  // namespace torchlight::Ast
 

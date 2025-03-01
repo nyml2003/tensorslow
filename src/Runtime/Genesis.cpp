@@ -11,6 +11,7 @@
 #include "Object/PyMatrix.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
+#include "Object/PyString.h"
 #include "Object/PyType.h"
 #include "Runtime/Interpreter.h"
 #include "Runtime/PyFrame.h"
@@ -20,13 +21,8 @@
 
 namespace torchlight::Runtime {
 
-void RuntimeKlassLoad() {
-  Runtime::FrameKlass::Self()->Initialize();
-}
-
 Object::PyObjPtr Genesis() {
   Object::BasicKlassLoad();
-  RuntimeKlassLoad();
   auto builtins = Object::CreatePyDict();
   builtins->setitem(Object::CreatePyString("None"), Object::CreatePyNone());
   builtins->setitem(
@@ -66,18 +62,6 @@ Object::PyObjPtr Genesis() {
   );
   builtins->setitem(
     Object::CreatePyString("reshape"), CreatePyNativeFunction(Object::Reshape)
-  );
-  builtins->setitem(
-    Object::CreatePyString("__name__"), Object::CreatePyString("__main__")
-  );
-  builtins->setitem(
-    Object::CreatePyString("randint"), CreatePyNativeFunction(RandInt)
-  );
-  builtins->setitem(
-    Object::CreatePyString("sleep"), CreatePyNativeFunction(Sleep)
-  );
-  builtins->setitem(
-    Object::CreatePyString("input"), CreatePyNativeFunction(Input)
   );
   builtins->setitem(
     Object::CreatePyString("int"), std::dynamic_pointer_cast<Object::PyObject>(
@@ -123,13 +107,13 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
   auto function = std::dynamic_pointer_cast<Object::PyFunction>(
     args->getitem(Object::CreatePyInteger(0))
   );
-  auto name = std::dynamic_pointer_cast<Object::PyString>(
-    args->getitem(Object::CreatePyInteger(1))
-  );
+  auto _name = args->getitem(Object::CreatePyInteger(1));
+  auto name = std::dynamic_pointer_cast<Object::PyString>(_name);
 
   // 创建执行环境
   auto globals = function->Globals();
-
+  auto preFrame = Runtime::Interpreter::Instance().CurrentFrame();
+  auto _name_ = globals->getitem(Object::CreatePyString("__name__"));
   // 保存当前帧
   // 创建新帧并执行类定义函数
   auto frame = Runtime::CreateFrameWithPyFunction(
@@ -138,7 +122,7 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
   );
   auto result = frame->Eval();
   Runtime::Interpreter::Instance().BackToParentFrame();
-  if (!Object::IsType(result, Object::NoneKlass::Self())) {
+  if (!result->is<Object::PyNone>()) {
     throw std::runtime_error("Class definition failed");
   }
   // 获取执行结果
@@ -146,8 +130,9 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
   auto base =
     std::dynamic_pointer_cast<Object::PyList>(Object::CreatePyList({}));
   // 创建新的类型对象
-  auto type = Object::CreatePyKlass(name, class_dict, base);
-  type->Initialize();
+  auto type_name =
+    std::dynamic_pointer_cast<Object::PyString>(_name_->add(_name));
+  auto type = Object::CreatePyKlass(type_name, class_dict, base);
   return Object::CreatePyType(type);
 }
 

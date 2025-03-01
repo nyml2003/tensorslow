@@ -233,7 +233,7 @@ Matrix Matrix::MatrixMultiply(const Matrix& other) const {
   return result;
 }
 
-Matrix Matrix::eye(Index n) {
+Matrix Matrix::Eye(Index n) {
   Matrix result(n, n);
   for (Index i = 0; i < n; i++) {
     result.data.Set(i * n + i, 1);

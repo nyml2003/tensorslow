@@ -1,11 +1,8 @@
 #include "ByteCode/PyInst.h"
-#include "ByteCode/PyCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
 #include "Object/PyBytes.h"
-#include "Object/PyDictionary.h"
 #include "Object/PyString.h"
-#include "Object/PyType.h"
 
 namespace torchlight::Object {
 
@@ -20,20 +17,6 @@ PyInst::PyInst(ByteCode code, OperandKind operand)
   return operand;
 }
 
-InstKlass::InstKlass() = default;
-
-void InstKlass::Initialize() {
-  SetType(CreatePyType(Self()));
-  SetName(CreatePyString("inst"));
-  SetAttributes(CreatePyDict());
-  Klass::Initialize();
-}
-
-KlassPtr InstKlass::Self() {
-  static KlassPtr instance = std::make_shared<InstKlass>();
-  return instance;
-}
-
 PyObjPtr InstKlass::_serialize_(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyInst::_serialize_(): obj is not an inst object"
@@ -45,7 +28,9 @@ PyObjPtr InstKlass::_serialize_(const PyObjPtr& obj) {
     overload{
       [&bytes](None) {},
       [&bytes](Index index) { bytes.Concat(Collections::Serialize(index)); },
-      [&bytes](CompareOp op) { bytes.Concat(Collections::Serialize(op)); },
+      [&bytes](CompareOp compOp) {
+        bytes.Concat(Collections::Serialize(compOp));
+      },
       [&bytes](int64_t index) { bytes.Concat(Collections::Serialize(index)); }
     },
     inst->Operand()
@@ -65,7 +50,9 @@ PyObjPtr InstKlass::repr(const PyObjPtr& obj) {
     overload{
       [&result](None) {},
       [&result](Index index) { result.Concat(Collections::ToString(index)); },
-      [&result](CompareOp op) { result.Concat(Collections::ToString(op)); },
+      [&result](CompareOp compOp) {
+        result.Concat(Collections::ToString(compOp));
+      },
       [&result](int64_t index) { result.Concat(Collections::ToString(index)); }
     },
     inst->Operand()
@@ -105,8 +92,8 @@ PyInstPtr CreateLoadFast(Index index) {
   return std::make_shared<PyInst>(ByteCode::LOAD_FAST, index);
 }
 
-PyInstPtr CreateCompareOp(CompareOp op) {
-  return std::make_shared<PyInst>(ByteCode::COMPARE_OP, op);
+PyInstPtr CreateCompareOp(CompareOp compOp) {
+  return std::make_shared<PyInst>(ByteCode::COMPARE_OP, compOp);
 }
 
 PyInstPtr CreatePopJumpIfFalse(int64_t index) {

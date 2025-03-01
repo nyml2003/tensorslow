@@ -3,165 +3,194 @@
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
 #include "Function/PyNativeFunction.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
-#include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
-#include "Object/PyObject.h"
 #include "Object/PyType.h"
+
+#include <iostream>
 
 namespace torchlight::Object {
 
-PyString::PyString(Collections::String value)
-  : PyObject(StringKlass::Self()), value(std::move(value)) {}
-
-Collections::String PyString::Value() const {
-  return value;
-}
-
-StringKlass::StringKlass() = default;
-
 void StringKlass::Initialize() {
-  SetType(CreatePyType(Self()));
-  SetName(CreatePyString("str"));
-  Collections::Map<PyObjPtr, PyObjPtr> methods;
-  methods.Put(CreatePyString("upper"), CreatePyNativeFunction(Upper));
-  methods.Put(CreatePyString("startswith"), CreatePyNativeFunction(StartsWith));
-  SetAttributes(CreatePyDict(methods));
-  Klass::Initialize();
+  LoadClass(CreatePyString("str")->as<PyString>(), Self());
+  ConfigureBasicAttributes(Self());
+  Self()->AddAttribute(
+    CreatePyString("join")->as<PyString>(), CreatePyNativeFunction(StringJoin)
+  );
+  Self()->AddAttribute(
+    CreatePyString("split")->as<PyString>(), CreatePyNativeFunction(StringSplit)
+  );
+  Self()->AddAttribute(
+    CreatePyString("upper")->as<PyString>(), CreatePyNativeFunction(StringUpper)
+  );
 }
 
-KlassPtr StringKlass::Self() {
-  static KlassPtr instance = std::make_shared<StringKlass>();
-  return instance;
-}
-
-PyObjPtr CreatePyString(Collections::String value) {
-  return std::make_shared<PyString>(value);
-}
-
-PyObjPtr CreatePyString(const char* value) {
-  return CreatePyString(Collections::CreateStringWithCString(value));
-}
-
-PyObjPtr CreatePyString(const std::string& value) {
-  return CreatePyString(Collections::CreateStringWithCString(value.c_str()));
-}
-
-PyObjPtr
-StringKlass::allocateInstance(const PyObjPtr& klass, const PyObjPtr& args) {
-  if (Self()->Type() != klass) {
-    throw std::runtime_error("allocateInstance(): klass is not a string");
+PyObjPtr StringKlass::construct(const PyObjPtr& klass, const PyObjPtr& args) {
+  if (klass->as<PyType>()->Owner() != Self()) {
+    throw std::runtime_error("construct(): klass is not a string");
   }
-  if (ToU64(args->len()) == 0) {
+  auto argList = args->as<PyList>();
+  if (argList->Length() == 0) {
     return CreatePyString("");
   }
-  if (args->len() != CreatePyInteger(1)) {
-    throw std::runtime_error(
-      "allocateInstance(): args must be a list with one element"
+  if (argList->Length() != 1) {
+    throw std::runtime_error("construct(): args must be a list with one element"
     );
   }
-  auto value = args->getitem(CreatePyInteger(0));
-  if (value->Klass() == StringKlass::Self()) {
-    return value;
-  }
-  if (value->Klass() == IntegerKlass::Self()) {
-    auto integer = std::dynamic_pointer_cast<PyInteger>(value);
-    auto integerValue = integer->Value();
-    return CreatePyString(integerValue.ToString());
-  }
-
-  throw std::runtime_error("allocateInstance(): value is not a string");
+  return argList->GetItem(0)->str();
 }
 
 PyObjPtr StringKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != StringKlass::Self()) {
-    throw std::runtime_error("lhs is not a string");
+  if (!lhs->is<PyString>() || !rhs->is<PyString>()) {
+    throw std::runtime_error("StringKlass::add(): lhs or rhs is not a string");
   }
-  if (rhs->Klass() != StringKlass::Self()) {
-    throw std::runtime_error("rhs is not a string");
-  }
-  auto left = std::dynamic_pointer_cast<PyString>(lhs);
-  auto right = std::dynamic_pointer_cast<PyString>(rhs);
-  return CreatePyString(left->Value().Add(right->Value()));
+  auto left = lhs->as<PyString>();
+  auto right = rhs->as<PyString>();
+  return left->Add(right);
 }
 
-PyObjPtr StringKlass::repr(const PyObjPtr& obj) {
-  if (obj->Klass() != StringKlass::Self()) {
-    throw std::runtime_error("obj is not a string");
+PyObjPtr StringKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyString>() || !rhs->is<PyString>()) {
+    return CreatePyBoolean(false);
   }
-  return CreatePyString(Collections::CreateStringWithCString("\"")
-                          .Add(std::dynamic_pointer_cast<PyString>(obj)->Value()
-                          )
-                          .Add(Collections::CreateStringWithCString("\"")));
+  auto left = lhs->as<PyString>();
+  auto right = rhs->as<PyString>();
+  return CreatePyBoolean(left->Equal(right));
+}
+
+PyObjPtr StringKlass::len(const PyObjPtr& obj) {
+  if (!obj->is<PyString>()) {
+    throw std::runtime_error("StringKlass::len(): obj is not a string");
+  }
+  auto string = obj->as<PyString>();
+  return CreatePyInteger(string->Length());
 }
 
 PyObjPtr StringKlass::str(const PyObjPtr& obj) {
-  if (obj->Klass() != StringKlass::Self()) {
-    throw std::runtime_error("obj is not a string");
+  if (!obj->is<PyString>()) {
+    throw std::runtime_error("StringKlass::str(): obj is not a string");
   }
   return obj;
 }
 
-PyObjPtr StringKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self()) {
-    throw std::runtime_error("lhs is not a string");
+PyObjPtr StringKlass::repr(const PyObjPtr& obj) {
+  if (!obj->is<PyString>()) {
+    throw std::runtime_error("StringKlass::repr(): obj is not a string");
   }
-  if (rhs->Klass() != Self()) {
-    throw std::runtime_error("rhs is not a string");
-  }
-  auto left = std::dynamic_pointer_cast<PyString>(lhs);
-  auto right = std::dynamic_pointer_cast<PyString>(rhs);
-  return CreatePyBoolean(left->Value() == right->Value());
+  auto string = obj->as<PyString>();
+  return StringConcat(
+    CreatePyList({CreatePyString("'"), string, CreatePyString("'")})
+  );
 }
 
 PyObjPtr StringKlass::_serialize_(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
-    throw std::runtime_error("str does not support serialization");
+  if (!obj->is<PyString>()) {
+    throw std::runtime_error("StringKlass::_serialize_(): obj is not a string");
   }
-  auto string = std::dynamic_pointer_cast<PyString>(obj);
   return CreatePyBytes(Collections::Serialize(Literal::STRING)
-                         .Add(Collections::Serialize(string->Value())));
+                         .Add(Collections::Serialize(obj->as<PyString>()->value)
+                         ));
 }
 
-PyObjPtr Upper(const PyObjPtr& args) {
-  if (args->Klass() != ListKlass::Self()) {
-    throw std::runtime_error("Upper() argument must be a list");
+PyStrPtr PyString::GetItem(Index index) const {
+  if (index >= value.Size()) {
+    throw std::runtime_error("PyString::GetItem(): index out of range");
   }
-  if (args->len() != CreatePyInteger(1)) {
-    throw std::runtime_error("Upper() argument must be a list with one element"
-    );
-  }
-  auto value = args->getitem(CreatePyInteger(0));
-  if (value->Klass() != StringKlass::Self()) {
-    throw std::runtime_error("Upper() argument must be a string");
-  }
-  auto str = std::dynamic_pointer_cast<PyString>(value);
-  return CreatePyString(str->Value().Upper());
+  return CreatePyString(
+           Collections::String(Collections::List<Unicode>(1, value[index]))
+  )
+    ->as<PyString>();
 }
 
-PyObjPtr StartsWith(const PyObjPtr& args) {
-  if (args->Klass() != ListKlass::Self()) {
-    throw std::runtime_error("StartsWith() argument must be a list");
+PyStrPtr PyString::Join(const PyObjPtr& iterable) {
+  auto result = CreatePyString("")->as<PyString>();
+  ForEach(iterable, [&](const PyObjPtr& item, Index index, const PyObjPtr&) {
+    if (index == 1) {
+      result = result->Add(item->str()->as<PyString>());
+    } else {
+      result = result->Add(CreatePyString(value)->as<PyString>())
+                 ->Add(item->str()->as<PyString>());
+    }
+  });
+  return result;
+}
+
+PyListPtr PyString::Split(const PyStrPtr& delimiter) {
+  auto parts = value.Split(delimiter->value);
+  auto result = CreatePyList(parts.Size())->as<PyList>();
+  for (Index i = 0; i < parts.Size(); i++) {
+    result->SetItem(i, CreatePyString(parts[i]));
   }
-  if (args->len() != CreatePyInteger(2)) {
-    throw std::runtime_error(
-      "StartsWith() argument must be a list with two elements"
+  return result;
+}
+
+PyStrPtr PyString::Add(const PyStrPtr& other) {
+  return CreatePyString(value.Add(other->value))->as<PyString>();
+}
+
+void PyString::Print() const {
+  std::cout << ToCppString() << std::flush;
+}
+
+void PyString::PrintLine() const {
+  std::cout << ToCppString() << std::endl;
+}
+
+std::string PyString::ToCppString() const {
+  return Collections::ToCppString(value);
+}
+
+bool PyString::Equal(const PyStrPtr& other) const {
+  return value.Equal(other->value);
+}
+
+PyStrPtr PyString::Upper() const {
+  return CreatePyString(value.Upper())->as<PyString>();
+}
+
+PyObjPtr StringConcat(const PyObjPtr& args) {
+  CheckNativeFunctionArguments(args);
+  auto argList = args->as<PyList>();
+  auto funcName = CreatePyString("StringConcat")->as<PyString>();
+  auto result = CreatePyString("")->as<PyString>();
+  for (Index i = 0; i < argList->Length(); i++) {
+    auto value = argList->GetItem(i);
+    CheckNativeFunctionArgumentWithType(
+      funcName, value, i, StringKlass::Self()
     );
+    result = result->Add(value->as<PyString>());
   }
-  auto value = args->getitem(CreatePyInteger(0));
-  if (value->Klass() != StringKlass::Self()) {
-    throw std::runtime_error("StartsWith() argument must be a string");
-  }
-  auto str = std::dynamic_pointer_cast<PyString>(value);
-  auto prefix = args->getitem(CreatePyInteger(1));
-  if (prefix->Klass() != StringKlass::Self()) {
-    throw std::runtime_error("StartsWith() argument must be a string");
-  }
-  return CreatePyBoolean(str->Value().StartsWith(
-    std::dynamic_pointer_cast<PyString>(prefix)->Value()
-  ));
+  return result;
+}
+
+PyObjPtr StringUpper(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
+  auto funcName = CreatePyString("StringUpper")->as<PyString>();
+  CheckNativeFunctionArgumentsAtIndexWithType(
+    funcName, args, 0, StringKlass::Self()
+  );
+  auto argList = args->as<PyList>();
+  auto value = argList->GetItem(0)->as<PyString>();
+  return value->Upper();
+}
+
+PyObjPtr StringJoin(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 2);
+  auto argList = args->as<PyList>();
+  auto delimiter = argList->GetItem(0)->as<PyString>();
+  auto list = argList->GetItem(1)->as<PyList>();
+  return delimiter->Join(list);
+}
+
+PyObjPtr StringSplit(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 2);
+  auto argList = args->as<PyList>();
+  auto delimiter = argList->GetItem(0)->as<PyString>();
+  auto value = argList->GetItem(1)->as<PyString>();
+  return value->Split(delimiter);
 }
 
 }  // namespace torchlight::Object

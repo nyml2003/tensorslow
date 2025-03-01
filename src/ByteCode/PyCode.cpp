@@ -4,14 +4,11 @@
 #include "Collections/BytesHelper.h"
 #include "Collections/IntegerHelper.h"
 #include "Collections/StringHelper.h"
-#include "Object/Klass.h"
 #include "Object/PyBytes.h"
-#include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
-#include "Object/PyType.h"
 
 #include <cstring>
 #include <memory>
@@ -100,21 +97,6 @@ PyListPtr PyCode::VarNames() const {
 Index PyCode::NLocals() const {
   return nLocals;
 }
-
-CodeKlass::CodeKlass() = default;
-
-void CodeKlass::Initialize() {
-  SetType(CreatePyType(Self()));
-  SetName(CreatePyString("code"));
-  SetAttributes(CreatePyDict());
-  Klass::Initialize();
-}
-
-KlassPtr CodeKlass::Self() {
-  static KlassPtr instance = std::make_shared<CodeKlass>();
-  return instance;
-}
-
 PyObjPtr CodeKlass::str(const PyObjPtr& self) {
   if (self->Klass() != Self()) {
     throw std::runtime_error("PyCode::repr(): obj is not a code object");
@@ -264,7 +246,7 @@ void PyCode::ReturnValue() {
 
 Index PyCode::PopJumpIfFalse() {
   instructions->Append(CreatePopJumpIfFalse(0));
-  return ToU64(instructions->len());
+  return instructions->Length();
 }
 
 void PyCode::JumpAbsolute(Index index) {

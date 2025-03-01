@@ -7,8 +7,6 @@
 #include "Collections/StringHelper.h"
 #include "Function/PyFunction.h"
 #include "Object/Iterator.h"
-#include "Object/MixinCollections.h"
-#include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
@@ -27,19 +25,6 @@
 #include <utility>
 
 namespace torchlight::Runtime {
-
-FrameKlass::FrameKlass() = default;
-
-void FrameKlass::Initialize() {
-  SetType(Object::CreatePyType(Self()));
-  SetName(Object::CreatePyString("frame"));
-  SetAttributes(Object::CreatePyDict());
-}
-
-Object::KlassPtr FrameKlass::Self() {
-  static Object::KlassPtr instance = std::make_shared<FrameKlass>();
-  return instance;
-}
 
 PyFrame::PyFrame(
   Object::PyCodePtr code,
@@ -296,7 +281,9 @@ Object::PyObjPtr FrameKlass::repr(const Object::PyObjPtr& obj) {
   repr = repr->add(
     Object::CreatePyString(Collections::CreateStringWithCString("\n\nstack:\n"))
   );
-  repr = repr->add(frame->CurrentStack()->Join(Object::CreatePyString("\n")));
+  repr = repr->add(Object::CreatePyString("\n")->as<Object::PyString>()->Join(
+    frame->CurrentStack()
+  ));
   repr = repr->add(
     Object::CreatePyString(Collections::CreateStringWithCString("\nlocals:\n"))
   );
@@ -313,7 +300,13 @@ Object::PyObjPtr FrameKlass::repr(const Object::PyObjPtr& obj) {
   repr = repr->add(Object::CreatePyString(
     Collections::CreateStringWithCString("\n\ncaller:\n")
   ));
-  repr = repr->add(frame->Caller()->repr());
+  if (frame->HasCaller()) {
+    repr = repr->add(frame->Caller()->repr());
+  } else {
+    repr = repr->add(Object::CreatePyString(
+      Collections::CreateStringWithCString("this is the top frame")
+    ));
+  }
   repr = repr->add(
     Object::CreatePyString(Collections::CreateStringWithCString("\n\ncode:\n"))
   );
@@ -532,9 +525,7 @@ Object::PyObjPtr PyFrame::Eval() {
         arguments.Reverse();
         auto func = stack.Pop();
         auto result = Interpreter::Instance().Eval(
-          func, std::dynamic_pointer_cast<Object::PyList>(
-                  Object::CreatePyList(arguments)
-                )
+          func, Object::CreatePyList(arguments)->as<Object::PyList>()
         );
         stack.Push(result);
         NextProgramCounter();
@@ -555,8 +546,12 @@ Object::PyObjPtr PyFrame::Eval() {
           value = Interpreter::Instance().Builtins()->getitem(key);
         }
         if (!found) {
+          auto errorMessage = StringConcat(Object::CreatePyList(
+            {Object::CreatePyString("NameError: name '"), key,
+             Object::CreatePyString("' is not defined")}
+          ));
           throw std::runtime_error(
-            "NameError: " + Collections::ToCppString(key) + " not found"
+            errorMessage->as<Object::PyString>()->ToCppString()
           );
         }
         stack.Push(value);
@@ -592,8 +587,12 @@ Object::PyObjPtr PyFrame::Eval() {
           value = Interpreter::Instance().Builtins()->getitem(key);
         }
         if (!found) {
+          auto errorMessage = StringConcat(Object::CreatePyList(
+            {Object::CreatePyString("NameError: name '"), key,
+             Object::CreatePyString("' is not defined")}
+          ));
           throw std::runtime_error(
-            "NameError: " + Collections::ToCppString(key) + " not found"
+            errorMessage->as<Object::PyString>()->ToCppString()
           );
         }
         stack.Push(value);
@@ -649,7 +648,7 @@ Object::PyObjPtr PyFrame::Eval() {
       case Object::ByteCode::FOR_ITER: {
         auto iter = stack.Pop();
         auto value = iter->next();
-        if (Object::IsType(value, Object::IterDoneKlass::Self())) {
+        if (!value->is<Object::IterDone>()) {
           SetProgramCounter(Collections::safe_add(
             ProgramCounter(), std::get<int64_t>(inst->Operand())
           ));

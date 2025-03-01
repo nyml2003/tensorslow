@@ -1,76 +1,78 @@
 #include "Function/PyNativeFunction.h"
-#include "Collections/StringHelper.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyDictionary.h"
+#include "Object/PyInteger.h"
 #include "Object/PyList.h"
-#include "Object/PyString.h"
-#include "Object/PyType.h"
+#include "Object/ObjectHelper.h"
 
 namespace torchlight::Object {
-
-NativeFunctionKlass::NativeFunctionKlass() = default;
-
-void NativeFunctionKlass::Initialize() {
-  SetType(CreatePyType(Self()));
-  SetName(CreatePyString("native_function"));
-  SetAttributes(CreatePyDict());
-  Klass::Initialize();
-}
-
-KlassPtr NativeFunctionKlass::Self() {
-  static KlassPtr instance = std::make_shared<NativeFunctionKlass>();
-  return instance;
-}
-
-PyNativeFunction::PyNativeFunction(TypeFunction nativeFunction)
-  : PyObject(NativeFunctionKlass::Self()),
-    nativeFunction(std::move(nativeFunction)) {}
-
-PyObjPtr PyNativeFunction::Call(const PyObjPtr& args) {
-  return nativeFunction(args);
-}
-
-PyObjPtr CreatePyNativeFunction(TypeFunction nativeFunction) {
-  return std::make_shared<PyNativeFunction>(std::move(nativeFunction));
-}
 
 void CheckNativeFunctionArgumentsWithExpectedLength(
   const PyObjPtr& args,
   Index expected
 ) {
   CheckNativeFunctionArguments(args);
-  auto list = std::dynamic_pointer_cast<PyList>(args);
+  auto list = args->as<PyList>();
   if (list->Length() != expected) {
-    throw std::runtime_error(
-      "NativeFunction expected " +
-      Collections::ToCppString(Collections::ToString(expected)) +
-      " arguments, but got " +
-      Collections::ToCppString(Collections::ToString(list->Length()))
+    auto errorMessage = StringConcat(CreatePyList(
+      {CreatePyString("Check Native Function Arguments With Expected Length: "),
+       CreatePyInteger(expected)->str(), CreatePyString(" Expected, but got "),
+       CreatePyInteger(list->Length())->str()}
+    ));
+    throw std::runtime_error(errorMessage->str()->as<PyString>()->ToCppString()
     );
   }
 }
 
 void CheckNativeFunctionArguments(const PyObjPtr& args) {
-  IsType(args, ListKlass::Self());
+  if (args->is<PyList>()) {
+    return;
+  }
+  auto errorMessage = StringConcat(CreatePyList(
+    {CreatePyString("Check Native Function (Name: "), args->str(),
+     CreatePyString(") Arguments: Expected a list, but got "),
+     args->Klass()->Name()}
+  ));
+  throw std::runtime_error(errorMessage->str()->as<PyString>()->ToCppString());
 }
 
-void CheckNativeFunctionArgumentsWithTypes(
+void CheckNativeFunctionArgumentsAtIndexWithType(
+  const PyStrPtr& funcName,
   const PyObjPtr& args,
-  const Collections::List<KlassPtr>& types
+  Index index,
+  const KlassPtr& klass
 ) {
-  CheckNativeFunctionArguments(args);
-  auto list = std::dynamic_pointer_cast<PyList>(args);
-  for (Index i = 0; i < list->Length(); ++i) {
-    auto arg = list->GetItem(i);
-    if (arg->Klass() != types.Get(i)) {
-      throw std::runtime_error(
-        "NativeFunction expected argument " +
-        Collections::ToCppString(Collections::ToString(i)) + " to be of type " +
-        Collections::ToCppString(types.Get(i)->Name()->Value()) + ", but got " +
-        Collections::ToCppString(arg->Klass()->Name()->Value())
-      );
-    }
+  CheckNativeFunctionArgumentWithType(
+    funcName, args->as<PyList>()->GetItem(index), index, klass
+  );
+}
+
+void CheckNativeFunctionArgumentWithType(
+  const PyStrPtr& funcName,
+  const PyObjPtr& arg,
+  Index index,
+  const KlassPtr& klass
+) {
+  if (arg->Klass() != klass) {
+    auto errorMessage = StringConcat(CreatePyList(
+      {CreatePyString("Check Native Function (Name: "), funcName,
+       CreatePyString(") Arguments With Type At Index: "),
+       CreatePyInteger(index)->str(), CreatePyString(" Expected Type: "),
+       klass->Name(), CreatePyString(" Got Type: "), arg->Klass()->Name()}
+    ));
+    throw std::runtime_error(errorMessage->str()->as<PyString>()->ToCppString()
+    );
   }
+}
+
+void NativeFunctionKlass::Initialize() {
+  LoadClass(CreatePyString("native_function")->as<PyString>(), Self());
+  ConfigureBasicAttributes(Self());
+}
+
+PyObjPtr NativeFunctionKlass::repr(const PyObjPtr& obj) {
+  return StringConcat(CreatePyList(
+    {CreatePyString("<built-in function at "), Identity(obj),
+     CreatePyString(">")}
+  ));
 }
 
 }  // namespace torchlight::Object

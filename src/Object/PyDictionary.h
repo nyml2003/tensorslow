@@ -7,31 +7,15 @@
 
 namespace torchlight::Object {
 
-class PyDictionary : public PyObject {
- private:
-  Collections::Map<PyObjPtr, PyObjPtr> dict;
-
- public:
-  explicit PyDictionary(Collections::Map<PyObjPtr, PyObjPtr> dict);
-
-  Collections::Map<PyObjPtr, PyObjPtr>& Value();
-
-  void Put(const PyObjPtr& key, const PyObjPtr& value);
-
-  PyObjPtr Get(const PyObjPtr& key);
-
-  void Remove(const PyObjPtr& key);
-
-  bool Contains(const PyObjPtr& key);
-};
-
 class DictionaryKlass : public Klass {
  public:
-  explicit DictionaryKlass();
-  static KlassPtr Self();
+  explicit DictionaryKlass() = default;
+  static KlassPtr Self() {
+    static KlassPtr instance = std::make_shared<DictionaryKlass>();
+    return instance;
+  }
 
-  PyObjPtr allocateInstance(const PyObjPtr& klass, const PyObjPtr& args)
-    override;
+  PyObjPtr construct(const PyObjPtr& klass, const PyObjPtr& args) override;
 
   PyObjPtr setitem(
     const PyObjPtr& obj,
@@ -40,14 +24,32 @@ class DictionaryKlass : public Klass {
   ) override;
 
   PyObjPtr getitem(const PyObjPtr& obj, const PyObjPtr& key) override;
-
   PyObjPtr delitem(const PyObjPtr& obj, const PyObjPtr& key) override;
-
   PyObjPtr contains(const PyObjPtr& obj, const PyObjPtr& key) override;
-
   PyObjPtr repr(const PyObjPtr& obj) override;
+  PyObjPtr iter(const PyObjPtr& obj) override;
+  static void Initialize();
+};
 
-  void Initialize() override;
+class PyDictionary : public PyObject {
+ private:
+  Collections::Map<PyObjPtr, PyObjPtr> dict;
+
+ public:
+  explicit PyDictionary(Collections::Map<PyObjPtr, PyObjPtr> dict)
+    : PyObject(DictionaryKlass::Self()), dict(std::move(dict)) {}
+
+  void Put(const PyObjPtr& key, const PyObjPtr& value);
+
+  PyObjPtr Get(const PyObjPtr& key);
+
+  void Remove(const PyObjPtr& key);
+
+  bool Contains(const PyObjPtr& key);
+
+  Index Size() const;
+
+  PyObjPtr GetItem(Index index) const;
 };
 
 PyObjPtr CreatePyDict();

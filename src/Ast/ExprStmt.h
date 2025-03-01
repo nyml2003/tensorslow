@@ -5,32 +5,39 @@
 
 namespace torchlight::Ast {
 
-class ExprStmt : public INode {
- public:
-  explicit ExprStmt(Ast::INodePtr content, Ast::INodePtr parent);
-
-  Ast::INodePtr Content() const;
-
- private:
-  Ast::INodePtr content;
-};
-
-Ast::INodePtr CreateExprStmt(Ast::INodePtr content, Ast::INodePtr parent);
-
 class ExprStmtKlass : public INodeKlass {
  public:
-  explicit ExprStmtKlass();
+  static Object::KlassPtr Self() {
+    static auto instance = std::make_shared<ExprStmtKlass>();
+    LoadClass(
+      Object::CreatePyString("ExprStmt")->as<Object::PyString>(), instance
+    );
+    ConfigureBasicAttributes(instance);
+    return instance;
+  }
 
-  static Object::KlassPtr Self();
+  Object::PyObjPtr
+  visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
 
-  Object::PyObjPtr visit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  Object::PyObjPtr emit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  void Initialize() override;
+  Object::PyObjPtr
+  emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
 };
+
+class ExprStmt : public INode {
+ public:
+  explicit ExprStmt(INodePtr content, INodePtr parent)
+    : INode(ExprStmtKlass::Self(), std::move(parent)),
+      content(std::move(content)) {}
+
+  [[nodiscard]] INodePtr Content() const { return content; }
+
+ private:
+  INodePtr content;
+};
+
+inline INodePtr CreateExprStmt(INodePtr content, INodePtr parent) {
+  return std::make_shared<ExprStmt>(std::move(content), std::move(parent));
+}
 
 }  // namespace torchlight::Ast
 

@@ -1,12 +1,8 @@
 #ifndef TORCHLIGHT_FUNCTION_PYNATIVEFUNCTION_H
 #define TORCHLIGHT_FUNCTION_PYNATIVEFUNCTION_H
 
-#include "Collections/List.h"
-#include "Common.h"
-#include "Object/Klass.h"
-#include "Object/PyObject.h"
-
 #include <functional>
+#include "Object/PyString.h"
 
 namespace torchlight::Object {
 
@@ -14,11 +10,15 @@ using TypeFunction = std::function<PyObjPtr(PyObjPtr)>;
 
 class NativeFunctionKlass : public Klass {
  public:
-  NativeFunctionKlass();
+  explicit NativeFunctionKlass() = default;
 
-  static KlassPtr Self();
+  static KlassPtr Self() {
+    static KlassPtr instance = std::make_shared<NativeFunctionKlass>();
+    return instance;
+  }
 
-  void Initialize() override;
+  PyObjPtr repr(const PyObjPtr& obj) override;
+  static void Initialize();
 };
 
 class PyNativeFunction : public PyObject {
@@ -26,23 +26,37 @@ class PyNativeFunction : public PyObject {
   TypeFunction nativeFunction;
 
  public:
-  explicit PyNativeFunction(TypeFunction nativeFunction);
+  explicit PyNativeFunction(TypeFunction nativeFunction)
+    : PyObject(NativeFunctionKlass::Self()),
+      nativeFunction(std::move(nativeFunction)) {}
 
-  PyObjPtr Call(const PyObjPtr& args);
+  PyObjPtr Call(const PyObjPtr& args) { return nativeFunction(args); }
 };
 
 using PyNativeFunctionPtr = std::shared_ptr<PyNativeFunction>;
 
-PyObjPtr CreatePyNativeFunction(TypeFunction nativeFunction);
+inline PyObjPtr CreatePyNativeFunction(TypeFunction nativeFunction) {
+  return std::make_shared<PyNativeFunction>(std::move(nativeFunction));
+}
 
 void CheckNativeFunctionArguments(const PyObjPtr& args);
 void CheckNativeFunctionArgumentsWithExpectedLength(
   const PyObjPtr& args,
   Index expected
 );
-void CheckNativeFunctionArgumentsWithTypes(
+
+void CheckNativeFunctionArgumentsAtIndexWithType(
+  const PyStrPtr& funcName,
   const PyObjPtr& args,
-  const Collections::List<KlassPtr>& types
+  Index index,
+  const KlassPtr& klass
+);
+
+void CheckNativeFunctionArgumentWithType(
+  const PyStrPtr& funcName,
+  const PyObjPtr& arg,
+  Index index,
+  const KlassPtr& klass
 );
 
 }  // namespace torchlight::Object

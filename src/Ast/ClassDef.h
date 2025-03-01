@@ -5,27 +5,52 @@
 
 namespace torchlight::Ast {
 
+class ClassDefKlass : public INodeKlass {
+ public:
+  static Object::KlassPtr Self() {
+    static auto instance = std::make_shared<ClassDefKlass>();
+    LoadClass(
+      Object::CreatePyString("ClassDef")->as<Object::PyString>(), instance
+    );
+    ConfigureBasicAttributes(instance);
+    return instance;
+  }
+
+  Object::PyObjPtr
+  visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+
+  Object::PyObjPtr
+  emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+};
+
 class ClassDef : public INode {
  public:
   explicit ClassDef(
     const Object::PyObjPtr& _name,
     const Object::PyObjPtr& _bases,
-    const Ast::INodePtr& parent
-  );
+    const INodePtr& parent
+  )
+    : INode(ClassDefKlass::Self(), parent),
+      name(_name->as<Object::PyString>()),
+      bases(_bases->as<Object::PyList>()) {}
 
-  [[nodiscard]] Object::PyStrPtr Name() const;
+  [[nodiscard]] Object::PyStrPtr Name() const { return name; }
 
-  [[nodiscard]] Object::PyListPtr Bases() const;
+  [[nodiscard]] Object::PyListPtr Bases() const { return bases; }
 
-  [[nodiscard]] Object::PyListPtr Body() const;
+  [[nodiscard]] Object::PyListPtr Body() const { return body; }
 
-  [[nodiscard]] Object::PyObjPtr Parents() const;
+  [[nodiscard]] Object::PyObjPtr Parents() const { return parents; }
 
-  [[nodiscard]] Object::PyObjPtr CodeIndex() const;
+  [[nodiscard]] Object::PyObjPtr CodeIndex() const { return codeIndex; }
 
-  void SetCodeIndex(const Object::PyObjPtr& _codeIndex);
+  void SetCodeIndex(const Object::PyObjPtr& _codeIndex) {
+    codeIndex = _codeIndex;
+  }
 
-  void SetBody(const Object::PyObjPtr& _body);
+  void SetBody(const Object::PyObjPtr& _body) {
+    body = _body->as<Object::PyList>();
+  }
 
  private:
   Object::PyStrPtr name;    // 类名
@@ -37,26 +62,13 @@ class ClassDef : public INode {
     codeIndex;  // 保存当前ClassDef对应的PyCode对象在codeList中的索引
 };
 
-Ast::INodePtr CreateClassDef(
+inline INodePtr CreateClassDef(
   const Object::PyObjPtr& _name,
   const Object::PyObjPtr& _bases,
-  const Ast::INodePtr& parent
-);
-
-class ClassDefKlass : public INodeKlass {
- public:
-  explicit ClassDefKlass();
-
-  static Object::KlassPtr Self();
-
-  Object::PyObjPtr visit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  Object::PyObjPtr emit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  void Initialize() override;
-};
+  const INodePtr& parent
+) {
+  return std::make_shared<ClassDef>(_name, _bases, parent);
+}
 
 }  // namespace torchlight::Ast
 

@@ -2,51 +2,86 @@
 #define TORCHLIGHT_OBJECT_PYSTRING_H
 
 #include "Collections/String.h"
-#include "Object/Klass.h"
+#include "Collections/StringHelper.h"
 #include "Object/PyObject.h"
 
 namespace torchlight::Object {
 
+class StringKlass : public Klass {
+ public:
+  explicit StringKlass() = default;
+
+  static KlassPtr Self() {
+    static KlassPtr instance = std::make_shared<StringKlass>();
+    return instance;
+  }
+
+  static void Initialize();
+
+  PyObjPtr construct(const PyObjPtr& klass, const PyObjPtr& args) override;
+
+  PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+
+  PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+
+  PyObjPtr len(const PyObjPtr& obj) override;
+
+  PyObjPtr str(const PyObjPtr& obj) override;
+
+  PyObjPtr repr(const PyObjPtr& obj) override;
+
+  PyObjPtr _serialize_(const PyObjPtr& obj) override;
+};
+
 class PyString : public PyObject {
+  friend class StringKlass;
+
  private:
   Collections::String value;
 
  public:
-  explicit PyString(Collections::String value);
+  explicit PyString(Collections::String value)
+    : PyObject(StringKlass::Self()), value(std::move(value)) {}
 
-  [[nodiscard]] Collections::String Value() const;
+  Index Length() const { return value.Size(); }
+
+  PyStrPtr GetItem(Index index) const;
+
+  PyStrPtr Join(const PyObjPtr& iterable);
+
+  PyListPtr Split(const PyStrPtr& delimiter);
+
+  PyStrPtr Add(const PyStrPtr& other);
+
+  void Print() const;
+
+  void PrintLine() const;
+
+  std::string ToCppString() const;
+
+  bool Equal(const PyStrPtr& other) const;
+
+  PyStrPtr Upper() const;
 };
-
-class StringKlass : public Klass {
- public:
-  explicit StringKlass();
-
-  void Initialize() override;
-
-  static KlassPtr Self();
-
-  PyObjPtr allocateInstance(const PyObjPtr& klass, const PyObjPtr& args)
-    override;
-
-  PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
-  PyObjPtr repr(const PyObjPtr& obj) override;
-
-  PyObjPtr str(const PyObjPtr& obj) override;
-
-  PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
-  PyObjPtr _serialize_(const PyObjPtr& obj) override;
-};
-PyObjPtr CreatePyString(Collections::String value);
-PyObjPtr CreatePyString(const char* value);
-PyObjPtr CreatePyString(const std::string& value);
-
 using PyStrPtr = std::shared_ptr<PyString>;
 
-PyObjPtr Upper(const PyObjPtr& args);
+inline PyObjPtr CreatePyString(Collections::String value) {
+  return std::make_shared<PyString>(std::move(value));
+}
+inline PyObjPtr CreatePyString(const char* value) {
+  return CreatePyString(Collections::CreateStringWithCString(value));
+}
+inline PyObjPtr CreatePyString(const std::string& value) {
+  return CreatePyString(Collections::CreateStringWithCString(value.c_str()));
+}
 
-PyObjPtr StartsWith(const PyObjPtr& args);
+PyObjPtr StringUpper(const PyObjPtr& args);
+
+PyObjPtr StringJoin(const PyObjPtr& args);
+
+PyObjPtr StringSplit(const PyObjPtr& args);
+
+PyObjPtr StringConcat(const PyObjPtr& args);
 
 }  // namespace torchlight::Object
 

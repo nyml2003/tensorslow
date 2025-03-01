@@ -1,32 +1,11 @@
 #include "Object/PyType.h"
-#include "Object/PyDictionary.h"
 #include "Object/PyString.h"
 
 namespace torchlight::Object {
 
-PyType::PyType(KlassPtr owner)
-  : PyObject(TypeKlass::Self()), owner(std::move(owner)) {}
-
-KlassPtr PyType::Owner() const {
-  return owner;
-}
-
-TypeKlass::TypeKlass() = default;
-
-KlassPtr TypeKlass::Self() {
-  static KlassPtr instance = std::make_shared<TypeKlass>();
-  return instance;
-}
-
-PyObjPtr CreatePyType(KlassPtr owner) {
-  return std::make_shared<PyType>(owner);
-}
-
 void TypeKlass::Initialize() {
-  SetType(CreatePyType(Self()));
-  SetName(CreatePyString("type"));
-  SetAttributes(CreatePyDict());
-  Klass::Initialize();
+  LoadClass(CreatePyString("type")->as<PyString>(), Self());
+  ConfigureBasicAttributes(Self());
 }
 
 PyObjPtr TypeKlass::repr(const PyObjPtr& obj) {

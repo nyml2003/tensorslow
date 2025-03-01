@@ -5,45 +5,55 @@
 
 namespace torchlight::Ast {
 
+class MemberAccessKlass : public INodeKlass {
+ public:
+  MemberAccessKlass() = default;
+
+  static Object::KlassPtr Self() {
+    static auto instance = std::make_shared<MemberAccessKlass>();
+    Object::LoadClass(
+      Object::CreatePyString("MemberAccess")->as<Object::PyString>(), instance
+    );
+    Object::ConfigureBasicAttributes(instance);
+    return instance;
+  }
+
+  Object::PyObjPtr
+  visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+
+  Object::PyObjPtr
+  emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+};
+
 class MemberAccess : public INode {
  public:
   MemberAccess(
-    Ast::INodePtr obj,
-    Object::PyObjPtr member,
-    Ast::INodePtr parent
-  );
+    INodePtr obj,
+    const Object::PyObjPtr& member,
+    const INodePtr& parent
+  )
+    : INode(MemberAccessKlass::Self(), parent),
+      obj(std::move(obj)),
+      member(member->as<Object::PyString>()) {}
 
-  [[nodiscard]] Ast::INodePtr Obj() const;
+  [[nodiscard]] INodePtr Obj() const { return obj; }
 
-  [[nodiscard]] Object::PyStrPtr Member() const;
+  [[nodiscard]] Object::PyStrPtr Member() const { return member; }
 
  private:
-  Ast::INodePtr obj;
+  INodePtr obj;
   Object::PyStrPtr member;
-};
-
-class MemberAccessKlass : public INodeKlass {
- public:
-  MemberAccessKlass();
-
-  static Object::KlassPtr Self();
-
-  Object::PyObjPtr visit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  Object::PyObjPtr emit(Object::PyObjPtr obj, Object::PyObjPtr codeList)
-    override;
-
-  void Initialize() override;
 };
 
 using MemberAccessPtr = std::shared_ptr<MemberAccess>;
 
-Ast::INodePtr CreateMemberAccess(
-  Ast::INodePtr obj,
-  Object::PyObjPtr member,
-  Ast::INodePtr parent
-);
+inline INodePtr CreateMemberAccess(
+  const INodePtr& obj,
+  const Object::PyObjPtr& member,
+  const INodePtr& parent
+) {
+  return std::make_shared<MemberAccess>(obj, member, parent);
+}
 
 }  // namespace torchlight::Ast
 

@@ -76,12 +76,15 @@ PyFramePtr CreateFrameWithPyFunction(
 
 class FrameKlass : public Object::Klass {
  public:
-  explicit FrameKlass();
-  static Object::KlassPtr Self();
+  explicit FrameKlass() = default;
+  static Object::KlassPtr Self() {
+    static Object::KlassPtr instance = std::make_shared<FrameKlass>();
+    LoadClass(Object::CreatePyString("frame")->as<Object::PyString>(), instance);
+    ConfigureBasicAttributes(instance);
+    return instance;
+  }
 
   Object::PyObjPtr repr(const Object::PyObjPtr& obj) override;
-
-  void Initialize() override;
 };
 
 void ParseByteCode(const Object::PyCodePtr& code);

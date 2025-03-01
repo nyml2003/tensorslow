@@ -1,83 +1,18 @@
 #include "Ast/FuncDef.h"
 #include "Ast/INode.h"
 #include "ByteCode/PyCode.h"
-
 #include "Object/ObjectHelper.h"
-#include "Object/PyDictionary.h"
-#include "Object/PyInteger.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
-#include "Object/PyType.h"
 #include "Tools/Tools.h"
 
 namespace torchlight::Ast {
 
-FuncDef::FuncDef(
-  Object::PyObjPtr _name,
-  Object::PyObjPtr _parameters,
-  Object::PyObjPtr _body,
-  Ast::INodePtr parent
-)
-  : INode(FuncDefKlass::Self(), std::move(parent)) {
-  name = std::dynamic_pointer_cast<Object::PyString>(_name);
-  parameters = std::dynamic_pointer_cast<Object::PyList>(_parameters);
-  body = std::dynamic_pointer_cast<Object::PyList>(_body);
-  parents = Object::CreatePyNone();
-  codeIndex = Object::CreatePyNone();
-}
-
-Object::PyStrPtr FuncDef::Name() const {
-  return name;
-}
-
-Object::PyListPtr FuncDef::Parameters() const {
-  return parameters;
-}
-
-Object::PyListPtr FuncDef::Body() const {
-  return body;
-}
-Object::PyObjPtr FuncDef::Parents() const {
-  return parents;
-}
-
-Object::PyObjPtr FuncDef::CodeIndex() const {
-  return codeIndex;
-}
-
-void FuncDef::SetParents(Object::PyObjPtr _parents) {
-  parents = std::dynamic_pointer_cast<Object::PyList>(_parents);
-}
-
-void FuncDef::SetCodeIndex(Object::PyObjPtr _codeIndex) {
-  codeIndex = std::dynamic_pointer_cast<Object::PyInteger>(_codeIndex);
-}
-
-void FuncDef::SetBody(Object::PyObjPtr _body) {
-  body = std::dynamic_pointer_cast<Object::PyList>(_body);
-}
-
-Ast::INodePtr CreateFuncDef(
-  Object::PyObjPtr _name,
-  Object::PyObjPtr _parameters,
-  Object::PyObjPtr _body,
-  Ast::INodePtr parent
+Object::PyObjPtr FuncDefKlass::visit(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& codeList
 ) {
-  return std::make_shared<FuncDef>(_name, _parameters, _body, parent);
-}
-
-void FuncDefKlass::Initialize() {
-  SetName(Object::CreatePyString("FuncDef"));
-  SetType(CreatePyType(Self()));
-  SetAttributes(Object::CreatePyDict());
-  Klass::Initialize();
-}
-
-FuncDefKlass::FuncDefKlass() = default;
-
-Object::PyObjPtr
-FuncDefKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   auto funcDef = std::dynamic_pointer_cast<FuncDef>(obj);
   funcDef->SetCodeIndex(codeList->len());
   auto code = std::dynamic_pointer_cast<Object::PyCode>(
@@ -106,8 +41,10 @@ FuncDefKlass::visit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   return Object::CreatePyNone();
 }
 
-Object::PyObjPtr
-FuncDefKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
+Object::PyObjPtr FuncDefKlass::emit(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& codeList
+) {
   auto funcDef = std::dynamic_pointer_cast<FuncDef>(obj);
   auto selfCode = GetCodeFromList(codeList, funcDef);
   Object::ForEach(
@@ -118,9 +55,9 @@ FuncDefKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
     }
   );
   if (selfCode->VarNames()->len()->ge(funcDef->Parameters()->len())) {
-    selfCode->SetNLocals(Object::ToU64(selfCode->VarNames()->len()));
+    selfCode->SetNLocals(selfCode->VarNames()->Length());
   } else {
-    selfCode->SetNLocals(Object::ToU64(funcDef->Parameters()->len()));
+    selfCode->SetNLocals(funcDef->Parameters()->Length());
   }
   selfCode->LoadConst(Object::CreatePyNone());
   selfCode->ReturnValue();
@@ -129,15 +66,10 @@ FuncDefKlass::emit(Object::PyObjPtr obj, Object::PyObjPtr codeList) {
   parent->LoadConst(funcDef->Name());
   parent->MakeFunction();
   parent->StoreName(funcDef->Name());
-  if (ArgsHelper::Instance().Has("show_code")) {
+  if (ArgsHelper::Instance().Has("show_code") || true) {
     Object::DebugPrint(selfCode->str());
   }
   return Object::CreatePyNone();
-}
-
-Object::KlassPtr FuncDefKlass::Self() {
-  static Object::KlassPtr instance = std::make_shared<FuncDefKlass>();
-  return instance;
 }
 
 }  // namespace torchlight::Ast

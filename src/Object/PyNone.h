@@ -1,21 +1,24 @@
 #ifndef TORCHLIGHT_OBJECT_PYNONE_H
 #define TORCHLIGHT_OBJECT_PYNONE_H
 
-#include "Object/Klass.h"
-#include "Object/PyObject.h"
+#include "Object/PyString.h"
 
 namespace torchlight::Object {
 
 class NoneKlass : public Klass {
  public:
-  explicit NoneKlass();
-  static KlassPtr Self();
+  explicit NoneKlass() = default;
 
-  PyObjPtr _serialize_(const PyObjPtr& obj) override;
+  static KlassPtr Self() {
+    static KlassPtr instance = std::make_shared<NoneKlass>();
+    LoadClass(CreatePyString("None")->as<PyString>(), instance);
+    ConfigureBasicAttributes(instance);
+    return instance;
+  }
 
   PyObjPtr repr(const PyObjPtr& obj) override;
 
-  void Initialize() override;
+  PyObjPtr _serialize_(const PyObjPtr& obj) override;
 };
 
 class PyNone : public PyObject {
@@ -24,7 +27,9 @@ class PyNone : public PyObject {
   static PyObjPtr Instance();
 };
 
-PyObjPtr CreatePyNone();
+inline PyObjPtr CreatePyNone() {
+  return PyNone::Instance();
+}
 
 }  // namespace torchlight::Object
 

@@ -2,36 +2,50 @@
 #define TORCHLIGHT_FUNCTION_PYFUNCTION_H
 
 #include "ByteCode/PyCode.h"
+#include "Object/PyDictionary.h"
 #include "Object/PyObject.h"
+#include "Object/PyString.h"
+#include "Object/ObjectHelper.h"
 
 namespace torchlight::Object {
+
+class FunctionKlass : public Klass {
+ public:
+  FunctionKlass() = default;
+  static KlassPtr Self() {
+    static KlassPtr instance = std::make_shared<FunctionKlass>();
+    LoadClass(CreatePyString("function")->as<PyString>(), instance);
+    ConfigureBasicAttributes(instance);
+    return instance;
+  }
+
+  PyObjPtr repr(const PyObjPtr& obj) override;
+};
+
 class PyFunction : public PyObject {
  private:
   PyCodePtr code;
   PyDictPtr globals;
 
  public:
-  PyFunction(const PyObjPtr& code, const PyObjPtr& globals);
+  PyFunction(const PyObjPtr& code, const PyObjPtr& globals)
+    : PyObject(FunctionKlass::Self()),
+      code(code->as<PyCode>()),
+      globals(globals->as<PyDictionary>()) {}
 
-  [[nodiscard]] PyCodePtr Code() const;
+  [[nodiscard]] PyCodePtr Code() const { return code; }
 
-  [[nodiscard]] PyDictPtr& Globals();
+  [[nodiscard]] PyDictPtr Globals() const { return globals; }
 
-  [[nodiscard]] PyStrPtr Name() const;
+  [[nodiscard]] PyStrPtr Name() const { return code->Name(); }
 };
 
 using PyFunctionPtr = std::shared_ptr<PyFunction>;
 
-class FunctionKlass : public Klass {
- public:
-  FunctionKlass();
-
-  static KlassPtr Self();
-
-  void Initialize() override;
-};
-
-PyObjPtr CreatePyFunction(const PyObjPtr& code, const PyObjPtr& globals);
+inline PyObjPtr
+CreatePyFunction(const PyObjPtr& code, const PyObjPtr& globals) {
+  return std::make_shared<PyFunction>(code, globals);
+}
 
 }  // namespace torchlight::Object
 

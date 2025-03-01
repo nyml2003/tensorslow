@@ -19,15 +19,14 @@ class Map {
  private:
   List<MapEntry<K, V>> entries;
 
-  Index IndexOf(K key) const;
-
  public:
+  Index IndexOf(K key) const;
   explicit Map();
   /**
    * 获取键值对的个数
    * @return 键值对的个数
    */
-  Index Size();
+  Index Size() const;
   /**
    * 判断是否为空
    * @return 是否为空
@@ -64,17 +63,17 @@ class Map {
    * 获取所有的键
    * @return 键的列表
    */
-  List<K> Keys();
+  List<K> Keys() const;
   /**
    * 获取所有的值
    * @return 值的列表
    */
-  List<V> Values();
+  List<V> Values() const;
   /**
    * 获取所有的键值对
    * @return 键值对的列表
    */
-  List<MapEntry<K, V>> Entries();
+  List<MapEntry<K, V>> Entries() const;
 };
 
 template <typename K, typename V>
@@ -84,7 +83,7 @@ MapEntry<K, V>::MapEntry() : key(K()), value(V()) {}
 template <typename K, typename V>
 Map<K, V>::Map() : entries() {}
 template <typename K, typename V>
-Index Map<K, V>::Size() {
+Index Map<K, V>::Size() const{
   return entries.Size();
 }
 template <typename K, typename V>
@@ -137,7 +136,7 @@ bool Map<K, V>::Contains(K key) noexcept {
   return false;
 }
 template <typename K, typename V>
-List<K> Map<K, V>::Keys() {
+List<K> Map<K, V>::Keys()  const {
   List<K> keys(entries.Size());
   for (Index i = 0; i < entries.Size(); i++) {
     keys.Push(entries.Get(i).Key());
@@ -145,7 +144,7 @@ List<K> Map<K, V>::Keys() {
   return keys;
 }
 template <typename K, typename V>
-List<V> Map<K, V>::Values() {
+List<V> Map<K, V>::Values() const{
   List<V> values(entries.Size());
   for (Index i = 0; i < entries.Size(); i++) {
     values.Push(entries.Get(i).Value());
@@ -153,7 +152,7 @@ List<V> Map<K, V>::Values() {
   return values;
 }
 template <typename K, typename V>
-List<MapEntry<K, V>> Map<K, V>::Entries() {
+List<MapEntry<K, V>> Map<K, V>::Entries() const{
   return entries;
 }
 }  // namespace torchlight::Collections

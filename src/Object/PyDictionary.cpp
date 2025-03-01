@@ -1,17 +1,13 @@
 #include "Object/PyDictionary.h"
-#include "Collections/Iterator.h"
+#include "Object/Iterator.h"
+#include "Object/Klass.h"
 #include "Object/PyBoolean.h"
-#include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
-
 namespace torchlight::Object {
-
-PyDictionary::PyDictionary(Collections::Map<PyObjPtr, PyObjPtr> dict)
-  : PyObject(DictionaryKlass::Self()), dict(std::move(dict)) {}
 
 PyObjPtr CreatePyDict() {
   return std::make_shared<PyDictionary>(Collections::Map<PyObjPtr, PyObjPtr>());
@@ -37,31 +33,28 @@ bool PyDictionary::Contains(const PyObjPtr& key) {
   return dict.Contains(key);
 }
 
-DictionaryKlass::DictionaryKlass() = default;
-
-void DictionaryKlass::Initialize() {
-  SetType(CreatePyType(Self()));
-  SetName(CreatePyString("dict"));
-  SetAttributes(CreatePyDict());
-  Klass::Initialize();
+PyObjPtr PyDictionary::GetItem(Index index) const {
+  auto entry = dict.Entries().Get(index);
+  return CreatePyList({entry.Key(), entry.Value()});
 }
 
-KlassPtr DictionaryKlass::Self() {
-  static KlassPtr self = std::make_shared<DictionaryKlass>();
-  return self;
+Index PyDictionary::Size() const{
+  return dict.Size();
+}
+
+void DictionaryKlass::Initialize() {
+  LoadClass(CreatePyString("dict")->as<PyString>(), Self());
+  ConfigureBasicAttributes(Self());
 }
 
 PyObjPtr
-DictionaryKlass::allocateInstance(const PyObjPtr& klass, const PyObjPtr& args) {
-  if (Self()->Type() != klass) {
-    throw std::runtime_error(
-      "PyDictionary::allocateInstance(): klass is not a dict"
-    );
+DictionaryKlass::construct(const PyObjPtr& klass, const PyObjPtr& args) {
+  if (klass->as<PyType>()->Owner() != Self()) {
+    throw std::runtime_error("PyDictionary::construct(): klass is not a dict");
   }
-  if (args->len() != CreatePyInteger(0)) {
-    throw std::runtime_error(
-      "PyDictionary::allocateInstance(): args must be empty"
-    );
+  auto argList = args->as<PyList>();
+  if (argList->Length() != 0) {
+    throw std::runtime_error("PyDictionary::construct(): args must be empty");
   }
   return CreatePyDict();
 }
@@ -96,30 +89,21 @@ PyObjPtr DictionaryKlass::delitem(const PyObjPtr& obj, const PyObjPtr& key) {
   return obj;
 }
 
-Collections::Map<PyObjPtr, PyObjPtr>& PyDictionary::Value() {
-  return dict;
+PyObjPtr DictionaryKlass::iter(const PyObjPtr& obj) {
+  if (!obj->is<PyDictionary>()) {
+    throw std::runtime_error("PyDictionary::iter(): obj is not a dict");
+  }
+  return CreateDictItemIterator(obj);
 }
 
 PyObjPtr DictionaryKlass::repr(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyDictionary>()) {
     throw std::runtime_error("PyDictionary::repr(): obj is not a dict");
   }
-  auto dict = std::dynamic_pointer_cast<PyDictionary>(obj);
-  auto entriesRaw = dict->Value().Entries();
-  auto entriesObj = CreatePyList(entriesRaw.Size());
-  for (auto it = Collections::Iterator<
-         Collections::MapEntry<PyObjPtr, PyObjPtr>>::Begin(entriesRaw);
-       !it.End(); it.Next()) {
-    auto key = it.Get().Key()->repr();
-    auto value = it.Get().Value()->repr();
-    entriesObj->setitem(
-      CreatePyInteger(it.GetCurrentIndex()),
-      key->add(CreatePyString(": "))->add(value)
-    );
-  }
-  return CreatePyString("{")
-    ->add(Join(CreatePyList({entriesObj, CreatePyString(", ")})))
-    ->add(CreatePyString("}"));
+  auto repr = CreatePyString(", ")->as<PyString>()->Join(obj);
+  return StringConcat(
+    CreatePyList({CreatePyString("{"), repr, CreatePyString("}")})
+  );
 }
 
 PyObjPtr DictionaryKlass::contains(const PyObjPtr& obj, const PyObjPtr& key) {

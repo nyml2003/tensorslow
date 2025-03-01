@@ -5,7 +5,6 @@
 #include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/Object.h"
-#include "Object/ObjectHelper.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
@@ -37,7 +36,7 @@ void Interpreter::SetFrame(const PyFramePtr& child) {
 
 void Interpreter::Run(const Object::PyCodePtr& code) {
   auto result = CreateModuleEntryFrame(code)->EvalWithDestory();
-  if (!Object::IsType(result, Object::NoneKlass::Self())) {
+  if (!result->is<Object::PyNone>()) {
     throw std::runtime_error("Module code did not return None");
   }
 }
@@ -46,7 +45,7 @@ Object::PyObjPtr Interpreter::EvalConstructor(
   const Object::PyTypePtr& type,
   const Object::PyListPtr& arguments
 ) {
-  return type->Owner()->allocateInstance(type, arguments);
+  return type->Owner()->construct(type, arguments);
 }
 
 Object::PyObjPtr Interpreter::EvalMethod(
@@ -55,10 +54,7 @@ Object::PyObjPtr Interpreter::EvalMethod(
 ) {
   auto owner = func->Owner();
   auto function = func->Method();
-  auto extendArguments = std::dynamic_pointer_cast<Object::PyList>(
-    Object::CreatePyList({owner})->add(arguments)
-  );
-  return Eval(function, extendArguments);
+  return Eval(function, arguments->Prepend(owner));
 }
 
 Object::PyObjPtr Interpreter::EvalPyFunction(
@@ -79,21 +75,20 @@ Object::PyObjPtr Interpreter::Eval(
   const Object::PyObjPtr& func,
   const Object::PyListPtr& arguments
 ) {
-  if (Object::IsType(func, Object::MethodKlass::Self())) {
-    auto method = std::dynamic_pointer_cast<Object::PyMethod>(func);
+  if (func->is<Object::PyMethod>()) {
+    auto method = func->as<Object::PyMethod>();
     return EvalMethod(method, arguments);
   }
-  if (Object::IsType(func, Object::FunctionKlass::Self())) {
-    auto pyFunction = std::dynamic_pointer_cast<Object::PyFunction>(func);
+  if (func->is<Object::PyFunction>()) {
+    auto pyFunction = func->as<Object::PyFunction>();
     return EvalPyFunction(pyFunction, arguments);
   }
-  if (Object::IsType(func, Object::NativeFunctionKlass::Self())) {
-    auto nativeFunction =
-      std::dynamic_pointer_cast<Object::PyNativeFunction>(func);
+  if (func->is<Object::PyNativeFunction>()) {
+    auto nativeFunction = func->as<Object::PyNativeFunction>();
     return EvalNativeFunction(nativeFunction, arguments);
   }
-  if (Object::IsType(func, Object::TypeKlass::Self())) {
-    auto type = std::dynamic_pointer_cast<Object::PyType>(func);
+  if (func->is<Object::PyType>()) {
+    auto type = func->as<Object::PyType>();
     return EvalConstructor(type, arguments);
   }
   throw std::runtime_error("Unknown function type");
@@ -104,7 +99,7 @@ Object::PyDictPtr Interpreter::Builtins() const {
 }
 
 void Interpreter::BackToParentFrame() {
-  if (!Object::IsType(frame, FrameKlass::Self())) {
+  if (!frame->is<PyFrame>()) {
     throw std::runtime_error("Cannot destroy non-frame object");
   }
   frame = std::dynamic_pointer_cast<PyFrame>(frame)->Caller();

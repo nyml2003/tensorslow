@@ -1,43 +1,65 @@
 #ifndef TORCHLIGHT_OBJECT_PYBOOLEAN_H
 #define TORCHLIGHT_OBJECT_PYBOOLEAN_H
 
-#include "Object/Klass.h"
-#include "Object/PyInteger.h"
+#include "Object/PyString.h"
 
 namespace torchlight::Object {
 
+class PyBoolean;
+using PyBoolPtr = std::shared_ptr<PyBoolean>;
+
 class BooleanKlass : public Klass {
  public:
-  explicit BooleanKlass();
-  static KlassPtr Self();
-
-  PyObjPtr _bool_(const PyObjPtr& obj) override;
-
-  PyObjPtr _serialize_(const PyObjPtr& obj) override;
-
-  PyObjPtr repr(const PyObjPtr& obj) override;
+  explicit BooleanKlass() = default;
+  static KlassPtr Self() {
+    static KlassPtr instance = std::make_shared<BooleanKlass>();
+    return instance;
+  }
+  static void Initialize() {
+    LoadClass(CreatePyString("bool")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+  }
 
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
-  void Initialize() override;
+  PyObjPtr repr(const PyObjPtr& obj) override;
+  PyObjPtr boolean(const PyObjPtr& obj) override { return obj; }
+  PyObjPtr _serialize_(const PyObjPtr& obj) override;
 };
 
-class PyBoolean : public PyInteger {
+class PyBoolean : public PyObject {
+ private:
+  bool value;
+
+
  public:
-  explicit PyBoolean(bool value);
-  static PyBoolPtr False();
-
-  static PyBoolPtr True();
-
-  bool Value() const;
+  explicit PyBoolean(bool value)
+    : PyObject(BooleanKlass::Self()), value(value) {}
+  static PyBoolPtr False() {
+    static PyBoolPtr instance = std::make_shared<PyBoolean>(false);
+    return instance;
+  }
+  static PyBoolPtr True() {
+    static PyBoolPtr instance = std::make_shared<PyBoolean>(true);
+    return instance;
+  }
+  bool Value() const { return value; }
 };
 
-PyObjPtr CreatePyBoolean(bool value);
-using PyBoolPtr = std::shared_ptr<PyBoolean>;
-bool IsTrue(const PyObjPtr& obj);
-PyObjPtr Not(const PyObjPtr& obj);
-PyObjPtr And(const PyObjPtr& lhs, const PyObjPtr& rhs);
-PyObjPtr Or(const PyObjPtr& lhs, const PyObjPtr& rhs);
+inline PyObjPtr CreatePyBoolean(bool value) {
+  return value ? PyBoolean::True() : PyBoolean::False();
+}
+inline bool IsTrue(const PyObjPtr& obj) {
+  return obj->boolean()->as<PyBoolean>()->Value();
+}
+inline PyObjPtr Not(const PyObjPtr& obj) {
+  return IsTrue(obj) ? PyBoolean::False() : PyBoolean::True();
+}
+inline PyObjPtr And(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return IsTrue(lhs) && IsTrue(rhs) ? PyBoolean::True() : PyBoolean::False();
+}
+inline PyObjPtr Or(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return IsTrue(lhs) || IsTrue(rhs) ? PyBoolean::True() : PyBoolean::False();
+}
 }  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_PYBOOLEAN_H

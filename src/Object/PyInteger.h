@@ -2,65 +2,52 @@
 #define TORCHLIGHT_OBJECT_PYINTEGER_H
 
 #include "Collections/Integer.h"
+#include "Collections/IntegerHelper.h"
 #include "Object/Klass.h"
-#include "Object/PyObject.h"
+#include "Object/PyString.h"
 
 namespace torchlight::Object {
 
-class PyInteger : public PyObject {
- private:
-  Collections::Integer value;
-
- public:
-  explicit PyInteger(Collections::Integer value);
-
-  [[nodiscard]] Collections::Integer Value() const;
-};
-
 class IntegerKlass : public Klass {
  public:
-  explicit IntegerKlass();
-
-  static KlassPtr Self();
-
-  ~IntegerKlass() override;
-
-  IntegerKlass(const IntegerKlass& other) = delete;
-
-  IntegerKlass& operator=(const IntegerKlass& other) = delete;
-
-  IntegerKlass(IntegerKlass&& other) noexcept = delete;
-
-  IntegerKlass& operator=(IntegerKlass&& other) noexcept = delete;
-
-  PyObjPtr allocateInstance(const PyObjPtr& klass, const PyObjPtr& args)
-    override;
-
+  explicit IntegerKlass() = default;
+  static KlassPtr Self() {
+    static KlassPtr instance = std::make_shared<IntegerKlass>();
+    LoadClass(CreatePyString("int")->as<PyString>(), instance);
+    ConfigureBasicAttributes(instance);
+    return instance;
+  }
+  PyObjPtr construct(const PyObjPtr& klass, const PyObjPtr& args) override;
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
   PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
   PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
   PyObjPtr div(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
   PyObjPtr gt(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
   PyObjPtr repr(const PyObjPtr& obj) override;
-
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
-
-  void Initialize() override;
 };
 
 PyObjPtr CreatePyInteger(Collections::Integer value);
 
 PyObjPtr CreatePyInteger(uint64_t value);
 
-uint64_t ToU64(const PyObjPtr& obj);
+class PyInteger;
+
 using PyIntPtr = std::shared_ptr<PyInteger>;
+
+class PyInteger : public PyObject {
+  friend class IntegerKlass;
+
+ private:
+  Collections::Integer value;
+
+ public:
+  explicit PyInteger(Collections::Integer value)
+    : PyObject(IntegerKlass::Self()), value(std::move(value)) {}
+
+  [[nodiscard]] Index ToU64() const { return Collections::ToU64(value); }
+};
 
 }  // namespace torchlight::Object
 
