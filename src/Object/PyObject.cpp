@@ -1,11 +1,30 @@
 #include "Object/PyObject.h"
-#include "Function/PyNativeFunction.h"
+#include "Object/Object.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
+#include "Object/PyDictionary.h"
 #include "Object/PyList.h"
-#include "Object/PyNone.h"
 #include "Object/PyString.h"
+#include "Object/PyType.h"
 
 namespace torchlight::Object {
+
+KlassPtr ObjectKlass::Self() {
+  static KlassPtr instance = std::make_shared<ObjectKlass>();
+  instance->SetName(CreatePyString("object")->as<PyString>());
+  instance->SetAttributes(CreatePyDict());
+  instance->SetType(CreatePyType(instance));
+  instance->SetSuper(CreatePyList({}));
+  instance->SetMro(CreatePyList({CreatePyType(instance)->as<PyType>()}));
+  instance->SetNative();
+  ConfigureBasicAttributes(instance);
+  return instance;
+}
+
+PyObjPtr PyObject::Instance() {
+  static PyObjPtr instance = std::make_shared<PyObject>(ObjectKlass::Self());
+  return instance;
+}
 
 bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs.get() == rhs.get()) {
@@ -20,30 +39,6 @@ bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 
 bool operator!=(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return !(lhs == rhs);
-}
-
-void DebugPrint(const PyObjPtr& obj) {
-  obj->str()->as<PyString>()->PrintLine();
-}
-
-PyObjPtr Print(const PyObjPtr& args) {
-  CheckNativeFunctionArguments(args);
-  auto argList = args->as<PyList>();
-  CreatePyString(" ")->as<PyString>()->Join(argList)->PrintLine();
-  return CreatePyNone();
-}
-
-PyObjPtr Len(const PyObjPtr& args) {
-  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
-  auto value = args->as<PyList>()->GetItem(0);
-  return value->len();
-}
-
-KlassPtr ObjectKlass::Self() {
-  static KlassPtr instance = std::make_shared<ObjectKlass>();
-  LoadClass(CreatePyString("object")->as<PyString>(), instance);
-  ConfigureBasicAttributes(instance);
-  return instance;
 }
 
 }  // namespace torchlight::Object

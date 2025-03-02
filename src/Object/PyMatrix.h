@@ -2,10 +2,9 @@
 #define TORCHLIGHT_OBJECT_PYMATRIX_H
 
 #include "Collections/Matrix.h"
-
-#include "Common.h"
 #include "Function/PyIife.h"
 #include "Object/Klass.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyObject.h"

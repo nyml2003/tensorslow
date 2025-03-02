@@ -136,7 +136,7 @@ TEST(Matrix, MatrixMultiply) {
 }
 
 TEST(Matrix, Eye) {
-  Matrix identity = Matrix::eye(3);
+  Matrix identity = Matrix::Eye(3);
   List<double> expected = {1, 0, 0, 0, 1, 0, 0, 0, 1};
   for (Index i = 0; i < 3; ++i) {
     for (Index j = 0; j < 3; ++j) {

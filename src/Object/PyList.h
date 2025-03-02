@@ -52,12 +52,12 @@ class PyList : public PyObject {
   PyObjPtr GetItem(Index index) const { return value[index]; }
   void SetItem(Index index, const PyObjPtr& obj) { value.Set(index, obj); }
   PyListPtr Prepend(const PyObjPtr& obj) {
-    value.Unshift(obj);
-    return std::make_shared<PyList>(value);
+    Collections::List<PyObjPtr> newList(value);
+    newList.Unshift(obj);
+    return CreatePyList(newList)->as<PyList>();
   }
+  void RemoveAt(Index index) { value.RemoveAt(index); }
 };
-
-
 
 PyObjPtr ListAppend(const PyObjPtr& args);
 

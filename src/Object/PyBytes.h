@@ -2,6 +2,7 @@
 #define TORCHLIGHT_OBJECT_PYBYTES_H
 
 #include "Collections/Bytes.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyString.h"
 
 namespace torchlight::Object {

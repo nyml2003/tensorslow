@@ -16,7 +16,11 @@ class TypeKlass : public Klass {
 
   static void Initialize();
 
+  PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+
   PyObjPtr repr(const PyObjPtr& obj) override;
+
+
 };
 
 class PyType : public PyObject {

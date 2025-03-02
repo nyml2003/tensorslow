@@ -1,6 +1,7 @@
 #ifndef TORCHLIGHT_OBJECT_PYFLOAT_H
 #define TORCHLIGHT_OBJECT_PYFLOAT_H
 
+#include "Object/ObjectHelper.h"
 #include "Object/PyString.h"
 
 namespace torchlight::Object {

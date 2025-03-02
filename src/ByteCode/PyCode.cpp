@@ -2,17 +2,15 @@
 #include "ByteCode/ByteCode.h"
 #include "ByteCode/PyInst.h"
 #include "Collections/BytesHelper.h"
-#include "Collections/IntegerHelper.h"
 #include "Collections/StringHelper.h"
+#include "Object/Object.h"
+#include "Object/ObjectHelper.h"
+#include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
-
-#include <cstring>
-#include <memory>
-#include <stdexcept>
 
 namespace torchlight::Object {
 
@@ -97,6 +95,34 @@ PyListPtr PyCode::VarNames() const {
 Index PyCode::NLocals() const {
   return nLocals;
 }
+
+PyObjPtr CodeKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyCode>() || !rhs->is<PyCode>()) {
+    return CreatePyBoolean(false);
+  }
+  auto lhsc = lhs->as<PyCode>();
+  auto rhsc = rhs->as<PyCode>();
+  if (!IsTrue(lhsc->Name()->eq(rhsc->Name()))) {
+    return CreatePyBoolean(false);
+  }
+  if (!IsTrue(lhsc->Consts()->eq(rhsc->Consts()))) {
+    return CreatePyBoolean(false);
+  }
+  if (!IsTrue(lhsc->Names()->eq(rhsc->Names()))) {
+    return CreatePyBoolean(false);
+  }
+  if (!IsTrue(lhsc->VarNames()->eq(rhsc->VarNames()))) {
+    return CreatePyBoolean(false);
+  }
+  if (lhsc->NLocals() != rhsc->NLocals()) {
+    return CreatePyBoolean(false);
+  }
+  if (!IsTrue(lhsc->Instructions()->eq(rhsc->Instructions()))) {
+    return CreatePyBoolean(false);
+  }
+  return CreatePyBoolean(true);
+}
+
 PyObjPtr CodeKlass::str(const PyObjPtr& self) {
   if (self->Klass() != Self()) {
     throw std::runtime_error("PyCode::repr(): obj is not a code object");
@@ -105,33 +131,35 @@ PyObjPtr CodeKlass::str(const PyObjPtr& self) {
   PyObjPtr repr =
     CreatePyString(Collections::CreateStringWithCString("<code>\n"));
   repr =
-    repr->add(CreatePyString(Collections::CreateStringWithCString("consts:\n"))
-    );
+    repr->add(CreatePyString(Collections::CreateStringWithCString("consts: ")));
   repr = repr->add(code->Consts()->repr());
   repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
   repr =
-    repr->add(CreatePyString(Collections::CreateStringWithCString("names:\n")));
+    repr->add(CreatePyString(Collections::CreateStringWithCString("names: ")));
   repr = repr->add(code->Names()->repr());
   repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
   repr =
-    repr->add(CreatePyString(Collections::CreateStringWithCString("varNames:\n")
-    ));
+    repr->add(CreatePyString(Collections::CreateStringWithCString("varNames: "))
+    );
   repr = repr->add(code->VarNames()->repr());
   repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
   repr =
-    repr->add(CreatePyString(Collections::CreateStringWithCString("name:\n")));
-  repr = repr->add(code->Name()->repr());
+    repr->add(CreatePyString(Collections::CreateStringWithCString("name: ")));
+  repr = repr->add(code->Name()->str());
   repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
   repr = repr->add(
-    CreatePyString(Collections::CreateStringWithCString("instructions:\n"))
+    CreatePyString(Collections::CreateStringWithCString("instructions:\n\n"))
   );
-  repr = repr->add(code->Instructions()->repr());
-  repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
+  repr = repr->add(StringConcat(CreatePyList({
+    CreatePyString("\n")->as<PyString>()->Join(code->Instructions()),
+  })));
+  repr =
+    repr->add(CreatePyString(Collections::CreateStringWithCString("\n\n")));
   repr =
     repr->add(CreatePyString(Collections::CreateStringWithCString("nLocals: "))
     );
   repr = repr->add(
-    CreatePyInteger(Collections::CreateIntegerWithU64(code->NLocals()))->repr()
+    CreatePyInteger(code->NLocals())->repr()
   );
   repr =
     repr->add(CreatePyString(Collections::CreateStringWithCString("\n</code>\n")
@@ -277,6 +305,10 @@ void PyCode::LoadBuildClass() {
 void PyCode::StoreAttr(const PyObjPtr& obj) {
   auto index = IndexOfName(obj);
   instructions->Append(CreateStoreAttr(index));
+}
+
+void PyCode::Nop() {
+  instructions->Append(CreateNop());
 }
 
 PyObjPtr CreatePyCode(const PyObjPtr& name) {

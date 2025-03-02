@@ -1,6 +1,5 @@
 #include "Runtime/Interpreter.h"
 #include "ByteCode/PyCode.h"
-#include "Collections/List.h"
 #include "Function/PyFunction.h"
 #include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
@@ -12,8 +11,6 @@
 #include "Runtime/Genesis.h"
 #include "Runtime/PyFrame.h"
 
-#include <memory>
-#include <stdexcept>
 namespace torchlight::Runtime {
 
 Interpreter::Interpreter() {

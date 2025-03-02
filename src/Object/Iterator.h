@@ -2,6 +2,7 @@
 #define TORCHLIGHT_OBJECT_ITERATOR_H
 
 #include "Object/Object.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyList.h"
 #include "Object/PyString.h"
@@ -12,9 +13,12 @@ class IterDoneKlass : public Klass {
   explicit IterDoneKlass() = default;
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<IterDoneKlass>();
-    LoadClass(CreatePyString("StopIteration")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  static void Initialize() {
+    LoadClass(CreatePyString("StopIteration")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
   }
 };
 
@@ -28,13 +32,16 @@ class ListIteratorKlass : public Klass {
   explicit ListIteratorKlass() = default;
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<ListIteratorKlass>();
-    LoadClass(CreatePyString("ListIterator")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
   }
   PyObjPtr iter(const PyObjPtr& obj) override { return obj; }
   PyObjPtr next(const PyObjPtr& obj) override;
   PyObjPtr str(const PyObjPtr& obj) override;
+
+  static void Initialize() {
+    LoadClass(CreatePyString("ListIterator")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+  }
 };
 
 inline PyObjPtr CreateIterDone() {

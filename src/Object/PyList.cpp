@@ -1,17 +1,17 @@
 #include "Object/PyList.h"
+#include "ByteCode/ByteCode.h"
+#include "Collections/BytesHelper.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/Iterator.h"
-#include "Object/Klass.h"
 #include "Object/Object.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
+#include "Object/PyBytes.h"
 #include "Object/PyInteger.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
-#include "Collections/BytesHelper.h"
-#include "ByteCode/ByteCode.h"
-#include "Object/PyBytes.h"
 
 namespace torchlight::Object {
 
@@ -40,7 +40,7 @@ void ListKlass::Initialize() {
 }
 
 PyObjPtr ListKlass::construct(const PyObjPtr& type, const PyObjPtr& args) {
-  if (Self()->Type() != type) {
+  if (type->as<PyType>()->Owner() != Self()) {
     throw std::runtime_error("List does not support construct operation");
   }
   if (!args->is<PyList>()) {

@@ -2,6 +2,7 @@
 #define TORCHLIGHT_AST_IDENTIFIER_H
 
 #include "Ast/INode.h"
+#include "Object/ObjectHelper.h"
 
 namespace torchlight::Ast {
 
@@ -27,7 +28,7 @@ class IdentifierKlass : public INodeKlass {
 class Identifier : public INode {
  public:
   explicit Identifier(const Object::PyObjPtr& _name, const INodePtr& parent)
-    : INode(IdentifierKlass::Self(), std::move(parent)),
+    : INode(IdentifierKlass::Self(), parent),
       name(_name->as<Object::PyString>()) {}
 
   [[nodiscard]] Object::PyStrPtr Name() const { return name; }

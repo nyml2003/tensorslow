@@ -1,9 +1,9 @@
-set(test_name "TEST_PYSTRING")
+set(test_name "TEST_MRO")
 
 add_executable(
     ${test_name}
     ${torchlight_common_files}
-    ${torchlight_dir}/test/unittest/Object/PyString.cpp
+    ${torchlight_dir}/test/unittest/Object/MRO.cpp
 )
 
 # gtest

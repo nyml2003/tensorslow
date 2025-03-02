@@ -18,7 +18,7 @@ Object::PyObjPtr ModuleKlass::visit(
     Object::CreatePyCode(module->Name())
   );
   code->SetScope(Object::Scope::GLOBAL);
-  code->RegisterConst(Object::CreatePyNone());
+  
   Object::Invoke(codeList, Object::CreatePyString("append"), {code});
   Object::ForEach(
     module->Body(),
@@ -27,7 +27,7 @@ Object::PyObjPtr ModuleKlass::visit(
       stmtNode->visit(codeList);
     }
   );
-
+  code->RegisterConst(Object::CreatePyNone());
   return Object::CreatePyNone();
 }
 

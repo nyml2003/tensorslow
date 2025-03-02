@@ -2,6 +2,7 @@
 #define TORCHLIGHT_RUNTIME_PYCODE_H
 
 #include "Object/Klass.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyBytes.h"
 #include "Object/PyList.h"
 #include "Object/PyObject.h"
@@ -98,6 +99,7 @@ class PyCode : public PyObject {
   Index ForIter(Index index);
   void LoadBuildClass();
   void StoreAttr(const PyObjPtr& obj);
+  void Nop();
 
  private:
   PyBytesPtr byteCode;
@@ -126,6 +128,8 @@ class CodeKlass : public Klass {
   PyObjPtr str(const PyObjPtr& self) override;
 
   PyObjPtr _serialize_(const PyObjPtr& self) override;
+
+  PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 };
 
 PyObjPtr CreatePyCode(const PyObjPtr& name);

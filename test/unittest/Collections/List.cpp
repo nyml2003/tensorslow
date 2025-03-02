@@ -1,7 +1,6 @@
 #include "../test_default.h"
 
 #include "Collections/List.h"
-#include "Collections/ListHelper.h"
 
 using namespace torchlight::Collections;
 using torchlight::Index;

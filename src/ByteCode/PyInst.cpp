@@ -166,4 +166,8 @@ PyInstPtr CreateStoreAttr(Index index) {
   return std::make_shared<PyInst>(ByteCode::STORE_ATTR, index);
 }
 
+PyInstPtr CreateNop() {
+  return std::make_shared<PyInst>(ByteCode::NOP);
+}
+
 }  // namespace torchlight::Object

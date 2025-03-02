@@ -96,7 +96,7 @@ void ParseAndGenerate(const fs::path& filePath) {
   visitor.Visit();
   visitor.Emit();
   auto code = visitor.Code();
-  if (ArgsHelper::Instance().Has("show_code") || true) {
+  if (ArgsHelper::Instance().Has("show_code")) {
     Object::DebugPrint(code->str());
   }
   Collections::Bytes data =

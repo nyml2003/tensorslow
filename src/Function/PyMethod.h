@@ -1,8 +1,8 @@
 #ifndef TORCHLIGHT_FUNCTION_PYMETHOD_H
 #define TORCHLIGHT_FUNCTION_PYMETHOD_H
 
+#include "Object/ObjectHelper.h"
 #include "Object/PyString.h"
-
 namespace torchlight::Object {
 
 class MethodKlass : public Klass {

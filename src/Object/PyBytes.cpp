@@ -3,12 +3,9 @@
 #include "Collections/BytesHelper.h"
 #include "Collections/Iterator.h"
 #include "Collections/StringHelper.h"
-#include "Object/Klass.h"
 #include "Object/PyBoolean.h"
-#include "Object/PyDictionary.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
-#include "Object/PyType.h"
 
 namespace torchlight::Object {
 

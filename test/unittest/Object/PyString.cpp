@@ -31,31 +31,31 @@ class PyStringTest : public ::testing::Test {
 
 TEST_F(PyStringTest, Constructor) {
   PyStrPtr str = std::dynamic_pointer_cast<PyString>(CreatePyString(Collections::CreateStringWithCString("test")));
-  EXPECT_EQ(str->Value(), Collections::CreateStringWithCString("test"));
+  EXPECT_EQ(str->value, Collections::CreateStringWithCString("test"));
 }
 
 TEST_F(PyStringTest, Add) {
   auto result = StringKlass::Self()->add(str1, str2);
   auto pystr = std::dynamic_pointer_cast<PyString>(result);
-  EXPECT_EQ(pystr->Value(), Collections::CreateStringWithCString("helloworld"));
+  EXPECT_EQ(pystr->value, Collections::CreateStringWithCString("helloworld"));
 }
 
 TEST_F(PyStringTest, Repr) {
   auto result = StringKlass::Self()->repr(str1);
   auto pystr = std::dynamic_pointer_cast<PyString>(result);
-  EXPECT_EQ(pystr->Value(), Collections::CreateStringWithCString("\"hello\""));
+  EXPECT_EQ(pystr->value, Collections::CreateStringWithCString("\'hello\'"));
 }
 
 TEST_F(PyStringTest, Eq) {
   {
     auto result = StringKlass::Self()->eq(str1, str2);
     auto pybool = std::dynamic_pointer_cast<PyBoolean>(result);
-    EXPECT_FALSE(pybool->Value());
+    EXPECT_FALSE(pybool->value);
   }
   {
     auto result = StringKlass::Self()->eq(str1, str3);
     auto pybool = std::dynamic_pointer_cast<PyBoolean>(result);
-    EXPECT_TRUE(pybool->Value());
+    EXPECT_TRUE(pybool->value);
   }
 }
 

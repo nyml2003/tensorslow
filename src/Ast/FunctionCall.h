@@ -2,6 +2,7 @@
 #define TORCHLIGHT_AST_FUNCTIONCALL_H
 
 #include "Ast/INode.h"
+#include "Object/ObjectHelper.h"
 
 namespace torchlight::Ast {
 

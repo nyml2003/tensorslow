@@ -2,7 +2,6 @@
 #include "Collections/Matrix.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/PyFloat.h"
-#include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyString.h"
 

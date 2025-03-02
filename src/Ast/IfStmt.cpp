@@ -1,13 +1,8 @@
 #include "Ast/IfStmt.h"
 #include "Ast/INode.h"
 #include "ByteCode/PyInst.h"
-#include "Collections/Iterator.h"
 #include "Object/ObjectHelper.h"
-#include "Object/PyDictionary.h"
-#include "Object/PyInteger.h"
 #include "Object/PyNone.h"
-#include "Object/PyString.h"
-#include "Object/PyType.h"
 
 namespace torchlight::Ast {
 

@@ -10,5 +10,6 @@
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
+#include "Object/PyType.h"
 
 #endif

@@ -1,7 +1,6 @@
 #ifndef TORCHLIGHT_FUNCTION_IIFE_H
 #define TORCHLIGHT_FUNCTION_IIFE_H
-
-#include "Object/PyString.h"
+#include "Object/PyObject.h"
 
 #include <functional>
 
@@ -15,10 +14,10 @@ class IifeKlass : public Klass {
 
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<IifeKlass>();
-    LoadClass(CreatePyString("IIFE")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
   }
+
+  static void Initialize();
 };
 
 class PyIife : public PyObject {

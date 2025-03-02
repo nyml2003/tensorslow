@@ -2,11 +2,7 @@ set(test_name "TEST_SERIALIZE")
 
 add_executable(
     ${test_name}
-    ${torchlight_Collections_files}
-    ${torchlight_Object_files}
-    ${torchlight_Function_files}
-    ${torchlight_ByteCode_files}
-    ${torchlight_Runtime_files}
+    ${torchlight_common_files}
     ${torchlight_dir}/test/unittest/Runtime/Serialize.cpp
 )
 

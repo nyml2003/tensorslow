@@ -14,6 +14,7 @@
 #include "Ast/List.h"
 #include "Ast/MemberAccess.h"
 #include "Ast/Module.h"
+#include "Ast/PassStmt.h"
 #include "Ast/ReturnStmt.h"
 #include "Ast/WhileStmt.h"
 #include "ByteCode/PyCode.h"
@@ -27,8 +28,6 @@
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "support/Any.h"
-
-#include <memory>
 
 namespace torchlight::Generation {
 
@@ -51,9 +50,10 @@ void Generator::Emit() {
 }
 
 antlrcpp::Any Generator::visitStmt(Python3Parser::StmtContext* ctx) {
-  if (ctx->simple_stmts()) {
+  if (ctx->simple_stmts() != nullptr) {
     return visitSimple_stmts(ctx->simple_stmts()).as<Object::PyObjPtr>();
-  } else if (ctx->compound_stmt()) {
+  }
+  if (ctx->compound_stmt() != nullptr) {
     return visitCompound_stmt(ctx->compound_stmt()).as<Ast::INodePtr>();
   }
   return nullptr;
@@ -308,6 +308,9 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
 }
 
 antlrcpp::Any Generator::visitArglist(Python3Parser::ArglistContext* ctx) {
+  if (ctx->argument().empty()) {
+    return Object::CreatePyList({});
+  }
   auto arglist = ctx->argument();
   Collections::List<Object::PyObjPtr> args(static_cast<uint64_t>(arglist.size())
   );
@@ -327,14 +330,16 @@ antlrcpp::Any Generator::visitTrailer(Python3Parser::TrailerContext* ctx) {
       return visitArglist(ctx->arglist());
     }
     return Object::CreatePyList({});
-  } else if (ctx->OPEN_BRACK() != nullptr) {
-    return visitSubscriptlist(ctx->subscriptlist());
-  } else if (ctx->DOT() != nullptr) {
-    throw std::runtime_error("visitTrailer: DOT is handled by visitAtom_expr");
-  } else {
-    // 其他情况
-    std::cout << "trailer: Unknown type" << std::endl;
   }
+  if (ctx->OPEN_BRACK() != nullptr) {
+    return visitSubscriptlist(ctx->subscriptlist());
+  }
+  if (ctx->DOT() != nullptr) {
+    throw std::runtime_error("visitTrailer: DOT is handled by visitAtom_expr");
+  }
+  // 其他情况
+  std::cout << "trailer: Unknown type" << std::endl;
+
   return nullptr;
 }
 
@@ -434,51 +439,50 @@ antlrcpp::Any Generator::visitCompound_stmt(
   Python3Parser::Compound_stmtContext* ctx
 ) {
   // 1. 如果是 if_stmt
-  if (ctx->if_stmt()) {
+  if (ctx->if_stmt() != nullptr) {
     return visitIf_stmt(ctx->if_stmt());
   }
   // 2. 如果是 while_stmt
-  else if (ctx->while_stmt()) {
+  if (ctx->while_stmt() != nullptr) {
     return visitWhile_stmt(ctx->while_stmt());
   }
   // 3. 如果是 for_stmt
-  else if (ctx->for_stmt()) {
+  if (ctx->for_stmt() != nullptr) {
     return visitFor_stmt(ctx->for_stmt());
   }
   // 4. 如果是 try_stmt
-  else if (ctx->try_stmt()) {
+  if (ctx->try_stmt() != nullptr) {
     return visitTry_stmt(ctx->try_stmt());
   }
   // 5. 如果是 with_stmt
-  else if (ctx->with_stmt()) {
+  if (ctx->with_stmt() != nullptr) {
     return visitWith_stmt(ctx->with_stmt());
   }
   // 6. 如果是 funcdef
-  else if (ctx->funcdef()) {
+  if (ctx->funcdef() != nullptr) {
     return visitFuncdef(ctx->funcdef()).as<Ast::INodePtr>();
   }
   // 7. 如果是 classdef
-  else if (ctx->classdef()) {
+  if (ctx->classdef() != nullptr) {
     return visitClassdef(ctx->classdef()).as<Ast::INodePtr>();
   }
   // 8. 如果是 decorated
-  else if (ctx->decorated()) {
+  if (ctx->decorated() != nullptr) {
     return visitDecorated(ctx->decorated());
   }
   // 9. 如果是 async_stmt
-  else if (ctx->async_stmt()) {
+  if (ctx->async_stmt() != nullptr) {
     return visitAsync_stmt(ctx->async_stmt());
   }
   // 10. 如果是 match_stmt
-  else if (ctx->match_stmt()) {
+  if (ctx->match_stmt() != nullptr) {
     return visitMatch_stmt(ctx->match_stmt());
   }
   // 其他情况（不应该出现）
-  else {
-    std::cerr << "visitCompound_stmt: Unknown compound statement type"
-              << std::endl;
-    return nullptr;
-  }
+
+  std::cerr << "visitCompound_stmt: Unknown compound statement type"
+            << std::endl;
+  return nullptr;
 }
 
 antlrcpp::Any Generator::visitFuncdef(Python3Parser::FuncdefContext* ctx) {
@@ -628,9 +632,18 @@ antlrcpp::Any Generator::visitExprlist(Python3Parser::ExprlistContext* ctx) {
 
 antlrcpp::Any Generator::visitClassdef(Python3Parser::ClassdefContext* ctx) {
   auto className = Object::CreatePyString(ctx->name()->getText().c_str());
+
   auto bases = Object::CreatePyList({});
+  if (ctx->arglist() != nullptr) {
+    bases = visitArglist(ctx->arglist()).as<Object::PyObjPtr>();
+  }
+  if (bases->as<Object::PyList>()->Length() == 0) {
+    bases->as<Object::PyList>()->Append(
+      Ast::CreateIdentifier(Object::CreatePyString("object"), context)
+    );
+  }
   auto classDef = std::dynamic_pointer_cast<Ast::ClassDef>(
-    Ast::CreateClassDef(className, bases, context)
+    Ast::CreateClassDef(className, Ast::CreateList(bases, context), context)
   );
   auto oldContext = context;
   context = classDef;
@@ -638,6 +651,10 @@ antlrcpp::Any Generator::visitClassdef(Python3Parser::ClassdefContext* ctx) {
   classDef->SetBody(body);
   context = oldContext;
   return std::dynamic_pointer_cast<Ast::INode>(classDef);
+}
+
+antlrcpp::Any Generator::visitPass_stmt(Python3Parser::Pass_stmtContext* ctx) {
+  return Ast::CreatePassStmt(context);
 }
 
 }  // namespace torchlight::Generation

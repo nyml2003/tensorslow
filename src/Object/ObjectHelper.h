@@ -18,7 +18,35 @@ void ForEach(
     void(const PyObjPtr& value, Index index, const PyObjPtr& obj)>& func
 );
 PyObjPtr Identity(const PyObjPtr& obj);
+PyObjPtr CreatePyClass(const PyTypePtr& type);
+PyObjPtr GetBases(const PyObjPtr& args);
+PyObjPtr GetMro(const PyObjPtr& args);
 
+PyListPtr MergeMro(const PyListPtr& mros);
+PyListPtr ComputeMro(const PyTypePtr& type);
+bool FirstOrNotInMro(const PyListPtr& mro, const PyTypePtr& type);
+bool CouldTypePlaceAhead(
+  const PyListPtr& mros,
+  const PyTypePtr& type,
+  Index ignore
+);
+void CleanMros(const PyListPtr& mros);
+
+
+void DebugPrint(const PyObjPtr& obj);
+
+PyObjPtr Print(const PyObjPtr& args);
+
+PyObjPtr Len(const PyObjPtr& args);
+
+KlassPtr CreatePyKlass(
+  const PyStrPtr& name,
+  const PyDictPtr& attributes,
+  const PyListPtr& super
+);
+
+void LoadClass(const PyStrPtr& name, const KlassPtr& klass);
+void ConfigureBasicAttributes(const KlassPtr& klass);
 }  // namespace torchlight::Object
 
 #endif

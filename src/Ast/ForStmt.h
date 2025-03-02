@@ -2,7 +2,7 @@
 #define TORCHLIGHT_AST_FOR_STATEMENT_H
 
 #include "Ast/INode.h"
-#include "Object/Object.h"
+#include "Object/ObjectHelper.h"
 
 namespace torchlight::Ast {
 
@@ -31,7 +31,7 @@ class ForStmt : public INode {
   explicit ForStmt(
     INodePtr target,
     INodePtr iter,
-    Object::PyObjPtr body,
+    const Object::PyObjPtr& body,
     INodePtr parent
   )
     : INode(ForStmtKlass::Self(), std::move(parent)),

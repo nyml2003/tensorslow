@@ -86,25 +86,21 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   bool is() {
     return std::dynamic_pointer_cast<T>(shared_from_this()) != nullptr;
   }
+  static PyObjPtr Instance();
 };
 
 using PyObjPtr = std::shared_ptr<PyObject>;
 
-bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs);
-
-bool operator!=(const PyObjPtr& lhs, const PyObjPtr& rhs);
-
-void DebugPrint(const PyObjPtr& obj);
-
-PyObjPtr Print(const PyObjPtr& args);
-
-PyObjPtr Len(const PyObjPtr& args);
 
 class ObjectKlass : public Klass {
  public:
   explicit ObjectKlass() = default;
   static KlassPtr Self();
 };
+
+bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs);
+
+bool operator!=(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
 }  // namespace torchlight::Object
 

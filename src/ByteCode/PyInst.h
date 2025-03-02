@@ -2,7 +2,9 @@
 #define TORCHLIGHT_RUNTIME_PYINST_H
 
 #include "ByteCode/ByteCode.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyString.h"
+
 
 namespace torchlight::Object {
 
@@ -88,6 +90,8 @@ PyInstPtr CreateForIter(Index index);
 PyInstPtr CreateLoadBuildClass();
 
 PyInstPtr CreateStoreAttr(Index index);
+
+PyInstPtr CreateNop();
 
 }  // namespace torchlight::Object
 

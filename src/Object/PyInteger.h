@@ -4,6 +4,7 @@
 #include "Collections/Integer.h"
 #include "Collections/IntegerHelper.h"
 #include "Object/Klass.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyString.h"
 
 namespace torchlight::Object {

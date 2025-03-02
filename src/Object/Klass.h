@@ -1,5 +1,6 @@
 #ifndef TORCHLIGHT_OBJECT_KLASS_H
 #define TORCHLIGHT_OBJECT_KLASS_H
+#include "Common.h"
 #include "Object/Object.h"
 
 namespace torchlight::Object {
@@ -24,6 +25,7 @@ class Klass {
   void SetType(const PyObjPtr& type);
   void SetNative() { this->isNative = true; }
   void SetSuper(const PyObjPtr& super);
+  void SetMro(const PyObjPtr& mro);
   [[nodiscard]] bool IsNative() const { return isNative; }
   void AddAttribute(const PyStrPtr& key, const PyObjPtr& value);
   Klass(const Klass& other) = delete;
@@ -65,16 +67,8 @@ class Klass {
   virtual PyObjPtr _serialize_(const PyObjPtr& obj);
 };
 
-KlassPtr CreatePyKlass(
-  const PyStrPtr& name,
-  const PyDictPtr& attributes,
-  const PyListPtr& super
-);
 
-void LoadClass(const PyStrPtr& name, const KlassPtr& klass);
-void ConfigureBasicAttributes(const KlassPtr& klass);
 PyObjPtr KlassRepr(const PyObjPtr& args);
-
 }  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_KLASS_H

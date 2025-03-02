@@ -1,6 +1,7 @@
 #ifndef TORCHLIGHT_OBJECT_PYNONE_H
 #define TORCHLIGHT_OBJECT_PYNONE_H
 
+#include "Object/ObjectHelper.h"
 #include "Object/PyString.h"
 
 namespace torchlight::Object {

@@ -1,6 +1,5 @@
 #include "Object/Iterator.h"
 #include "Object/Object.h"
-#include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyString.h"
 

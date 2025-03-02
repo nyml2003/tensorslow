@@ -1,12 +1,9 @@
 #include "Runtime/Genesis.h"
-
 #include "Function/PyFunction.h"
 #include "Function/PyNativeFunction.h"
-#include "Object/Klass.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyFloat.h"
-#include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyMatrix.h"
 #include "Object/PyNone.h"
@@ -15,9 +12,6 @@
 #include "Object/PyType.h"
 #include "Runtime/Interpreter.h"
 #include "Runtime/PyFrame.h"
-#include "Runtime/RuntimeHelper.h"
-
-#include <memory>
 
 namespace torchlight::Runtime {
 
@@ -98,17 +92,15 @@ Object::PyObjPtr Genesis() {
   builtins->setitem(
     Object::CreatePyString("type"), CreatePyNativeFunction(Type)
   );
-
   return builtins;
 }
 
 Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
+  auto argList = args->as<Object::PyList>();
   // 解析参数：函数、类名和基类
-  auto function = std::dynamic_pointer_cast<Object::PyFunction>(
-    args->getitem(Object::CreatePyInteger(0))
-  );
-  auto _name = args->getitem(Object::CreatePyInteger(1));
-  auto name = std::dynamic_pointer_cast<Object::PyString>(_name);
+  auto function = argList->GetItem(0)->as<Object::PyFunction>();
+  auto name = argList->GetItem(1)->as<Object::PyString>();
+  auto bases = argList->GetItem(2)->as<Object::PyList>();
 
   // 创建执行环境
   auto globals = function->Globals();
@@ -117,8 +109,7 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
   // 保存当前帧
   // 创建新帧并执行类定义函数
   auto frame = Runtime::CreateFrameWithPyFunction(
-    function,
-    std::dynamic_pointer_cast<Object::PyList>(Object::CreatePyList({}))
+    function, Object::CreatePyList({})->as<Object::PyList>()
   );
   auto result = frame->Eval();
   Runtime::Interpreter::Instance().BackToParentFrame();
@@ -127,19 +118,20 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
   }
   // 获取执行结果
   auto class_dict = frame->CurrentLocals();
-  auto base =
-    std::dynamic_pointer_cast<Object::PyList>(Object::CreatePyList({}));
   // 创建新的类型对象
   auto type_name =
-    std::dynamic_pointer_cast<Object::PyString>(_name_->add(_name));
-  auto type = Object::CreatePyKlass(type_name, class_dict, base);
-  return Object::CreatePyType(type);
+    StringConcat(
+      Object::CreatePyList({_name_, Object::CreatePyString("."), name})
+    )
+      ->as<Object::PyString>();
+  Object::DebugPrint(bases);
+  auto klass = Object::CreatePyKlass(type_name, class_dict, bases);
+  return Object::CreatePyType(klass);
 }
 
 Object::PyObjPtr Type(const Object::PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   auto obj = args->getitem(Object::CreatePyInteger(0));
-
   return obj->Klass()->Type();
 }
 

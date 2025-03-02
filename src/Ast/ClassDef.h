@@ -2,6 +2,7 @@
 #define TORCHLIGHT_AST_CLASSDEF_H
 
 #include "Ast/INode.h"
+#include "Object/ObjectHelper.h"
 
 namespace torchlight::Ast {
 
@@ -27,16 +28,16 @@ class ClassDef : public INode {
  public:
   explicit ClassDef(
     const Object::PyObjPtr& _name,
-    const Object::PyObjPtr& _bases,
+    INodePtr _bases,
     const INodePtr& parent
   )
     : INode(ClassDefKlass::Self(), parent),
       name(_name->as<Object::PyString>()),
-      bases(_bases->as<Object::PyList>()) {}
+      bases(std::move(_bases)) {}
 
   [[nodiscard]] Object::PyStrPtr Name() const { return name; }
 
-  [[nodiscard]] Object::PyListPtr Bases() const { return bases; }
+  [[nodiscard]] INodePtr Bases() const { return bases; }
 
   [[nodiscard]] Object::PyListPtr Body() const { return body; }
 
@@ -53,9 +54,9 @@ class ClassDef : public INode {
   }
 
  private:
-  Object::PyStrPtr name;    // 类名
-  Object::PyListPtr body;   // 类的主体
-  Object::PyListPtr bases;  // 保存当前ClassDef的基类
+  Object::PyStrPtr name;   // 类名
+  Object::PyListPtr body;  // 类的主体
+  INodePtr bases;  // 保存当前ClassDef的基类, 是一个Identifier对象的列表
   Object::PyObjPtr
     parents;  // 保存整个调用链上的ClassDef,Module和FuncDef所对应的PyCode对象
   Object::PyObjPtr
@@ -64,7 +65,7 @@ class ClassDef : public INode {
 
 inline INodePtr CreateClassDef(
   const Object::PyObjPtr& _name,
-  const Object::PyObjPtr& _bases,
+  INodePtr _bases,
   const INodePtr& parent
 ) {
   return std::make_shared<ClassDef>(_name, _bases, parent);

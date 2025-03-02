@@ -24,6 +24,7 @@ Object::PyObjPtr ClassDefKlass::visit(
   code->RegisterConst(classDef->Name());
   code->SetScope(Object::Scope::GLOBAL);
   Object::Invoke(codeList, Object::CreatePyString("append"), {code});
+  classDef->Bases()->visit(codeList);
   auto parent = GetCodeFromList(codeList, classDef->Parent());
   parent->RegisterName(classDef->Name());
   Object::ForEach(
@@ -64,13 +65,13 @@ Object::PyObjPtr ClassDefKlass::emit(
   parent->LoadConst(classDef->Name());
   parent->MakeFunction();
   parent->LoadConst(classDef->Name());
-  parent->CallFunction(2);
+  classDef->Bases()->emit(codeList);
+  parent->CallFunction(3);
   parent->StoreName(classDef->Name());
-  if (ArgsHelper::Instance().Has("show_code") || true) {
+  if (ArgsHelper::Instance().Has("show_code")) {
     Object::DebugPrint(selfCode->str());
   }
   return Object::CreatePyNone();
 }
-
 
 }  // namespace torchlight::Ast

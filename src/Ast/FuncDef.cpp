@@ -66,7 +66,7 @@ Object::PyObjPtr FuncDefKlass::emit(
   parent->LoadConst(funcDef->Name());
   parent->MakeFunction();
   parent->StoreName(funcDef->Name());
-  if (ArgsHelper::Instance().Has("show_code") || true) {
+  if (ArgsHelper::Instance().Has("show_code")) {
     Object::DebugPrint(selfCode->str());
   }
   return Object::CreatePyNone();

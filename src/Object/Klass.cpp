@@ -8,12 +8,11 @@
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
+#include "Object/PyList.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
-
-#include <memory>
 
 namespace torchlight::Object {
 
@@ -34,6 +33,10 @@ void Klass::SetType(const PyObjPtr& type) {
 
 void Klass::SetSuper(const PyObjPtr& super) {
   this->super = super->as<PyList>();
+}
+
+void Klass::SetMro(const PyObjPtr& mro) {
+  this->mro = mro->as<PyList>();
 }
 
 PyObjPtr Klass::construct(const PyObjPtr& type, const PyObjPtr& args) {
@@ -62,16 +65,16 @@ PyObjPtr Klass::div(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr Klass::repr(const PyObjPtr& self) {
-  self->Klass()->Name()->PrintLine();
-  throw std::runtime_error("Cannot repr non-object");
-  // return CreatePyString("<")
-  //   ->add(self->getattr(CreatePyString("__name__")->str()))
-  //   ->add(CreatePyString(" object at ")
-  //           ->add(CreatePyString(Collections::CreateIntegerWithU64(
-  //                                  reinterpret_cast<uint64_t>(self.get())
-  //           )
-  //                                  .ToHexString())))
-  //   ->add(CreatePyString(">"));
+  // self->Klass()->Name()->PrintLine();
+  // throw std::runtime_error("Cannot repr non-object");
+  return CreatePyString("<")
+    ->add(self->getattr(CreatePyString("__name__")->str()))
+    ->add(CreatePyString(" object at ")
+            ->add(CreatePyString(Collections::CreateIntegerWithU64(
+                                   reinterpret_cast<uint64_t>(self.get())
+            )
+                                   .ToHexString())))
+    ->add(CreatePyString(">"));
 }
 
 PyObjPtr Klass::gt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -79,7 +82,14 @@ PyObjPtr Klass::gt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr Klass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  return Invoke(lhs, CreatePyString("__eq__"), {rhs});
+  auto eq = Invoke(lhs, CreatePyString("__eq__"), {rhs});
+  if (!eq->is<PyBoolean>()) {
+    DebugPrint(eq);
+    DebugPrint(lhs);
+    DebugPrint(rhs);
+    throw std::runtime_error("eq should return boolean");
+  }
+  return eq;
 }
 
 PyObjPtr Klass::lt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -187,6 +197,7 @@ KlassPtr CreatePyKlass(
   klass->SetAttributes(attributes);
   klass->SetType(CreatePyType(klass));
   klass->SetSuper(super);
+  klass->SetMro(ComputeMro(klass->Type()));
   ConfigureBasicAttributes(klass);
   return klass;
 }
@@ -195,37 +206,6 @@ void Klass::AddAttribute(const PyStrPtr& key, const PyObjPtr& value) {
   attributes->as<PyDictionary>()->Put(key, value);
 }
 
-void LoadClass(const PyStrPtr& name, const KlassPtr& klass) {
-  klass->SetName(name);
-  klass->SetAttributes(CreatePyDict());
-  klass->SetType(CreatePyType(klass));
-  klass->SetNative();
-}
 
-void ConfigureBasicAttributes(const KlassPtr& klass) {
-  klass->AddAttribute(
-    CreatePyString("__name__")->as<PyString>(), klass->Name()
-  );
-  klass->AddAttribute(
-    CreatePyString("__class__")->as<PyString>(), klass->Type()
-  );
-  klass->AddAttribute(
-    CreatePyString("__repr__")->as<PyString>(),
-    CreatePyNativeFunction(KlassRepr)
-  );
-}
-
-PyObjPtr KlassRepr(const PyObjPtr& args) {
-  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
-  auto obj = args->as<PyList>()->GetItem(0);
-  return CreatePyString("<")
-    ->add(obj->getattr(CreatePyString("__name__")->str()))
-    ->add(CreatePyString(" object at ")
-            ->add(CreatePyString(Collections::CreateIntegerWithU64(
-                                   reinterpret_cast<uint64_t>(obj.get())
-            )
-                                   .ToHexString())))
-    ->add(CreatePyString(">"));
-}
 
 }  // namespace torchlight::Object

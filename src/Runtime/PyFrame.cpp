@@ -14,15 +14,10 @@
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
-#include "Object/PyType.h"
 #include "Runtime/Interpreter.h"
 #include "Runtime/Serialize.h"
 #include "Tools/Tools.h"
 
-#include <cstring>
-#include <memory>
-#include <stdexcept>
-#include <utility>
 
 namespace torchlight::Runtime {
 
@@ -246,6 +241,10 @@ void ParseByteCode(const Object::PyCodePtr& code) {
       }
       case Object::ByteCode::STORE_ATTR: {
         insts.Push(Object::CreateStoreAttr(ReadU64(iter)));
+        break;
+      }
+      case Object::ByteCode::NOP: {
+        insts.Push(Object::CreateNop());
         break;
       }
       default:
@@ -524,7 +523,7 @@ Object::PyObjPtr PyFrame::Eval() {
         }
         arguments.Reverse();
         auto func = stack.Pop();
-        auto result = Interpreter::Instance().Eval(
+        auto result = Interpreter::Eval(
           func, Object::CreatePyList(arguments)->as<Object::PyList>()
         );
         stack.Push(result);
@@ -672,6 +671,10 @@ Object::PyObjPtr PyFrame::Eval() {
         auto obj = stack.Pop();
         auto value = stack.Pop();
         obj->setattr(key, value);
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::NOP: {
         NextProgramCounter();
         break;
       }

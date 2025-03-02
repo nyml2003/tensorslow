@@ -1,9 +1,8 @@
 #ifndef TORCHLIGHT_AST_ASSIGN_STATEMENT_H
 #define TORCHLIGHT_AST_ASSIGN_STATEMENT_H
 
-#include <utility>
-
 #include "Ast/INode.h"
+#include "Object/ObjectHelper.h"
 
 namespace torchlight::Ast {
 
