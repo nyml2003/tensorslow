@@ -14,10 +14,10 @@
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
+#include "Object/PyType.h"
 #include "Runtime/Interpreter.h"
 #include "Runtime/Serialize.h"
 #include "Tools/Tools.h"
-
 
 namespace torchlight::Runtime {
 
@@ -647,7 +647,7 @@ Object::PyObjPtr PyFrame::Eval() {
       case Object::ByteCode::FOR_ITER: {
         auto iter = stack.Pop();
         auto value = iter->next();
-        if (!value->is<Object::IterDone>()) {
+        if (value->is<Object::IterDone>()) {
           SetProgramCounter(Collections::safe_add(
             ProgramCounter(), std::get<int64_t>(inst->Operand())
           ));

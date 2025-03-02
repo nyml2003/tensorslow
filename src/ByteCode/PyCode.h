@@ -116,7 +116,7 @@ using PyCodePtr = std::shared_ptr<PyCode>;
 
 class CodeKlass : public Klass {
  public:
-  explicit CodeKlass()  = default;
+  explicit CodeKlass() = default;
 
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<CodeKlass>();
@@ -126,6 +126,8 @@ class CodeKlass : public Klass {
   }
 
   PyObjPtr str(const PyObjPtr& self) override;
+
+  PyObjPtr repr(const PyObjPtr& self) override;
 
   PyObjPtr _serialize_(const PyObjPtr& self) override;
 

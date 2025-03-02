@@ -123,7 +123,7 @@ PyObjPtr CodeKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return CreatePyBoolean(true);
 }
 
-PyObjPtr CodeKlass::str(const PyObjPtr& self) {
+PyObjPtr CodeKlass::repr(const PyObjPtr& self) {
   if (self->Klass() != Self()) {
     throw std::runtime_error("PyCode::repr(): obj is not a code object");
   }
@@ -132,7 +132,9 @@ PyObjPtr CodeKlass::str(const PyObjPtr& self) {
     CreatePyString(Collections::CreateStringWithCString("<code>\n"));
   repr =
     repr->add(CreatePyString(Collections::CreateStringWithCString("consts: ")));
-  repr = repr->add(code->Consts()->repr());
+  repr = repr->add(StringConcat(CreatePyList({
+    CreatePyString(", ")->as<PyString>()->Join(code->Consts()),
+  })));
   repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
   repr =
     repr->add(CreatePyString(Collections::CreateStringWithCString("names: ")));
@@ -158,13 +160,17 @@ PyObjPtr CodeKlass::str(const PyObjPtr& self) {
   repr =
     repr->add(CreatePyString(Collections::CreateStringWithCString("nLocals: "))
     );
-  repr = repr->add(
-    CreatePyInteger(code->NLocals())->repr()
-  );
+  repr = repr->add(CreatePyInteger(code->NLocals())->repr());
   repr =
     repr->add(CreatePyString(Collections::CreateStringWithCString("\n</code>\n")
     ));
   return repr;
+}
+
+PyObjPtr CodeKlass::str(const PyObjPtr& self) {
+  return StringConcat(CreatePyList(
+    {CreatePyString("<code object at "), Identity(self), CreatePyString(">")}
+  ));
 }
 
 PyObjPtr CodeKlass::_serialize_(const PyObjPtr& self) {
@@ -199,6 +205,7 @@ void PyCode::RegisterConst(const PyObjPtr& obj) {
 
 Index PyCode::IndexOfName(const PyObjPtr& name) {
   if (!names->Contains(name)) {
+    DebugPrint(name);
     throw std::runtime_error("PyCode::IndexOfName(): name not found");
   }
   return names->IndexOf(name);

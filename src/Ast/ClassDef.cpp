@@ -23,7 +23,7 @@ Object::PyObjPtr ClassDefKlass::visit(
   code->RegisterName(Object::CreatePyString("__qualname__"));
   code->RegisterConst(classDef->Name());
   code->SetScope(Object::Scope::GLOBAL);
-  Object::Invoke(codeList, Object::CreatePyString("append"), {code});
+  codeList->as<Object::PyList>()->Append(code);
   classDef->Bases()->visit(codeList);
   auto parent = GetCodeFromList(codeList, classDef->Parent());
   parent->RegisterName(classDef->Name());
@@ -69,7 +69,7 @@ Object::PyObjPtr ClassDefKlass::emit(
   parent->CallFunction(3);
   parent->StoreName(classDef->Name());
   if (ArgsHelper::Instance().Has("show_code")) {
-    Object::DebugPrint(selfCode->str());
+    Object::DebugPrint(selfCode->repr());
   }
   return Object::CreatePyNone();
 }

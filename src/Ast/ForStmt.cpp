@@ -20,7 +20,12 @@ Object::PyObjPtr ForStmtKlass::emit(
   auto target = stmt->Target();
   if (target->is<Identifier>()) {
     auto identifier = std::dynamic_pointer_cast<Identifier>(target);
-    code->StoreName(identifier->Name());
+    if (code->Scope() == Object::Scope::GLOBAL) {
+      code->StoreName(identifier->Name());
+    }
+    if (code->Scope() == Object::Scope::LOCAL) {
+      code->StoreFast(identifier->Name());
+    }
   } else {
     throw std::runtime_error("ForStmt::emit(): unsupported target type");
   }
@@ -52,7 +57,12 @@ Object::PyObjPtr ForStmtKlass::visit(
   if (target->is<Identifier>()) {
     auto identifier = std::dynamic_pointer_cast<Identifier>(target);
     auto code = GetCodeFromList(codeList, stmt);
-    code->RegisterName(identifier->Name());
+    if (code->Scope() == Object::Scope::GLOBAL) {
+      code->RegisterName(identifier->Name());
+    }
+    if (code->Scope() == Object::Scope::LOCAL) {
+      code->RegisterVarName(identifier->Name());
+    }
   } else {
     DebugPrint(target);
     throw std::runtime_error("ForStmt::visit(): unsupported target type");

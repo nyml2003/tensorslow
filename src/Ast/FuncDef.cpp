@@ -4,7 +4,6 @@
 #include "Object/ObjectHelper.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
-#include "Object/PyString.h"
 #include "Tools/Tools.h"
 
 namespace torchlight::Ast {
@@ -26,7 +25,7 @@ Object::PyObjPtr FuncDefKlass::visit(
     }
   );
   code->RegisterConst(Object::CreatePyNone());
-  Object::Invoke(codeList, Object::CreatePyString("append"), {code});
+  codeList->as<Object::PyList>()->Append(code);
   auto parent = GetCodeFromList(codeList, funcDef->Parent());
   parent->RegisterName(funcDef->Name());
   Object::ForEach(
@@ -67,7 +66,7 @@ Object::PyObjPtr FuncDefKlass::emit(
   parent->MakeFunction();
   parent->StoreName(funcDef->Name());
   if (ArgsHelper::Instance().Has("show_code")) {
-    Object::DebugPrint(selfCode->str());
+    Object::DebugPrint(selfCode->repr());
   }
   return Object::CreatePyNone();
 }

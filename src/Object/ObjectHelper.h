@@ -1,16 +1,14 @@
 #ifndef TORCHLIGHT_OBJECT_HELPER_H
 #define TORCHLIGHT_OBJECT_HELPER_H
 #include "Common.h"
+#include "Object/Object.h"
 #include "Object/PyObject.h"
 
 #include <functional>
 
 namespace torchlight::Object {
-PyObjPtr Invoke(
-  const PyObjPtr& obj,
-  const PyObjPtr& methodName,
-  std::initializer_list<PyObjPtr> arguments
-);
+PyObjPtr
+Invoke(const PyObjPtr& obj, const PyObjPtr& methodName, const PyListPtr& args);
 void BasicKlassLoad();
 void ForEach(
   const PyObjPtr& obj,
@@ -21,7 +19,7 @@ PyObjPtr Identity(const PyObjPtr& obj);
 PyObjPtr CreatePyClass(const PyTypePtr& type);
 PyObjPtr GetBases(const PyObjPtr& args);
 PyObjPtr GetMro(const PyObjPtr& args);
-
+PyObjPtr GetDict(const PyObjPtr& args);
 PyListPtr MergeMro(const PyListPtr& mros);
 PyListPtr ComputeMro(const PyTypePtr& type);
 bool FirstOrNotInMro(const PyListPtr& mro, const PyTypePtr& type);
@@ -31,22 +29,18 @@ bool CouldTypePlaceAhead(
   Index ignore
 );
 void CleanMros(const PyListPtr& mros);
-
-
 void DebugPrint(const PyObjPtr& obj);
-
 PyObjPtr Print(const PyObjPtr& args);
-
 PyObjPtr Len(const PyObjPtr& args);
-
 KlassPtr CreatePyKlass(
   const PyStrPtr& name,
   const PyDictPtr& attributes,
   const PyListPtr& super
 );
-
 void LoadClass(const PyStrPtr& name, const KlassPtr& klass);
 void ConfigureBasicAttributes(const KlassPtr& klass);
+PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept;
+PyObjPtr AttrWrapper(const PyObjPtr& obj, const PyObjPtr& attr);
 }  // namespace torchlight::Object
 
 #endif

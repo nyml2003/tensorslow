@@ -1,4 +1,5 @@
 #include "Object/ObjectHelper.h"
+#include <memory>
 #include "Collections/IntegerHelper.h"
 #include "Function/PyFunction.h"
 #include "Function/PyIife.h"
@@ -13,32 +14,21 @@
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
-#include "Runtime/PyFrame.h"
+#include "Runtime/Interpreter.h"
 namespace torchlight::Object {
 
-PyObjPtr Invoke(
-  const PyObjPtr& obj,
-  const PyObjPtr& methodName,
-  std::initializer_list<PyObjPtr> arguments
-) {
-  if (!obj->Klass()->Attributes()->Contains(methodName)) {
-    return CreatePyNone();
+PyObjPtr
+Invoke(const PyObjPtr& obj, const PyObjPtr& methodName, const PyListPtr& args) {
+  auto func = obj->getattr(methodName);
+  if (func == nullptr) {
+    auto errorMessge = CreatePyString("AttributeError: ")
+                         ->add(obj->str())
+                         ->add(CreatePyString(" has no attribute "))
+                         ->add(methodName->str())
+                         ->as<PyString>();
+    throw std::runtime_error(errorMessge->ToCppString());
   }
-  Collections::List<PyObjPtr> argumentsList(arguments);
-  argumentsList.Unshift(obj);
-  PyListPtr args =
-    std::dynamic_pointer_cast<PyList>(CreatePyList(argumentsList));
-  auto method =
-    std::dynamic_pointer_cast<Object::PyMethod>(obj->getattr(methodName))
-      ->Method();
-  auto isNative = std::dynamic_pointer_cast<PyNativeFunction>(method);
-  if (isNative) {
-    return isNative->Call(args);
-  }
-  return Runtime::CreateFrameWithPyFunction(
-           std::dynamic_pointer_cast<PyFunction>(method), args
-  )
-    ->EvalWithDestory();
+  return Runtime::Interpreter::Eval(func, args);
 }
 
 void BasicKlassLoad() {
@@ -89,8 +79,17 @@ PyObjPtr GetMro(const PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   return args->as<PyList>()->GetItem(0)->Klass()->Type()->Owner()->Mro();
 }
+PyObjPtr GetDict(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
+  auto obj = args->as<PyList>()->GetItem(0);
+  return obj->Attributes();
+}
 PyListPtr ComputeMro(const PyTypePtr& type) {
   if (type->Owner()->Mro() != nullptr) {
+    // DebugPrint(StringConcat(CreatePyList(
+    //   {CreatePyString("Mro for "), type->Owner()->Name(),
+    //    CreatePyString(" already computed: "), type->Owner()->Mro()->str()}
+    // )));
     return type->Owner()->Mro();
   }
   // DebugPrint(StringConcat(CreatePyList(
@@ -100,7 +99,7 @@ PyListPtr ComputeMro(const PyTypePtr& type) {
   auto bases = type->Owner()->Super();
   PyListPtr mros = CreatePyList({})->as<PyList>();
   for (Index i = 0; i < bases->Length(); i++) {
-    auto base = bases->GetItem(i)->as<PyObject>()->Klass()->Type();
+    auto base = bases->GetItem(i)->as<PyType>();
     mros->Append(ComputeMro(base));
   }
   // DebugPrint(StringConcat(
@@ -111,10 +110,10 @@ PyListPtr ComputeMro(const PyTypePtr& type) {
   //   StringConcat(CreatePyList({CreatePyString("Merged Mro: "), mro->str()}))
   // );
   mro = CreatePyList({type})->as<PyList>()->Add(mro)->as<PyList>();
-  DebugPrint(StringConcat(CreatePyList(
-    {CreatePyString("Mro for "), type->Owner()->Name(), CreatePyString(": "),
-     mro->str()}
-  )));
+  // DebugPrint(StringConcat(CreatePyList(
+  //   {CreatePyString("Mro for "), type->Owner()->Name(), CreatePyString(": "),
+  //    mro->str()}
+  // )));
   return mro;
 }
 
@@ -220,7 +219,13 @@ void DebugPrint(const PyObjPtr& obj) {
 PyObjPtr Print(const PyObjPtr& args) {
   CheckNativeFunctionArguments(args);
   auto argList = args->as<PyList>();
-  CreatePyString(" ")->as<PyString>()->Join(argList)->PrintLine();
+  for (Index i = 0; i < argList->Length(); i++) {
+    argList->GetItem(i)->str()->as<PyString>()->Print();
+    if (i < argList->Length() - 1) {
+      CreatePyString(" ")->as<PyString>()->Print();
+    }
+  }
+  CreatePyString("\n")->as<PyString>()->Print();
   return CreatePyNone();
 }
 
@@ -258,6 +263,9 @@ void ConfigureBasicAttributes(const KlassPtr& klass) {
   klass->AddAttribute(
     CreatePyString("__mro__")->as<PyString>(), CreatePyIife(GetMro)
   );
+  klass->AddAttribute(
+    CreatePyString("__dict__")->as<PyString>(), CreatePyIife(GetDict)
+  );
 }
 
 PyObjPtr KlassRepr(const PyObjPtr& args) {
@@ -273,4 +281,34 @@ PyObjPtr KlassRepr(const PyObjPtr& args) {
     ->add(CreatePyString(">"));
 }
 
+PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept {
+  if (obj->Klass()->Attributes()->Contains(attrName)) {
+    return obj->Klass()->Attributes()->Get(attrName);
+  }
+  if (obj->Klass()->Super()->Length() == 0 &&
+      obj->Klass() == ObjectKlass::Self()) {
+    return nullptr;
+  }
+  for (Index i = 0; i < obj->Klass()->Mro()->Length(); i++) {
+    auto klass = obj->Klass()->Mro()->GetItem(i)->as<PyType>()->Owner();
+    if (klass->Attributes()->Contains(attrName)) {
+      return klass->Attributes()->Get(attrName);
+    }
+  }
+  return nullptr;
+}
+
+PyObjPtr AttrWrapper(const PyObjPtr& obj, const PyObjPtr& attr) {
+  if (attr->is<PyNativeFunction>()) {
+    return CreatePyMethod(obj, attr);
+  }
+  if (attr->is<PyFunction>()) {
+    return CreatePyMethod(obj, attr);
+  }
+  if (attr->is<PyIife>()) {
+    auto reuslt = attr->as<PyIife>()->Call(CreatePyList({obj}));
+    return reuslt;
+  }
+  return attr;
+}
 }  // namespace torchlight::Object

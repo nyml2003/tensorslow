@@ -1,4 +1,7 @@
 #include "Object/PyObject.h"
+
+#include <utility>
+#include "Function/PyNativeFunction.h"
 #include "Object/Object.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
@@ -9,10 +12,31 @@
 
 namespace torchlight::Object {
 
+PyObject::PyObject(KlassPtr klass) : klass(std::move(klass)) {}
+
+PyDictPtr PyObject::Attributes() {
+  if (attributes == nullptr) {
+    attributes = CreatePyDict()->as<PyDictionary>();
+  }
+  return attributes;
+}
+
+PyObjPtr ObjectInit(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
+  auto self = args->as<PyList>()->GetItem(0);
+  auto klass = self->Klass();
+  auto instance = std::make_shared<PyObject>(klass);
+  return instance;
+}
+
 KlassPtr ObjectKlass::Self() {
   static KlassPtr instance = std::make_shared<ObjectKlass>();
   instance->SetName(CreatePyString("object")->as<PyString>());
   instance->SetAttributes(CreatePyDict());
+  instance->AddAttribute(
+    CreatePyString("__init__")->as<PyString>(),
+    CreatePyNativeFunction(ObjectInit)
+  );
   instance->SetType(CreatePyType(instance));
   instance->SetSuper(CreatePyList({}));
   instance->SetMro(CreatePyList({CreatePyType(instance)->as<PyType>()}));

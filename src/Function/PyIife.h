@@ -18,6 +18,8 @@ class IifeKlass : public Klass {
   }
 
   static void Initialize();
+
+  PyObjPtr str(const PyObjPtr& self) override ;
 };
 
 class PyIife : public PyObject {

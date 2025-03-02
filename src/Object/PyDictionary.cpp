@@ -1,6 +1,5 @@
 #include "Object/PyDictionary.h"
 #include "Object/Iterator.h"
-#include "Object/Klass.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyList.h"
 #include "Object/PyNone.h"

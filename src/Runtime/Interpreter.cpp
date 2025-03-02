@@ -51,7 +51,7 @@ Object::PyObjPtr Interpreter::EvalMethod(
 ) {
   auto owner = func->Owner();
   auto function = func->Method();
-  return Eval(function, arguments->Prepend(owner));
+  return Eval(function, arguments->Prepend(owner)->as<Object::PyList>());
 }
 
 Object::PyObjPtr Interpreter::EvalPyFunction(

@@ -124,7 +124,6 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
       Object::CreatePyList({_name_, Object::CreatePyString("."), name})
     )
       ->as<Object::PyString>();
-  Object::DebugPrint(bases);
   auto klass = Object::CreatePyKlass(type_name, class_dict, bases);
   return Object::CreatePyType(klass);
 }

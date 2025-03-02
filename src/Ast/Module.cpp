@@ -18,8 +18,7 @@ Object::PyObjPtr ModuleKlass::visit(
     Object::CreatePyCode(module->Name())
   );
   code->SetScope(Object::Scope::GLOBAL);
-  
-  Object::Invoke(codeList, Object::CreatePyString("append"), {code});
+  codeList->as<Object::PyList>()->Append(code);
   Object::ForEach(
     module->Body(),
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {

@@ -9,4 +9,8 @@ void IifeKlass::Initialize() {
   ConfigureBasicAttributes(klass);
 }
 
+PyObjPtr IifeKlass::str(const PyObjPtr& self) {
+  return CreatePyString("<iife>");
+}
+
 }  // namespace torchlight::Object

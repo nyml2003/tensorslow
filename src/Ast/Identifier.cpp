@@ -43,7 +43,6 @@ Object::PyObjPtr IdentifierKlass::emit(
 ) {
   auto identifier = std::dynamic_pointer_cast<Identifier>(obj);
   auto code = GetCodeFromList(codeList, identifier);
-
   if (code->Scope() == Object::Scope::GLOBAL) {
     code->LoadName(identifier->Name());
   }

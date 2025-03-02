@@ -9,15 +9,17 @@ namespace torchlight::Object {
 class PyObject : public std::enable_shared_from_this<PyObject> {
  private:
   KlassPtr klass;
+  PyDictPtr attributes;
 
  public:
-  explicit PyObject(KlassPtr klass) : klass(std::move(klass)) {}
+  explicit PyObject(KlassPtr klass);
   [[nodiscard]] KlassPtr Klass() const { return klass; }
+  [[nodiscard]] PyDictPtr Attributes();
   virtual ~PyObject() = default;
-  PyObject(const PyObject&) = delete;
-  PyObject& operator=(const PyObject&) = delete;
-  PyObject(PyObject&&) = delete;
-  PyObject& operator=(PyObject&&) = delete;
+  PyObject(const PyObject&) = default;
+  PyObject& operator=(const PyObject&) = default;
+  PyObject(PyObject&&) = default;
+  PyObject& operator=(PyObject&&) = default;
   PyObjPtr add(const PyObjPtr& other) {
     return klass->add(shared_from_this(), other);
   }
@@ -91,7 +93,6 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
 
 using PyObjPtr = std::shared_ptr<PyObject>;
 
-
 class ObjectKlass : public Klass {
  public:
   explicit ObjectKlass() = default;
@@ -101,6 +102,8 @@ class ObjectKlass : public Klass {
 bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
 bool operator!=(const PyObjPtr& lhs, const PyObjPtr& rhs);
+
+PyObjPtr ObjectInit(const PyObjPtr& args);
 
 }  // namespace torchlight::Object
 

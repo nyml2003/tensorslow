@@ -1,8 +1,21 @@
-# class Node():
-#     value = 114
-#     def say(self):
-#         print(self.value)
+class Animal:
+    def speak(self):
+        print("Animal speaks")
+        
+        
+class Dog(Animal):
+    def speak(self):
+        print("Dog barks")
+        
+class Cat(Animal):
+    def speak(self):
+        print("Cat meows")
+        
+animal = Animal()
+animal.speak()
 
+dog = Dog()
+dog.speak()
 
-# node = Node()
-# node.say()
+cat = Cat()
+cat.speak()

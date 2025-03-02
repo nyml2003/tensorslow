@@ -3,7 +3,6 @@
 #include "Collections/StringHelper.h"
 #include "Generation/Generator.h"
 #include "Object/ObjectHelper.h"
-#include "Object/PyObject.h"
 #include "Object/PyString.h"
 #include "Python3Lexer.h"
 #include "Python3Parser.h"
@@ -97,7 +96,7 @@ void ParseAndGenerate(const fs::path& filePath) {
   visitor.Emit();
   auto code = visitor.Code();
   if (ArgsHelper::Instance().Has("show_code")) {
-    Object::DebugPrint(code->str());
+    Object::DebugPrint(code->repr());
   }
   Collections::Bytes data =
     std::dynamic_pointer_cast<Object::PyBytes>(code->_serialize_())->Value();
