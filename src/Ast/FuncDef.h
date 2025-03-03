@@ -36,8 +36,8 @@ class FuncDef : public INode {
   )
     : INode(FuncDefKlass::Self(), std::move(parent)),
       name(_name->as<Object::PyString>()),
-      parameters(_parameters->as<Object::PyList>()),
-      body(_body->as<Object::PyList>()) {}
+      body(_body->as<Object::PyList>()),
+      parameters(_parameters->as<Object::PyList>()) {}
 
   [[nodiscard]] Object::PyStrPtr Name() const { return name; }
 

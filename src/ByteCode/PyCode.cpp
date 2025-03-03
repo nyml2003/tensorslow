@@ -169,7 +169,8 @@ PyObjPtr CodeKlass::repr(const PyObjPtr& self) {
 
 PyObjPtr CodeKlass::str(const PyObjPtr& self) {
   return StringConcat(CreatePyList(
-    {CreatePyString("<code object at "), Identity(self), CreatePyString(">")}
+    {CreatePyString("<code object at "), Identity(self)->as<PyString>(),
+     CreatePyString(">")}
   ));
 }
 

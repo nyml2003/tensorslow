@@ -12,7 +12,7 @@ Decimal CreateDecimalOne() {
 }
 Decimal CreateDecimalWithU32(uint32_t value) {
   List<int32_t> parts;
-  for (Index i = 0; value != 0; i++) {
+  while (value > 0) {
     parts.Push(static_cast<int32_t>(value % 10));
     value /= 10;
   }

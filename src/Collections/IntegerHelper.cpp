@@ -2,49 +2,35 @@
 #include "Collections/DecimalHelper.h"
 #include "Collections/Iterator.h"
 #include "Collections/StringHelper.h"
+#include "Common.h"
 
 #include <limits>
 #include <stdexcept>
 namespace torchlight::Collections {
 int8_t UnicodeToHex(Unicode unicode) noexcept {
-  const Unicode UnicodeDigit_0 = 0x0030;
-  const Unicode UnicodeDigit_9 = 0x0039;
-  const Unicode UnicodeDigit_A = 0x0041;
-  const Unicode UnicodeDigit_F = 0x0046;
-  const Unicode UnicodeDigit_a = 0x0061;
-  const Unicode UnicodeDigit_f = 0x0066;
-  if (unicode >= UnicodeDigit_0 && unicode <= UnicodeDigit_9) {
-    return static_cast<int8_t>(unicode - 0x0030);
+  if (unicode >= Unicode_0 && unicode <= Unicode_9) {
+    return static_cast<int8_t>(unicode - Unicode_0);
   }
-  if (unicode >= UnicodeDigit_A && unicode <= UnicodeDigit_F) {
-    return static_cast<int8_t>(unicode - 0x0041 + 10);
+  if (unicode >= Unicode_A && unicode <= Unicode_F) {
+    return static_cast<int8_t>(unicode - Unicode_A + 10);
   }
-  if (unicode >= UnicodeDigit_a && unicode <= UnicodeDigit_f) {
-    return static_cast<int8_t>(unicode - 0x0061 + 10);
+  if (unicode >= Unicode_a && unicode <= Unicode_f) {
+    return static_cast<int8_t>(unicode - Unicode_a + 10);
   }
   return -1;
 }
 Unicode HexToUnicode(uint8_t hex) noexcept {
-  const Unicode UnicodeDigit_0 = 0x0030;
-  const Unicode UnicodeDigit_9 = 0x0039;
-  const Unicode UnicodeDigit_A = 0x0041;
-  const Unicode UnicodeDigit_F = 0x0046;
-  const Unicode UnicodeDigit_a = 0x0061;
-  const Unicode UnicodeDigit_f = 0x0066;
   if (hex >= 0 && hex <= 9) {
-    return static_cast<Unicode>(hex + UnicodeDigit_0);
+    return static_cast<Unicode>(hex + Unicode_0);
   }
   if (hex >= 10 && hex <= 15) {
-    return static_cast<Unicode>(hex - 10 + UnicodeDigit_A);
+    return static_cast<Unicode>(hex - 10 + Unicode_A);
   }
   return 0;
 }
 Integer CreateIntegerWithString(const String& str) {
-  Unicode unicode_0 = 0x0030;
-  Unicode unicode_X = 0x0058;
-  Unicode unicode_x = 0x0078;
-  if (str.Size() > 2 && str.Get(0) == unicode_0 &&
-      (str.Get(1) == unicode_X || str.Get(1) == unicode_x)) {
+  if (str.Size() > 2 && str.Get(0) == Unicode_0 &&
+      (str.Get(1) == Unicode_X || str.Get(1) == Unicode_x)) {
     List<uint32_t> parts;
     uint32_t buffer = 0;
     uint32_t count = 0;

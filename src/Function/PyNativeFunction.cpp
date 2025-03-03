@@ -70,7 +70,7 @@ void NativeFunctionKlass::Initialize() {
 
 PyObjPtr NativeFunctionKlass::repr(const PyObjPtr& obj) {
   return StringConcat(CreatePyList(
-    {CreatePyString("<built-in function at "), Identity(obj),
+    {CreatePyString("<built-in function at "), Identity(obj)->as<PyString>(),
      CreatePyString(">")}
   ));
 }

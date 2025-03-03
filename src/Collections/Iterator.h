@@ -33,7 +33,7 @@ class Iterator {
 
 template <typename T>
 Iterator<T>::Iterator(const List<T>& list, Index index, IteratorOrder order)
-  : listRef(list), currentIndex(index), order(order), isEnd(list.Size() == 0) {}
+  : listRef(list), currentIndex(index), isEnd(list.Size() == 0), order(order) {}
 template <typename T>
 Iterator<T>::Iterator(const Iterator<T>& iterator)
   : listRef(iterator.listRef),
