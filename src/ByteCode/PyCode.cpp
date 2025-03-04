@@ -2,7 +2,6 @@
 #include "ByteCode/ByteCode.h"
 #include "ByteCode/PyInst.h"
 #include "Collections/BytesHelper.h"
-#include "Collections/StringHelper.h"
 #include "Object/Object.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
@@ -128,49 +127,36 @@ PyObjPtr CodeKlass::repr(const PyObjPtr& self) {
     throw std::runtime_error("PyCode::repr(): obj is not a code object");
   }
   auto code = std::dynamic_pointer_cast<PyCode>(self);
-  PyObjPtr repr =
-    CreatePyString(Collections::CreateStringWithCString("<code>\n"));
-  repr =
-    repr->add(CreatePyString(Collections::CreateStringWithCString("consts: ")));
+  PyObjPtr repr = CreatePyString("<code>\n");
+  repr = repr->add(CreatePyString("consts: "));
   repr = repr->add(StringConcat(CreatePyList({
     CreatePyString(", ")->as<PyString>()->Join(code->Consts()),
   })));
-  repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
-  repr =
-    repr->add(CreatePyString(Collections::CreateStringWithCString("names: ")));
+  repr = repr->add(CreatePyString("\n"));
+  repr = repr->add(CreatePyString("names: "));
   repr = repr->add(code->Names()->repr());
-  repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
-  repr =
-    repr->add(CreatePyString(Collections::CreateStringWithCString("varNames: "))
-    );
+  repr = repr->add(CreatePyString("\n"));
+  repr = repr->add(CreatePyString("varNames: "));
   repr = repr->add(code->VarNames()->repr());
-  repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
-  repr =
-    repr->add(CreatePyString(Collections::CreateStringWithCString("name: ")));
+  repr = repr->add(CreatePyString("\n"));
+  repr = repr->add(CreatePyString("name: "));
   repr = repr->add(code->Name()->str());
-  repr = repr->add(CreatePyString(Collections::CreateStringWithCString("\n")));
-  repr = repr->add(
-    CreatePyString(Collections::CreateStringWithCString("instructions:\n\n"))
-  );
+  repr = repr->add(CreatePyString("\n"));
+  repr = repr->add(CreatePyString("instructions:\n\n"));
   repr = repr->add(StringConcat(CreatePyList({
     CreatePyString("\n")->as<PyString>()->Join(code->Instructions()),
   })));
-  repr =
-    repr->add(CreatePyString(Collections::CreateStringWithCString("\n\n")));
-  repr =
-    repr->add(CreatePyString(Collections::CreateStringWithCString("nLocals: "))
-    );
+  repr = repr->add(CreatePyString("\n\n"));
+  repr = repr->add(CreatePyString("nLocals: "));
   repr = repr->add(CreatePyInteger(code->NLocals())->repr());
-  repr =
-    repr->add(CreatePyString(Collections::CreateStringWithCString("\n</code>\n")
-    ));
+  repr = repr->add(CreatePyString("\n</code>\n"));
   return repr;
 }
 
 PyObjPtr CodeKlass::str(const PyObjPtr& self) {
   return StringConcat(CreatePyList(
-    {CreatePyString("<code object at "), Identity(self)->as<PyString>(),
-     CreatePyString(">")}
+    {CreatePyString("<code object at ")->as<PyString>(),
+     Identity(self)->as<PyString>(), CreatePyString(">")->as<PyString>()}
   ));
 }
 
@@ -317,6 +303,58 @@ void PyCode::StoreAttr(const PyObjPtr& obj) {
 
 void PyCode::Nop() {
   instructions->Append(CreateNop());
+}
+
+void PyCode::UnaryPositive() {
+  instructions->Append(CreateUnaryPositive());
+}
+
+void PyCode::UnaryNegative() {
+  instructions->Append(CreateUnaryNegative());
+}
+
+void PyCode::UnaryNot() {
+  instructions->Append(CreateUnaryNot());
+}
+
+void PyCode::UnaryInvert() {
+  instructions->Append(CreateUnaryInvert());
+}
+
+void PyCode::BinaryPower() {
+  instructions->Append(CreateBinaryPower());
+}
+
+void PyCode::BinaryModulo() {
+  instructions->Append(CreateBinaryModulo());
+}
+
+void PyCode::BinaryFloorDivide() {
+  instructions->Append(CreateBinaryFloorDivide());
+}
+
+void PyCode::BinaryTrueDivide() {
+  instructions->Append(CreateBinaryTrueDivide());
+}
+
+void PyCode::BinaryLShift() {
+  instructions->Append(CreateBinaryLShift());
+}
+
+void PyCode::BinaryRShift() {
+  instructions->Append(CreateBinaryRShift());
+}
+
+void PyCode::BinaryAnd() {
+  instructions->Append(CreateBinaryAnd());
+}
+
+void PyCode::BinaryXor() {
+  instructions->Append(CreateBinaryXor());
+}
+
+void PyCode::BinaryOr() {
+  instructions->Append(CreateBinaryOr());
 }
 
 PyObjPtr CreatePyCode(const PyObjPtr& name) {

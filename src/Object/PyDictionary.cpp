@@ -100,9 +100,10 @@ PyObjPtr DictionaryKlass::repr(const PyObjPtr& obj) {
     throw std::runtime_error("PyDictionary::repr(): obj is not a dict");
   }
   auto repr = CreatePyString(", ")->as<PyString>()->Join(obj);
-  return StringConcat(
-    CreatePyList({CreatePyString("{"), repr, CreatePyString("}")})
-  );
+  return StringConcat(CreatePyList(
+    {CreatePyString("{")->as<PyString>(), repr,
+     CreatePyString("}")->as<PyString>()}
+  ));
 }
 
 PyObjPtr DictionaryKlass::contains(const PyObjPtr& obj, const PyObjPtr& key) {

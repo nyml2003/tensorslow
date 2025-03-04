@@ -1,6 +1,7 @@
 #ifndef TORCHLIGHT_RUNTIME_PYCODE_H
 #define TORCHLIGHT_RUNTIME_PYCODE_H
 
+#include "ByteCode/PyInst.h"
 #include "Object/Klass.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBytes.h"
@@ -87,19 +88,30 @@ class PyCode : public PyObject {
   void MakeFunction();
 
   void ReturnValue();
-
   Index PopJumpIfFalse();
-
   void JumpAbsolute(Index index);
-
   void PopTop();
-
   void StoreSubscr();
   void GetIter();
   Index ForIter(Index index);
   void LoadBuildClass();
   void StoreAttr(const PyObjPtr& obj);
   void Nop();
+  void UnaryPositive();
+  void UnaryNegative();
+  void UnaryNot();
+  void UnaryInvert();
+  void BinaryPower();
+  void BinaryModulo();
+  void BinaryFloorDivide();
+  void BinaryTrueDivide();
+  void BinaryLShift();
+  void BinaryRShift();
+  void BinaryAnd();
+  void BinaryXor();
+  void BinaryOr();
+  void GetYieldFromIter() { instructions->Append(CreateGetYieldFromIter()); }
+  void YieldValue() { instructions->Append(CreateYieldValue()); }
 
  private:
   PyBytesPtr byteCode;

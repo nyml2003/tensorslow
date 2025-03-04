@@ -14,7 +14,6 @@
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
-#include "Object/PyType.h"
 #include "Runtime/Interpreter.h"
 #include "Runtime/Serialize.h"
 #include "Tools/Tools.h"
@@ -247,6 +246,66 @@ void ParseByteCode(const Object::PyCodePtr& code) {
         insts.Push(Object::CreateNop());
         break;
       }
+      case Object::ByteCode::UNARY_POSITIVE: {
+        insts.Push(Object::CreateUnaryPositive());
+        break;
+      }
+      case Object::ByteCode::UNARY_NEGATIVE: {
+        insts.Push(Object::CreateUnaryNegative());
+        break;
+      }
+      case Object::ByteCode::UNARY_NOT: {
+        insts.Push(Object::CreateUnaryNot());
+        break;
+      }
+      case Object::ByteCode::UNARY_INVERT: {
+        insts.Push(Object::CreateUnaryInvert());
+        break;
+      }
+      case Object::ByteCode::BINARY_POWER: {
+        insts.Push(Object::CreateBinaryPower());
+        break;
+      }
+      case Object::ByteCode::BINARY_MODULO: {
+        insts.Push(Object::CreateBinaryModulo());
+        break;
+      }
+      case Object::ByteCode::BINARY_FLOOR_DIVIDE: {
+        insts.Push(Object::CreateBinaryFloorDivide());
+        break;
+      }
+      case Object::ByteCode::BINARY_TRUE_DIVIDE: {
+        insts.Push(Object::CreateBinaryTrueDivide());
+        break;
+      }
+      case Object::ByteCode::BINARY_LSHIFT: {
+        insts.Push(Object::CreateBinaryLShift());
+        break;
+      }
+      case Object::ByteCode::BINARY_RSHIFT: {
+        insts.Push(Object::CreateBinaryRShift());
+        break;
+      }
+      case Object::ByteCode::BINARY_AND: {
+        insts.Push(Object::CreateBinaryAnd());
+        break;
+      }
+      case Object::ByteCode::BINARY_XOR: {
+        insts.Push(Object::CreateBinaryXor());
+        break;
+      }
+      case Object::ByteCode::BINARY_OR: {
+        insts.Push(Object::CreateBinaryOr());
+        break;
+      }
+      case Object::ByteCode::YIELD_VALUE: {
+        insts.Push(Object::CreateYieldValue());
+        break;
+      }
+      case Object::ByteCode::GET_YIELD_FROM_ITER: {
+        insts.Push(Object::CreateGetYieldFromIter());
+        break;
+      }
       default:
         throw std::runtime_error(
           "Unknown byte code:" + std::to_string(static_cast<int>(iter.Get()))
@@ -339,6 +398,17 @@ Object::PyObjPtr PyFrame::Eval() {
         NextProgramCounter();
         break;
       }
+      case Object::ByteCode::STORE_GLOBAL: {
+        auto key = std::get<Index>(inst->Operand());
+        auto value = stack.Pop();
+        globals->setitem(Object::CreatePyInteger(key), value);
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::DELETE_SUBSCR:
+      case Object::ByteCode::DELETE_ATTR:
+      case Object::ByteCode::DELETE_NAME:
+        break;
       case Object::ByteCode::STORE_FAST: {
         auto index = std::get<Index>(inst->Operand());
         auto value = stack.Pop();
@@ -480,6 +550,10 @@ Object::PyObjPtr PyFrame::Eval() {
       case Object::ByteCode::BINARY_MODULO:
       case Object::ByteCode::BINARY_LSHIFT:
       case Object::ByteCode::BINARY_RSHIFT:
+      case Object::ByteCode::UNARY_POSITIVE:
+      case Object::ByteCode::UNARY_NEGATIVE:
+      case Object::ByteCode::UNARY_NOT:
+      case Object::ByteCode::UNARY_INVERT:
         break;
       case Object::ByteCode::BINARY_SUBSCR: {
         auto index = stack.Pop();
@@ -676,6 +750,23 @@ Object::PyObjPtr PyFrame::Eval() {
       }
       case Object::ByteCode::NOP: {
         NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::GET_YIELD_FROM_ITER: {
+        auto iter = stack.Pop();
+        auto value = iter->next();
+        if (value->is<Object::IterDone>()) {
+          throw std::runtime_error("Yield from iterator ended");
+        }
+        stack.Push(value);
+        NextProgramCounter();
+
+        break;
+      }
+      case Object::ByteCode::YIELD_VALUE: {
+        auto value = stack.Pop();
+        Interpreter::Instance().BackToParentFrame();
+        throw std::runtime_error("Yield from iterator ended");
         break;
       }
       case Object::ByteCode::ERROR: {

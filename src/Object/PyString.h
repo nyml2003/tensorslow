@@ -65,8 +65,8 @@ class PyString : public PyObject {
 };
 using PyStrPtr = std::shared_ptr<PyString>;
 
-inline PyObjPtr CreatePyString(Collections::String value) {
-  return std::make_shared<PyString>(std::move(value));
+inline PyObjPtr CreatePyString(const Collections::String& value) {
+  return std::make_shared<PyString>(value);
 }
 inline PyObjPtr CreatePyString(const char* value) {
   return CreatePyString(Collections::CreateStringWithCString(value));

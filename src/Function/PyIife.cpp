@@ -9,7 +9,7 @@ void IifeKlass::Initialize() {
   ConfigureBasicAttributes(klass);
 }
 
-PyObjPtr IifeKlass::str(const PyObjPtr& self) {
+PyObjPtr IifeKlass::str(const PyObjPtr& /*self*/) {
   return CreatePyString("<iife>");
 }
 

@@ -5,7 +5,6 @@
 #include "Object/ObjectHelper.h"
 #include "Object/PyString.h"
 
-
 namespace torchlight::Object {
 
 class PyInst : public PyObject {
@@ -55,7 +54,7 @@ PyInstPtr CreateStoreFast(Index index);
 
 PyInstPtr CreateLoadFast(Index index);
 
-PyInstPtr CreateCompareOp(CompareOp op);
+PyInstPtr CreateCompareOp(CompareOp compOp);
 
 PyInstPtr CreatePopJumpIfFalse(int64_t index);
 
@@ -92,6 +91,66 @@ PyInstPtr CreateLoadBuildClass();
 PyInstPtr CreateStoreAttr(Index index);
 
 PyInstPtr CreateNop();
+
+inline PyInstPtr CreateUnaryPositive() {
+  return std::make_shared<PyInst>(ByteCode::UNARY_POSITIVE);
+}
+
+inline PyInstPtr CreateUnaryNegative() {
+  return std::make_shared<PyInst>(ByteCode::UNARY_NEGATIVE);
+}
+
+inline PyInstPtr CreateUnaryNot() {
+  return std::make_shared<PyInst>(ByteCode::UNARY_NOT);
+}
+
+inline PyInstPtr CreateUnaryInvert() {
+  return std::make_shared<PyInst>(ByteCode::UNARY_INVERT);
+}
+
+inline PyInstPtr CreateBinaryPower() {
+  return std::make_shared<PyInst>(ByteCode::BINARY_POWER);
+}
+
+inline PyInstPtr CreateBinaryModulo() {
+  return std::make_shared<PyInst>(ByteCode::BINARY_MODULO);
+}
+
+inline PyInstPtr CreateBinaryFloorDivide() {
+  return std::make_shared<PyInst>(ByteCode::BINARY_FLOOR_DIVIDE);
+}
+
+inline PyInstPtr CreateBinaryTrueDivide() {
+  return std::make_shared<PyInst>(ByteCode::BINARY_TRUE_DIVIDE);
+}
+
+inline PyInstPtr CreateBinaryXor() {
+  return std::make_shared<PyInst>(ByteCode::BINARY_XOR);
+}
+
+inline PyInstPtr CreateBinaryAnd() {
+  return std::make_shared<PyInst>(ByteCode::BINARY_AND);
+}
+
+inline PyInstPtr CreateBinaryOr() {
+  return std::make_shared<PyInst>(ByteCode::BINARY_OR);
+}
+
+inline PyInstPtr CreateBinaryLShift() {
+  return std::make_shared<PyInst>(ByteCode::BINARY_LSHIFT);
+}
+
+inline PyInstPtr CreateBinaryRShift() {
+  return std::make_shared<PyInst>(ByteCode::BINARY_RSHIFT);
+}
+
+inline PyInstPtr CreateYieldValue() {
+  return std::make_shared<PyInst>(ByteCode::YIELD_VALUE);
+}
+
+inline PyInstPtr CreateGetYieldFromIter() {
+  return std::make_shared<PyInst>(ByteCode::GET_YIELD_FROM_ITER);
+}
 
 }  // namespace torchlight::Object
 

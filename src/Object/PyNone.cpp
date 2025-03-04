@@ -1,6 +1,5 @@
 #include "Object/PyNone.h"
 #include "ByteCode/ByteCode.h"
-#include "Collections/StringHelper.h"
 #include "Object/PyBytes.h"
 #include "Object/PyString.h"
 
@@ -17,7 +16,7 @@ PyObjPtr NoneKlass::repr(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("NoneType does not support repr operation");
   }
-  return CreatePyString(Collections::CreateStringWithCString("None"));
+  return CreatePyString("None");
 }
 
 PyNone::PyNone() : PyObject(NoneKlass::Self()) {}

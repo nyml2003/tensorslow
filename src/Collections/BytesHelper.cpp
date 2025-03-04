@@ -127,11 +127,9 @@ uint16_t DeserializeU16(const Bytes& bytes) {
   return *reinterpret_cast<const uint16_t*>(bytes.Value().Data());
 }
 String DeserializeString(const Bytes& bytes) {
-  Index size = DeserializeU64(bytes.Slice(0, sizeof(uint64_t)));
   return CreateStringWithBytes(bytes.Slice(sizeof(uint64_t), bytes.Size()));
 }
 Bytes DeserializeBytes(const Bytes& bytes) {
-  Index size = DeserializeU64(bytes.Slice(0, sizeof(uint64_t)));
   return bytes.Slice(sizeof(uint64_t), bytes.Size());
 }
 Bytes Serialize(const Decimal& value) {

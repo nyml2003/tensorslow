@@ -2,7 +2,6 @@
 #define TORCHLIGHT_EVALVISITOR_H
 
 #include "Ast/INode.h"
-#include "Ast/Module.h"
 #include "Python3ParserBaseVisitor.h"
 
 #include <antlr4-runtime.h>
@@ -15,7 +14,7 @@ class Generator : public Python3ParserBaseVisitor {
   Ast::INodePtr context;
 
  public:
-  explicit Generator(Object::PyObjPtr filename);
+  explicit Generator(const Object::PyObjPtr& filename);
   void Visit();
   void Emit();
   [[nodiscard]] Object::PyCodePtr Code() const;

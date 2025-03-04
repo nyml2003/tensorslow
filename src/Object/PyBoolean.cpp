@@ -1,6 +1,5 @@
 #include "Object/PyBoolean.h"
 #include "ByteCode/ByteCode.h"
-#include "Collections/BytesHelper.h"
 #include "Object/PyBytes.h"
 #include "Object/PyList.h"
 
@@ -15,7 +14,8 @@ PyObjPtr BooleanKlass::repr(const PyObjPtr& obj) {
     throw std::runtime_error(errorMessage->as<PyString>()->ToCppString());
   }
   auto boolean = obj->as<PyBoolean>();
-  return boolean->Value() ? CreatePyString("True") : CreatePyString("False");
+  return boolean->Value() ? CreatePyString("True")->as<PyString>()
+                          : CreatePyString("False")->as<PyString>();
 }
 
 PyObjPtr BooleanKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {

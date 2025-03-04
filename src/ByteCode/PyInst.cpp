@@ -26,7 +26,7 @@ PyObjPtr InstKlass::_serialize_(const PyObjPtr& obj) {
   Collections::Bytes bytes = Collections::Serialize(inst->Code());
   std::visit(
     overload{
-      [&bytes](None) {},
+      [](None) {},
       [&bytes](Index index) { bytes.Concat(Collections::Serialize(index)); },
       [&bytes](CompareOp compOp) {
         bytes.Concat(Collections::Serialize(compOp));
@@ -48,7 +48,7 @@ PyObjPtr InstKlass::repr(const PyObjPtr& obj) {
       .Add(Collections::CreateStringWithCString(" "));
   std::visit(
     overload{
-      [&result](None) {},
+      [](None) {},
       [&result](Index index) { result.Concat(Collections::ToString(index)); },
       [&result](CompareOp compOp) {
         result.Concat(Collections::ToString(compOp));

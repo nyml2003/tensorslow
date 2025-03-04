@@ -53,7 +53,7 @@ PyObjPtr DictItemIteratorKlass::str(const PyObjPtr& obj) {
   auto dict = iterator->Dict();
   auto value = dict->GetItem(iterator->CurrentIndex())->as<PyList>();
   auto result = StringConcat(CreatePyList(
-    {value->GetItem(0)->str(), CreatePyString(": "), value->GetItem(1)->str()}
+    {value->GetItem(0)->str(), CreatePyString(": ")->as<PyString>(), value->GetItem(1)->str()}
   ));
   return result;
 }

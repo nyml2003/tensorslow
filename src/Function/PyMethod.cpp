@@ -7,15 +7,17 @@ namespace torchlight::Object {
 PyObjPtr MethodKlass::repr(const PyObjPtr& obj) {
   if (!obj->is<PyMethod>()) {
     auto errorMessage = StringConcat(CreatePyList(
-      {CreatePyString("AttributeError: '"), obj->Klass()->Name(),
-       CreatePyString("' object has no attribute '__repr__'")}
+      {CreatePyString("AttributeError: '")->as<PyString>(),
+       obj->Klass()->Name(),
+       CreatePyString("' object has no attribute '__repr__'")->as<PyString>()}
     ));
     throw std::runtime_error(errorMessage->as<PyString>()->ToCppString());
   }
   auto method = obj->as<PyMethod>();
   return StringConcat(CreatePyList(
-    {CreatePyString("<method "), method->Owner()->repr(), CreatePyString("."),
-     method->Method()->repr(), CreatePyString(">")}
+    {CreatePyString("<method "), method->Owner()->repr(),
+     CreatePyString(".")->as<PyString>(), method->Method()->repr(),
+     CreatePyString(">")->as<PyString>()}
   ));
 }
 

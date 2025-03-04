@@ -16,9 +16,8 @@ enum class ByteCode {
   UNARY_NEGATIVE = 11,  // 一元运算符 -
   UNARY_NOT = 12,       // 一元运算符 not
 
-  UNARY_INVERT = 15,             // 一元运算符 ~
-  BINARY_MATRIX_MULTIPLY = 16,   // 矩阵乘法 @
-  INPLACE_MATRIX_MULTIPLY = 17,  // 矩阵乘法 @=
+  UNARY_INVERT = 15,            // 一元运算符 ~
+  BINARY_MATRIX_MULTIPLY = 16,  // 矩阵乘法 @
 
   BINARY_POWER = 19,     // 二元运算符 **
   BINARY_MULTIPLY = 20,  // 二元运算符 *
@@ -29,13 +28,6 @@ enum class ByteCode {
   BINARY_SUBSCR = 25,        // 二元运算符 []
   BINARY_FLOOR_DIVIDE = 26,  // 二元运算符 //
   BINARY_TRUE_DIVIDE = 27,   // 二元运算符 /
-  INPLACE_FLOOR_DIVIDE = 28, /* //= */
-  INPLACE_TRUE_DIVIDE = 29,  /* /= */
-  GET_LEN = 30,
-  INPLACE_ADD = 55,       // +=
-  INPLACE_SUBTRACT = 56,  // -=
-  INPLACE_MULTIPLY = 57,  /* *= */
-  INPLACE_MODULO = 59,    // %=
   STORE_SUBSCR = 60,
   DELETE_SUBSCR = 61,
   BINARY_LSHIFT = 62,
@@ -43,18 +35,12 @@ enum class ByteCode {
   BINARY_AND = 64,
   BINARY_XOR = 65,
   BINARY_OR = 66,
-  INPLACE_POWER = 67,
   GET_ITER = 68,
-
+  GET_YIELD_FROM_ITER = 69,
   LOAD_BUILD_CLASS = 71,
 
-  INPLACE_LSHIFT = 75,
-  INPLACE_RSHIFT = 76,
-  INPLACE_AND = 77,
-  INPLACE_XOR = 78,
-  INPLACE_OR = 79,
-
   RETURN_VALUE = 83,
+  YIELD_VALUE = 86,
   STORE_NAME = 90,
   DELETE_NAME = 91,
   UNPACK_SEQUENCE = 92,
@@ -62,19 +48,14 @@ enum class ByteCode {
   STORE_ATTR = 95,
   DELETE_ATTR = 96,
   STORE_GLOBAL = 97,
-  DELETE_GLOBAL = 98,
 
   LOAD_CONST = 100,
   LOAD_NAME = 101,
-  BUILD_TUPLE = 102,
   BUILD_LIST = 103,
-  BUILD_SET = 104,
   BUILD_MAP = 105,
   LOAD_ATTR = 106,
 
   COMPARE_OP = 107,
-  IMPORT_NAME = 108,
-  IMPORT_FROM = 109,
   JUMP_FORWARD = 110,
   JUMP_IF_FALSE_OR_POP = 111,
   JUMP_IF_TRUE_OR_POP = 112,
@@ -86,15 +67,11 @@ enum class ByteCode {
   BINARY_OP = 122,
   LOAD_FAST = 124,
   STORE_FAST = 125,
-  DELETE_FAST = 126,
 
   MAKE_FUNCTION = 132,
   BUILD_SLICE = 133,
-  LOAD_CLOSURE = 135,
 
   CALL_FUNCTION = 142,
-  LOAD_METHOD = 160,
-  CALL_METHOD = 161,
 
   ERROR = 0xFF
 };
@@ -127,7 +104,62 @@ enum class Literal {
   BYTES,
 };
 
-extern std::map<ByteCode, const char*> ByteCodeNames;
+static const std::map<ByteCode, const char*> ByteCodeNames = {
+  {ByteCode::POP_TOP, "POP_TOP"},
+  {ByteCode::NOP, "NOP"},
+  {ByteCode::UNARY_POSITIVE, "UNARY_POSITIVE"},
+  {ByteCode::UNARY_NEGATIVE, "UNARY_NEGATIVE"},
+  {ByteCode::UNARY_NOT, "UNARY_NOT"},
+  {ByteCode::UNARY_INVERT, "UNARY_INVERT"},
+  {ByteCode::BINARY_MATRIX_MULTIPLY, "BINARY_MATRIX_MULTIPLY"},
+  {ByteCode::BINARY_POWER, "BINARY_POWER"},
+  {ByteCode::BINARY_MULTIPLY, "BINARY_MULTIPLY"},
+  {ByteCode::BINARY_MODULO, "BINARY_MODULO"},
+  {ByteCode::BINARY_ADD, "BINARY_ADD"},
+  {ByteCode::BINARY_SUBTRACT, "BINARY_SUBTRACT"},
+  {ByteCode::BINARY_SUBSCR, "BINARY_SUBSCR"},
+  {ByteCode::BINARY_FLOOR_DIVIDE, "BINARY_FLOOR_DIVIDE"},
+  {ByteCode::BINARY_TRUE_DIVIDE, "BINARY_TRUE_DIVIDE"},
+  {ByteCode::STORE_SUBSCR, "STORE_SUBSCR"},
+  {ByteCode::DELETE_SUBSCR, "DELETE_SUBSCR"},
+  {ByteCode::BINARY_LSHIFT, "BINARY_LSHIFT"},
+  {ByteCode::BINARY_RSHIFT, "BINARY_RSHIFT"},
+  {ByteCode::BINARY_AND, "BINARY_AND"},
+  {ByteCode::BINARY_XOR, "BINARY_XOR"},
+  {ByteCode::BINARY_OR, "BINARY_OR"},
+  {ByteCode::GET_ITER, "GET_ITER"},
+  {ByteCode::LOAD_BUILD_CLASS, "LOAD_BUILD_CLASS"},
+  {ByteCode::RETURN_VALUE, "RETURN_VALUE"},
+  {ByteCode::STORE_NAME, "STORE_NAME"},
+  {ByteCode::DELETE_NAME, "DELETE_NAME"},
+  {ByteCode::UNPACK_SEQUENCE, "UNPACK_SEQUENCE"},
+  {ByteCode::FOR_ITER, "FOR_ITER"},
+  {ByteCode::STORE_ATTR, "STORE_ATTR"},
+  {ByteCode::DELETE_ATTR, "DELETE_ATTR"},
+  {ByteCode::STORE_GLOBAL, "STORE_GLOBAL"},
+  {ByteCode::LOAD_CONST, "LOAD_CONST"},
+  {ByteCode::LOAD_NAME, "LOAD_NAME"},
+  {ByteCode::BUILD_LIST, "BUILD_LIST"},
+  {ByteCode::BUILD_MAP, "BUILD_MAP"},
+  {ByteCode::LOAD_ATTR, "LOAD_ATTR"},
+  {ByteCode::COMPARE_OP, "COMPARE_OP"},
+  {ByteCode::JUMP_FORWARD, "JUMP_FORWARD"},
+  {ByteCode::JUMP_IF_FALSE_OR_POP, "JUMP_IF_FALSE_OR_POP"},
+  {ByteCode::JUMP_IF_TRUE_OR_POP, "JUMP_IF_TRUE_OR_POP"},
+  {ByteCode::JUMP_ABSOLUTE, "JUMP_ABSOLUTE"},
+  {ByteCode::POP_JUMP_IF_FALSE, "POP_JUMP_IF_FALSE"},
+  {ByteCode::POP_JUMP_IF_TRUE, "POP_JUMP_IF_TRUE"},
+  {ByteCode::LOAD_GLOBAL, "LOAD_GLOBAL"},
+  {ByteCode::BINARY_OP, "BINARY_OP"},
+  {ByteCode::LOAD_FAST, "LOAD_FAST"},
+  {ByteCode::STORE_FAST, "STORE_FAST"},
+  {ByteCode::MAKE_FUNCTION, "MAKE_FUNCTION"},
+  {ByteCode::BUILD_SLICE, "BUILD_SLICE"},
+  {ByteCode::CALL_FUNCTION, "CALL_FUNCTION"},
+  {ByteCode::GET_YIELD_FROM_ITER, "GET_YIELD_FROM_ITER"},
+  {ByteCode::YIELD_VALUE, "YIELD_VALUE"},
+  {ByteCode::ERROR, "ERROR"},
+};
 
 }  // namespace torchlight::Object
 namespace torchlight::Collections {

@@ -68,8 +68,9 @@ PyObjPtr ListKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 PyObjPtr ListKlass::repr(const PyObjPtr& obj) {
   auto list = obj->as<PyList>();
   return StringConcat(CreatePyList(
-    {CreatePyString("["), CreatePyString(", ")->as<PyString>()->Join(list),
-     CreatePyString("]")}
+    {CreatePyString("[")->as<PyString>(),
+     CreatePyString(", ")->as<PyString>()->Join(list),
+     CreatePyString("]")->as<PyString>()}
   ));
 }
 

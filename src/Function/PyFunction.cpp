@@ -1,13 +1,13 @@
 #include "Function/PyFunction.h"
+#include "Object/PyString.h"
 
 namespace torchlight::Object {
 
 PyObjPtr FunctionKlass::repr(const PyObjPtr& obj) {
   return StringConcat(CreatePyList(
-    {CreatePyString("<function "), obj->as<PyFunction>()->Name(),
-     CreatePyString(" at "),
-     Identity(obj)->as<PyString>(),
-     CreatePyString(">")}
+    {CreatePyString("<function ")->as<PyString>(),
+     obj->as<PyFunction>()->Name(), CreatePyString(" at ")->as<PyString>(),
+     Identity(obj)->as<PyString>(), CreatePyString(">")->as<PyString>()}
   ));
 }
 

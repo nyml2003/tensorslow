@@ -31,7 +31,7 @@
 
 namespace torchlight::Generation {
 
-Generator::Generator(Object::PyObjPtr filename) {
+Generator::Generator(const Object::PyObjPtr& filename) {
   context = Ast::CreateModule(Object::CreatePyList({}), filename);
   codeList =
     std::dynamic_pointer_cast<Object::PyList>(Object::CreatePyList({}));
@@ -206,34 +206,37 @@ antlrcpp::Any Generator::visitExpr(Python3Parser::ExprContext* ctx) {
              (ctx->STAR() != nullptr || ctx->AT() != nullptr ||
               ctx->DIV() != nullptr || ctx->MOD() != nullptr ||
               ctx->IDIV() != nullptr)) {
-    bool isStar = (ctx->STAR() != nullptr);
-    bool isAt = (ctx->AT() != nullptr);
-    bool isDiv = (ctx->DIV() != nullptr);
-    bool isMod = (ctx->MOD() != nullptr);
-    bool isIdiv = (ctx->IDIV() != nullptr);
-    auto left = visitExpr(ctx->expr(0));
-    auto right = visitExpr(ctx->expr(1));
-    return isStar
-             ? CreateBinary(Ast::Binary::Operator::MUL, left, right, context)
-           : isAt
-             ? CreateBinary(Ast::Binary::Operator::MATMUL, left, right, context)
-           : isDiv
-             ? CreateBinary(Ast::Binary::Operator::DIV, left, right, context)
-           : isMod
-             ? CreateBinary(Ast::Binary::Operator::MOD, left, right, context)
-             : CreateBinary(
-                 Ast::Binary::Operator::FLOOR_DIV, left, right, context
-               );
+    auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
+    auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
+    if (ctx->STAR() != nullptr) {
+      return CreateBinary(Ast::Binary::Operator::MUL, left, right, context);
+    }
+    if (ctx->AT() != nullptr) {
+      return CreateBinary(Ast::Binary::Operator::MATMUL, left, right, context);
+    }
+    if (ctx->DIV() != nullptr) {
+      return CreateBinary(Ast::Binary::Operator::DIV, left, right, context);
+    }
+    if (ctx->MOD() != nullptr) {
+      return CreateBinary(Ast::Binary::Operator::MOD, left, right, context);
+    }
+    if (ctx->IDIV() != nullptr) {
+      return CreateBinary(
+        Ast::Binary::Operator::FLOOR_DIV, left, right, context
+      );
+    }
+    throw std::runtime_error("Unknown operator");
   } else if (ctx->expr().size() == 2 &&
              (ctx->ADD().size() == 1 || ctx->MINUS().size() == 1)) {
     // 情况 5: expr ('+' | '-') expr
-    bool isAdd = (ctx->ADD().size() == 1);
-    bool isMinus = (ctx->MINUS().size() == 1);
     auto left = visitExpr(ctx->expr(0));
     auto right = visitExpr(ctx->expr(1));
-    return isAdd
-             ? CreateBinary(Ast::Binary::Operator::ADD, left, right, context)
-             : CreateBinary(Ast::Binary::Operator::SUB, left, right, context);
+    if (ctx->ADD().size() == 1) {
+      return CreateBinary(Ast::Binary::Operator::ADD, left, right, context);
+    }
+    if (ctx->MINUS().size() == 1) {
+      return CreateBinary(Ast::Binary::Operator::SUB, left, right, context);
+    }
   } else if (ctx->expr().size() == 2 &&
              (ctx->LEFT_SHIFT() != nullptr || ctx->RIGHT_SHIFT() != nullptr)) {
     // 情况 6: expr ('<<' | '>>') expr
@@ -653,7 +656,8 @@ antlrcpp::Any Generator::visitClassdef(Python3Parser::ClassdefContext* ctx) {
   return std::dynamic_pointer_cast<Ast::INode>(classDef);
 }
 
-antlrcpp::Any Generator::visitPass_stmt(Python3Parser::Pass_stmtContext* ctx) {
+antlrcpp::Any
+Generator::visitPass_stmt(Python3Parser::Pass_stmtContext* /*ctx*/) {
   return Ast::CreatePassStmt(context);
 }
 
