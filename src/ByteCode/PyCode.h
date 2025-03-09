@@ -89,6 +89,10 @@ class PyCode : public PyObject {
 
   void ReturnValue();
   Index PopJumpIfFalse();
+  Index JumpForward() {
+    instructions->Append(CreateJumpForward(0));
+    return instructions->Length();
+  }
   void JumpAbsolute(Index index);
   void PopTop();
   void StoreSubscr();

@@ -143,9 +143,20 @@ PyObjPtr CodeKlass::repr(const PyObjPtr& self) {
   repr = repr->add(code->Name()->str());
   repr = repr->add(CreatePyString("\n"));
   repr = repr->add(CreatePyString("instructions:\n\n"));
-  repr = repr->add(StringConcat(CreatePyList({
-    CreatePyString("\n")->as<PyString>()->Join(code->Instructions()),
-  })));
+  // repr = repr->add(StringConcat(CreatePyList({
+  //   CreatePyString("\n")->as<PyString>()->Join(code->Instructions()),
+  // })));
+  ForEach(
+    code->Instructions(),
+    [&](const PyObjPtr& inst, Index index, const PyObjPtr&) {
+      repr = repr->add(StringConcat(CreatePyList({
+        CreatePyInteger(index - 1)->repr(),
+        CreatePyString(": ")->as<PyString>(),
+        inst->repr(),
+        CreatePyString("\n")->as<PyString>(),
+      })));
+    }
+  );
   repr = repr->add(CreatePyString("\n\n"));
   repr = repr->add(CreatePyString("nLocals: "));
   repr = repr->add(CreatePyInteger(code->NLocals())->repr());

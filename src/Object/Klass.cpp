@@ -3,6 +3,7 @@
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
+#include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
@@ -182,9 +183,16 @@ PyObjPtr Klass::ne(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr Klass::boolean(const PyObjPtr& obj) {
-  return Invoke(
-    obj, CreatePyString("__bool__"), CreatePyList({})->as<PyList>()
-  );
+  auto boolFunc = GetAttr(obj, CreatePyString("__getattr__")->as<PyString>());
+  if (boolFunc != nullptr) {
+    return Runtime::Interpreter::Eval(boolFunc, CreatePyList({})->as<PyList>());
+  }
+  auto lenFunc = GetAttr(obj, CreatePyString("__len__")->as<PyString>());
+  if (lenFunc != nullptr) {
+    auto len = Runtime::Interpreter::Eval(lenFunc, CreatePyList({})->as<PyList>());
+    return len->ne(CreatePyInteger(0));
+  }
+  return CreatePyBoolean(true);
 }
 
 PyObjPtr Klass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {

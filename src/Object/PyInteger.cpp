@@ -32,10 +32,14 @@ PyObjPtr IntegerKlass::construct(const PyObjPtr& klass, const PyObjPtr& args) {
     );
   }
   auto value = argList->GetItem(0);
-  if (!value->is<PyInteger>()) {
-    throw std::runtime_error("PyInteger::construct(): value is not an integer");
+  if (value->is<PyInteger>()) {
+    return value;
   }
-  return value;
+  if (value->is<PyString>()) {
+    auto str = std::dynamic_pointer_cast<PyString>(value);
+    return CreatePyInteger(Collections::CreateIntegerWithString(str->Value()));
+  }
+  throw std::runtime_error("PyInteger::construct(): value is not an integer");
 }
 
 PyObjPtr IntegerKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {

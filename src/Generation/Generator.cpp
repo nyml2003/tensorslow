@@ -189,100 +189,6 @@ antlrcpp::Any Generator::visitExpr(Python3Parser::ExprContext* ctx) {
   if (ctx->atom_expr() != nullptr) {
     return visitAtom_expr(ctx->atom_expr());
   }
-
-  // if (ctx->expr().size() == 2 && ctx->POWER() != nullptr) {
-  //   visitExpr(ctx->expr(0));
-  //   visitExpr(ctx->expr(1));
-  //   auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
-  //   auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
-  //   return Ast::CreateBinary(
-  //     Ast::Binary::Operator::POWER, left, right, context
-  //   );
-  // }
-  // if ((ctx->expr().size() == 1) &&
-  //     (!ctx->ADD().empty() || !ctx->MINUS().empty() || !ctx->NOT_OP().empty()
-  //     )) {
-  //   auto operand = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
-  //   if (ctx->ADD().size() == 1) {
-  //     return Ast::CreateUnary(Ast::Unary::Operator::PLUS, operand, context);
-  //   }
-  //   if (ctx->MINUS().size() == 1) {
-  //     return Ast::CreateUnary(Ast::Unary::Operator::MINUS, operand, context);
-  //   }
-  //   if (ctx->NOT_OP().size() == 1) {
-  //     return Ast::CreateUnary(Ast::Unary::Operator::INVERT, operand,
-  //     context);
-  //   }
-  //   throw std::runtime_error("Unknown operator");
-  // }
-  // if (ctx->expr().size() ==
-  //       2 &&  // 情况 4: expr ('*' | '@' | '/' | '%' | '//') expr
-  //     (ctx->STAR() != nullptr || ctx->AT() != nullptr ||
-  //      ctx->DIV() != nullptr || ctx->MOD() != nullptr ||
-  //      ctx->IDIV() != nullptr)) {
-  //   auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
-  //   auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
-  //   if (ctx->STAR() != nullptr) {
-  //     return CreateBinary(Ast::Binary::Operator::MUL, left, right, context);
-  //   }
-  //   if (ctx->AT() != nullptr) {
-  //     return CreateBinary(Ast::Binary::Operator::MATMUL, left, right,
-  //     context);
-  //   }
-  //   if (ctx->DIV() != nullptr) {
-  //     return CreateBinary(Ast::Binary::Operator::DIV, left, right, context);
-  //   }
-  //   if (ctx->MOD() != nullptr) {
-  //     return CreateBinary(Ast::Binary::Operator::MOD, left, right, context);
-  //   }
-  //   if (ctx->IDIV() != nullptr) {
-  //     return CreateBinary(
-  //       Ast::Binary::Operator::FLOOR_DIV, left, right, context
-  //     );
-  //   }
-  //   throw std::runtime_error("Unknown operator");
-  // }
-  // if (ctx->expr().size() == 2 &&
-  //     (ctx->ADD().size() == 1 || ctx->MINUS().size() == 1)) {
-  //   // 情况 5: expr ('+' | '-') expr
-  //   auto left = visitExpr(ctx->expr(0));
-  //   auto right = visitExpr(ctx->expr(1));
-  //   if (ctx->ADD().size() == 1) {
-  //     return CreateBinary(Ast::Binary::Operator::ADD, left, right, context);
-  //   }
-  //   if (ctx->MINUS().size() == 1) {
-  //     return CreateBinary(Ast::Binary::Operator::SUB, left, right, context);
-  //   }
-  // } else if (ctx->expr().size() == 2 &&
-  //            (ctx->LEFT_SHIFT() != nullptr || ctx->RIGHT_SHIFT() != nullptr))
-  //            {
-  //   auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
-  //   auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
-  //   if (ctx->LEFT_SHIFT() != nullptr) {
-  //     return CreateBinary(Ast::Binary::Operator::LSHIFT, left, right,
-  //     context);
-  //   }
-  //   if (ctx->RIGHT_SHIFT() != nullptr) {
-  //     return CreateBinary(Ast::Binary::Operator::RSHIFT, left, right,
-  //     context);
-  //   }
-  // } else if (ctx->expr().size() == 2 && ctx->AND_OP() != nullptr) {
-  //   auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
-  //   auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
-  //   return CreateBinary(Ast::Binary::Operator::AND, left, right, context);
-  // } else if (ctx->expr().size() == 2 && ctx->XOR() != nullptr) {
-  //   auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
-  //   auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
-  //   return CreateBinary(Ast::Binary::Operator::XOR, left, right, context);
-  // } else if (ctx->expr().size() == 2 && ctx->OR_OP() != nullptr) {
-  //   auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
-  //   auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
-  //   return CreateBinary(Ast::Binary::Operator::OR, left, right, context);
-  // } else {
-  //   // 其他情况
-  //   std::cout << "Unknown expression type" << std::endl;
-  // }
-  // return nullptr;
   auto exprs = ctx->expr();
   if (exprs.size() == 1) {
     auto operand = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
@@ -395,10 +301,6 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
     auto target =
       visitTestlist_star_expr(ctx->testlist_star_expr(0)).as<Ast::INodePtr>();
     return Ast::CreateAssignStmt(target, source, context);
-    // 遍历所有赋值右侧的表达式
-    // for (auto* exprIt : ctx->testlist_star_expr()) {
-    //   auto expr = visitTestlist_star_expr(exprIt).as<Object::PyObjPtr>();
-    // }
   }
 
   // 处理只有 testlist_star_expr 的情况
@@ -642,8 +544,7 @@ antlrcpp::Any Generator::visitBlock(Python3Parser::BlockContext* ctx) {
       auto stmt = visitStmt(it);
       if (stmt.is<Object::PyObjPtr>()) {
         Object::ForEach(
-          std::dynamic_pointer_cast<Object::PyList>(stmt.as<Object::PyObjPtr>()
-          ),
+          stmt.as<Object::PyObjPtr>()->as<Object::PyList>(),
           [&stmts](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
             stmts.Push(stmt);
           }
@@ -712,8 +613,34 @@ antlrcpp::Any Generator::visitTfpdef(Python3Parser::TfpdefContext* ctx) {
 
 antlrcpp::Any Generator::visitIf_stmt(Python3Parser::If_stmtContext* ctx) {
   auto condition = visitTest(ctx->test(0)).as<Ast::INodePtr>();
-  auto thenStmts = visitBlock(ctx->block(0)).as<Object::PyObjPtr>();
-  auto ifStmt = Ast::CreateIfStmt(condition, thenStmts, context);
+  auto thenStmts =
+    visitBlock(ctx->block(0)).as<Object::PyObjPtr>()->as<Object::PyList>();
+  Object::PyListPtr elseStmts = Object::CreatePyList({})->as<Object::PyList>();
+  Object::PyListPtr elseIfStmts =
+    Object::CreatePyList({})->as<Object::PyList>();
+  Object::PyListPtr elseIfConditions =
+    Object::CreatePyList({})->as<Object::PyList>();
+  size_t elseifCount = ctx->ELIF().size();
+  bool hasElse = ctx->ELSE() != nullptr;
+  if (elseifCount > 0) {
+    for (size_t i = 0; i < elseifCount; ++i) {
+      auto elseIfCondition = visitTest(ctx->test(i + 1)).as<Ast::INodePtr>();
+      elseIfConditions->Append(elseIfCondition);
+      auto block = visitBlock(ctx->block(i + 1))
+                     .as<Object::PyObjPtr>()
+                     ->as<Object::PyList>();
+      elseIfStmts->Append(block);
+    }
+  }
+  if (hasElse) {
+    elseStmts = visitBlock(ctx->block(elseifCount + 1))
+                  .as<Object::PyObjPtr>()
+                  ->as<Object::PyList>();
+  }
+
+  auto ifStmt = Ast::CreateIfStmt(
+    condition, thenStmts, elseStmts, elseIfStmts, elseIfConditions, context
+  );
   return ifStmt;
 }
 

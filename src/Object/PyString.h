@@ -62,6 +62,8 @@ class PyString : public PyObject {
   bool Equal(const PyStrPtr& other) const;
 
   PyStrPtr Upper() const;
+
+  Collections::String Value() const { return value; }
 };
 using PyStrPtr = std::shared_ptr<PyString>;
 

@@ -152,6 +152,10 @@ inline PyInstPtr CreateGetYieldFromIter() {
   return std::make_shared<PyInst>(ByteCode::GET_YIELD_FROM_ITER);
 }
 
+inline PyInstPtr CreateJumpForward(Index index) {
+  return std::make_shared<PyInst>(ByteCode::JUMP_FORWARD, index);
+}
+
 }  // namespace torchlight::Object
 
 #endif

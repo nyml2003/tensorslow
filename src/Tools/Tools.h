@@ -44,7 +44,7 @@ class Schema {
   std::map<std::string, Parameter> parameters;  // 参数存储
 };
 
-// 单例类
+
 class ArgsHelper {
  public:
   static ArgsHelper& Instance();

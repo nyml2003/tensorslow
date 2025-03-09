@@ -41,7 +41,7 @@ Object::PyObjPtr WhileStmtKlass::emit(
   );
   code->JumpAbsolute(condBegin);
   auto jumpEnd = code->Instructions()->Length();
-  auto offset = static_cast<int64_t>(jumpEnd - jumpStart);
+  auto offset = static_cast<int64_t>(jumpEnd - jumpStart + 1);
   code->Instructions()->SetItem(
     jumpStart - 1, Object::CreatePopJumpIfFalse(offset)
   );

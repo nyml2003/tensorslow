@@ -3,6 +3,7 @@
 #include "Function/PyNativeFunction.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
+#include "Object/PyDictionary.h"
 #include "Object/PyFloat.h"
 #include "Object/PyList.h"
 #include "Object/PyMatrix.h"
@@ -17,7 +18,7 @@ namespace torchlight::Runtime {
 
 Object::PyObjPtr Genesis() {
   Object::BasicKlassLoad();
-  auto builtins = Object::CreatePyDict();
+  auto builtins = Object::CreatePyDict()->as<Object::PyDictionary>();
   builtins->setitem(Object::CreatePyString("None"), Object::CreatePyNone());
   builtins->setitem(
     Object::CreatePyString("True"), Object::CreatePyBoolean(true)
@@ -91,6 +92,15 @@ Object::PyObjPtr Genesis() {
   );
   builtins->setitem(
     Object::CreatePyString("type"), CreatePyNativeFunction(Type)
+  );
+  builtins->Put(
+    Object::CreatePyString("input"), CreatePyNativeFunction(Object::Input)
+  );
+  builtins->Put(
+    Object::CreatePyString("sleep"), CreatePyNativeFunction(Object::Sleep)
+  );
+  builtins->Put(
+    Object::CreatePyString("randint"), CreatePyNativeFunction(Object::RandInt)
   );
   return builtins;
 }

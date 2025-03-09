@@ -7,11 +7,9 @@
 namespace torchlight::Collections {
 class Integer {
   friend class List<Integer>;
-
  private:
   List<uint32_t> parts;
   bool sign = false;
-
  public:
   explicit Integer();
   explicit Integer(const List<uint32_t>& _parts, bool _sign);

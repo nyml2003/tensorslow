@@ -306,6 +306,10 @@ void ParseByteCode(const Object::PyCodePtr& code) {
         insts.Push(Object::CreateGetYieldFromIter());
         break;
       }
+      case Object::ByteCode::JUMP_FORWARD: {
+        insts.Push(Object::CreateJumpForward(ReadU64(iter)));
+        break;
+      }
       default:
         throw std::runtime_error(
           "Unknown byte code:" + std::to_string(static_cast<int>(iter.Get()))
@@ -475,37 +479,23 @@ Object::PyObjPtr PyFrame::Eval() {
       }
       case Object::ByteCode::POP_JUMP_IF_FALSE: {
         auto needJump = stack.Pop();
-        if (!(needJump->Klass() == Object::BooleanKlass::Self())) {
-          throw std::runtime_error("Cannot jump if not boolean");
-        }
-        auto bool_needJump =
-          std::dynamic_pointer_cast<Object::PyBoolean>(needJump);
-        if (bool_needJump == nullptr) {
-          throw std::runtime_error("Cannot jump if not boolean");
-        }
-        NextProgramCounter();
-        if (!bool_needJump->Value()) {
+        if (!IsTrue(needJump)) {
           SetProgramCounter(Collections::safe_add(
             ProgramCounter(), std::get<int64_t>(inst->Operand())
           ));
+        } else {
+          NextProgramCounter();
         }
         break;
       }
       case Object::ByteCode::POP_JUMP_IF_TRUE: {
         auto needJump = stack.Pop();
-        if (!(needJump->Klass() == Object::BooleanKlass::Self())) {
-          throw std::runtime_error("Cannot jump if not boolean");
-        }
-        auto bool_needJump =
-          std::dynamic_pointer_cast<Object::PyBoolean>(needJump);
-        if (bool_needJump == nullptr) {
-          throw std::runtime_error("Cannot jump if not boolean");
-        }
-        NextProgramCounter();
-        if (bool_needJump->Value()) {
+        if (IsTrue(needJump)) {
           SetProgramCounter(Collections::safe_add(
             ProgramCounter(), std::get<int64_t>(inst->Operand())
           ));
+        } else {
+          NextProgramCounter();
         }
         break;
       }
@@ -834,6 +824,10 @@ Object::PyObjPtr PyFrame::Eval() {
         auto value = stack.Pop();
         Interpreter::Instance().BackToParentFrame();
         throw std::runtime_error("Yield from iterator ended");
+        break;
+      }
+      case Object::ByteCode::JUMP_FORWARD: {
+        SetProgramCounter(programCounter + std::get<Index>(inst->Operand()));
         break;
       }
       case Object::ByteCode::ERROR: {

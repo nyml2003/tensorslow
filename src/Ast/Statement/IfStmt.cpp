@@ -2,7 +2,9 @@
 #include "Ast/INode.h"
 #include "ByteCode/PyInst.h"
 #include "Object/ObjectHelper.h"
+#include "Object/PyInteger.h"
 #include "Object/PyNone.h"
+#include "Object/PyString.h"
 
 namespace torchlight::Ast {
 
@@ -13,9 +15,39 @@ Object::PyObjPtr IfStmtKlass::visit(
   auto stmt = std::dynamic_pointer_cast<IfStmt>(obj);
   auto condition = stmt->Condition();
   auto thenStmts = stmt->ThenStmts();
+  auto elseStmts = stmt->ElseStmts();
+  auto elifs = stmt->Elifs();
+  auto elifConditions = stmt->ElifConditions();
   condition->visit(codeList);
   Object::ForEach(
     thenStmts,
+    [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
+      auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
+      stmtObj->visit(codeList);
+    }
+  );
+  Object::ForEach(
+    elifConditions,
+    [&codeList](const Object::PyObjPtr& elif, Index, const Object::PyObjPtr&) {
+      auto elifObj = std::dynamic_pointer_cast<Ast::INode>(elif);
+      elifObj->visit(codeList);
+    }
+  );
+  Object::ForEach(
+    elifs,
+    [&codeList](const Object::PyObjPtr& elif, Index, const Object::PyObjPtr&) {
+      auto elifStms = elif->as<Object::PyList>();
+      Object::ForEach(
+        elifStms,
+        [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
+          auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
+          stmtObj->visit(codeList);
+        }
+      );
+    }
+  );
+  Object::ForEach(
+    elseStmts,
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
       auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
       stmtObj->visit(codeList);
@@ -32,9 +64,17 @@ Object::PyObjPtr IfStmtKlass::emit(
   auto stmt = std::dynamic_pointer_cast<IfStmt>(obj);
   auto condition = stmt->Condition();
   auto thenStmts = stmt->ThenStmts();
-  condition->emit(codeList);
+  auto elseStmts = stmt->ElseStmts();
+  auto elifs = stmt->Elifs();
+  auto elifConditions = stmt->ElifConditions();
   auto code = GetCodeFromList(codeList, stmt);
-  auto jumpStart = code->PopJumpIfFalse();
+
+  // 生成条件的字节码
+  condition->emit(codeList);
+  // 添加 POP_JUMP_IF_FALSE 指令，跳转位置暂定
+  Index thenConditionEnd = code->PopJumpIfFalse();
+
+  // 生成 then 块的字节码
   Object::ForEach(
     thenStmts,
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
@@ -42,10 +82,66 @@ Object::PyObjPtr IfStmtKlass::emit(
       stmtObj->emit(codeList);
     }
   );
-  auto jumpEnd = code->Instructions()->Length();
-  auto offset = static_cast<int64_t>(jumpEnd - jumpStart);
+  // then 块结束后，添加 JUMP_FORWARD 跳转到整个 if 结束的位置
+  Index thenBlockEnd = code->JumpForward();
   code->Instructions()->SetItem(
-    jumpStart - 1, Object::CreatePopJumpIfFalse(offset)
+    thenConditionEnd - 1, Object::CreatePopJumpIfFalse(static_cast<int64_t>(
+                            thenBlockEnd - thenConditionEnd + 1
+                          ))
+  );
+  Collections::List<Index> elifBlockEnds;
+  // 处理 elif 部分
+  for (Index i = 0; i < elifConditions->Length(); ++i) {
+    auto elifCondition = elifConditions->GetItem(i);
+    auto elifBlock = elifs->GetItem(i);
+
+    // 生成 elif 条件的字节码
+    elifCondition->as<Ast::INode>()->emit(codeList);
+    // 添加 POP_JUMP_IF_FALSE 指令，跳转位置暂定
+    Index elfiConditionEnd = code->PopJumpIfFalse();
+
+    // 生成 elif 块的字节码
+    auto elifStms = elifBlock->as<Object::PyList>();
+    Object::ForEach(
+      elifStms,
+      [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
+        auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
+        stmtObj->emit(codeList);
+      }
+    );
+    // elif 块结束后，添加 JUMP_FORWARD 跳转到整个 if 结束的位置
+    Index elifBlockEnd = code->JumpForward();
+    code->Instructions()->SetItem(
+      elfiConditionEnd - 1, Object::CreatePopJumpIfFalse(static_cast<int64_t>(
+                              elifBlockEnd - elfiConditionEnd + 1
+                            ))
+    );
+    elifBlockEnds.Push(elifBlockEnd);
+  }
+
+  // 处理 else 块
+  if (elseStmts->Length() > 0) {
+    // 生成 else 块的字节码
+    Object::ForEach(
+      elseStmts,
+      [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
+        auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
+        stmtObj->emit(codeList);
+      }
+    );
+  }
+
+  // 计算 then 块中 JUMP_FORWARD 的实际跳转偏移量
+  Index ifEnd = code->Instructions()->Length();
+  for (Index i = 0; i < elifBlockEnds.Size(); ++i) {
+    code->Instructions()->SetItem(
+      elifBlockEnds[i] - 1,
+      Object::CreateJumpForward(ifEnd - elifBlockEnds[i] + 1)
+    );
+  }
+
+  code->Instructions()->SetItem(
+    thenBlockEnd - 1, Object::CreateJumpForward(ifEnd - thenBlockEnd + 1)
   );
   return Object::CreatePyNone();
 }
