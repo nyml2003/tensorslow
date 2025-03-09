@@ -80,6 +80,17 @@ Integer Integer::Copy() const {
   return newInteger;
 }
 bool Integer::GreaterThan(const Integer& rhs) const {
+  bool lzero = IsZero();
+  bool rzero = rhs.IsZero();
+  if (lzero && rzero) {
+    return false;
+  }
+  if (lzero) {
+    return rhs.sign;
+  }
+  if (rzero) {
+    return !sign;
+  }
   // 如果左值是负数，右值是正数，那么左值一定比右值小
   if (sign && !rhs.sign) {
     return false;

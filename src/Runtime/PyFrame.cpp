@@ -7,6 +7,7 @@
 #include "Collections/StringHelper.h"
 #include "Function/PyFunction.h"
 #include "Object/Iterator.h"
+#include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyInteger.h"
@@ -423,52 +424,43 @@ Object::PyObjPtr PyFrame::Eval() {
         switch (oprt) {
           case Object::CompareOp::EQUAL: {
             stack.Push(left->eq(right));
-            auto result = left->eq(right);
             break;
           }
           case Object::CompareOp::NOT_EQUAL: {
             stack.Push(left->ne(right));
-            auto result = left->ne(right);
             break;
           }
           case Object::CompareOp::LESS_THAN: {
             stack.Push(left->lt(right));
-            auto result = left->lt(right);
             break;
           }
           case Object::CompareOp::LESS_THAN_EQUAL: {
             stack.Push(left->le(right));
-            auto result = left->le(right);
             break;
           }
           case Object::CompareOp::GREATER_THAN: {
-            stack.Push(left->gt(right));
             auto result = left->gt(right);
+            stack.Push(left->gt(right));
             break;
           }
           case Object::CompareOp::GREATER_THAN_EQUAL: {
             stack.Push(left->ge(right));
-            auto result = left->ge(right);
             break;
           }
           case Object::CompareOp::IN: {
             stack.Push(right->contains(left));
-            auto result = right->contains(left);
             break;
           }
           case Object::CompareOp::NOT_IN: {
             stack.Push(Not(right->contains(left)));
-            auto result = Not(right->contains(left));
             break;
           }
           case Object::CompareOp::IS: {
             stack.Push(Object::CreatePyBoolean(left.get() == right.get()));
-            auto result = Object::CreatePyBoolean(left.get() == right.get());
             break;
           }
           case Object::CompareOp::IS_NOT: {
-            stack.Push(Not(Object::CreatePyBoolean(left.get() == right.get())));
-            auto result = Object::CreatePyBoolean(left.get() != right.get());
+            stack.Push(Object::CreatePyBoolean(left.get() != right.get()));
             break;
           }
           default:
