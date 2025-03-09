@@ -39,6 +39,33 @@ class Matrix {
   [[nodiscard]] Matrix MatrixMultiply(const Matrix& other) const;
 
   static Matrix Eye(Index n);
+
+  // 获取start行到stop行
+  [[nodiscard]] Matrix GetRows(Index start, Index stop) const;
+
+  // 获取start列到stop列
+  [[nodiscard]] Matrix GetCols(Index start, Index stop) const;
+
+  // 获取(rowStart, colStart)到(rowStop, colStop)的矩阵
+  [[nodiscard]] Matrix
+  GetSlice(Index rowStart, Index colStart, Index rowStop, Index colStop) const;
+
+  // 设置start行到stop行
+  void SetRows(Index start, Index stop, const Matrix& other);
+
+  // 设置start列到stop列
+  void SetCols(Index start, Index stop, const Matrix& other);
+
+  // 设置(rowStart, colStart)到(rowStop, colStop)的矩阵
+  void SetSlice(
+    Index rowStart,
+    Index colStart,
+    Index rowStop,
+    Index colStop,
+    const Matrix& other
+  );
+
+  [[nodiscard]] Matrix Copy() const;
 };
 
 }  // namespace torchlight::Collections

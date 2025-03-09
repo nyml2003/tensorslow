@@ -1,6 +1,4 @@
-#include "Ast/List.h"
-#include "Ast/INode.h"
-#include "Object/ObjectHelper.h"
+#include "Ast/Expression/List.h"
 #include "Object/PyNone.h"
 
 namespace torchlight::Ast {

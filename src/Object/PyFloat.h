@@ -9,7 +9,7 @@ namespace torchlight::Object {
 class FloatKlass : public Klass {
  public:
   explicit FloatKlass() = default;
-  
+
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<FloatKlass>();
     LoadClass(CreatePyString("float")->as<PyString>(), instance);
@@ -25,7 +25,7 @@ class FloatKlass : public Klass {
 
   PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
-  PyObjPtr div(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
   PyObjPtr repr(const PyObjPtr& obj) override;
 

@@ -4,6 +4,7 @@
 #include "Collections/Integer.h"
 #include "Collections/IntegerHelper.h"
 #include "Object/Klass.h"
+#include "Object/Object.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyString.h"
 
@@ -22,7 +23,17 @@ class IntegerKlass : public Klass {
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-  PyObjPtr div(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr floordiv(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr pow(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr pos(const PyObjPtr& obj) override;
+  PyObjPtr neg(const PyObjPtr& obj) override;
+  PyObjPtr invert(const PyObjPtr& obj) override;
+  PyObjPtr _and_(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr _or_(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr _xor_(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr lshift(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr rshift(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr mod(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr gt(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr repr(const PyObjPtr& obj) override;
@@ -48,6 +59,10 @@ class PyInteger : public PyObject {
     : PyObject(IntegerKlass::Self()), value(std::move(value)) {}
 
   [[nodiscard]] Index ToU64() const { return Collections::ToU64(value); }
+
+  // Index Add(Index rhs) const {
+  //   return Positive() ? ToU64() : length + ToU64();
+  // }
 };
 
 }  // namespace torchlight::Object

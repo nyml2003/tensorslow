@@ -1,7 +1,7 @@
+#include "Collections/Integer.h"
 #include <stdexcept>
 #include "Collections/Decimal.h"
 #include "Collections/DecimalHelper.h"
-#include "Collections/Integer.h"
 #include "Collections/IntegerHelper.h"
 #include "Collections/Iterator.h"
 #include "Collections/StringHelper.h"
@@ -323,4 +323,100 @@ List<uint32_t> Integer::Data() const {
   return parts;
 }
 
+Integer Integer::Negate() const {
+  return Integer(parts, !sign);
+}
+
+Integer Integer::Power(const Integer& rhs) const {
+  if (rhs.sign) {
+    throw std::runtime_error("Exponent must be non-negative");
+  }
+  if (rhs.IsZero()) {
+    return CreateIntegerOne();
+  }
+  if (rhs.Equal(CreateIntegerOne())) {
+    return Copy();
+  }
+  if (rhs.Equal(CreateIntegerTwo())) {
+    return Multiply(*this);
+  }
+  Integer result = CreateIntegerOne();
+  Integer base = Copy();
+  Integer exponent = rhs.Copy();
+  while (!exponent.IsZero()) {
+    if ((exponent.parts.Get(0) & 1) != 0U) {
+      result = result.Multiply(base);
+    }
+    base = base.Multiply(base);
+    exponent = exponent.RightShift(CreateIntegerOne());
+  }
+  return result;
+}
+
+Integer Integer::LeftShift(const Integer& rhs) const {
+  if (rhs.sign) {
+    throw std::runtime_error("Shift count must be non-negative");
+  }
+  if (rhs.IsZero()) {
+    return Copy();
+  }
+
+  Integer result = Copy();
+  uint32_t totalShift = 0;
+
+  // 计算总位移量
+  for (Index i = 0; i < rhs.parts.Size(); i++) {
+    totalShift += rhs.parts.Get(i);
+  }
+
+  // 如果总位移量超过最大范围，直接返回0
+  if (totalShift >= 16 * result.parts.Size()) {
+    return CreateIntegerZero();
+  }
+
+  // 扩展数组大小以容纳新的位移结果
+  Index newPartsSize = result.parts.Size() + (totalShift + 15) / 16;
+  result.parts.ExpandWithElement(newPartsSize, 0);
+
+  // 逐位进行位移
+  for (Index i = 0; i < result.parts.Size(); i++) {
+    uint32_t lowShift = totalShift % 16;
+    uint32_t highShift = 16 - lowShift;
+
+    if (i + 1 < result.parts.Size()) {
+      uint32_t overflow = result.parts.Get(i) >> highShift;
+      result.parts.Set(i + 1, result.parts.Get(i + 1) | overflow);
+    }
+
+    result.parts.Set(i, result.parts.Get(i) << lowShift);
+  }
+
+  return result;
+}
+
+Integer Integer::RightShift(const Integer& rhs) const {
+  if (rhs.sign) {
+    throw std::runtime_error("Shift count must be non-negative");
+  }
+  if (rhs.IsZero()) {
+    return Copy();
+  }
+  Integer result = Copy();
+  for (Index i = 0; i < rhs.parts.Size(); i++) {
+    uint32_t shift = rhs.parts.Get(i);
+    if (shift == 0) {
+      continue;
+    }
+    for (Index j = 0; j < result.parts.Size(); j++) {
+      result.parts.Set(j, result.parts.Get(j) >> shift);
+      if (j + 1 < result.parts.Size()) {
+        result.parts.Set(
+          j, result.parts.Get(j) | (result.parts.Get(j + 1) << (16 - shift))
+        );
+      }
+    }
+  }
+  TrimLeadingZero(result.parts);
+  return result;
+}
 }  // namespace torchlight::Collections

@@ -24,13 +24,15 @@ class BooleanKlass : public Klass {
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr repr(const PyObjPtr& obj) override;
   PyObjPtr boolean(const PyObjPtr& obj) override { return obj; }
+  PyObjPtr _and_(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr _or_(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 };
 
 class PyBoolean : public PyObject {
  private:
   bool value;
-
 
  public:
   explicit PyBoolean(bool value)

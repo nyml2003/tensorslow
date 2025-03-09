@@ -29,7 +29,6 @@ class BinaryKlass : public INodeKlass {
 class Binary : public Ast::INode {
  public:
   enum class Operator {
-    Error = 0,
     LT,         // <
     GT,         // >
     EQ,         // ==
@@ -42,12 +41,18 @@ class Binary : public Ast::INode {
     IS_NOT,     // is not
     ADD,        // +
     SUB,        // -
-    MUL,        // *
+    MUL,        // "*"
     DIV,        // "/"
     MATMUL,     // @
     MOD,        // %
     FLOOR_DIV,  // "//"
     SUBSCR,     // []
+    AND,        // and
+    OR,         // or
+    XOR,        // xor
+    LSHIFT,     // <<
+    RSHIFT,     // >>
+    POWER,      // "**"
   };
 
   explicit Binary(Operator oprt, INodePtr left, INodePtr right, INodePtr parent)

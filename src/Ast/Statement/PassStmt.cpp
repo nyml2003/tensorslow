@@ -1,4 +1,4 @@
-#include "Ast/PassStmt.h"
+#include "Ast/Statement/PassStmt.h"
 
 namespace torchlight::Ast {
 

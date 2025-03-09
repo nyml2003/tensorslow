@@ -121,13 +121,13 @@ uint8_t Matrix::CheckBroadcast(const Matrix& other) const {
 }
 
 double Matrix::BroadcastAt(Index row, Index col, uint8_t broadcast_type) const {
-  if (broadcast_type & 0b10 && broadcast_type & 0b01) {
+  if (((broadcast_type & 0b10) != 0) && ((broadcast_type & 0b01) != 0)) {
     return At(0, 0);
   }
-  if (broadcast_type & 0b01) {
+  if ((broadcast_type & 0b01) != 0) {
     return At(0, col);
   }
-  if (broadcast_type & 0b10) {
+  if ((broadcast_type & 0b10) != 0) {
     return At(row, 0);
   }
   return At(row, col);
@@ -240,4 +240,114 @@ Matrix Matrix::Eye(Index n) {
   }
   return result;
 }
+
+Matrix Matrix::GetRows(Index start, Index stop) const {
+  if (start < 0 || stop > rows) {
+    throw std::out_of_range("Index out of range");
+  }
+  // 行优先，行完整，可以copy
+  return Matrix(stop - start, cols, data.Slice(start * cols, stop * cols));
+}
+
+Matrix Matrix::GetCols(Index start, Index stop) const {
+  if (start < 0 || stop > cols) {
+    throw std::out_of_range("Index out of range");
+  }
+  List<double> newData;
+  for (Index row = 0; row < rows; row++) {
+    newData.Concat(data.Slice(row * cols + start, row * cols + stop));
+  }
+  return Matrix(rows, stop - start, newData);
+}
+
+Matrix Matrix::GetSlice(
+  Index rowStart,
+  Index colStart,
+  Index rowStop,
+  Index colStop
+) const {
+  if (rowStart < 0 || rowStop > rows || colStart < 0 || colStop > cols) {
+    throw std::out_of_range("Index out of range");
+  }
+  List<double> newData;
+  for (Index row = rowStart; row < rowStop; row++) {
+    newData.Concat(data.Slice(row * cols + colStart, row * cols + colStop));
+  }
+  return Matrix(rowStop - rowStart, colStop - colStart, newData);
+}
+
+void Matrix::SetRows(Index start, Index stop, const Matrix& other) {
+  if (start < 0 || stop > rows - 1 || start > stop) {
+    throw std::out_of_range("Index out of range");
+  }
+  if (other.rows != stop - start || other.cols != cols) {
+    throw std::invalid_argument("Invalid other");
+  }
+  double* targetData = data.Data() + start * cols;
+  const double* sourceData = other.data.Data();
+  std::copy(sourceData, sourceData + (stop - start) * cols, targetData);
+}
+void Matrix::SetCols(Index start, Index stop, const Matrix& other) {
+  if (start < 0 || stop > cols - 1 || start > stop) {
+    throw std::out_of_range("Index out of range");
+  }
+  if (other.rows != rows || other.cols != stop - start) {
+    throw std::invalid_argument("Invalid other matrix");
+  }
+  double* targetData = data.Data();
+  const double* sourceData = other.data.Data();
+  for (Index row = 0; row < rows; row++) {
+    std::copy(
+      sourceData + row * other.cols,
+      sourceData + row * other.cols + (stop - start),
+      targetData + row * cols + start
+    );
+  }
+}
+
+void Matrix::SetSlice(
+  Index rowStart,
+  Index colStart,
+  Index rowStop,
+  Index colStop,
+  const Matrix& other
+) {
+  // 检查边界是否合法
+  if (rowStart < 0 || colStart < 0 || rowStop > rows || colStop > cols) {
+    throw std::out_of_range("Index out of range");
+  }
+  if (rowStart > rowStop || colStart > colStop) {
+    throw std::invalid_argument("Invalid slice range");
+  }
+
+  // 检查 other 矩阵的大小是否与目标区域匹配
+  Index targetRows = rowStop - rowStart;
+  Index targetCols = colStop - colStart;
+  if (other.rows != targetRows || other.cols != targetCols) {
+    throw std::invalid_argument("Size mismatch between slice and other matrix");
+  }
+
+  // 获取目标矩阵和源矩阵的原始数据指针
+  double* targetData = data.Data();
+  const double* sourceData = other.data.Data();
+
+  // 遍历目标区域的每一行
+  for (Index row = 0; row < targetRows; ++row) {
+    // 计算目标矩阵的起始位置
+    double* targetRowStart = targetData + (rowStart + row) * cols + colStart;
+    // 计算源矩阵的起始位置
+    const double* sourceRowStart = sourceData + row * other.cols;
+
+    // 复制一行数据
+    std::copy(sourceRowStart, sourceRowStart + targetCols, targetRowStart);
+  }
+}
+
+Matrix Matrix::Copy() const {
+  return Matrix(rows, cols, data);
+}
+
+
+
+
 }  // namespace torchlight::Collections

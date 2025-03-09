@@ -38,6 +38,10 @@ class Integer {
   [[nodiscard]] bool NotEqual(const Integer& rhs) const;
   [[nodiscard]] bool IsZero() const;
   [[nodiscard]] Integer Copy() const;
+  [[nodiscard]] Integer Negate() const;
+  [[nodiscard]] Integer Power(const Integer& rhs) const;
+  [[nodiscard]] Integer LeftShift(const Integer& rhs) const;
+  [[nodiscard]] Integer RightShift(const Integer& rhs) const;
 };
 }  // namespace torchlight::Collections
 #endif  // TORCHLIGHT_COLLECTIONS_INTEGER_H

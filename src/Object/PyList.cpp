@@ -10,6 +10,7 @@
 #include "Object/PyInteger.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
+#include "Object/PySlice.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
 
@@ -109,7 +110,7 @@ PyObjPtr ListKlass::setitem(
   const PyObjPtr& key,
   const PyObjPtr& value
 ) {
-  if (!obj->is<PyList>() || !key->is<PyInteger>()) {
+  if (!obj->is<PyList>()) {
     auto errorMessage = StringConcat(CreatePyList(
       {CreatePyString("AttributeError: '"), obj->Klass()->Name(),
        CreatePyString("' object has no attribute '__setitem__'")}
@@ -117,8 +118,21 @@ PyObjPtr ListKlass::setitem(
     throw std::runtime_error(errorMessage->as<PyString>()->ToCppString());
   }
   auto list = obj->as<PyList>();
-  auto index = key->as<PyInteger>()->ToU64();
-  list->SetItem(index, value);
+  // list[key] = value
+  if (key->is<PyInteger>()) {
+    auto index = key->as<PyInteger>()->ToU64();
+    list->SetItem(index, value);
+    return CreatePyNone();
+  }
+  // list[start:stop] = iterable
+  // if (key->is<PySlice>()) {
+  //   auto slice = key->as<PySlice>();
+  //   auto stop = slice->GetStop()->as<PyInteger>()->ToU64();
+  //   auto start = slice->GetStart()->as<PyInteger>()->ToU64();
+  //   list->RemoveRange(start, stop);
+  //   auto iterable = CreatePyListFromIterable(value);
+  //   list->InsertRange(start, iterable);
+  // }
   return CreatePyNone();
 }
 

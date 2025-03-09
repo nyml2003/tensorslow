@@ -1,4 +1,4 @@
-#include "Ast/Binary.h"
+#include "Ast/Expression/Binary.h"
 #include "ByteCode/PyInst.h"
 #include "Object/PyNone.h"
 
@@ -70,7 +70,32 @@ Object::PyObjPtr BinaryKlass::emit(
     case Binary::Operator::SUBSCR:
       inst = Object::CreateBinarySubscr();
       break;
-    default:
+    case Binary::Operator::FLOOR_DIV:
+      inst = Object::CreateBinaryFloorDivide();
+      break;
+    case Binary::Operator::DIV:
+      inst = Object::CreateBinaryTrueDivide();
+      break;
+    case Binary::Operator::MOD:
+      inst = Object::CreateBinaryModulo();
+      break;
+    case Binary::Operator::AND:
+      inst = Object::CreateBinaryAnd();
+      break;
+    case Binary::Operator::OR:
+      inst = Object::CreateBinaryOr();
+      break;
+    case Binary::Operator::XOR:
+      inst = Object::CreateBinaryXor();
+      break;
+    case Binary::Operator::LSHIFT:
+      inst = Object::CreateBinaryLShift();
+      break;
+    case Binary::Operator::RSHIFT:
+      inst = Object::CreateBinaryRShift();
+      break;
+    case Binary::Operator::POWER:
+      inst = Object::CreateBinaryPower();
       break;
   }
   if (inst == nullptr) {

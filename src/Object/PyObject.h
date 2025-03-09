@@ -29,11 +29,38 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   PyObjPtr mul(const PyObjPtr& other) {
     return klass->mul(shared_from_this(), other);
   }
-  PyObjPtr div(const PyObjPtr& other) {
-    return klass->div(shared_from_this(), other);
+  PyObjPtr floordiv(const PyObjPtr& other) {
+    return klass->floordiv(shared_from_this(), other);
+  }
+  PyObjPtr mod(const PyObjPtr& other) {
+    return klass->mod(shared_from_this(), other);
+  }
+  PyObjPtr truediv(const PyObjPtr& other) {
+    return klass->truediv(shared_from_this(), other);
   }
   PyObjPtr matmul(const PyObjPtr& other) {
     return klass->matmul(shared_from_this(), other);
+  }
+  PyObjPtr pos() { return klass->pos(shared_from_this()); }
+  PyObjPtr neg() { return klass->neg(shared_from_this()); }
+  PyObjPtr invert() { return klass->invert(shared_from_this()); }
+  PyObjPtr _and_(const PyObjPtr& other) {
+    return klass->_and_(shared_from_this(), other);
+  }
+  PyObjPtr _or_(const PyObjPtr& other) {
+    return klass->_or_(shared_from_this(), other);
+  }
+  PyObjPtr _xor_(const PyObjPtr& other) {
+    return klass->_xor_(shared_from_this(), other);
+  }
+  PyObjPtr lshift(const PyObjPtr& other) {
+    return klass->lshift(shared_from_this(), other);
+  }
+  PyObjPtr rshift(const PyObjPtr& other) {
+    return klass->rshift(shared_from_this(), other);
+  }
+  PyObjPtr pow(const PyObjPtr& other) {
+    return klass->pow(shared_from_this(), other);
   }
   PyObjPtr gt(const PyObjPtr& other) {
     return klass->gt(shared_from_this(), other);

@@ -1,5 +1,4 @@
-#include "Ast/Atom.h"
-#include "Ast/INode.h"
+#include "Ast/Expression/Atom.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 

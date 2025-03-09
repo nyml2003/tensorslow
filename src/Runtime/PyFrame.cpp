@@ -405,10 +405,6 @@ Object::PyObjPtr PyFrame::Eval() {
         NextProgramCounter();
         break;
       }
-      case Object::ByteCode::DELETE_SUBSCR:
-      case Object::ByteCode::DELETE_ATTR:
-      case Object::ByteCode::DELETE_NAME:
-        break;
       case Object::ByteCode::STORE_FAST: {
         auto index = std::get<Index>(inst->Operand());
         auto value = stack.Pop();
@@ -541,20 +537,93 @@ Object::PyObjPtr PyFrame::Eval() {
         NextProgramCounter();
         break;
       }
-      case Object::ByteCode::BINARY_TRUE_DIVIDE:
-      case Object::ByteCode::BINARY_FLOOR_DIVIDE:
-      case Object::ByteCode::BINARY_XOR:
-      case Object::ByteCode::BINARY_AND:
-      case Object::ByteCode::BINARY_OR:
-      case Object::ByteCode::BINARY_POWER:
-      case Object::ByteCode::BINARY_MODULO:
-      case Object::ByteCode::BINARY_LSHIFT:
-      case Object::ByteCode::BINARY_RSHIFT:
-      case Object::ByteCode::UNARY_POSITIVE:
-      case Object::ByteCode::UNARY_NEGATIVE:
-      case Object::ByteCode::UNARY_NOT:
-      case Object::ByteCode::UNARY_INVERT:
+      case Object::ByteCode::BINARY_TRUE_DIVIDE: {
+        auto right = stack.Pop();
+        auto left = stack.Pop();
+        stack.Push(left->truediv(right));
+        NextProgramCounter();
         break;
+      }
+      case Object::ByteCode::BINARY_FLOOR_DIVIDE: {
+        auto right = stack.Pop();
+        auto left = stack.Pop();
+        stack.Push(left->floordiv(right));
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::BINARY_XOR: {
+        auto right = stack.Pop();
+        auto left = stack.Pop();
+        stack.Push(left->_xor_(right));
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::BINARY_AND: {
+        auto right = stack.Pop();
+        auto left = stack.Pop();
+        stack.Push(left->_and_(right));
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::BINARY_OR: {
+        auto right = stack.Pop();
+        auto left = stack.Pop();
+        stack.Push(left->_or_(right));
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::BINARY_POWER: {
+        auto right = stack.Pop();
+        auto left = stack.Pop();
+        stack.Push(left->pow(right));
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::BINARY_MODULO: {
+        auto right = stack.Pop();
+        auto left = stack.Pop();
+        stack.Push(left->mod(right));
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::BINARY_LSHIFT: {
+        auto right = stack.Pop();
+        auto left = stack.Pop();
+        stack.Push(left->lshift(right));
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::BINARY_RSHIFT: {
+        auto right = stack.Pop();
+        auto left = stack.Pop();
+        stack.Push(left->rshift(right));
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::UNARY_POSITIVE: {
+        auto operand = stack.Pop();
+        stack.Push(operand->pos());
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::UNARY_NEGATIVE: {
+        auto operand = stack.Pop();
+        stack.Push(operand->neg());
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::UNARY_NOT: {
+        auto operand = stack.Pop();
+        stack.Push(Object::Not(operand->boolean()));
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::UNARY_INVERT: {
+        auto operand = stack.Pop();
+        stack.Push(operand->invert());
+        NextProgramCounter();
+        break;
+      }
       case Object::ByteCode::BINARY_SUBSCR: {
         auto index = stack.Pop();
         auto obj = stack.Pop();
@@ -576,7 +645,6 @@ Object::PyObjPtr PyFrame::Eval() {
         if (code->Klass() != Object::CodeKlass::Self()) {
           throw std::runtime_error("Function code must be code object");
         }
-
         auto func = Object::CreatePyFunction(code, globals);
         stack.Push(func);
         NextProgramCounter();

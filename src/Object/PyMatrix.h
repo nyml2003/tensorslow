@@ -8,6 +8,7 @@
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyObject.h"
+#include "Object/PySlice.h"
 #include "Object/PyString.h"
 
 namespace torchlight::Object {
@@ -44,6 +45,14 @@ class MatrixKlass : public Klass {
     return instance;
   }
 
+  // PyObjPtr getitem(const PyObjPtr& obj, const PyObjPtr& key) override;
+
+  // PyObjPtr setitem(
+  //   const PyObjPtr& obj,
+  //   const PyObjPtr& key,
+  //   const PyObjPtr& value
+  // ) override;
+
   PyObjPtr repr(const PyObjPtr& obj) override;
 
   PyObjPtr matmul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
@@ -70,6 +79,7 @@ class PyMatrix : public PyObject {
   explicit PyMatrix(Collections::Matrix matrix)
     : PyObject(MatrixKlass::Self()), matrix(std::move(matrix)) {}
 
+
   PyMatrixPtr Transpose() const { return CreatePyMatrix(matrix.Transpose()); }
   PyMatrixPtr MatrixMultiply(const PyMatrixPtr& other) const {
     return CreatePyMatrix(matrix.MatrixMultiply(other->matrix));
@@ -93,6 +103,7 @@ class PyMatrix : public PyObject {
   PyMatrixPtr Reshape(Index rows, Index cols) const {
     return CreatePyMatrix(matrix.Reshape(rows, cols));
   }
+
 };
 
 using PyMatrixPtr = std::shared_ptr<PyMatrix>;

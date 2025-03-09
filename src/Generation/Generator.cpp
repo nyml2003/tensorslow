@@ -1,22 +1,22 @@
 #include "Generation/Generator.h"
-
 #include "Ast/AssignStmt.h"
-#include "Ast/Atom.h"
-#include "Ast/Binary.h"
 #include "Ast/ClassDef.h"
-#include "Ast/ExprStmt.h"
-#include "Ast/ForStmt.h"
+#include "Ast/Expression/Atom.h"
+#include "Ast/Expression/Binary.h"
+#include "Ast/Expression/FunctionCall.h"
+#include "Ast/Expression/List.h"
+#include "Ast/Expression/Unary.h"
 #include "Ast/FuncDef.h"
-#include "Ast/FunctionCall.h"
 #include "Ast/INode.h"
 #include "Ast/Identifier.h"
-#include "Ast/IfStmt.h"
-#include "Ast/List.h"
 #include "Ast/MemberAccess.h"
 #include "Ast/Module.h"
-#include "Ast/PassStmt.h"
-#include "Ast/ReturnStmt.h"
-#include "Ast/WhileStmt.h"
+#include "Ast/Statement/ExprStmt.h"
+#include "Ast/Statement/ForStmt.h"
+#include "Ast/Statement/IfStmt.h"
+#include "Ast/Statement/PassStmt.h"
+#include "Ast/Statement/ReturnStmt.h"
+#include "Ast/Statement/WhileStmt.h"
 #include "ByteCode/PyCode.h"
 #include "Collections/IntegerHelper.h"
 #include "Object/ObjectHelper.h"
@@ -187,82 +187,183 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
 
 antlrcpp::Any Generator::visitExpr(Python3Parser::ExprContext* ctx) {
   if (ctx->atom_expr() != nullptr) {
-    // 情况 1: atom_expr
     return visitAtom_expr(ctx->atom_expr());
   }
-  if (ctx->expr().size() == 2 && ctx->POWER() != nullptr) {
-    // 情况 2: expr '**' expr
-    std::cout << "expr '**' expr" << std::endl;
-    visitExpr(ctx->expr(0));
-    visitExpr(ctx->expr(1));
-  } else if ((ctx->expr().size() == 1) &&
-             (!ctx->ADD().empty() || !ctx->MINUS().empty() ||
-              !ctx->NOT_OP().empty())) {
-    // 情况 3: ('+' | '-' | '~')+ expr
-    std::cout << "('+' | '-' | '~')+ expr" << std::endl;
-    visitExpr(ctx->expr(0));
-  } else if (ctx->expr().size() ==
-               2 &&  // 情况 4: expr ('*' | '@' | '/' | '%' | '//') expr
-             (ctx->STAR() != nullptr || ctx->AT() != nullptr ||
-              ctx->DIV() != nullptr || ctx->MOD() != nullptr ||
-              ctx->IDIV() != nullptr)) {
+
+  // if (ctx->expr().size() == 2 && ctx->POWER() != nullptr) {
+  //   visitExpr(ctx->expr(0));
+  //   visitExpr(ctx->expr(1));
+  //   auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
+  //   auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
+  //   return Ast::CreateBinary(
+  //     Ast::Binary::Operator::POWER, left, right, context
+  //   );
+  // }
+  // if ((ctx->expr().size() == 1) &&
+  //     (!ctx->ADD().empty() || !ctx->MINUS().empty() || !ctx->NOT_OP().empty()
+  //     )) {
+  //   auto operand = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
+  //   if (ctx->ADD().size() == 1) {
+  //     return Ast::CreateUnary(Ast::Unary::Operator::PLUS, operand, context);
+  //   }
+  //   if (ctx->MINUS().size() == 1) {
+  //     return Ast::CreateUnary(Ast::Unary::Operator::MINUS, operand, context);
+  //   }
+  //   if (ctx->NOT_OP().size() == 1) {
+  //     return Ast::CreateUnary(Ast::Unary::Operator::INVERT, operand,
+  //     context);
+  //   }
+  //   throw std::runtime_error("Unknown operator");
+  // }
+  // if (ctx->expr().size() ==
+  //       2 &&  // 情况 4: expr ('*' | '@' | '/' | '%' | '//') expr
+  //     (ctx->STAR() != nullptr || ctx->AT() != nullptr ||
+  //      ctx->DIV() != nullptr || ctx->MOD() != nullptr ||
+  //      ctx->IDIV() != nullptr)) {
+  //   auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
+  //   auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
+  //   if (ctx->STAR() != nullptr) {
+  //     return CreateBinary(Ast::Binary::Operator::MUL, left, right, context);
+  //   }
+  //   if (ctx->AT() != nullptr) {
+  //     return CreateBinary(Ast::Binary::Operator::MATMUL, left, right,
+  //     context);
+  //   }
+  //   if (ctx->DIV() != nullptr) {
+  //     return CreateBinary(Ast::Binary::Operator::DIV, left, right, context);
+  //   }
+  //   if (ctx->MOD() != nullptr) {
+  //     return CreateBinary(Ast::Binary::Operator::MOD, left, right, context);
+  //   }
+  //   if (ctx->IDIV() != nullptr) {
+  //     return CreateBinary(
+  //       Ast::Binary::Operator::FLOOR_DIV, left, right, context
+  //     );
+  //   }
+  //   throw std::runtime_error("Unknown operator");
+  // }
+  // if (ctx->expr().size() == 2 &&
+  //     (ctx->ADD().size() == 1 || ctx->MINUS().size() == 1)) {
+  //   // 情况 5: expr ('+' | '-') expr
+  //   auto left = visitExpr(ctx->expr(0));
+  //   auto right = visitExpr(ctx->expr(1));
+  //   if (ctx->ADD().size() == 1) {
+  //     return CreateBinary(Ast::Binary::Operator::ADD, left, right, context);
+  //   }
+  //   if (ctx->MINUS().size() == 1) {
+  //     return CreateBinary(Ast::Binary::Operator::SUB, left, right, context);
+  //   }
+  // } else if (ctx->expr().size() == 2 &&
+  //            (ctx->LEFT_SHIFT() != nullptr || ctx->RIGHT_SHIFT() != nullptr))
+  //            {
+  //   auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
+  //   auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
+  //   if (ctx->LEFT_SHIFT() != nullptr) {
+  //     return CreateBinary(Ast::Binary::Operator::LSHIFT, left, right,
+  //     context);
+  //   }
+  //   if (ctx->RIGHT_SHIFT() != nullptr) {
+  //     return CreateBinary(Ast::Binary::Operator::RSHIFT, left, right,
+  //     context);
+  //   }
+  // } else if (ctx->expr().size() == 2 && ctx->AND_OP() != nullptr) {
+  //   auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
+  //   auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
+  //   return CreateBinary(Ast::Binary::Operator::AND, left, right, context);
+  // } else if (ctx->expr().size() == 2 && ctx->XOR() != nullptr) {
+  //   auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
+  //   auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
+  //   return CreateBinary(Ast::Binary::Operator::XOR, left, right, context);
+  // } else if (ctx->expr().size() == 2 && ctx->OR_OP() != nullptr) {
+  //   auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
+  //   auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
+  //   return CreateBinary(Ast::Binary::Operator::OR, left, right, context);
+  // } else {
+  //   // 其他情况
+  //   std::cout << "Unknown expression type" << std::endl;
+  // }
+  // return nullptr;
+  auto exprs = ctx->expr();
+  if (exprs.size() == 1) {
+    auto operand = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
+    if (ctx->ADD().size() == 1) {
+      return Ast::CreateUnary(Ast::Unary::Operator::PLUS, operand, context);
+    }
+    if (ctx->MINUS().size() == 1) {
+      return Ast::CreateUnary(Ast::Unary::Operator::MINUS, operand, context);
+    }
+    if (ctx->NOT_OP().size() == 1) {
+      return Ast::CreateUnary(Ast::Unary::Operator::INVERT, operand, context);
+    }
+  }
+  if (exprs.size() == 2) {
     auto left = visitExpr(ctx->expr(0)).as<Ast::INodePtr>();
     auto right = visitExpr(ctx->expr(1)).as<Ast::INodePtr>();
     if (ctx->STAR() != nullptr) {
-      return CreateBinary(Ast::Binary::Operator::MUL, left, right, context);
+      return Ast::CreateBinary(
+        Ast::Binary::Operator::MUL, left, right, context
+      );
+    }
+    if (ctx->POWER() != nullptr) {
+      return Ast::CreateBinary(
+        Ast::Binary::Operator::POWER, left, right, context
+      );
     }
     if (ctx->AT() != nullptr) {
-      return CreateBinary(Ast::Binary::Operator::MATMUL, left, right, context);
+      return Ast::CreateBinary(
+        Ast::Binary::Operator::MATMUL, left, right, context
+      );
     }
     if (ctx->DIV() != nullptr) {
-      return CreateBinary(Ast::Binary::Operator::DIV, left, right, context);
+      return Ast::CreateBinary(
+        Ast::Binary::Operator::DIV, left, right, context
+      );
     }
     if (ctx->MOD() != nullptr) {
-      return CreateBinary(Ast::Binary::Operator::MOD, left, right, context);
+      return Ast::CreateBinary(
+        Ast::Binary::Operator::MOD, left, right, context
+      );
     }
     if (ctx->IDIV() != nullptr) {
-      return CreateBinary(
+      return Ast::CreateBinary(
         Ast::Binary::Operator::FLOOR_DIV, left, right, context
       );
     }
-    throw std::runtime_error("Unknown operator");
-  } else if (ctx->expr().size() == 2 &&
-             (ctx->ADD().size() == 1 || ctx->MINUS().size() == 1)) {
-    // 情况 5: expr ('+' | '-') expr
-    auto left = visitExpr(ctx->expr(0));
-    auto right = visitExpr(ctx->expr(1));
     if (ctx->ADD().size() == 1) {
-      return CreateBinary(Ast::Binary::Operator::ADD, left, right, context);
+      return Ast::CreateBinary(
+        Ast::Binary::Operator::ADD, left, right, context
+      );
     }
     if (ctx->MINUS().size() == 1) {
-      return CreateBinary(Ast::Binary::Operator::SUB, left, right, context);
+      return Ast::CreateBinary(
+        Ast::Binary::Operator::SUB, left, right, context
+      );
     }
-  } else if (ctx->expr().size() == 2 &&
-             (ctx->LEFT_SHIFT() != nullptr || ctx->RIGHT_SHIFT() != nullptr)) {
-    // 情况 6: expr ('<<' | '>>') expr
-    std::cout << "expr ('<<' | '>>') expr" << std::endl;
-    visitExpr(ctx->expr(0));
-    visitExpr(ctx->expr(1));
-  } else if (ctx->expr().size() == 2 && ctx->AND_OP() != nullptr) {
-    // 情况 7: expr '&' expr
-    std::cout << "expr '&' expr" << std::endl;
-    visitExpr(ctx->expr(0));
-    visitExpr(ctx->expr(1));
-  } else if (ctx->expr().size() == 2 && ctx->XOR() != nullptr) {
-    // 情况 8: expr '^' expr
-    std::cout << "expr '^' expr" << std::endl;
-    visitExpr(ctx->expr(0));
-    visitExpr(ctx->expr(1));
-  } else if (ctx->expr().size() == 2 && ctx->OR_OP() != nullptr) {
-    // 情况 9: expr '|' expr
-    std::cout << "expr '|' expr" << std::endl;
-    visitExpr(ctx->expr(0));
-    visitExpr(ctx->expr(1));
-  } else {
-    // 其他情况
-    std::cout << "Unknown expression type" << std::endl;
+    if (ctx->LEFT_SHIFT() != nullptr) {
+      return Ast::CreateBinary(
+        Ast::Binary::Operator::LSHIFT, left, right, context
+      );
+    }
+    if (ctx->RIGHT_SHIFT() != nullptr) {
+      return Ast::CreateBinary(
+        Ast::Binary::Operator::RSHIFT, left, right, context
+      );
+    }
+    if (ctx->AND_OP() != nullptr) {
+      return Ast::CreateBinary(
+        Ast::Binary::Operator::AND, left, right, context
+      );
+    }
+    if (ctx->XOR() != nullptr) {
+      return Ast::CreateBinary(
+        Ast::Binary::Operator::XOR, left, right, context
+      );
+    }
+    if (ctx->OR_OP() != nullptr) {
+      return Ast::CreateBinary(Ast::Binary::Operator::OR, left, right, context);
+    }
   }
-  return nullptr;
+  throw std::runtime_error("Unknown expression type");
 }
 
 antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
@@ -383,18 +484,42 @@ antlrcpp::Any Generator::visitTest(Python3Parser::TestContext* ctx) {
 }
 
 antlrcpp::Any Generator::visitOr_test(Python3Parser::Or_testContext* ctx) {
-  return visitAnd_test(ctx->and_test(0));
+  auto andTests = ctx->and_test();
+  auto left = visitAnd_test(andTests[0]);
+  if (andTests.size() == 1) {
+    return left;
+  }
+  Ast::INodePtr right = nullptr;
+  for (Index i = 1; i < andTests.size(); ++i) {
+    right = visitAnd_test(andTests[i]);
+    left = Ast::CreateBinary(Ast::Binary::Operator::OR, left, right, context);
+  }
+  return left;
 }
 
 antlrcpp::Any Generator::visitAnd_test(Python3Parser::And_testContext* ctx) {
-  return visitNot_test(ctx->not_test(0));
+  auto notTests = ctx->not_test();
+  auto left = visitNot_test(notTests[0]);
+  if (notTests.size() == 1) {
+    return left;
+  }
+  Ast::INodePtr right = nullptr;
+  for (Index i = 1; i < notTests.size(); ++i) {
+    right = visitNot_test(notTests[i]);
+    left = Ast::CreateBinary(Ast::Binary::Operator::AND, left, right, context);
+  }
+  return left;
 }
 
 antlrcpp::Any Generator::visitNot_test(Python3Parser::Not_testContext* ctx) {
   if (ctx->comparison() != nullptr) {
     return visitComparison(ctx->comparison());
   }
-  return nullptr;
+  if (ctx->NOT() != nullptr) {
+    auto operand = visitNot_test(ctx->not_test()).as<Ast::INodePtr>();
+    return Ast::CreateUnary(Ast::Unary::Operator::NOT, operand, context);
+  }
+  throw std::runtime_error("visitNot_test: Unknown type");
 }
 
 antlrcpp::Any Generator::visitComparison(Python3Parser::ComparisonContext* ctx

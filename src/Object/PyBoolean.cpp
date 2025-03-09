@@ -27,6 +27,24 @@ PyObjPtr BooleanKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return CreatePyBoolean(left->Value() == right->Value());
 }
 
+PyObjPtr BooleanKlass::_and_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyBoolean>() || !rhs->is<PyBoolean>()) {
+    throw std::runtime_error("Boolean does not support and operation");
+  }
+  auto left = lhs->as<PyBoolean>();
+  auto right = rhs->as<PyBoolean>();
+  return CreatePyBoolean(left->Value() && right->Value());
+}
+
+PyObjPtr BooleanKlass::_or_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyBoolean>() || !rhs->is<PyBoolean>()) {
+    throw std::runtime_error("Boolean does not support or operation");
+  }
+  auto left = lhs->as<PyBoolean>();
+  auto right = rhs->as<PyBoolean>();
+  return CreatePyBoolean(left->Value() || right->Value());
+}
+
 PyObjPtr BooleanKlass::_serialize_(const PyObjPtr& obj) {
   if (obj->Klass() != Self()) {
     throw std::runtime_error("PyBoolean::_serialize_(): obj is not a bool");

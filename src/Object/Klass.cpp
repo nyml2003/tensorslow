@@ -63,9 +63,75 @@ PyObjPtr Klass::mul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   );
 }
 
-PyObjPtr Klass::div(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+PyObjPtr Klass::floordiv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return Invoke(
-    lhs, CreatePyString("__div__"), CreatePyList({rhs})->as<PyList>()
+    lhs, CreatePyString("__floordiv__"), CreatePyList({rhs})->as<PyList>()
+  );
+}
+
+PyObjPtr Klass::truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return Invoke(
+    lhs, CreatePyString("__truediv__"), CreatePyList({rhs})->as<PyList>()
+  );
+}
+
+PyObjPtr Klass::pos(const PyObjPtr& obj) {
+  return Invoke(obj, CreatePyString("__pos__"), {});
+}
+
+PyObjPtr Klass::neg(const PyObjPtr& obj) {
+  return Invoke(obj, CreatePyString("__neg__"), {});
+}
+
+PyObjPtr Klass::invert(const PyObjPtr& obj) {
+  return Invoke(obj, CreatePyString("__invert__"), {});
+}
+
+PyObjPtr Klass::_and_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return Invoke(
+    lhs, CreatePyString("__and__"), CreatePyList({rhs})->as<PyList>()
+  );
+}
+
+PyObjPtr Klass::_or_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return Invoke(
+    lhs, CreatePyString("__or__"), CreatePyList({rhs})->as<PyList>()
+  );
+}
+
+PyObjPtr Klass::_xor_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return Invoke(
+    lhs, CreatePyString("__xor__"), CreatePyList({rhs})->as<PyList>()
+  );
+}
+
+PyObjPtr Klass::lshift(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return Invoke(
+    lhs, CreatePyString("__lshift__"), CreatePyList({rhs})->as<PyList>()
+  );
+}
+
+PyObjPtr Klass::rshift(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return Invoke(
+    lhs, CreatePyString("__rshift__"), CreatePyList({rhs})->as<PyList>()
+  );
+}
+
+PyObjPtr Klass::mod(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return Invoke(
+    lhs, CreatePyString("__mod__"), CreatePyList({rhs})->as<PyList>()
+  );
+}
+
+PyObjPtr Klass::divmod(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return Invoke(
+    lhs, CreatePyString("__divmod__"), CreatePyList({rhs})->as<PyList>()
+  );
+}
+
+PyObjPtr Klass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return Invoke(
+    lhs, CreatePyString("__pow__"), CreatePyList({rhs})->as<PyList>()
   );
 }
 

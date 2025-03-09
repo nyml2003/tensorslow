@@ -51,6 +51,12 @@ class PyList : public PyObject {
   Index IndexOf(const PyObjPtr& obj) const { return value.IndexOf(obj); }
   PyObjPtr GetItem(Index index) const { return value[index]; }
   void SetItem(Index index, const PyObjPtr& obj) { value.Set(index, obj); }
+  void SetList(Index start, Index stop, const PyObjPtr& obj) {
+    auto list = obj->as<PyList>();
+    for (Index i = start; i < stop; ++i) {
+      value[i] = list->GetItem(i - start);
+    }
+  }
   PyObjPtr Prepend(const PyObjPtr& obj) {
     return CreatePyList({obj})->as<PyList>()->Add(shared_from_this());
   }

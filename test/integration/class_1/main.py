@@ -1,21 +1,10 @@
-class Animal:
-    def speak(self):
-        print("Animal speaks")
-        
-        
-class Dog(Animal):
-    def speak(self):
-        print("Dog barks")
-        
-class Cat(Animal):
-    def speak(self):
-        print("Cat meows")
-        
-animal = Animal()
-animal.speak()
+class Value:
+    def __init__(self, value):
+        self.value = value
 
-dog = Dog()
-dog.speak()
+    def __add__(self, other):
+        return self.value + other.value
 
-cat = Cat()
-cat.speak()
+a = Value(1)
+b = Value(2)
+print(a + b)

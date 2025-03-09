@@ -113,6 +113,10 @@ Integer CreateIntegerOne() {
   List<uint32_t> parts = {1};
   return Integer(parts, false);
 }
+Integer CreateIntegerTwo() {
+  List<uint32_t> parts = {2};
+  return Integer(parts, false);
+}
 uint64_t ToU64(const Integer& integer) {
   if (integer.IsZero()) {
     return 0;

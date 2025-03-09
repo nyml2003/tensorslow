@@ -1,7 +1,4 @@
-#include "Ast/WhileStmt.h"
-#include "Ast/INode.h"
-#include "ByteCode/PyInst.h"
-#include "Object/ObjectHelper.h"
+#include "Ast/Statement/WhileStmt.h"
 #include "Object/PyNone.h"
 
 namespace torchlight::Ast {
@@ -32,14 +29,14 @@ Object::PyObjPtr WhileStmtKlass::emit(
   auto condition = stmt->Condition();
   auto body = stmt->Body();
   auto code = GetCodeFromList(codeList, stmt);
-  auto condBegin =code->Instructions()->Length();
+  auto condBegin = code->Instructions()->Length();
   condition->emit(codeList);
   auto jumpStart = code->PopJumpIfFalse();
   Object::ForEach(
     body,
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-    auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
-    stmtObj->emit(codeList);
+      auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
+      stmtObj->emit(codeList);
     }
   );
   code->JumpAbsolute(condBegin);

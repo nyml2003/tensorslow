@@ -34,6 +34,7 @@ class List {
   void Expand(Index newCapacity);
 
  public:
+  void ExpandWithElement(Index newCapacity, T element);
   /**
    * 构造函数
    * @param capacity 列表的初始容量，默认为 INIT_CAPACITY
@@ -61,6 +62,7 @@ class List {
    */
   [[nodiscard]] Index Capacity() const;
   T* Data();
+  const T* Data() const { return elements.get(); }
   /**
    * @brief 返回列表末尾的元素
    * @return 第一个元素
@@ -125,6 +127,20 @@ class List {
    * @param end 移除区间的结束索引（不包含）
    */
   void RemoveRange(Index start, Index end);
+  /**
+   * @brief 在指定位置插入元素
+   * @param index 要插入的位置（包含）
+   * @param element 要插入的元素
+   */
+  void Insert(Index index, T element);
+
+  /**
+   * @brief 在指定位置插入初始化列表
+   * @param index 要插入的位置（包含）
+   * @param list 要插入的初始化列表
+   */
+  void Insert(Index index, std::initializer_list<T> list);
+
   /**
    * @brief 反转列表
    */
@@ -361,6 +377,35 @@ void List<T>::RemoveRange(Index start, Index end) {
   size -= (end - start);
 }
 template <typename T>
+void List<T>::Insert(Index index, T element) {
+  if (index > size || index < 0) {
+    throw std::runtime_error("List::Insert::Index out of range");
+  }
+  if (Full()) {
+    Expand();
+  }
+  std::move(
+    elements.get() + index, elements.get() + size, elements.get() + index + 1
+  );
+  elements[index] = element;
+  size++;
+}
+template <typename T>
+void List<T>::Insert(Index index, std::initializer_list<T> list) {
+  if (index > size || index < 0) {
+    throw std::runtime_error("List::Insert::Index out of range");
+  }
+  if (Full()) {
+    Expand();
+  }
+  std::move(
+    elements.get() + index, elements.get() + size,
+    elements.get() + index + list.size()
+  );
+  std::copy(list.begin(), list.end(), elements.get() + index);
+  size += list.size();
+}
+template <typename T>
 void List<T>::Reverse() {
   std::reverse(elements.get(), elements.get() + size);
 }
@@ -448,6 +493,14 @@ void List<T>::Expand() {
 template <typename T>
 void List<T>::Expand(Index newCapacity) {
   std::unique_ptr<T[]> newElements = std::make_unique<T[]>(newCapacity);
+  std::copy(elements.get(), elements.get() + size, newElements.get());
+  elements = std::move(newElements);
+  capacity = newCapacity;
+}
+template <typename T>
+void List<T>::ExpandWithElement(Index newCapacity, T element) {
+  std::unique_ptr<T[]> newElements = std::make_unique<T[]>(newCapacity);
+  std::fill(newElements.get(), newElements.get() + newCapacity, element);
   std::copy(elements.get(), elements.get() + size, newElements.get());
   elements = std::move(newElements);
   capacity = newCapacity;

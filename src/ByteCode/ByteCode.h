@@ -10,26 +10,22 @@
 namespace torchlight::Object {
 
 enum class ByteCode {
-  POP_TOP = 0,
+  POP_TOP = 1,
   NOP = 9,
-  UNARY_POSITIVE = 10,  // 一元运算符 +
-  UNARY_NEGATIVE = 11,  // 一元运算符 -
-  UNARY_NOT = 12,       // 一元运算符 not
-
+  UNARY_POSITIVE = 10,          // 一元运算符 +
+  UNARY_NEGATIVE = 11,          // 一元运算符 -
+  UNARY_NOT = 12,               // 一元运算符 not
   UNARY_INVERT = 15,            // 一元运算符 ~
   BINARY_MATRIX_MULTIPLY = 16,  // 矩阵乘法 @
-
-  BINARY_POWER = 19,     // 二元运算符 **
-  BINARY_MULTIPLY = 20,  // 二元运算符 *
-
-  BINARY_MODULO = 22,        // 二元运算符 %
-  BINARY_ADD = 23,           // 二元运算符 +
-  BINARY_SUBTRACT = 24,      // 二元运算符 -
-  BINARY_SUBSCR = 25,        // 二元运算符 []
-  BINARY_FLOOR_DIVIDE = 26,  // 二元运算符 //
-  BINARY_TRUE_DIVIDE = 27,   // 二元运算符 /
+  BINARY_POWER = 19,            // 二元运算符 **
+  BINARY_MULTIPLY = 20,         // 二元运算符 *
+  BINARY_MODULO = 22,           // 二元运算符 %
+  BINARY_ADD = 23,              // 二元运算符 +
+  BINARY_SUBTRACT = 24,         // 二元运算符 -
+  BINARY_SUBSCR = 25,           // 二元运算符 []
+  BINARY_FLOOR_DIVIDE = 26,     // 二元运算符 //
+  BINARY_TRUE_DIVIDE = 27,      // 二元运算符 /
   STORE_SUBSCR = 60,
-  DELETE_SUBSCR = 61,
   BINARY_LSHIFT = 62,
   BINARY_RSHIFT = 63,
   BINARY_AND = 64,
@@ -38,23 +34,18 @@ enum class ByteCode {
   GET_ITER = 68,
   GET_YIELD_FROM_ITER = 69,
   LOAD_BUILD_CLASS = 71,
-
   RETURN_VALUE = 83,
   YIELD_VALUE = 86,
+  
   STORE_NAME = 90,
-  DELETE_NAME = 91,
-  UNPACK_SEQUENCE = 92,
   FOR_ITER = 93,
   STORE_ATTR = 95,
-  DELETE_ATTR = 96,
   STORE_GLOBAL = 97,
-
   LOAD_CONST = 100,
   LOAD_NAME = 101,
   BUILD_LIST = 103,
   BUILD_MAP = 105,
   LOAD_ATTR = 106,
-
   COMPARE_OP = 107,
   JUMP_FORWARD = 110,
   JUMP_IF_FALSE_OR_POP = 111,
@@ -63,14 +54,10 @@ enum class ByteCode {
   POP_JUMP_IF_FALSE = 114,
   POP_JUMP_IF_TRUE = 115,
   LOAD_GLOBAL = 116,
-
-  BINARY_OP = 122,
   LOAD_FAST = 124,
   STORE_FAST = 125,
-
   MAKE_FUNCTION = 132,
   BUILD_SLICE = 133,
-
   CALL_FUNCTION = 142,
 
   ERROR = 0xFF
@@ -121,7 +108,6 @@ static const std::map<ByteCode, const char*> ByteCodeNames = {
   {ByteCode::BINARY_FLOOR_DIVIDE, "BINARY_FLOOR_DIVIDE"},
   {ByteCode::BINARY_TRUE_DIVIDE, "BINARY_TRUE_DIVIDE"},
   {ByteCode::STORE_SUBSCR, "STORE_SUBSCR"},
-  {ByteCode::DELETE_SUBSCR, "DELETE_SUBSCR"},
   {ByteCode::BINARY_LSHIFT, "BINARY_LSHIFT"},
   {ByteCode::BINARY_RSHIFT, "BINARY_RSHIFT"},
   {ByteCode::BINARY_AND, "BINARY_AND"},
@@ -131,11 +117,8 @@ static const std::map<ByteCode, const char*> ByteCodeNames = {
   {ByteCode::LOAD_BUILD_CLASS, "LOAD_BUILD_CLASS"},
   {ByteCode::RETURN_VALUE, "RETURN_VALUE"},
   {ByteCode::STORE_NAME, "STORE_NAME"},
-  {ByteCode::DELETE_NAME, "DELETE_NAME"},
-  {ByteCode::UNPACK_SEQUENCE, "UNPACK_SEQUENCE"},
   {ByteCode::FOR_ITER, "FOR_ITER"},
   {ByteCode::STORE_ATTR, "STORE_ATTR"},
-  {ByteCode::DELETE_ATTR, "DELETE_ATTR"},
   {ByteCode::STORE_GLOBAL, "STORE_GLOBAL"},
   {ByteCode::LOAD_CONST, "LOAD_CONST"},
   {ByteCode::LOAD_NAME, "LOAD_NAME"},
@@ -150,7 +133,6 @@ static const std::map<ByteCode, const char*> ByteCodeNames = {
   {ByteCode::POP_JUMP_IF_FALSE, "POP_JUMP_IF_FALSE"},
   {ByteCode::POP_JUMP_IF_TRUE, "POP_JUMP_IF_TRUE"},
   {ByteCode::LOAD_GLOBAL, "LOAD_GLOBAL"},
-  {ByteCode::BINARY_OP, "BINARY_OP"},
   {ByteCode::LOAD_FAST, "LOAD_FAST"},
   {ByteCode::STORE_FAST, "STORE_FAST"},
   {ByteCode::MAKE_FUNCTION, "MAKE_FUNCTION"},

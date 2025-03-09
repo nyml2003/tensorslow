@@ -1,6 +1,4 @@
-#include "Ast/FunctionCall.h"
-#include "Ast/INode.h"
-#include "Object/ObjectHelper.h"
+#include "Ast/Expression/FunctionCall.h"
 #include "Object/PyNone.h"
 namespace torchlight::Ast {
 

@@ -57,7 +57,7 @@ PyObjPtr FloatKlass::mul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   );
 }
 
-PyObjPtr FloatKlass::div(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+PyObjPtr FloatKlass::truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
     throw std::runtime_error("PyFloat::div(): lhs or rhs is not a float");
   }
