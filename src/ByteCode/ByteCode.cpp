@@ -2,12 +2,6 @@
 #include "Collections/Bytes.h"
 #include "Collections/StringHelper.h"
 
-namespace torchlight::Object {
-
-
-
-}
-
 namespace torchlight::Collections {
 
 Collections::String ToString(None /*kind*/) {

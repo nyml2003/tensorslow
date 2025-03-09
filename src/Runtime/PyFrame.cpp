@@ -760,7 +760,6 @@ Object::PyObjPtr PyFrame::Eval() {
         }
         stack.Push(value);
         NextProgramCounter();
-
         break;
       }
       case Object::ByteCode::YIELD_VALUE: {
