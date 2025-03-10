@@ -132,10 +132,6 @@ PyInstPtr CreateLoadAttr(Index index) {
   return std::make_shared<PyInst>(ByteCode::LOAD_ATTR, index);
 }
 
-PyInstPtr CreateBuildList(Index size) {
-  return std::make_shared<PyInst>(ByteCode::BUILD_LIST, size);
-}
-
 PyInstPtr CreateJumpAbsolute(Index index) {
   return std::make_shared<PyInst>(ByteCode::JUMP_ABSOLUTE, index);
 }

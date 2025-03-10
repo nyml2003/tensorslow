@@ -102,6 +102,9 @@ Object::PyObjPtr Genesis() {
   builtins->Put(
     Object::CreatePyString("randint"), CreatePyNativeFunction(Object::RandInt)
   );
+  builtins->Put(
+    Object::CreatePyString("slice"), Object::SliceKlass::Self()->Type()
+  );
   return builtins;
 }
 

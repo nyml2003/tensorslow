@@ -261,10 +261,6 @@ void PyCode::StoreFast(const PyObjPtr& obj) {
   instructions->Append(CreateStoreFast(index));
 }
 
-void PyCode::BuildList(Index size) {
-  instructions->Append(CreateBuildList(size));
-}
-
 void PyCode::CallFunction(Index nArgs) {
   instructions->Append(CreateCallFunction(nArgs));
 }

@@ -1,6 +1,7 @@
 #include "Object/PyList.h"
 #include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
+#include "Collections/Integer.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/Iterator.h"
 #include "Object/Object.h"
@@ -93,7 +94,7 @@ PyObjPtr ListKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr ListKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
-  if (!obj->is<PyList>() || !key->is<PyInteger>()) {
+  if (!obj->is<PyList>()) {
     auto errorMessage = StringConcat(CreatePyList(
       {CreatePyString("AttributeError: '"), obj->Klass()->Name(),
        CreatePyString("' object has no attribute '__getitem__'")}
@@ -101,8 +102,25 @@ PyObjPtr ListKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
     throw std::runtime_error(errorMessage->as<PyString>()->ToCppString());
   }
   auto list = obj->as<PyList>();
-  auto index = key->as<PyInteger>();
-  return list->GetItem(index->ToU64());
+  if (key->is<PyInteger>()) {
+    auto index = key->as<PyInteger>();
+    if (index->GetSign() == Collections::Integer::IntSign::Positive) {
+      return list->GetItem(index->ToU64());
+    }
+    if (index->GetSign() == Collections::Integer::IntSign::Negative) {
+      return list->GetItem(list->Length() + index->ToI64());
+    }
+  }
+  if (key->is<PySlice>()) {
+    auto slice = key->as<PySlice>();
+    return list->GetSlice(slice);
+  }
+  auto errorMessage = StringConcat(CreatePyList(
+    {CreatePyString("TypeError: list indices must be integers or slices, not '"
+     ),
+     key->Klass()->Name(), CreatePyString("'")}
+  ));
+  throw std::runtime_error(errorMessage->as<PyString>()->ToCppString());
 }
 
 PyObjPtr ListKlass::setitem(
@@ -197,6 +215,30 @@ PyObjPtr ListKlass::iter(const PyObjPtr& obj) {
     throw std::runtime_error("List does not support iter operation");
   }
   return CreateListIterator(obj);
+}
+
+PyObjPtr PyList::GetSlice(const PySlicePtr& slice) const {
+  slice->BindLength(Length());
+  int64_t start = slice->GetStart()->as<PyInteger>()->ToI64();
+  int64_t stop = slice->GetStop()->as<PyInteger>()->ToI64();
+  int64_t step = slice->GetStep()->as<PyInteger>()->ToI64();
+  auto subList = CreatePyList({})->as<PyList>();
+  if (step > 0) {
+    for (int64_t i = start; i < stop; i += step) {
+      if (i >= Length()) {
+        break;
+      }
+      subList->Append(GetItem(i));
+    }
+    return subList;
+  }
+  for (int64_t i = start; i > stop; i += step) {
+    if (i >= Length()) {
+      break;
+    }
+    subList->Append(GetItem(i));
+  }
+  return subList;
 }
 
 }  // namespace torchlight::Object

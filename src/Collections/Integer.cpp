@@ -13,6 +13,9 @@ Integer::Integer() = default;
 bool Integer::Sign() const {
   return sign;
 }
+Integer::IntSign Integer::GetSign() const {
+  return sign ? IntSign::Negative : IntSign::Positive;
+}
 String Integer::ToString() const {
   return CreateDecimalWithInteger(*this).ToString();
 }

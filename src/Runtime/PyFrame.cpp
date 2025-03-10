@@ -14,6 +14,7 @@
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
+#include "Object/PySlice.h"
 #include "Object/PyString.h"
 #include "Runtime/Interpreter.h"
 #include "Runtime/Serialize.h"
@@ -209,6 +210,10 @@ void ParseByteCode(const Object::PyCodePtr& code) {
       }
       case Object::ByteCode::BUILD_LIST: {
         insts.Push(Object::CreateBuildList(ReadU64(iter)));
+        break;
+      }
+      case Object::ByteCode::BUILD_SLICE: {
+        insts.Push(Object::CreateBuildSlice());
         break;
       }
       case Object::ByteCode::BINARY_MATRIX_MULTIPLY: {
@@ -746,6 +751,15 @@ Object::PyObjPtr PyFrame::Eval() {
         elements.Reverse();
         auto list = Object::CreatePyList(elements);
         stack.Push(list);
+        NextProgramCounter();
+        break;
+      }
+      case Object::ByteCode::BUILD_SLICE: {
+        auto step = stack.Pop();
+        auto end = stack.Pop();
+        auto start = stack.Pop();
+        auto slice = Object::CreatePySlice(start, end, step);
+        stack.Push(slice);
         NextProgramCounter();
         break;
       }

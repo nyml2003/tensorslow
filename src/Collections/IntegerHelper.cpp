@@ -143,6 +143,28 @@ Integer CreateIntegerWithU64(uint64_t value) {
   parts.Reverse();
   return Integer(parts, false);
 }
+Integer CreateIntegerWithI64(int64_t value) {
+  if (value == 0) {
+    return CreateIntegerZero();
+  }
+  if (value < 0) {
+    return CreateIntegerWithU64(-value).Negate();
+  }
+  return CreateIntegerWithU64(value);
+}
+int64_t ToI64(const Integer& integer) {
+  if (integer.IsZero()) {
+    return 0;
+  }
+  if (integer.Data().Size() > 4) {
+    throw std::runtime_error("Integer is too large to be converted to index");
+  }
+  int64_t result = 0;
+  for (Index i = 0; i < integer.Data().Size(); i++) {
+    result = (result << 16) | integer.Data().Get(i);
+  }
+  return integer.Sign() ? -static_cast<int64_t>(result) : result;
+}
 uint64_t safe_add(uint64_t lhs, int64_t rhs) {
   if (rhs >= 0) {
     // b 是正数或零，直接相加

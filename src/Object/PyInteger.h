@@ -60,10 +60,13 @@ class PyInteger : public PyObject {
 
   [[nodiscard]] Index ToU64() const { return Collections::ToU64(value); }
 
-  // Index Add(Index rhs) const {
-  //   return Positive() ? ToU64() : length + ToU64();
-  // }
-};
+  Collections::Integer::IntSign GetSign() const { return value.GetSign(); }
+
+  int64_t ToI64() const {
+    return Collections::ToI64(value);
+  }
+
+  };
 
 }  // namespace torchlight::Object
 

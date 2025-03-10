@@ -1,6 +1,5 @@
 #ifndef TORCHLIGHT_OBJECT_KLASS_H
 #define TORCHLIGHT_OBJECT_KLASS_H
-#include "Common.h"
 #include "Object/Object.h"
 
 namespace torchlight::Object {

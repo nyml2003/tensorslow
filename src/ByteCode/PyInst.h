@@ -72,7 +72,13 @@ PyInstPtr CreatePopTop();
 
 PyInstPtr CreateLoadAttr(Index index);
 
-PyInstPtr CreateBuildList(Index size);
+inline PyInstPtr CreateBuildList(Index size) {
+  return std::make_shared<PyInst>(ByteCode::BUILD_LIST, size);
+}
+
+inline PyInstPtr CreateBuildSlice() {
+  return std::make_shared<PyInst>(ByteCode::BUILD_SLICE);
+}
 
 PyInstPtr CreateBinaryMatrixMultiply();
 

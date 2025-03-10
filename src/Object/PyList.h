@@ -3,6 +3,7 @@
 
 #include "Collections/List.h"
 #include "Object/PyObject.h"
+#include "Object/PySlice.h"
 
 namespace torchlight::Object {
 class ListKlass : public Klass {
@@ -50,6 +51,7 @@ class PyList : public PyObject {
   bool Contains(const PyObjPtr& obj) const { return value.Contains(obj); }
   Index IndexOf(const PyObjPtr& obj) const { return value.IndexOf(obj); }
   PyObjPtr GetItem(Index index) const { return value[index]; }
+  PyObjPtr GetSlice(const PySlicePtr& slice) const;
   void SetItem(Index index, const PyObjPtr& obj) { value.Set(index, obj); }
   void SetList(Index start, Index stop, const PyObjPtr& obj) {
     auto list = obj->as<PyList>();

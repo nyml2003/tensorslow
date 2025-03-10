@@ -7,14 +7,18 @@
 namespace torchlight::Collections {
 class Integer {
   friend class List<Integer>;
+
  private:
   List<uint32_t> parts;
   bool sign = false;
+
  public:
+  enum class IntSign { Positive = 0, Negative = 1 };
   explicit Integer();
   explicit Integer(const List<uint32_t>& _parts, bool _sign);
   [[nodiscard]] List<uint32_t> Data() const;
   [[nodiscard]] bool Sign() const;
+  [[nodiscard]] IntSign GetSign() const;
   [[nodiscard]] String ToHexString() const;
   [[nodiscard]] String ToString() const;
   [[nodiscard]] Bytes Serialize() const;

@@ -28,14 +28,10 @@ class FunctionCallKlass : public INodeKlass {
 
 class FunctionCall : public INode {
  public:
-  FunctionCall(
-    const Object::PyObjPtr& _func,
-    const Object::PyObjPtr& _args,
-    INodePtr parent
-  )
+  FunctionCall(INodePtr func, Object::PyListPtr args, INodePtr parent)
     : INode(FunctionCallKlass::Self(), std::move(parent)),
-      func(_func->as<INode>()),
-      args(_args->as<Object::PyList>()) {}
+      func(std::move(func)),
+      args(std::move(args)) {}
 
   [[nodiscard]] INodePtr Func() const { return func; }
 
@@ -49,11 +45,11 @@ class FunctionCall : public INode {
 using FunctionCallPtr = std::shared_ptr<FunctionCall>;
 
 inline INodePtr CreateFunctionCall(
-  const Object::PyObjPtr& func,
-  const Object::PyObjPtr& args,
-  INodePtr parent
+  const INodePtr& func,
+  const Object::PyListPtr& args,
+  const INodePtr& parent
 ) {
-  return std::make_shared<FunctionCall>(func, args, std::move(parent));
+  return std::make_shared<FunctionCall>(func, args, parent);
 }
 
 }  // namespace torchlight::Ast

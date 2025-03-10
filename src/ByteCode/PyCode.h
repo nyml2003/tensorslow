@@ -81,7 +81,8 @@ class PyCode : public PyObject {
 
   void StoreFast(const PyObjPtr& obj);
 
-  void BuildList(Index size);
+  void BuildList(Index size) { instructions->Append(CreateBuildList(size)); }
+  void BuildSlice() { instructions->Append(CreateBuildSlice()); }
 
   void CallFunction(Index nArgs);
 

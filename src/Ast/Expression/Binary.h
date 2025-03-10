@@ -75,13 +75,11 @@ class Binary : public Ast::INode {
 
 inline INodePtr CreateBinary(
   Binary::Operator oprt,
-  INodePtr left,
-  INodePtr right,
-  INodePtr parent
+  const INodePtr& left,
+  const INodePtr& right,
+  const INodePtr& parent
 ) {
-  return std::make_shared<Binary>(
-    oprt, std::move(left), std::move(right), std::move(parent)
-  );
+  return std::make_shared<Binary>(oprt, left, right, parent);
 }
 
 }  // namespace torchlight::Ast

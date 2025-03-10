@@ -20,7 +20,6 @@ class Generator : public Python3ParserBaseVisitor {
   [[nodiscard]] Object::PyCodePtr Code() const;
   antlrcpp::Any visitFile_input(Python3Parser::File_inputContext* ctx) override;
   antlrcpp::Any visitAtom(Python3Parser::AtomContext* ctx) override;
-  antlrcpp::Any visitTrailer(Python3Parser::TrailerContext* ctx) override;
   antlrcpp::Any visitExpr(Python3Parser::ExprContext* ctx) override;
 
   antlrcpp::Any visitAtom_expr(Python3Parser::Atom_exprContext* ctx) override;
