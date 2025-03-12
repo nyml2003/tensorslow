@@ -19,16 +19,12 @@ class StringKlass : public Klass {
   static void Initialize();
 
   PyObjPtr construct(const PyObjPtr& klass, const PyObjPtr& args) override;
-
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
   PyObjPtr len(const PyObjPtr& obj) override;
-
   PyObjPtr str(const PyObjPtr& obj) override;
-
   PyObjPtr repr(const PyObjPtr& obj) override;
+  PyObjPtr iter(const PyObjPtr& obj) override;
 
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 };

@@ -3,6 +3,7 @@
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
 #include "Function/PyNativeFunction.h"
+#include "Object/Iterator.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
@@ -86,6 +87,13 @@ PyObjPtr StringKlass::repr(const PyObjPtr& obj) {
   );
 }
 
+PyObjPtr StringKlass::iter(const PyObjPtr& obj) {
+  if (!obj->is<PyString>()) {
+    throw std::runtime_error("StringKlass::iter(): obj is not a string");
+  }
+  return CreateStringIterator(obj);
+}
+
 PyObjPtr StringKlass::_serialize_(const PyObjPtr& obj) {
   if (!obj->is<PyString>()) {
     throw std::runtime_error("StringKlass::_serialize_(): obj is not a string");
@@ -109,10 +117,10 @@ PyStrPtr PyString::Join(const PyObjPtr& iterable) {
   auto result = CreatePyString("")->as<PyString>();
   ForEach(iterable, [&](const PyObjPtr& item, Index index, const PyObjPtr&) {
     if (index == 1) {
-      result = result->Add(item->str()->as<PyString>());
+      result = result->Add(item->repr()->as<PyString>());
     } else {
       result = result->Add(CreatePyString(value)->as<PyString>())
-                 ->Add(item->str()->as<PyString>());
+                 ->Add(item->repr()->as<PyString>());
     }
   });
   return result;

@@ -11,16 +11,21 @@ Object::PyObjPtr IdentifierKlass::visit(
   const Object::PyObjPtr& codeList
 ) {
   auto builtinStr = Object::CreatePyList({
-    Object::CreatePyString("print"),     Object::CreatePyString("matrix"),
-    Object::CreatePyString("reshape"),   Object::CreatePyString("len"),
-    Object::CreatePyString("zeros"),     Object::CreatePyString("diag"),
-    Object::CreatePyString("eye"),       Object::CreatePyString("ones"),
-    Object::CreatePyString("transpose"), Object::CreatePyString("__name__"),
-    Object::CreatePyString("randint"),   Object::CreatePyString("sleep"),
-    Object::CreatePyString("input"),     Object::CreatePyString("int"),
-    Object::CreatePyString("float"),     Object::CreatePyString("str"),
-    Object::CreatePyString("list"),      Object::CreatePyString("object"),
-    Object::CreatePyString("type"),      Object::CreatePyString("dict"),
+    Object::CreatePyString("print"),
+    Object::CreatePyString("reshape"),
+    Object::CreatePyString("Matrix"),
+    Object::CreatePyString("len"),
+    Object::CreatePyString("__name__"),
+    Object::CreatePyString("randint"),
+    Object::CreatePyString("sleep"),
+    Object::CreatePyString("input"),
+    Object::CreatePyString("int"),
+    Object::CreatePyString("float"),
+    Object::CreatePyString("str"),
+    Object::CreatePyString("list"),
+    Object::CreatePyString("object"),
+    Object::CreatePyString("type"),
+    Object::CreatePyString("dict"),
     Object::CreatePyString("slice"),
   });
   auto identifier = std::dynamic_pointer_cast<Identifier>(obj);

@@ -67,7 +67,7 @@ PyObjPtr ListKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return lhs->as<PyList>()->Add(rhs->as<PyList>());
 }
 
-PyObjPtr ListKlass::repr(const PyObjPtr& obj) {
+PyObjPtr ListKlass::str(const PyObjPtr& obj) {
   auto list = obj->as<PyList>();
   return StringConcat(CreatePyList(
     {CreatePyString("[")->as<PyString>(),
@@ -115,6 +115,14 @@ PyObjPtr ListKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
     auto slice = key->as<PySlice>();
     return list->GetSlice(slice);
   }
+  if (key->is<PyList>()) {
+    auto indexList = key->as<PyList>();
+    auto result = obj;
+    for (Index i = 0; i < indexList->Length(); i++) {
+      result = result->getitem(indexList->GetItem(i));
+    }
+    return result;
+  }
   auto errorMessage = StringConcat(CreatePyList(
     {CreatePyString("TypeError: list indices must be integers or slices, not '"
      ),
@@ -143,15 +151,34 @@ PyObjPtr ListKlass::setitem(
     return CreatePyNone();
   }
   // list[start:stop] = iterable
-  // if (key->is<PySlice>()) {
-  //   auto slice = key->as<PySlice>();
-  //   auto stop = slice->GetStop()->as<PyInteger>()->ToU64();
-  //   auto start = slice->GetStart()->as<PyInteger>()->ToU64();
-  //   list->RemoveRange(start, stop);
-  //   auto iterable = CreatePyListFromIterable(value);
-  //   list->InsertRange(start, iterable);
-  // }
-  return CreatePyNone();
+  if (key->is<PySlice>()) {
+    auto slice = key->as<PySlice>();
+    if (!slice->GetStep()->is<PyNone>()) {
+      throw std::runtime_error("List does not support step in slice assignment"
+      );
+    }
+    slice->BindLength(list->Length());
+    auto stop = slice->GetStop()->as<PyInteger>()->ToU64();
+    auto start = slice->GetStart()->as<PyInteger>()->ToU64();
+    auto valueList = CreatePyListFromIterable(value);
+    list->InsertAndReplace(start, stop, valueList);
+    return CreatePyNone();
+  }
+  if (key->is<PyList>()) {
+    auto indexList = key->as<PyList>();
+    auto result = obj;
+    for (Index i = 0; i < indexList->Length() - 1; i++) {
+      result = result->getitem(indexList->GetItem(i));
+    }
+    result->setitem(indexList->GetItem(indexList->Length() - 1), value);
+    return CreatePyNone();
+  }
+  auto errorMessage = StringConcat(CreatePyList(
+    {CreatePyString("TypeError: list indices must be integers or slices, not '"
+     ),
+     key->Klass()->Name(), CreatePyString("'")}
+  ));
+  throw std::runtime_error(errorMessage->as<PyString>()->ToCppString());
 }
 
 PyObjPtr ListKlass::len(const PyObjPtr& obj) {
@@ -218,6 +245,12 @@ PyObjPtr ListKlass::iter(const PyObjPtr& obj) {
 }
 
 PyObjPtr PyList::GetSlice(const PySlicePtr& slice) const {
+  if (slice->GetStep()->is<PyNone>()) {
+    slice->BindLength(Length());
+    int64_t start = slice->GetStart()->as<PyInteger>()->ToI64();
+    int64_t stop = slice->GetStop()->as<PyInteger>()->ToI64();
+    return CreatePyList(value.Slice(start, stop))->as<PyList>();
+  }
   slice->BindLength(Length());
   int64_t start = slice->GetStart()->as<PyInteger>()->ToI64();
   int64_t stop = slice->GetStop()->as<PyInteger>()->ToI64();
@@ -239,6 +272,21 @@ PyObjPtr PyList::GetSlice(const PySlicePtr& slice) const {
     subList->Append(GetItem(i));
   }
   return subList;
+}
+
+PyListPtr CreatePyListFromIterable(const PyObjPtr& iterator) {
+  auto iter = iterator->iter();
+  auto iterable = std::dynamic_pointer_cast<IIterator>(iter);
+  if (!iterable) {
+    throw std::runtime_error("object is not iterable");
+  }
+  auto value = iter->next();
+  Collections::List<PyObjPtr> list;
+  while (!value->is<IterDone>()) {
+    list.Push(value);
+    value = iter->next();
+  }
+  return CreatePyList(list)->as<PyList>();
 }
 
 }  // namespace torchlight::Object

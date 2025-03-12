@@ -1,6 +1,9 @@
 #include "Object/PyMatrix.h"
 #include "Collections/Matrix.h"
 #include "Function/PyNativeFunction.h"
+#include "Object/Object.h"
+#include "Object/ObjectHelper.h"
+#include "Object/PyBoolean.h"
 #include "Object/PyFloat.h"
 #include "Object/PyList.h"
 #include "Object/PyString.h"
@@ -19,7 +22,27 @@ PyObjPtr MatrixKlass::repr(const PyObjPtr& obj) {
   if (!obj->is<PyMatrix>()) {
     throw std::runtime_error("MatrixKlass::repr(): obj is not a matrix");
   }
-  return obj->as<PyMatrix>()->ToString();
+  auto matrix = obj->as<PyMatrix>();
+  auto shape = matrix->Shape();
+  auto rows = shape->GetItem(0)->as<PyInteger>()->ToU64();
+  auto cols = shape->GetItem(1)->as<PyInteger>()->ToU64();
+  auto repr = CreatePyString("[")->as<PyString>();
+  for (Index i = 0; i < rows; i++) {
+    repr = repr->Add(CreatePyString("[")->as<PyString>());
+    for (Index j = 0; j < cols; j++) {
+      repr = repr->Add(CreatePyString(" ")->as<PyString>());
+      repr = repr->Add(CreatePyFloat(matrix->At(i, j))->repr()->as<PyString>());
+      if (j != cols - 1) {
+        repr = repr->Add(CreatePyString(", ")->as<PyString>());
+      }
+    }
+    repr = repr->Add(CreatePyString("]")->as<PyString>());
+    if (i != rows - 1) {
+      repr = repr->Add(CreatePyString("\n ")->as<PyString>());
+    }
+  }
+  repr = repr->Add(CreatePyString("]")->as<PyString>());
+  return repr;
 }
 
 PyObjPtr MatrixKlass::matmul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -30,9 +53,66 @@ PyObjPtr MatrixKlass::matmul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return lhs->as<PyMatrix>()->MatrixMultiply(rhs->as<PyMatrix>());
 }
 
+PyObjPtr MatrixKlass::gt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyMatrix>()){
+    throw std::runtime_error("MatrixKlass::gt(): lhs is not a matrix");
+  }
+  if (!rhs->is<PyFloat>()) {
+    throw std::runtime_error("MatrixKlass::gt(): rhs is not a float");
+  }
+  auto matrix = lhs->as<PyMatrix>();
+  auto compareObj = rhs->as<PyFloat>()->Value();
+  auto shape = lhs->as<PyMatrix>()->Shape();
+  auto rows = shape->GetItem(0)->as<PyInteger>()->ToU64();
+  auto cols = shape->GetItem(1)->as<PyInteger>()->ToU64();
+  // 初始化一个rows * cols的二维Python列表，用于存储比较结果
+  Collections::List<PyObjPtr> data;
+  for (Index i = 0; i < rows; i++) {
+    Collections::List<PyObjPtr> row;
+    for (Index j = 0; j < cols; j++) {
+      row.Push(
+        matrix->At(i, j) > compareObj ? CreatePyBoolean(true)
+                                      : CreatePyBoolean(false)
+      );
+    }
+    data.Push(CreatePyList(row));
+  }
+  return CreatePyList(data);
+}
+
+PyObjPtr MatrixKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyMatrix>() || !rhs->is<PyFloat>()) {
+    throw std::runtime_error("MatrixKlass::eq(): lhs or rhs is not a matrix");
+  }
+  auto matrix = lhs->as<PyMatrix>();
+  auto compareObj = rhs->as<PyFloat>()->Value();
+  auto shape = lhs->as<PyMatrix>()->Shape();
+  auto rows = shape->GetItem(0)->as<PyInteger>()->ToU64();
+  auto cols = shape->GetItem(1)->as<PyInteger>()->ToU64();
+  Collections::List<PyObjPtr> data;
+  for (Index i = 0; i < rows; i++) {
+    Collections::List<PyObjPtr> row;
+    for (Index j = 0; j < cols; j++) {
+      row.Push(
+        matrix->At(i, j) == compareObj ? CreatePyBoolean(true)
+                                       : CreatePyBoolean(false)
+      );
+    }
+    data.Push(CreatePyList(row));
+  }
+  return CreatePyList(data);
+}
+
 PyObjPtr MatrixKlass::mul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyMatrix>() || !rhs->is<PyMatrix>()) {
+  if (!lhs->is<PyMatrix>()) {
     throw std::runtime_error("MatrixKlass::mul(): lhs or rhs is not a matrix");
+  }
+  auto matrix = lhs->as<PyMatrix>();
+  if (rhs->is<PyMatrix>()) {
+    return matrix->Multiply(rhs->as<PyMatrix>());
+  }
+  if (rhs->is<PyFloat>()) {
+    return matrix->Multiply(rhs->as<PyFloat>()->Value());
   }
   return lhs->as<PyMatrix>()->Multiply(rhs->as<PyMatrix>());
 }
@@ -49,6 +129,7 @@ PyObjPtr Matrix(const PyObjPtr& args) {
     throw std::runtime_error("Matrix(): args is not a list");
   }
   auto argList = args->as<PyList>();
+
   if (argList->Length() != 1) {
     throw std::runtime_error("Matrix(): args length is not 1");
   }
@@ -77,7 +158,9 @@ PyObjPtr Eye(const PyObjPtr& args) {
     throw std::runtime_error("Eye(): args is not a list");
   }
   auto argList = args->as<PyList>();
+
   if (argList->Length() != 1) {
+    DebugPrint(args);
     throw std::runtime_error("Eye(): args length is not 1");
   }
   auto dim = argList->GetItem(0)->as<PyInteger>()->ToU64();
@@ -89,11 +172,16 @@ PyObjPtr Zeros(const PyObjPtr& args) {
     throw std::runtime_error("Zeros(): args is not a list");
   }
   auto argList = args->as<PyList>();
-  if (argList->Length() != 2) {
-    throw std::runtime_error("Zeros(): args length is not 2");
+
+  if (argList->Length() != 1) {
+    throw std::runtime_error("Zeros(): args length is not 1");
   }
-  auto rows = argList->GetItem(0)->as<PyInteger>()->ToU64();
-  auto cols = argList->GetItem(1)->as<PyInteger>()->ToU64();
+  auto shape = argList->GetItem(0)->as<PyList>();
+  if (shape->Length() != 2) {
+    throw std::runtime_error("Zeros(): shape length is not 2");
+  }
+  auto rows = shape->GetItem(0)->as<PyInteger>()->ToU64();
+  auto cols = shape->GetItem(1)->as<PyInteger>()->ToU64();
   Collections::List<double> data(rows * cols, 0.0);
   return CreatePyMatrix(Collections::Matrix(rows, cols, data));
 }
@@ -103,11 +191,16 @@ PyObjPtr Ones(const PyObjPtr& args) {
     throw std::runtime_error("Ones(): args is not a list");
   }
   auto argList = args->as<PyList>();
-  if (argList->Length() != 2) {
-    throw std::runtime_error("Ones(): args length is not 2");
+
+  if (argList->Length() != 1) {
+    throw std::runtime_error("Ones(): args length is not 1");
   }
-  auto rows = argList->GetItem(0)->as<PyInteger>()->ToU64();
-  auto cols = argList->GetItem(1)->as<PyInteger>()->ToU64();
+  auto shape = argList->GetItem(0)->as<PyList>();
+  if (shape->Length() != 2) {
+    throw std::runtime_error("Ones(): shape length is not 2");
+  }
+  auto rows = shape->GetItem(0)->as<PyInteger>()->ToU64();
+  auto cols = shape->GetItem(1)->as<PyInteger>()->ToU64();
   Collections::List<double> data(rows * cols, 1.0);
   return CreatePyMatrix(Collections::Matrix(rows, cols, data));
 }
@@ -117,6 +210,7 @@ PyObjPtr Diagnostic(const PyObjPtr& args) {
     throw std::runtime_error("Diagnostic(): args is not a list");
   }
   auto argList = args->as<PyList>();
+
   if (argList->Length() != 1) {
     throw std::runtime_error("Diagnostic(): args length is not 1");
   }
@@ -149,6 +243,7 @@ PyObjPtr Reshape(const PyObjPtr& args) {
     throw std::runtime_error("Reshape(): args is not a list");
   }
   auto argList = args->as<PyList>();
+
   if (argList->Length() != 2) {
     throw std::runtime_error("Reshape(): args length is not 2");
   }
@@ -160,6 +255,86 @@ PyObjPtr Reshape(const PyObjPtr& args) {
   auto rows = list->GetItem(0)->as<PyInteger>()->ToU64();
   auto cols = list->GetItem(1)->as<PyInteger>()->ToU64();
   return matrix->Reshape(rows, cols);
+}
+
+PyObjPtr Where(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 3);
+  CheckNativeFunctionArgumentsAtIndexWithType(
+    CreatePyString("Where")->as<PyString>(), args, 0, ListKlass::Self()
+  );
+  CheckNativeFunctionArgumentsAtIndexWithType(
+    CreatePyString("Where")->as<PyString>(), args, 1, FloatKlass::Self()
+  );
+  CheckNativeFunctionArgumentsAtIndexWithType(
+    CreatePyString("Where")->as<PyString>(), args, 2, FloatKlass::Self()
+  );
+  auto trueValue = args->as<PyList>()->GetItem(1)->as<PyFloat>()->Value();
+  auto falseValue = args->as<PyList>()->GetItem(2)->as<PyFloat>()->Value();
+  auto list = args->as<PyList>()->GetItem(0)->as<PyList>();
+  auto cols = list->GetItem(0)->as<PyList>()->Length();
+  auto rows = list->Length();
+  Collections::List<double> data(rows * cols, falseValue);
+  for (Index i = 0; i < rows; i++) {
+    auto row = list->GetItem(i)->as<PyList>();
+    for (Index j = 0; j < cols; j++) {
+      if (!row->GetItem(j)->is<PyBoolean>()) {
+        throw std::runtime_error("Where(): element is not a boolean");
+      }
+      if (row->GetItem(j)->as<PyBoolean>()->Value()) {
+        data[i * cols + j] = trueValue;
+      }
+    }
+  }
+  return CreatePyMatrix(Collections::Matrix(rows, cols, data));
+}
+
+PyObjPtr Ravel(const PyObjPtr& args) {
+  if (!args->is<PyList>()) {
+    throw std::runtime_error("Ravel(): args is not a list");
+  }
+  auto argList = args->as<PyList>();
+
+  if (argList->Length() != 1) {
+    throw std::runtime_error("Ravel(): args length is not 1");
+  }
+  auto matrix = argList->GetItem(0)->as<PyMatrix>();
+  auto data = matrix->Ravel();
+  Collections::List<PyObjPtr> result(data.Size());
+  for (Index i = 0; i < data.Size(); i++) {
+    result.Push(CreatePyFloat(data[i]));
+  }
+  return CreatePyList(result);
+}
+
+PyObjPtr Concatenate(const PyObjPtr& args) {
+  if (!args->is<PyList>()) {
+    throw std::runtime_error("Concatenate(): args is not a list");
+  }
+  auto argList = args->as<PyList>();
+
+  if (argList->Length() != 1) {
+    throw std::runtime_error("Concatenate(): args length is not 1");
+  }
+  auto list = argList->GetItem(0)->as<PyList>();
+  auto rows = list->Length();
+  auto cols = list->GetItem(0)
+                ->as<PyMatrix>()
+                ->Shape()
+                ->GetItem(1)
+                ->as<PyInteger>()
+                ->ToU64();
+  Collections::List<double> data;
+  for (Index i = 0; i < rows; i++) {
+    auto row = list->GetItem(i)->as<PyMatrix>();
+    if (row->Shape()->GetItem(1)->as<PyInteger>()->ToU64() != cols) {
+      throw std::runtime_error("Concatenate(): cols is not equal");
+    }
+    auto rowData = row->Ravel();
+    for (Index j = 0; j < rowData.Size(); j++) {
+      data.Push(rowData[j]);
+    }
+  }
+  return CreatePyMatrix(Collections::Matrix(rows, cols, data));
 }
 
 }  // namespace torchlight::Object

@@ -170,7 +170,7 @@ TEST(List, Reverse) {
 }
 TEST(List, RemoveRange) {
   List<char> list{1, 2, 3, 4, 5, 6};
-  list.RemoveRange(1, 4);
+  list.RemoveRange(1, 3);
   EXPECT_EQ(list.Size(), 3);
   EXPECT_EQ(list[0], 1);
   EXPECT_EQ(list[1], 5);
@@ -280,7 +280,7 @@ TEST(List, RemoveRangeBoundaryAndError) {
   list.RemoveRange(0, 1);  // 移除第一个元素
   ASSERT_EQ(list.Size(), 4);
   ASSERT_EQ(list[0], 2);
-  list.RemoveRange(list.Size() - 2, list.Size());  // 移除最后两个元素
+  list.RemoveRange(list.Size() - 2,2);  // 移除最后两个元素
   ASSERT_EQ(list.Size(), 2);
   ASSERT_EQ(list[0], 2);
   ASSERT_EQ(list[1], 3);
@@ -341,4 +341,17 @@ TEST(List, AddAndCopyAndConcat) {
   ASSERT_EQ(list1[6], 4);
   ASSERT_EQ(list1[7], 5);
   ASSERT_EQ(list1[8], 6);
+}
+
+TEST(List, InsertAndReplace) {
+  List<char> list{1, 2, 3, 4, 5};
+  List<char> insertList{6, 7, 8};
+  list.InsertAndReplace(1, 3, insertList);
+  ASSERT_EQ(list.Size(), 6);
+  ASSERT_EQ(list[0], 1);
+  ASSERT_EQ(list[1], 6);
+  ASSERT_EQ(list[2], 7);
+  ASSERT_EQ(list[3], 8);
+  ASSERT_EQ(list[4], 4);
+  ASSERT_EQ(list[5], 5);
 }

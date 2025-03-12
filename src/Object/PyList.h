@@ -14,7 +14,8 @@ class ListKlass : public Klass {
     return instance;
   }
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-  PyObjPtr repr(const PyObjPtr& obj) override;
+  PyObjPtr str(const PyObjPtr& obj) override;
+  PyObjPtr repr(const PyObjPtr& obj) override { return str(obj); }
   PyObjPtr getitem(const PyObjPtr& obj, const PyObjPtr& key) override;
   PyObjPtr setitem(
     const PyObjPtr& obj,
@@ -63,11 +64,16 @@ class PyList : public PyObject {
     return CreatePyList({obj})->as<PyList>()->Add(shared_from_this());
   }
   void RemoveAt(Index index) { value.RemoveAt(index); }
+  void InsertAndReplace(Index start, Index end, const PyListPtr& list) {
+    value.InsertAndReplace(start, end, list->value);
+  }
 };
 
 PyObjPtr ListAppend(const PyObjPtr& args);
 
 PyObjPtr ListIndex(const PyObjPtr& args);
+
+PyListPtr CreatePyListFromIterable(const PyObjPtr& iterator);
 }  // namespace torchlight::Object
 
 #endif

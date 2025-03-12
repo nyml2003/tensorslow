@@ -19,80 +19,31 @@ namespace torchlight::Runtime {
 Object::PyObjPtr Genesis() {
   Object::BasicKlassLoad();
   auto builtins = Object::CreatePyDict()->as<Object::PyDictionary>();
-  builtins->setitem(Object::CreatePyString("None"), Object::CreatePyNone());
-  builtins->setitem(
-    Object::CreatePyString("True"), Object::CreatePyBoolean(true)
-  );
-  builtins->setitem(
+  // 注册内置函数和类型
+  builtins->Put(Object::CreatePyString("None"), Object::CreatePyNone());
+  builtins->Put(Object::CreatePyString("True"), Object::CreatePyBoolean(true));
+  builtins->Put(
     Object::CreatePyString("False"), Object::CreatePyBoolean(false)
   );
-  builtins->setitem(
+
+  // 注册内置函数
+  builtins->Put(
     Object::CreatePyString("print"), CreatePyNativeFunction(Object::Print)
   );
-  builtins->setitem(
+  builtins->Put(
     Object::CreatePyString("len"), CreatePyNativeFunction(Object::Len)
   );
-  builtins->setitem(
+  builtins->Put(
     Object::CreatePyString("__build_class__"),
     CreatePyNativeFunction(BuildClass)
   );
-  builtins->setitem(
-    Object::CreatePyString("matrix"), CreatePyNativeFunction(Object::Matrix)
-  );
-  builtins->setitem(
-    Object::CreatePyString("eye"), CreatePyNativeFunction(Object::Eye)
-  );
-  builtins->setitem(
-    Object::CreatePyString("zeros"), CreatePyNativeFunction(Object::Zeros)
-  );
-  builtins->setitem(
-    Object::CreatePyString("ones"), CreatePyNativeFunction(Object::Ones)
-  );
-  builtins->setitem(
-    Object::CreatePyString("diag"), CreatePyNativeFunction(Object::Diagnostic)
-  );
-  builtins->setitem(
-    Object::CreatePyString("transpose"),
-    CreatePyNativeFunction(Object::Transpose)
-  );
-  builtins->setitem(
-    Object::CreatePyString("reshape"), CreatePyNativeFunction(Object::Reshape)
-  );
-  builtins->setitem(
-    Object::CreatePyString("int"), std::dynamic_pointer_cast<Object::PyObject>(
-                                     Object::IntegerKlass::Self()->Type()
-                                   )
-  );
-  builtins->setitem(
-    Object::CreatePyString("float"),
-    std::dynamic_pointer_cast<Object::PyObject>(
-      Object::FloatKlass::Self()->Type()
-    )
-  );
-  builtins->setitem(
-    Object::CreatePyString("str"), std::dynamic_pointer_cast<Object::PyObject>(
-                                     Object::StringKlass::Self()->Type()
-                                   )
-  );
-  builtins->setitem(
-    Object::CreatePyString("list"), std::dynamic_pointer_cast<Object::PyObject>(
-                                      Object::ListKlass::Self()->Type()
-                                    )
-  );
-  builtins->setitem(
-    Object::CreatePyString("dict"), std::dynamic_pointer_cast<Object::PyObject>(
-                                      Object::DictionaryKlass::Self()->Type()
-                                    )
-  );
-  builtins->setitem(
-    Object::CreatePyString("object"),
-    std::dynamic_pointer_cast<Object::PyObject>(
-      Object::ObjectKlass::Self()->Type()
-    )
-  );
-  builtins->setitem(
-    Object::CreatePyString("type"), CreatePyNativeFunction(Type)
-  );
+
+  // 内置全局对象
+  builtins->Put(Object::CreatePyString("Matrix"), BuiltinMatrix());
+
+  builtins->Put(Object::CreatePyString("type"), CreatePyNativeFunction(Type));
+
+  // 注册输入和随机数相关函数
   builtins->Put(
     Object::CreatePyString("input"), CreatePyNativeFunction(Object::Input)
   );
@@ -102,8 +53,44 @@ Object::PyObjPtr Genesis() {
   builtins->Put(
     Object::CreatePyString("randint"), CreatePyNativeFunction(Object::RandInt)
   );
+
+  // 注册切片类型
   builtins->Put(
     Object::CreatePyString("slice"), Object::SliceKlass::Self()->Type()
+  );
+
+  // 注册内置类型
+  builtins->Put(
+    Object::CreatePyString("int"), std::dynamic_pointer_cast<Object::PyObject>(
+                                     Object::IntegerKlass::Self()->Type()
+                                   )
+  );
+  builtins->Put(
+    Object::CreatePyString("float"),
+    std::dynamic_pointer_cast<Object::PyObject>(
+      Object::FloatKlass::Self()->Type()
+    )
+  );
+  builtins->Put(
+    Object::CreatePyString("str"), std::dynamic_pointer_cast<Object::PyObject>(
+                                     Object::StringKlass::Self()->Type()
+                                   )
+  );
+  builtins->Put(
+    Object::CreatePyString("list"), std::dynamic_pointer_cast<Object::PyObject>(
+                                      Object::ListKlass::Self()->Type()
+                                    )
+  );
+  builtins->Put(
+    Object::CreatePyString("dict"), std::dynamic_pointer_cast<Object::PyObject>(
+                                      Object::DictionaryKlass::Self()->Type()
+                                    )
+  );
+  builtins->Put(
+    Object::CreatePyString("object"),
+    std::dynamic_pointer_cast<Object::PyObject>(
+      Object::ObjectKlass::Self()->Type()
+    )
   );
   return builtins;
 }
@@ -145,6 +132,61 @@ Object::PyObjPtr Type(const Object::PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   auto obj = args->getitem(Object::CreatePyInteger(0));
   return obj->Klass()->Type();
+}
+
+Object::PyObjPtr BuiltinMatrix() {
+  auto matrixModuleKlass = Object::CreatePyKlass(
+    Object::CreatePyString("matrix_module")->as<Object::PyString>(),
+    Object::CreatePyDict()->as<Object::PyDictionary>(),
+    Object::CreatePyList({Object::CreatePyType(Object::ObjectKlass::Self())})
+      ->as<Object::PyList>()
+  );
+  matrixModuleKlass->AddAttribute(
+    Object::CreatePyString("array")->as<Object::PyString>(),
+    Object::CreatePyNativeFunction(Object::Matrix)
+  );
+  matrixModuleKlass->AddAttribute(
+    Object::CreatePyString("eye")->as<Object::PyString>(),
+    Object::CreatePyNativeFunction(Object::Eye)
+  );
+  matrixModuleKlass->AddAttribute(
+    Object::CreatePyString("zeros")->as<Object::PyString>(),
+    Object::CreatePyNativeFunction(Object::Zeros)
+  );
+  matrixModuleKlass->AddAttribute(
+    Object::CreatePyString("ones")->as<Object::PyString>(),
+    Object::CreatePyNativeFunction(Object::Ones)
+  );
+  matrixModuleKlass->AddAttribute(
+    Object::CreatePyString("diag")->as<Object::PyString>(),
+    Object::CreatePyNativeFunction(Object::Diagnostic)
+  );
+  matrixModuleKlass->AddAttribute(
+    Object::CreatePyString("transpose")->as<Object::PyString>(),
+    Object::CreatePyNativeFunction(Object::Transpose)
+  );
+  matrixModuleKlass->AddAttribute(
+    Object::CreatePyString("reshape")->as<Object::PyString>(),
+    Object::CreatePyNativeFunction(Object::Reshape)
+  );
+  matrixModuleKlass->AddAttribute(
+    Object::CreatePyString("shape")->as<Object::PyString>(),
+    Object::CreatePyNativeFunction(Object::Shape)
+  );
+  matrixModuleKlass->AddAttribute(
+    Object::CreatePyString("where")->as<Object::PyString>(),
+    Object::CreatePyNativeFunction(Object::Where)
+  );
+  matrixModuleKlass->AddAttribute(
+    Object::CreatePyString("concatenate")->as<Object::PyString>(),
+    Object::CreatePyNativeFunction(Object::Concatenate)
+  );
+  matrixModuleKlass->AddAttribute(
+    Object::CreatePyString("ravel")->as<Object::PyString>(),
+    Object::CreatePyNativeFunction(Object::Ravel)
+  );
+  auto matrixModule = std::make_shared<Object::PyObject>(matrixModuleKlass);
+  return matrixModule;
 }
 
 }  // namespace torchlight::Runtime

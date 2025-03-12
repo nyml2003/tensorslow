@@ -4,6 +4,7 @@
 #include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/Object.h"
+#include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
@@ -51,6 +52,11 @@ Object::PyObjPtr Interpreter::EvalMethod(
 ) {
   auto owner = func->Owner();
   auto function = func->Method();
+  if (owner->Klass()->Name()->Equal(
+        Object::CreatePyString("matrix_module")->as<Object::PyString>()
+      )) {
+    return Eval(function, arguments);
+  }
   return Eval(function, arguments->Prepend(owner)->as<Object::PyList>());
 }
 

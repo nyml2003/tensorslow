@@ -124,22 +124,16 @@ class List {
   /**
    * @brief 移除指定区间[start, end)的元素
    * @param start 移除区间的起始索引（包含）
-   * @param end 移除区间的结束索引（不包含）
+   * @param length 移除区间的长度
    */
-  void RemoveRange(Index start, Index end);
+  void RemoveRange(Index start, Index length);
   /**
-   * @brief 在指定位置插入元素
-   * @param index 要插入的位置（包含）
-   * @param element 要插入的元素
+   * @brief 移去[start, end)区间的元素，并用list替换
+   * @param start 要插入的位置
+   * @param end 要插入的元素
+   * @param list 要插入的元素列表
    */
-  void Insert(Index index, T element);
-
-  /**
-   * @brief 在指定位置插入初始化列表
-   * @param index 要插入的位置（包含）
-   * @param list 要插入的初始化列表
-   */
-  void Insert(Index index, std::initializer_list<T> list);
+  void InsertAndReplace(Index start, Index end, const List<T>& list);
 
   /**
    * @brief 反转列表
@@ -229,8 +223,8 @@ List<T>::List(std::initializer_list<T> list)
 template <typename T>
 List<T>::List(const List<T>& other)
   : size(other.size),
-    capacity(other.capacity),
-    elements(std::make_unique<T[]>(other.capacity)) {
+    capacity(other.size),
+    elements(std::make_unique<T[]>(other.size)) {
   std::copy(other.elements.get(), other.elements.get() + size, elements.get());
 }
 template <typename T>
@@ -367,43 +361,72 @@ void List<T>::RemoveAt(Index index) {
   size--;
 }
 template <typename T>
-void List<T>::RemoveRange(Index start, Index end) {
-  if (start >= size || end > size || start > end) {
+void List<T>::RemoveRange(Index start, Index length) {
+  if (start >= size || start + length > size || length < 0) {
     throw std::runtime_error("List::RemoveRange::Index out of range");
   }
   std::move(
-    elements.get() + end, elements.get() + size, elements.get() + start
+    elements.get() + start + length, elements.get() + size,
+    elements.get() + start
   );
-  size -= (end - start);
+  size -= length;
 }
 template <typename T>
-void List<T>::Insert(Index index, T element) {
-  if (index > size || index < 0) {
-    throw std::runtime_error("List::Insert::Index out of range");
+void List<T>::InsertAndReplace(Index start, Index end, const List<T>& list) {
+  // 检查索引是否越界
+  if (start > size || end > size || start > end) {
+    throw std::runtime_error("List::InsertAndReplace::Index out of range");
   }
-  if (Full()) {
-    Expand();
+
+  auto removeLength = end - start;  // 要移除的元素个数
+  auto insertLength = list.size;    // 要插入的元素个数
+
+  // 如果插入的元素个数小于移除的元素个数
+  if (insertLength < removeLength) {
+    // 将 [end, size-1] 的元素移动到 [start + insertLength, size - removeLength
+    // + insertLength - 1]
+    std::move(
+      elements.get() + end, elements.get() + size,
+      elements.get() + start + insertLength
+    );
+    // 将 list 的元素复制到 [start, start + insertLength - 1]
+    std::copy(
+      list.elements.get(), list.elements.get() + insertLength,
+      elements.get() + start
+    );
+    // 更新列表大小
+    size = size - removeLength + insertLength;
   }
-  std::move(
-    elements.get() + index, elements.get() + size, elements.get() + index + 1
-  );
-  elements[index] = element;
-  size++;
-}
-template <typename T>
-void List<T>::Insert(Index index, std::initializer_list<T> list) {
-  if (index > size || index < 0) {
-    throw std::runtime_error("List::Insert::Index out of range");
+  // 如果插入的元素个数大于移除的元素个数
+  else if (insertLength > removeLength) {
+    // 计算需要的新容量
+    auto newCapacity = size + insertLength - removeLength;
+    // 如果当前容量不足以容纳新元素，则扩展容量
+    if (newCapacity > capacity) {
+      Expand(newCapacity);
+    }
+    // 将 [end, size-1] 的元素移动到 [start + insertLength, size + insertLength
+    // - removeLength - 1]
+    std::move(
+      elements.get() + end, elements.get() + size,
+      elements.get() + start + insertLength
+    );
+    // 将 list 的元素复制到 [start, start + insertLength - 1]
+    std::copy(
+      list.elements.get(), list.elements.get() + insertLength,
+      elements.get() + start
+    );
+    // 更新列表大小
+    size += insertLength - removeLength;
   }
-  if (Full()) {
-    Expand();
+  // 如果插入的元素个数等于移除的元素个数
+  else {
+    // 直接将 list 的元素复制到 [start, start + insertLength - 1]
+    std::copy(
+      list.elements.get(), list.elements.get() + insertLength,
+      elements.get() + start
+    );
   }
-  std::move(
-    elements.get() + index, elements.get() + size,
-    elements.get() + index + list.size()
-  );
-  std::copy(list.begin(), list.end(), elements.get() + index);
-  size += list.size();
 }
 template <typename T>
 void List<T>::Reverse() {

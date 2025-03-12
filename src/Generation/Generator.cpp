@@ -744,7 +744,7 @@ antlrcpp::Any Generator::visitSubscriptlist(
     static_cast<uint64_t>(ctx->subscript_().size())
   );
   for (auto* subscript : ctx->subscript_()) {
-    subscripts.Push(visitSubscript_(subscript));
+    subscripts.Push(visitSubscript_(subscript).as<Ast::INodePtr>());
   }
   return Ast::CreateList(Object::CreatePyList(subscripts), context);
 }
@@ -829,6 +829,12 @@ antlrcpp::Any Generator::visitClassdef(Python3Parser::ClassdefContext* ctx) {
 antlrcpp::Any
 Generator::visitPass_stmt(Python3Parser::Pass_stmtContext* /*ctx*/) {
   return Ast::CreatePassStmt(context);
+}
+
+antlrcpp::Any Generator::visitImport_stmt(
+  Python3Parser::Import_stmtContext* /*ctx*/
+) {
+  return Ast::CreateAtom(Object::CreatePyNone(), context);
 }
 
 }  // namespace torchlight::Generation

@@ -68,7 +68,7 @@ class Variable(Node):
         self.graph.add_node(self)
         self.dim = dim
         if init:
-            self.value = ones(dim[0], dim[1])
+            self.value = Matrix.ones(dim)
             
     def set_value(self, value):
         self.reset_value()
@@ -80,7 +80,7 @@ class Operator(Node):
 class Add(Operator):
     def compute(self):
         shape = self.parents[0].get_shape()
-        self.value = zeros(shape[0], shape[1])
+        self.value = Matrix.zeros(shape)
         for parent in self.parents:
             self.value = self.value + parent.value
             
@@ -92,6 +92,6 @@ print(a.value)
 print(b.value)
 c.compute()
 print(c.value)
-a.set_value(eye(3))
+a.set_value(Matrix.eye(3))
 c.compute()
 print(c.value)
