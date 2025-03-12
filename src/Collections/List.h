@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <initializer_list>
 #include <memory>
+#include <random>
 #include <stdexcept>
 
 namespace torchlight::Collections {
@@ -186,6 +187,8 @@ class List {
    * @return 深拷贝后的列表
    */
   [[nodiscard]] List<T> Copy() const;
+
+  void Shuffle();
 };
 template <typename T>
 List<T>::~List() = default;
@@ -546,6 +549,13 @@ List<T> List<T>::Copy() const {
 template <typename T>
 T* List<T>::Data() {
   return elements.get();
+}
+
+template <typename T>
+void List<T>::Shuffle() {
+  std::random_device randomDevice;
+  std::mt19937 gen(randomDevice());
+  std::shuffle(elements.get(), elements.get() + size, gen);
 }
 
 }  // namespace torchlight::Collections

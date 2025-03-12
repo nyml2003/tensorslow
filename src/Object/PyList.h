@@ -44,6 +44,7 @@ class PyList : public PyObject {
   explicit PyList(Collections::List<PyObjPtr> value)
     : PyObject(ListKlass::Self()), value(std::move(value)) {}
 
+  void Shuffle() { value.Shuffle(); }
   void Append(PyObjPtr obj) { value.Push(std::move(obj)); }
   PyObjPtr Add(const PyObjPtr& obj) {
     return CreatePyList(value.Add(obj->as<PyList>()->value));

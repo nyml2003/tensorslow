@@ -53,6 +53,12 @@ Object::PyObjPtr Genesis() {
   builtins->Put(
     Object::CreatePyString("randint"), CreatePyNativeFunction(Object::RandInt)
   );
+  builtins->Put(
+    Object::CreatePyString("normal"), CreatePyNativeFunction(Object::Normal)
+  );
+  builtins->Put(
+    Object::CreatePyString("shuffle"), CreatePyNativeFunction(Object::Shuffle)
+  );
 
   // 注册切片类型
   builtins->Put(

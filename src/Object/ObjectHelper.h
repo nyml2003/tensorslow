@@ -19,6 +19,8 @@ PyObjPtr Identity(const PyObjPtr& obj);
 PyObjPtr RandInt(const PyObjPtr& args);
 PyObjPtr Sleep(const PyObjPtr& args);
 PyObjPtr Input(const PyObjPtr& args);
+PyObjPtr Normal(const PyObjPtr& args);
+PyObjPtr Shuffle(const PyObjPtr& args);
 PyObjPtr CreatePyClass(const PyTypePtr& type);
 PyObjPtr GetBases(const PyObjPtr& args);
 PyObjPtr GetMro(const PyObjPtr& args);

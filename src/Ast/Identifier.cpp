@@ -11,14 +11,11 @@ Object::PyObjPtr IdentifierKlass::visit(
   const Object::PyObjPtr& codeList
 ) {
   auto builtinStr = Object::CreatePyList({
-    Object::CreatePyString("print"),
-    Object::CreatePyString("reshape"),
-    Object::CreatePyString("Matrix"),
-    Object::CreatePyString("len"),
-    Object::CreatePyString("__name__"),
-    Object::CreatePyString("randint"),
-    Object::CreatePyString("sleep"),
-    Object::CreatePyString("input"),
+    Object::CreatePyString("print"), Object::CreatePyString("reshape"),
+    Object::CreatePyString("Matrix"), Object::CreatePyString("len"),
+    Object::CreatePyString("__name__"), Object::CreatePyString("randint"),
+    Object::CreatePyString("sleep"), Object::CreatePyString("input"),
+    Object::CreatePyString("normal"), Object::CreatePyString("shuffle"),
     Object::CreatePyString("int"),
     Object::CreatePyString("float"),
     Object::CreatePyString("str"),

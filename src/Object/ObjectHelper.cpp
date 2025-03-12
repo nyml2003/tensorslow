@@ -12,6 +12,7 @@
 #include "Object/Object.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
+#include "Object/PyFloat.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
@@ -277,6 +278,34 @@ Object::PyObjPtr Sleep(const Object::PyObjPtr& args) {
   auto secondsValue = seconds->ToU64();
   std::this_thread::sleep_for(std::chrono::seconds(secondsValue));
   return Object::CreatePyNone();
+}
+/*
+loc: _ArrayLikeFloat_co = ...,
+        scale: _ArrayLikeFloat_co = ...,
+        size: None | _ShapeLike = ...,
+*/
+Object::PyObjPtr Normal(const Object::PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 3);
+  auto argList = args->as<PyList>();
+  auto loc = argList->GetItem(0)->as<PyFloat>()->Value();
+  auto scale = argList->GetItem(1)->as<PyFloat>()->Value();
+  auto size = argList->GetItem(2)->as<PyInteger>()->ToU64();
+  std::random_device randomDevice;
+  std::mt19937 gen(randomDevice());
+  std::normal_distribution<> dis(loc, scale);
+  auto result = CreatePyList(size)->as<PyList>();
+  for (Index i = 0; i < size; i++) {
+    result->SetItem(i, CreatePyFloat(dis(gen)));
+  }
+  return result;
+}
+
+Object::PyObjPtr Shuffle(const Object::PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
+  auto argList = args->as<PyList>();
+  auto list = argList->GetItem(0)->as<PyList>();
+  list->Shuffle();
+  return list;
 }
 
 Object::PyObjPtr Input(const Object::PyObjPtr& args) {
