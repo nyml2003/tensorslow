@@ -18,6 +18,10 @@ PyObjPtr BooleanKlass::repr(const PyObjPtr& obj) {
                           : CreatePyString("False")->as<PyString>();
 }
 
+PyObjPtr BooleanKlass::str(const PyObjPtr& obj) {
+  return repr(obj);
+}
+
 PyObjPtr BooleanKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (!lhs->is<PyBoolean>() || !rhs->is<PyBoolean>()) {
     throw std::runtime_error("Boolean does not support eq operation");

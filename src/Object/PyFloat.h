@@ -1,6 +1,7 @@
 #ifndef TORCHLIGHT_OBJECT_PYFLOAT_H
 #define TORCHLIGHT_OBJECT_PYFLOAT_H
 
+#include "Object/Object.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyString.h"
 
@@ -17,7 +18,7 @@ class FloatKlass : public Klass {
     return instance;
   }
 
-  PyObjPtr construct(const PyObjPtr& klass, const PyObjPtr& args) override;
+  PyObjPtr init(const PyObjPtr& klass, const PyObjPtr& args) override;
 
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
@@ -28,6 +29,9 @@ class FloatKlass : public Klass {
   PyObjPtr truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
   PyObjPtr repr(const PyObjPtr& obj) override;
+  PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
+
+  PyObjPtr neg(const PyObjPtr& obj) override;
 
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 

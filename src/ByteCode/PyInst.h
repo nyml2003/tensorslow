@@ -2,6 +2,7 @@
 #define TORCHLIGHT_RUNTIME_PYINST_H
 
 #include "ByteCode/ByteCode.h"
+#include "Object/Object.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyString.h"
 
@@ -36,6 +37,8 @@ class InstKlass : public Klass {
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 
   PyObjPtr repr(const PyObjPtr& obj) override;
+
+  PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
 };
 
 PyInstPtr CreateLoadConst(Index index);
@@ -152,10 +155,6 @@ inline PyInstPtr CreateBinaryRShift() {
 
 inline PyInstPtr CreateYieldValue() {
   return std::make_shared<PyInst>(ByteCode::YIELD_VALUE);
-}
-
-inline PyInstPtr CreateGetYieldFromIter() {
-  return std::make_shared<PyInst>(ByteCode::GET_YIELD_FROM_ITER);
 }
 
 inline PyInstPtr CreateJumpForward(Index index) {

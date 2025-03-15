@@ -17,7 +17,7 @@ class SliceKlass : public Klass {
     ConfigureBasicAttributes(instance);
     return instance;
   }
-  PyObjPtr construct(const PyObjPtr& type, const PyObjPtr& args) override;
+  PyObjPtr init(const PyObjPtr& type, const PyObjPtr& args) override;
   PyObjPtr str(const PyObjPtr& obj) override;
 };
 

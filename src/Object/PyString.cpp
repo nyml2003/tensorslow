@@ -2,6 +2,7 @@
 #include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
+#include "Function/FunctionForward.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/Iterator.h"
 #include "Object/ObjectHelper.h"
@@ -14,7 +15,7 @@
 #include <iostream>
 
 namespace torchlight::Object {
-
+Index PyString::indent = 0;
 void StringKlass::Initialize() {
   LoadClass(CreatePyString("str")->as<PyString>(), Self());
   ConfigureBasicAttributes(Self());
@@ -27,19 +28,58 @@ void StringKlass::Initialize() {
   Self()->AddAttribute(
     CreatePyString("upper")->as<PyString>(), CreatePyNativeFunction(StringUpper)
   );
+  Self()->AddAttribute(
+    CreatePyString("__add__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<StringKlass>(&StringKlass::add)
+    )
+  );
+  Self()->AddAttribute(
+    CreatePyString("__eq__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<StringKlass>(&StringKlass::eq))
+  );
+  Self()->AddAttribute(
+    CreatePyString("__len__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<StringKlass>(&StringKlass::len)
+    )
+  );
+  Self()->AddAttribute(
+    CreatePyString("__str__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<StringKlass>(&StringKlass::str)
+    )
+  );
+  Self()->AddAttribute(
+    CreatePyString("__repr__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<StringKlass>(&StringKlass::repr
+    ))
+  );
+  Self()->AddAttribute(
+    CreatePyString("__iter__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<StringKlass>(&StringKlass::iter
+    ))
+  );
+  Self()->AddAttribute(
+    CreatePyString("__serialize__")->as<PyString>(),
+    CreatePyNativeFunction(
+      CreateForwardFunction<StringKlass>(&StringKlass::_serialize_)
+    )
+  );
+  Self()->AddAttribute(
+    CreatePyString("__init__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<StringKlass>(&StringKlass::init
+    ))
+  );
 }
 
-PyObjPtr StringKlass::construct(const PyObjPtr& klass, const PyObjPtr& args) {
+PyObjPtr StringKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {
   if (klass->as<PyType>()->Owner() != Self()) {
-    throw std::runtime_error("construct(): klass is not a string");
+    throw std::runtime_error("init(): klass is not a string");
   }
   auto argList = args->as<PyList>();
   if (argList->Length() == 0) {
     return CreatePyString("");
   }
   if (argList->Length() != 1) {
-    throw std::runtime_error("construct(): args must be a list with one element"
-    );
+    throw std::runtime_error("init(): args must be a list with one element");
   }
   return argList->GetItem(0)->str();
 }
@@ -117,10 +157,10 @@ PyStrPtr PyString::Join(const PyObjPtr& iterable) {
   auto result = CreatePyString("")->as<PyString>();
   ForEach(iterable, [&](const PyObjPtr& item, Index index, const PyObjPtr&) {
     if (index == 1) {
-      result = result->Add(item->repr()->as<PyString>());
+      result = result->Add(item->as<PyString>());
     } else {
       result = result->Add(CreatePyString(value)->as<PyString>())
-                 ->Add(item->repr()->as<PyString>());
+                 ->Add(item->as<PyString>());
     }
   });
   return result;
@@ -139,11 +179,21 @@ PyStrPtr PyString::Add(const PyStrPtr& other) {
   return CreatePyString(value.Add(other->value))->as<PyString>();
 }
 
-void PyString::Print() const {
+void PyString::Print(bool enableIndent) const {
+  if (enableIndent) {
+    for (Index i = 0; i < indent; i++) {
+      std::cout << "  " << std::flush;
+    }
+  }
   std::cout << ToCppString() << std::flush;
 }
 
-void PyString::PrintLine() const {
+void PyString::PrintLine(bool enableIndent) const {
+  if (enableIndent) {
+    for (Index i = 0; i < indent; i++) {
+      std::cout << "  " << std::flush;
+    }
+  }
   std::cout << ToCppString() << std::endl;
 }
 
@@ -190,7 +240,8 @@ PyObjPtr StringJoin(const PyObjPtr& args) {
   auto argList = args->as<PyList>();
   auto delimiter = argList->GetItem(0)->as<PyString>();
   auto list = argList->GetItem(1)->as<PyList>();
-  return delimiter->Join(list);
+  auto strList = Map(list, [](const PyObjPtr& item) { return item->str(); });
+  return delimiter->Join(strList);
 }
 
 PyObjPtr StringSplit(const PyObjPtr& args) {

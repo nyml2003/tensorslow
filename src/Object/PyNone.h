@@ -1,6 +1,7 @@
 #ifndef TORCHLIGHT_OBJECT_PYNONE_H
 #define TORCHLIGHT_OBJECT_PYNONE_H
 
+#include "Object/Object.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyString.h"
 
@@ -18,6 +19,9 @@ class NoneKlass : public Klass {
   }
 
   PyObjPtr repr(const PyObjPtr& obj) override;
+  PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
+
+  PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 };

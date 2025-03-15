@@ -43,7 +43,7 @@ Object::PyObjPtr Interpreter::EvalConstructor(
   const Object::PyTypePtr& type,
   const Object::PyListPtr& arguments
 ) {
-  return type->Owner()->construct(type, arguments);
+  return type->Owner()->init(type, arguments);
 }
 
 Object::PyObjPtr Interpreter::EvalMethod(

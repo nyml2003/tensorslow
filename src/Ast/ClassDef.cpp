@@ -1,5 +1,7 @@
 #include "Ast/ClassDef.h"
+#include "Ast/FuncDef.h"
 #include "Ast/INode.h"
+#include "Ast/Module.h"
 #include "ByteCode/PyCode.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyNone.h"
@@ -8,6 +10,29 @@
 #include "Tools/Tools.h"
 
 namespace torchlight::Ast {
+
+ClassDef::ClassDef(
+  Object::PyStrPtr name,
+  INodePtr bases,
+  const INodePtr& parent
+)
+  : INode(ClassDefKlass::Self(), parent),
+    name(std::move(name)),
+    bases(std::move(bases)),
+    body(Object::CreatePyList({})->as<Object::PyList>()),
+    codeIndex(nullptr) {
+  if (parent->is<Module>()) {
+    parents = Object::CreatePyList({parent})->as<Object::PyList>();
+  }
+  if (parent->is<FuncDef>()) {
+    parents = parent->as<FuncDef>()->Parents();
+    parents->Append(parent);
+  }
+  if (parent->is<ClassDef>()) {
+    parents = parent->as<ClassDef>()->Parents();
+    parents->Append(parent);
+  }
+}
 
 Object::PyObjPtr ClassDefKlass::visit(
   const Object::PyObjPtr& obj,
@@ -69,7 +94,7 @@ Object::PyObjPtr ClassDefKlass::emit(
   parent->CallFunction(3);
   parent->StoreName(classDef->Name());
   if (ArgsHelper::Instance().Has("show_code")) {
-    Object::DebugPrint(selfCode->repr());
+    Object::PrintCode(selfCode);
   }
   return Object::CreatePyNone();
 }

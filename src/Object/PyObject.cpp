@@ -37,6 +37,17 @@ KlassPtr ObjectKlass::Self() {
     CreatePyString("__init__")->as<PyString>(),
     CreatePyNativeFunction(ObjectInit)
   );
+  instance->AddAttribute(
+    CreatePyString("__str__")->as<PyString>(), CreatePyNativeFunction(KlassStr)
+  );
+  instance->AddAttribute(
+    CreatePyString("__repr__")->as<PyString>(),
+    CreatePyNativeFunction(KlassRepr)
+  );
+  instance->AddAttribute(
+    CreatePyString("__bool__")->as<PyString>(),
+    CreatePyNativeFunction(KlassBool)
+  );
   instance->SetType(CreatePyType(instance));
   instance->SetSuper(CreatePyList({}));
   instance->SetMro(CreatePyList({CreatePyType(instance)->as<PyType>()}));

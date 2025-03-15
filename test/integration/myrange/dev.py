@@ -13,9 +13,7 @@ def range(start, end, step):
             yield start
             start += step
 
+a = [1, 2, 3, 4, 5]
 
-for i in range(1, 10):
-    cur = ""
-    for j in range(1, i + 1):
-        cur = cur + str(j) + "×" + str(i) + "=" + str(i * j) + "  "
-    print(cur)
+for i in range(len(a)):
+    print(a[i])

@@ -55,9 +55,9 @@ void PySlice::BindLength(Index length) {
   step = CreatePyInteger(Collections::CreateIntegerWithI64(stepValue));
 }
 
-PyObjPtr SliceKlass::construct(const PyObjPtr& type, const PyObjPtr& args) {
+PyObjPtr SliceKlass::init(const PyObjPtr& type, const PyObjPtr& args) {
   if (type->as<PyType>()->Owner() != Self()) {
-    throw std::runtime_error("PySlice::construct(): klass is not a slice");
+    throw std::runtime_error("PySlice::init(): klass is not a slice");
   }
   if (args->as<PyList>()->Length() == 3) {
     return CreatePySlice(

@@ -115,7 +115,6 @@ class PyCode : public PyObject {
   void BinaryAnd();
   void BinaryXor();
   void BinaryOr();
-  void GetYieldFromIter() { instructions->Append(CreateGetYieldFromIter()); }
   void YieldValue() { instructions->Append(CreateYieldValue()); }
 
  private:
@@ -142,8 +141,6 @@ class CodeKlass : public Klass {
     return instance;
   }
 
-  PyObjPtr str(const PyObjPtr& self) override;
-
   PyObjPtr repr(const PyObjPtr& self) override;
 
   PyObjPtr _serialize_(const PyObjPtr& self) override;
@@ -152,6 +149,8 @@ class CodeKlass : public Klass {
 };
 
 PyObjPtr CreatePyCode(const PyObjPtr& name);
+// 打印PyCode的详细信息
+void PrintCode(const PyCodePtr& code);
 
 }  // namespace torchlight::Object
 

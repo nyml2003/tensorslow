@@ -15,6 +15,7 @@
 #include "Object/PyFloat.h"
 #include "Object/PyInteger.h"
 #include "Object/PyList.h"
+#include "Object/PyMatrix.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 #include "Object/PyString.h"
@@ -65,6 +66,78 @@ void ForEach(
   }
 }
 
+PyObjPtr Map(
+  const PyObjPtr& iterable,
+  const std::function<PyObjPtr(const PyObjPtr& value)>& func
+) {
+  auto iter = iterable->iter();
+  auto iterableObj = std::dynamic_pointer_cast<IIterator>(iter);
+  if (!iterableObj) {
+    throw std::runtime_error("object is not iterable");
+  }
+  auto value = iter->next();
+  Collections::List<PyObjPtr> result;
+  while (!value->is<IterDone>()) {
+    result.Push(func(value));
+    value = iter->next();
+  }
+  return CreatePyList(result)->as<PyList>();
+}
+PyObjPtr SolveStr(const KlassPtr& klass, const PyObjPtr& self) {
+  auto strFunc = self->getattr(CreatePyString("__str__")->as<PyString>());
+  if (strFunc != nullptr) {
+    return Runtime::Interpreter::Eval(strFunc, CreatePyList({})->as<PyList>());
+  }
+  auto reprFunc = self->getattr(CreatePyString("__repr__")->as<PyString>());
+  if (reprFunc != nullptr) {
+    return Runtime::Interpreter::Eval(reprFunc, CreatePyList({})->as<PyList>());
+  }
+  return klass->repr(self);
+}
+
+PyObjPtr Str(const PyObjPtr& args) {
+  CheckNativeFunctionArguments(args);
+  auto argList = args->as<PyList>();
+  if (argList->Length() == 0) {
+    return CreatePyString("");
+  }
+  if (argList->Length() != 1) {
+    throw std::runtime_error("str() takes at most 1 argument");
+  }
+  return args->as<PyList>()->GetItem(0)->str();
+}
+
+PyObjPtr KlassStr(const PyObjPtr& args) {
+  return StringConcat(CreatePyList(
+    {CreatePyString("<"), args->as<PyList>()->GetItem(0)->Klass()->Name(),
+     CreatePyString(" object at "), Identity(args->as<PyList>()->GetItem(0)),
+     CreatePyString(">")}
+  ));
+}
+
+PyObjPtr Repr(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
+  return args->as<PyList>()->GetItem(0)->repr();
+}
+
+PyObjPtr KlassRepr(const PyObjPtr& args) {
+  return StringConcat(CreatePyList(
+    {CreatePyString("<"), args->as<PyList>()->GetItem(0)->Klass()->Name(),
+     CreatePyString(" object at "), Identity(args->as<PyList>()->GetItem(0)),
+     CreatePyString(">")}
+  ));
+}
+
+PyObjPtr Bool(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
+  return args->as<PyList>()->GetItem(0)->boolean();
+}
+
+PyObjPtr KlassBool(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
+  return CreatePyBoolean(true);
+}
+
 PyObjPtr Identity(const PyObjPtr& obj) {
   return CreatePyString(
     Collections::CreateIntegerWithU64(reinterpret_cast<uint64_t>(obj.get()))
@@ -87,6 +160,9 @@ PyObjPtr GetMro(const PyObjPtr& args) {
 PyObjPtr GetDict(const PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   auto obj = args->as<PyList>()->GetItem(0);
+  if (obj->is<PyType>()) {
+    return obj->as<PyType>()->Owner()->Attributes();
+  }
   return obj->Attributes();
 }
 PyListPtr ComputeMro(const PyTypePtr& type) {
@@ -218,14 +294,19 @@ bool CouldTypePlaceAhead(
 }
 
 void DebugPrint(const PyObjPtr& obj) {
-  obj->str()->as<PyString>()->PrintLine();
+  if (obj->is<PyString>()) {
+    std::cout << obj->as<PyString>()->ToCppString() << std::endl;
+    return;
+  }
+  std::cout << obj->str()->as<PyString>()->ToCppString() << std::endl;
 }
 
 PyObjPtr Print(const PyObjPtr& args) {
   CheckNativeFunctionArguments(args);
   auto argList = args->as<PyList>();
   for (Index i = 0; i < argList->Length(); i++) {
-    argList->GetItem(i)->str()->as<PyString>()->Print();
+    auto arg = argList->GetItem(i);
+    arg->str()->as<PyString>()->Print();
     if (i < argList->Length() - 1) {
       CreatePyString(" ")->as<PyString>()->Print();
     }
@@ -238,6 +319,12 @@ PyObjPtr Len(const PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   auto value = args->as<PyList>()->GetItem(0);
   return value->len();
+}
+
+PyObjPtr Next(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
+  auto value = args->as<PyList>()->GetItem(0);
+  return value->next();
 }
 
 Object::PyObjPtr RandInt(const Object::PyObjPtr& args) {
@@ -279,11 +366,6 @@ Object::PyObjPtr Sleep(const Object::PyObjPtr& args) {
   std::this_thread::sleep_for(std::chrono::seconds(secondsValue));
   return Object::CreatePyNone();
 }
-/*
-loc: _ArrayLikeFloat_co = ...,
-        scale: _ArrayLikeFloat_co = ...,
-        size: None | _ShapeLike = ...,
-*/
 Object::PyObjPtr Normal(const Object::PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 3);
   auto argList = args->as<PyList>();
@@ -303,9 +385,16 @@ Object::PyObjPtr Normal(const Object::PyObjPtr& args) {
 Object::PyObjPtr Shuffle(const Object::PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   auto argList = args->as<PyList>();
-  auto list = argList->GetItem(0)->as<PyList>();
-  list->Shuffle();
-  return list;
+  auto arg = argList->GetItem(0);
+  if (arg->is<PyList>()) {
+    arg->as<PyList>()->Shuffle();
+    return CreatePyNone();
+  }
+  if (arg->is<PyMatrix>()) {
+    arg->as<PyMatrix>()->Shuffle();
+    return CreatePyNone();
+  }
+  throw std::runtime_error("Shuffle function need list or matrix argument");
 }
 
 Object::PyObjPtr Input(const Object::PyObjPtr& args) {
@@ -338,10 +427,6 @@ void ConfigureBasicAttributes(const KlassPtr& klass) {
     CreatePyString("__class__")->as<PyString>(), klass->Type()
   );
   klass->AddAttribute(
-    CreatePyString("__repr__")->as<PyString>(),
-    CreatePyNativeFunction(KlassRepr)
-  );
-  klass->AddAttribute(
     CreatePyString("__bases__")->as<PyString>(), CreatePyIife(GetBases)
   );
   klass->AddAttribute(
@@ -350,19 +435,6 @@ void ConfigureBasicAttributes(const KlassPtr& klass) {
   klass->AddAttribute(
     CreatePyString("__dict__")->as<PyString>(), CreatePyIife(GetDict)
   );
-}
-
-PyObjPtr KlassRepr(const PyObjPtr& args) {
-  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
-  auto obj = args->as<PyList>()->GetItem(0);
-  return CreatePyString("<")
-    ->add(obj->getattr(CreatePyString("__name__")->str()))
-    ->add(CreatePyString(" object at ")
-            ->add(CreatePyString(Collections::CreateIntegerWithU64(
-                                   reinterpret_cast<uint64_t>(obj.get())
-            )
-                                   .ToHexString())))
-    ->add(CreatePyString(">"));
 }
 
 PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept {

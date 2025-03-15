@@ -48,6 +48,8 @@ class PyFrame : public Object::PyObject {
 
   Object::PyListPtr CurrentStack() const;
 
+  Object::PyObjPtr StackTop() const { return stack.Top(); }
+
   Object::PyDictPtr CurrentLocals() const;
 
   Object::PyDictPtr CurrentGlobals() const;
@@ -79,7 +81,9 @@ class FrameKlass : public Object::Klass {
   explicit FrameKlass() = default;
   static Object::KlassPtr Self() {
     static Object::KlassPtr instance = std::make_shared<FrameKlass>();
-    LoadClass(Object::CreatePyString("frame")->as<Object::PyString>(), instance);
+    LoadClass(
+      Object::CreatePyString("frame")->as<Object::PyString>(), instance
+    );
     ConfigureBasicAttributes(instance);
     return instance;
   }
@@ -88,6 +92,7 @@ class FrameKlass : public Object::Klass {
 };
 
 void ParseByteCode(const Object::PyCodePtr& code);
+void PrintFrame(const PyFramePtr& frame);
 
 }  // namespace torchlight::Runtime
 

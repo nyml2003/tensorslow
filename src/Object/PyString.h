@@ -18,7 +18,7 @@ class StringKlass : public Klass {
 
   static void Initialize();
 
-  PyObjPtr construct(const PyObjPtr& klass, const PyObjPtr& args) override;
+  PyObjPtr init(const PyObjPtr& klass, const PyObjPtr& args) override;
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr len(const PyObjPtr& obj) override;
@@ -34,10 +34,14 @@ class PyString : public PyObject {
 
  private:
   Collections::String value;
+  // 缩进深度
+  static Index indent;
 
  public:
   explicit PyString(Collections::String value)
     : PyObject(StringKlass::Self()), value(std::move(value)) {}
+  static void IncreaseIndent() { indent++; }
+  static void DecreaseIndent() { indent--; }
 
   Index Length() const { return value.Size(); }
 
@@ -49,9 +53,8 @@ class PyString : public PyObject {
 
   PyStrPtr Add(const PyStrPtr& other);
 
-  void Print() const;
-
-  void PrintLine() const;
+  void Print(bool enableIndent = true) const;
+  void PrintLine(bool enableIndent = true) const;
 
   std::string ToCppString() const;
 
@@ -61,7 +64,16 @@ class PyString : public PyObject {
 
   Collections::String Value() const { return value; }
 };
+
 using PyStrPtr = std::shared_ptr<PyString>;
+
+PyObjPtr StringUpper(const PyObjPtr& args);
+
+PyObjPtr StringJoin(const PyObjPtr& args);
+
+PyObjPtr StringSplit(const PyObjPtr& args);
+
+PyObjPtr StringConcat(const PyObjPtr& args);
 
 inline PyObjPtr CreatePyString(const Collections::String& value) {
   return std::make_shared<PyString>(value);
@@ -72,14 +84,6 @@ inline PyObjPtr CreatePyString(const char* value) {
 inline PyObjPtr CreatePyString(const std::string& value) {
   return CreatePyString(Collections::CreateStringWithCString(value.c_str()));
 }
-
-PyObjPtr StringUpper(const PyObjPtr& args);
-
-PyObjPtr StringJoin(const PyObjPtr& args);
-
-PyObjPtr StringSplit(const PyObjPtr& args);
-
-PyObjPtr StringConcat(const PyObjPtr& args);
 
 }  // namespace torchlight::Object
 

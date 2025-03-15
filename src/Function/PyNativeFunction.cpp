@@ -5,6 +5,10 @@
 
 namespace torchlight::Object {
 
+PyObjPtr PyNativeFunction::Call(const PyObjPtr& args) {
+  return nativeFunction(args);
+}
+
 void CheckNativeFunctionArgumentsWithExpectedLength(
   const PyObjPtr& args,
   Index expected

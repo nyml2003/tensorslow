@@ -5,7 +5,9 @@
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyFloat.h"
+#include "Object/PyInteger.h"
 #include "Object/PyList.h"
+#include "Object/PyNone.h"
 #include "Object/PyString.h"
 
 namespace torchlight::Object {
@@ -54,7 +56,7 @@ PyObjPtr MatrixKlass::matmul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr MatrixKlass::gt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyMatrix>()){
+  if (!lhs->is<PyMatrix>()) {
     throw std::runtime_error("MatrixKlass::gt(): lhs is not a matrix");
   }
   if (!rhs->is<PyFloat>()) {
@@ -122,6 +124,101 @@ PyObjPtr MatrixKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
     throw std::runtime_error("MatrixKlass::add(): lhs or rhs is not a matrix");
   }
   return lhs->as<PyMatrix>()->Add(rhs->as<PyMatrix>());
+}
+
+PyObjPtr MatrixKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
+  if (!obj->is<PyMatrix>()) {
+    throw std::runtime_error("MatrixKlass::getitem(): obj is not a matrix");
+  }
+  auto matrix = obj->as<PyMatrix>();
+  // a[row,col] a[row] a[row][col] a[rowStart:rowEnd,colStart:colEnd]
+  if (key->is<PyList>()) {
+    // a[row,col] 或者 a[rowStart:rowEnd,colStart:colEnd]
+    auto keyList = key->as<PyList>();
+    if (keyList->GetItem(0)->is<PyInteger>()) {
+      // a[row,col]
+      if (keyList->Length() != 2) {
+        throw std::runtime_error("MatrixKlass::getitem(): key length is not 2");
+      }
+      auto shape = matrix->Shape();
+      auto matrixRow = shape->GetItem(0)->as<PyInteger>()->ToU64();
+      auto matrixCol = shape->GetItem(1)->as<PyInteger>()->ToU64();
+      Index rowValue = 0;
+      Index colValue = 0;
+      auto row = keyList->GetItem(0)->as<PyInteger>();
+      if (row->GetSign() == Collections::Integer::IntSign::Positive) {
+        rowValue = row->ToU64();
+      }
+      if (row->GetSign() == Collections::Integer::IntSign::Negative) {
+        rowValue = matrixRow + row->ToI64();
+      }
+      auto col = keyList->GetItem(1)->as<PyInteger>();
+      if (col->GetSign() == Collections::Integer::IntSign::Positive) {
+        colValue = col->ToU64();
+      }
+      if (col->GetSign() == Collections::Integer::IntSign::Negative) {
+        colValue = matrixCol + col->ToI64();
+      }
+      return CreatePyFloat(matrix->At(rowValue, colValue));
+    }
+    if (keyList->GetItem(0)->is<PySlice>()) {
+      // a[rowStart:rowEnd,colStart:colEnd]
+      if (keyList->Length() != 2) {
+        throw std::runtime_error("MatrixKlass::getitem(): key length is not 2");
+      }
+      auto rowSlice = keyList->GetItem(0)->as<PySlice>();
+      auto shape = matrix->Shape();
+      rowSlice->BindLength(matrix->Shape()->GetItem(0)->as<PyInteger>()->ToU64()
+      );
+      auto colSlice = keyList->GetItem(1)->as<PySlice>();
+      colSlice->BindLength(matrix->Shape()->GetItem(1)->as<PyInteger>()->ToU64()
+      );
+      auto rowStart = rowSlice->GetStart()->as<PyInteger>()->ToU64();
+      auto rowStop = rowSlice->GetStop()->as<PyInteger>()->ToU64();
+      auto colStart = colSlice->GetStart()->as<PyInteger>()->ToU64();
+      auto colStop = colSlice->GetStop()->as<PyInteger>()->ToU64();
+      return matrix->GetSlice(rowStart, colStart, rowStop, colStop);
+    }
+  }
+  if (key->is<PySlice>()) {
+    // a[rowStart:rowEnd]
+    auto rowSlice = key->as<PySlice>();
+    rowSlice->BindLength(matrix->Shape()->GetItem(0)->as<PyInteger>()->ToU64());
+    auto rowStart = rowSlice->GetStart()->as<PyInteger>()->ToU64();
+    auto rowStop = rowSlice->GetStop()->as<PyInteger>()->ToU64();
+    return matrix->GetRows(rowStart, rowStop);
+  }
+  throw std::runtime_error("MatrixKlass::getitem(): key type is not supported");
+}
+
+PyObjPtr MatrixKlass::setitem(
+  const PyObjPtr& obj,
+  const PyObjPtr& key,
+  const PyObjPtr& value
+) {
+  if (!obj->is<PyMatrix>()) {
+    throw std::runtime_error("MatrixKlass::setitem(): obj is not a matrix");
+  }
+  // a[rowStart:rowStop,colStart:colStop] = matrix
+  if (!key->is<PyList>()) {
+    throw std::runtime_error("MatrixKlass::setitem(): key is not a list");
+  }
+  if (!value->is<PyMatrix>()) {
+    throw std::runtime_error("MatrixKlass::setitem(): value is not a matrix");
+  }
+  auto matrix = obj->as<PyMatrix>();
+  auto keyList = key->as<PyList>();
+  auto other = value->as<PyMatrix>();
+  auto rowSlice = keyList->GetItem(0)->as<PySlice>();
+  rowSlice->BindLength(matrix->Shape()->GetItem(0)->as<PyInteger>()->ToU64());
+  auto colSlice = keyList->GetItem(1)->as<PySlice>();
+  colSlice->BindLength(matrix->Shape()->GetItem(1)->as<PyInteger>()->ToU64());
+  auto rowStart = rowSlice->GetStart()->as<PyInteger>()->ToU64();
+  auto rowStop = rowSlice->GetStop()->as<PyInteger>()->ToU64();
+  auto colStart = colSlice->GetStart()->as<PyInteger>()->ToU64();
+  auto colStop = colSlice->GetStop()->as<PyInteger>()->ToU64();
+  matrix->SetSlice(rowStart, colStart, rowStop, colStop, other);
+  return CreatePyNone();
 }
 
 PyObjPtr Matrix(const PyObjPtr& args) {

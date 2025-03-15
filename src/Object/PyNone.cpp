@@ -1,5 +1,6 @@
 #include "Object/PyNone.h"
 #include "ByteCode/ByteCode.h"
+#include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
 #include "Object/PyString.h"
 
@@ -17,6 +18,13 @@ PyObjPtr NoneKlass::repr(const PyObjPtr& obj) {
     throw std::runtime_error("NoneType does not support repr operation");
   }
   return CreatePyString("None");
+}
+
+PyObjPtr NoneKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (lhs->is<PyNone>() && rhs->is<PyNone>()) {
+    return CreatePyBoolean(true);
+  }
+  return CreatePyBoolean(false);
 }
 
 PyNone::PyNone() : PyObject(NoneKlass::Self()) {}

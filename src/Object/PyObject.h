@@ -15,6 +15,8 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   explicit PyObject(KlassPtr klass);
   [[nodiscard]] KlassPtr Klass() const { return klass; }
   [[nodiscard]] PyDictPtr Attributes();
+  void SetAttributes(const PyDictPtr& _attributes) { attributes = _attributes; }
+  void SetKlass(const KlassPtr& _klass) { klass = _klass; }
   virtual ~PyObject() = default;
   PyObject(const PyObject&) = default;
   PyObject& operator=(const PyObject&) = default;
@@ -127,6 +129,8 @@ class ObjectKlass : public Klass {
 };
 
 bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs);
+
+bool operator<(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
 bool operator!=(const PyObjPtr& lhs, const PyObjPtr& rhs);
 

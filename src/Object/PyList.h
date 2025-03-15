@@ -2,6 +2,7 @@
 #define TORCHLIGHT_OBJECT_PYLIST_H
 
 #include "Collections/List.h"
+#include "Object/Object.h"
 #include "Object/PyObject.h"
 #include "Object/PySlice.h"
 
@@ -14,8 +15,9 @@ class ListKlass : public Klass {
     return instance;
   }
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr str(const PyObjPtr& obj) override;
-  PyObjPtr repr(const PyObjPtr& obj) override { return str(obj); }
+  PyObjPtr repr(const PyObjPtr& obj) override;
   PyObjPtr getitem(const PyObjPtr& obj, const PyObjPtr& key) override;
   PyObjPtr setitem(
     const PyObjPtr& obj,
@@ -25,7 +27,7 @@ class ListKlass : public Klass {
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr len(const PyObjPtr& obj) override;
   PyObjPtr contains(const PyObjPtr& obj, const PyObjPtr& key) override;
-  PyObjPtr construct(const PyObjPtr& type, const PyObjPtr& args) override;
+  PyObjPtr init(const PyObjPtr& type, const PyObjPtr& args) override;
   PyObjPtr iter(const PyObjPtr& obj) override;
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
   static void Initialize();

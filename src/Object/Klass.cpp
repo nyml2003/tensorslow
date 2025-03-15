@@ -36,7 +36,7 @@ void Klass::SetMro(const PyObjPtr& mro) {
   this->mro = mro->as<PyList>();
 }
 
-PyObjPtr Klass::construct(const PyObjPtr& type, const PyObjPtr& args) {
+PyObjPtr Klass::init(const PyObjPtr& type, const PyObjPtr& args) {
   auto klass = type->as<PyType>()->Owner();
   auto instance = std::make_shared<PyObject>(klass);
   if (klass->IsNative()) {
@@ -137,15 +137,15 @@ PyObjPtr Klass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr Klass::repr(const PyObjPtr& self) {
-  return self->Klass()->Name();
-  // return CreatePyString("<")
-  //   ->add(self->getattr(CreatePyString("__name__")->str()))
-  //   ->add(CreatePyString(" object at ")
-  //           ->add(CreatePyString(Collections::CreateIntegerWithU64(
-  //                                  reinterpret_cast<uint64_t>(self.get())
-  //           )
-  //                                  .ToHexString())))
-  //   ->add(CreatePyString(">"));
+  auto reprFunc = GetAttr(self, CreatePyString("__repr__")->as<PyString>());
+  if (reprFunc != nullptr) {
+    return Runtime::Interpreter::Eval(reprFunc, CreatePyList({})->as<PyList>());
+  }
+  return StringConcat(CreatePyList(
+    {CreatePyString("<"),
+     self->getattr(CreatePyString("__name__")->as<PyString>()),
+     CreatePyString(" object at "), Identity(self), CreatePyString(">")}
+  ));
 }
 
 PyObjPtr Klass::gt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -155,15 +155,9 @@ PyObjPtr Klass::gt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr Klass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  auto eq =
-    Invoke(lhs, CreatePyString("__eq__"), CreatePyList({rhs})->as<PyList>());
-  if (!eq->is<PyBoolean>()) {
-    DebugPrint(eq);
-    DebugPrint(lhs);
-    DebugPrint(rhs);
-    throw std::runtime_error("eq should return boolean");
-  }
-  return eq;
+  return Invoke(
+    lhs, CreatePyString("__eq__"), CreatePyList({rhs})->as<PyList>()
+  );
 }
 
 PyObjPtr Klass::lt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -183,13 +177,14 @@ PyObjPtr Klass::ne(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr Klass::boolean(const PyObjPtr& obj) {
-  auto boolFunc = GetAttr(obj, CreatePyString("__getattr__")->as<PyString>());
+  auto boolFunc = obj->getattr(CreatePyString("__bool__")->as<PyString>());
   if (boolFunc != nullptr) {
     return Runtime::Interpreter::Eval(boolFunc, CreatePyList({})->as<PyList>());
   }
-  auto lenFunc = GetAttr(obj, CreatePyString("__len__")->as<PyString>());
+  auto lenFunc = obj->getattr(CreatePyString("__len__")->as<PyString>());
   if (lenFunc != nullptr) {
-    auto len = Runtime::Interpreter::Eval(lenFunc, CreatePyList({})->as<PyList>());
+    auto len =
+      Runtime::Interpreter::Eval(lenFunc, CreatePyList({})->as<PyList>());
     return len->ne(CreatePyInteger(0));
   }
   return CreatePyBoolean(true);
@@ -242,12 +237,7 @@ PyObjPtr Klass::getattr(const PyObjPtr& obj, const PyObjPtr& key) {
   if (attr != nullptr) {
     return AttrWrapper(obj, attr);
   }
-  auto errorMessge = CreatePyString("AttributeError: ")
-                       ->add(obj->str())
-                       ->add(CreatePyString(" has no attribute "))
-                       ->add(key->str())
-                       ->as<PyString>();
-  throw std::runtime_error(errorMessge->ToCppString());
+  return nullptr;
 }
 
 PyObjPtr Klass::setattr(
@@ -267,7 +257,15 @@ PyObjPtr Klass::setattr(
 }
 
 PyObjPtr Klass::str(const PyObjPtr& self) {
-  return self->repr();
+  auto strFunc = self->getattr(CreatePyString("__str__")->as<PyString>());
+  if (strFunc != nullptr) {
+    return Runtime::Interpreter::Eval(strFunc, CreatePyList({})->as<PyList>());
+  }
+  auto reprFunc = self->getattr(CreatePyString("__repr__")->as<PyString>());
+  if (reprFunc != nullptr) {
+    return Runtime::Interpreter::Eval(reprFunc, CreatePyList({})->as<PyList>());
+  }
+  return repr(self);
 }
 
 PyObjPtr Klass::matmul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -310,7 +308,7 @@ KlassPtr CreatePyKlass(
 }
 
 void Klass::AddAttribute(const PyStrPtr& key, const PyObjPtr& value) {
-  attributes->as<PyDictionary>()->Put(key, value);
+  attributes->Put(key, value);
 }
 
 }  // namespace torchlight::Object

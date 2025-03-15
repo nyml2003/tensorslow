@@ -18,6 +18,7 @@
 #include "Ast/Statement/PassStmt.h"
 #include "Ast/Statement/ReturnStmt.h"
 #include "Ast/Statement/WhileStmt.h"
+#include "Ast/Statement/YieldStmt.h"
 #include "ByteCode/PyCode.h"
 #include "Collections/IntegerHelper.h"
 #include "Object/Object.h"
@@ -108,14 +109,9 @@ antlrcpp::Any Generator::visitTestlist_comp(
 
 antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
   if (ctx->OPEN_PAREN() != nullptr) {
-    // 情况 1: '(' (yield_expr | testlist_comp)? ')'
-    std::cout << "atom: '(' (yield_expr | testlist_comp)? ')'" << std::endl;
-    // if (ctx->yield_expr()) {
-    //   //visitYield_expr(ctx->yield_expr());
-    // } else if (ctx->testlist_comp()) {
-    //   //visitTestlist_comp(ctx->testlist_comp());
-    // }
-  } else if (ctx->OPEN_BRACK() != nullptr) {
+    return visitTest(ctx->testlist_comp()->test(0)).as<Ast::INodePtr>();
+  }
+  if (ctx->OPEN_BRACK() != nullptr) {
     // 情况 2: '[' testlist_comp? ']'
     if (ctx->testlist_comp() == nullptr) {
       return Ast::CreateList(Object::CreatePyList({}), context);
@@ -605,9 +601,10 @@ antlrcpp::Any Generator::visitFuncdef(Python3Parser::FuncdefContext* ctx) {
   // 3. 获取函数体
 
   // 4. 创建函数对象
-  auto funcDef = std::dynamic_pointer_cast<Ast::FuncDef>(
-    Ast::CreateFuncDef(funcName, parameters, Object::CreatePyList({}), context)
-  );
+  auto funcDef = std::dynamic_pointer_cast<Ast::FuncDef>(Ast::CreateFuncDef(
+    funcName->as<Object::PyString>(), parameters->as<Object::PyList>(),
+    Object::CreatePyList({})->as<Object::PyList>(), context
+  ));
   auto oldContext = context;
   context = funcDef;
   auto body = visitBlock(ctx->block()).as<Object::PyObjPtr>();
@@ -662,6 +659,11 @@ antlrcpp::Any Generator::visitSimple_stmts(
 
 antlrcpp::Any Generator::visitReturn_stmt(Python3Parser::Return_stmtContext* ctx
 ) {
+  if (ctx->testlist() == nullptr) {
+    return Ast::CreateReturnStmt(
+      CreateAtom(Object::CreatePyNone(), context), context
+    );
+  }
   return Ast::CreateReturnStmt(visitTestlist(ctx->testlist()), context);
 }
 
@@ -804,7 +806,8 @@ antlrcpp::Any Generator::visitExprlist(Python3Parser::ExprlistContext* ctx) {
 }
 
 antlrcpp::Any Generator::visitClassdef(Python3Parser::ClassdefContext* ctx) {
-  auto className = Object::CreatePyString(ctx->name()->getText().c_str());
+  auto className = Object::CreatePyString(ctx->name()->getText().c_str())
+                     ->as<Object::PyString>();
 
   auto bases = Object::CreatePyList({})->as<Object::PyList>();
   if (ctx->arglist() != nullptr) {
@@ -834,6 +837,19 @@ Generator::visitPass_stmt(Python3Parser::Pass_stmtContext* /*ctx*/) {
 antlrcpp::Any Generator::visitImport_stmt(
   Python3Parser::Import_stmtContext* /*ctx*/
 ) {
+  return Ast::CreateAtom(Object::CreatePyNone(), context);
+}
+
+antlrcpp::Any Generator::visitYield_stmt(Python3Parser::Yield_stmtContext* ctx
+) {
+  return Ast::CreateYieldStmt(visitYield_expr(ctx->yield_expr()), context);
+}
+
+antlrcpp::Any Generator::visitYield_expr(Python3Parser::Yield_exprContext* ctx
+) {
+  if (ctx->yield_arg()->testlist() != nullptr) {
+    return visitTestlist(ctx->yield_arg()->testlist());
+  }
   return Ast::CreateAtom(Object::CreatePyNone(), context);
 }
 

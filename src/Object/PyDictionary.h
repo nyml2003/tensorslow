@@ -1,7 +1,9 @@
 #ifndef TORCHLIGHT_OBJECT_PYDICTIONARY_H
 #define TORCHLIGHT_OBJECT_PYDICTIONARY_H
 
+#include <map>
 #include "Collections/Map.h"
+#include "Common.h"
 #include "Object/Klass.h"
 #include "Object/PyObject.h"
 
@@ -15,7 +17,7 @@ class DictionaryKlass : public Klass {
     return instance;
   }
 
-  PyObjPtr construct(const PyObjPtr& klass, const PyObjPtr& args) override;
+  PyObjPtr init(const PyObjPtr& klass, const PyObjPtr& args) override;
 
   PyObjPtr setitem(
     const PyObjPtr& obj,
@@ -27,6 +29,7 @@ class DictionaryKlass : public Klass {
   PyObjPtr delitem(const PyObjPtr& obj, const PyObjPtr& key) override;
   PyObjPtr contains(const PyObjPtr& obj, const PyObjPtr& key) override;
   PyObjPtr repr(const PyObjPtr& obj) override;
+  PyObjPtr str(const PyObjPtr& obj) override;
   PyObjPtr iter(const PyObjPtr& obj) override;
   static void Initialize();
 };
@@ -36,8 +39,7 @@ class PyDictionary : public PyObject {
   Collections::Map<PyObjPtr, PyObjPtr> dict;
 
  public:
-  explicit PyDictionary(Collections::Map<PyObjPtr, PyObjPtr> dict)
-    : PyObject(DictionaryKlass::Self()), dict(std::move(dict)) {}
+  explicit PyDictionary() : PyObject(DictionaryKlass::Self()) {}
 
   void Put(const PyObjPtr& key, const PyObjPtr& value);
 
@@ -53,7 +55,6 @@ class PyDictionary : public PyObject {
 };
 
 PyObjPtr CreatePyDict();
-PyObjPtr CreatePyDict(Collections::Map<PyObjPtr, PyObjPtr> dict);
 using PyDictPtr = std::shared_ptr<PyDictionary>;
 }  // namespace torchlight::Object
 

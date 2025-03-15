@@ -34,16 +34,27 @@ Object::PyObjPtr Genesis() {
     Object::CreatePyString("len"), CreatePyNativeFunction(Object::Len)
   );
   builtins->Put(
+    Object::CreatePyString("next"), CreatePyNativeFunction(Object::Next)
+  );
+  builtins->Put(
+    Object::CreatePyString("str"), CreatePyNativeFunction(Object::Str)
+  );
+  builtins->Put(
+    Object::CreatePyString("repr"), CreatePyNativeFunction(Object::Repr)
+  );
+  builtins->Put(
+    Object::CreatePyString("bool"), CreatePyNativeFunction(Object::Bool)
+  );
+  builtins->Put(
     Object::CreatePyString("__build_class__"),
     CreatePyNativeFunction(BuildClass)
   );
+  builtins->Put(Object::CreatePyString("type"), CreatePyNativeFunction(Type));
 
   // 内置全局对象
   builtins->Put(Object::CreatePyString("Matrix"), BuiltinMatrix());
 
-  builtins->Put(Object::CreatePyString("type"), CreatePyNativeFunction(Type));
-
-  // 注册输入和随机数相关函数
+  // 系统相关函数
   builtins->Put(
     Object::CreatePyString("input"), CreatePyNativeFunction(Object::Input)
   );
@@ -52,12 +63,6 @@ Object::PyObjPtr Genesis() {
   );
   builtins->Put(
     Object::CreatePyString("randint"), CreatePyNativeFunction(Object::RandInt)
-  );
-  builtins->Put(
-    Object::CreatePyString("normal"), CreatePyNativeFunction(Object::Normal)
-  );
-  builtins->Put(
-    Object::CreatePyString("shuffle"), CreatePyNativeFunction(Object::Shuffle)
   );
 
   // 注册切片类型
@@ -76,11 +81,6 @@ Object::PyObjPtr Genesis() {
     std::dynamic_pointer_cast<Object::PyObject>(
       Object::FloatKlass::Self()->Type()
     )
-  );
-  builtins->Put(
-    Object::CreatePyString("str"), std::dynamic_pointer_cast<Object::PyObject>(
-                                     Object::StringKlass::Self()->Type()
-                                   )
   );
   builtins->Put(
     Object::CreatePyString("list"), std::dynamic_pointer_cast<Object::PyObject>(
@@ -131,7 +131,8 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
     )
       ->as<Object::PyString>();
   auto klass = Object::CreatePyKlass(type_name, class_dict, bases);
-  return Object::CreatePyType(klass);
+  auto type = Object::CreatePyType(klass);
+  return type;
 }
 
 Object::PyObjPtr Type(const Object::PyObjPtr& args) {
@@ -190,6 +191,14 @@ Object::PyObjPtr BuiltinMatrix() {
   matrixModuleKlass->AddAttribute(
     Object::CreatePyString("ravel")->as<Object::PyString>(),
     Object::CreatePyNativeFunction(Object::Ravel)
+  );
+  matrixModuleKlass->AddAttribute(
+    Object::CreatePyString("normal")->as<Object::PyString>(),
+    Object::CreatePyNativeFunction(Object::Normal)
+  );
+  matrixModuleKlass->AddAttribute(
+    Object::CreatePyString("shuffle")->as<Object::PyString>(),
+    Object::CreatePyNativeFunction(Object::Shuffle)
   );
   auto matrixModule = std::make_shared<Object::PyObject>(matrixModuleKlass);
   return matrixModule;

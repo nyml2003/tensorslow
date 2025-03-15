@@ -43,6 +43,19 @@ void Matrix::Set(Index row, Index col, double value) {
   data.Set(row * cols + col, value);
 }
 
+void Matrix::Shuffle() {
+  Collections::List<Index> indices(rows, static_cast<Index>(0));
+  for (Index i = 0; i < rows; i++) {
+    indices.Set(i, i);
+  }
+  indices.Shuffle();
+  Matrix newMatrix(rows, cols);
+  for (Index i = 0; i < rows; i++) {
+    newMatrix.SetRows(i, i + 1, GetRows(indices[i], indices[i] + 1));
+  }
+  this->data = newMatrix.data;
+}
+
 String Matrix::ToString() const {
   String str;
   str.Concat(CreateStringWithCString("["));
@@ -277,7 +290,7 @@ Matrix Matrix::GetSlice(
 }
 
 void Matrix::SetRows(Index start, Index stop, const Matrix& other) {
-  if (start < 0 || stop > rows - 1 || start > stop) {
+  if (start < 0 || stop > rows  || start > stop) {
     throw std::out_of_range("Index out of range");
   }
   if (other.rows != stop - start || other.cols != cols) {
@@ -346,8 +359,5 @@ void Matrix::SetSlice(
 Matrix Matrix::Copy() const {
   return Matrix(rows, cols, data);
 }
-
-
-
 
 }  // namespace torchlight::Collections

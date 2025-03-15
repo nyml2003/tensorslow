@@ -88,6 +88,10 @@ class Generator : public Python3ParserBaseVisitor {
 
   antlrcpp::Any visitPass_stmt(Python3Parser::Pass_stmtContext* ctx) override;
 
+  antlrcpp::Any visitYield_stmt(Python3Parser::Yield_stmtContext* ctx) override;
+
+  antlrcpp::Any visitYield_expr(Python3Parser::Yield_exprContext* ctx) override;
+
   antlrcpp::Any visitImport_stmt(Python3Parser::Import_stmtContext* ctx) override;
 
   };

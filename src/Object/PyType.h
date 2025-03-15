@@ -37,7 +37,8 @@ class PyType : public PyObject {
 using PyTypePtr = std::shared_ptr<PyType>;
 
 inline PyObjPtr CreatePyType(KlassPtr owner) {
-  return std::make_shared<PyType>(owner);
+  auto type = std::make_shared<PyType>(owner)->as<PyType>();
+  return type;
 }
 }  // namespace torchlight::Object
 

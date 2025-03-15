@@ -123,48 +123,6 @@ PyObjPtr CodeKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr CodeKlass::repr(const PyObjPtr& self) {
-  if (self->Klass() != Self()) {
-    throw std::runtime_error("PyCode::repr(): obj is not a code object");
-  }
-  auto code = std::dynamic_pointer_cast<PyCode>(self);
-  PyObjPtr repr = CreatePyString("<code>\n");
-  repr = repr->add(CreatePyString("consts: "));
-  repr = repr->add(StringConcat(CreatePyList({
-    CreatePyString(", ")->as<PyString>()->Join(code->Consts()),
-  })));
-  repr = repr->add(CreatePyString("\n"));
-  repr = repr->add(CreatePyString("names: "));
-  repr = repr->add(code->Names()->repr());
-  repr = repr->add(CreatePyString("\n"));
-  repr = repr->add(CreatePyString("varNames: "));
-  repr = repr->add(code->VarNames()->repr());
-  repr = repr->add(CreatePyString("\n"));
-  repr = repr->add(CreatePyString("name: "));
-  repr = repr->add(code->Name()->str());
-  repr = repr->add(CreatePyString("\n"));
-  repr = repr->add(CreatePyString("instructions:\n\n"));
-  // repr = repr->add(StringConcat(CreatePyList({
-  //   CreatePyString("\n")->as<PyString>()->Join(code->Instructions()),
-  // })));
-  ForEach(
-    code->Instructions(),
-    [&](const PyObjPtr& inst, Index index, const PyObjPtr&) {
-      repr = repr->add(StringConcat(CreatePyList({
-        CreatePyInteger(index - 1)->repr(),
-        CreatePyString(": ")->as<PyString>(),
-        inst->repr(),
-        CreatePyString("\n")->as<PyString>(),
-      })));
-    }
-  );
-  repr = repr->add(CreatePyString("\n\n"));
-  repr = repr->add(CreatePyString("nLocals: "));
-  repr = repr->add(CreatePyInteger(code->NLocals())->repr());
-  repr = repr->add(CreatePyString("\n</code>\n"));
-  return repr;
-}
-
-PyObjPtr CodeKlass::str(const PyObjPtr& self) {
   return StringConcat(CreatePyList(
     {CreatePyString("<code object at ")->as<PyString>(),
      Identity(self)->as<PyString>(), CreatePyString(">")->as<PyString>()}
@@ -370,6 +328,30 @@ PyObjPtr CreatePyCode(const PyObjPtr& name) {
   auto names = CreatePyList({});
   auto varNames = CreatePyList({});
   return std::make_shared<PyCode>(byteCode, consts, names, varNames, name, 0);
+}
+
+void PrintCode(const PyCodePtr& code) {
+  auto codeObj = code->as<PyCode>();
+  codeObj->str()->as<PyString>()->PrintLine();
+  PyString::IncreaseIndent();
+  CreatePyString("consts: ")->as<PyString>()->Print();
+  codeObj->Consts()->str()->as<PyString>()->PrintLine(false);
+  CreatePyString("names: ")->as<PyString>()->Print();
+  codeObj->Names()->str()->as<PyString>()->PrintLine(false);
+  CreatePyString("varNames: ")->as<PyString>()->Print();
+  codeObj->VarNames()->str()->as<PyString>()->PrintLine(false);
+  CreatePyString("instructions:")->as<PyString>()->PrintLine();
+  PyString::IncreaseIndent();
+  ForEach(
+    codeObj->Instructions(),
+    [](const PyObjPtr& inst, Index, const PyObjPtr&) {
+      inst->str()->as<PyString>()->PrintLine();
+    }
+  );
+  PyString::DecreaseIndent();
+  CreatePyString("nLocals: ")->as<PyString>()->Print();
+  CreatePyInteger(codeObj->NLocals())->str()->as<PyString>()->PrintLine(false);
+  PyString::DecreaseIndent();
 }
 
 }  // namespace torchlight::Object

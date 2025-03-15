@@ -3,7 +3,7 @@
 #include "Object/Object.h"
 
 namespace torchlight::Object {
-class Klass {
+class Klass : public std::enable_shared_from_this<Klass> {
  private:
   PyStrPtr name;
   PyDictPtr attributes;
@@ -37,7 +37,7 @@ class Klass {
   [[nodiscard]] PyDictPtr Attributes() const { return attributes; }
   [[nodiscard]] PyListPtr Super() const { return super; }
   [[nodiscard]] PyListPtr Mro() const { return mro; }
-  virtual PyObjPtr construct(const PyObjPtr& type, const PyObjPtr& args);
+  virtual PyObjPtr init(const PyObjPtr& type, const PyObjPtr& args);
   virtual PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs);
   virtual PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs);
   virtual PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs);
@@ -77,7 +77,6 @@ class Klass {
   virtual PyObjPtr next(const PyObjPtr& obj);
   virtual PyObjPtr _serialize_(const PyObjPtr& obj);
 };
-PyObjPtr KlassRepr(const PyObjPtr& args);
 }  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_KLASS_H

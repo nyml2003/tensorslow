@@ -17,6 +17,7 @@
 #include "Object/PySlice.h"
 #include "Object/PyString.h"
 #include "Runtime/Interpreter.h"
+#include "Runtime/PyGenerator.h"
 #include "Runtime/Serialize.h"
 #include "Tools/Tools.h"
 
@@ -308,10 +309,6 @@ void ParseByteCode(const Object::PyCodePtr& code) {
         insts.Push(Object::CreateYieldValue());
         break;
       }
-      case Object::ByteCode::GET_YIELD_FROM_ITER: {
-        insts.Push(Object::CreateGetYieldFromIter());
-        break;
-      }
       case Object::ByteCode::JUMP_FORWARD: {
         insts.Push(Object::CreateJumpForward(ReadU64(iter)));
         break;
@@ -327,62 +324,51 @@ void ParseByteCode(const Object::PyCodePtr& code) {
 }
 
 Object::PyObjPtr FrameKlass::repr(const Object::PyObjPtr& obj) {
-  if (obj->Klass() != FrameKlass::Self()) {
-    throw std::runtime_error("Cannot repr non-frame object");
+  if (!obj->is<PyFrame>()) {
+    throw std::runtime_error("repr(): klass is not a frame");
   }
-  auto frame = std::dynamic_pointer_cast<PyFrame>(obj);
-  auto code = frame->Code();
-  auto name = code->Name();
-  Object::PyObjPtr repr =
-    Object::CreatePyString(Collections::CreateStringWithCString("<frame>"));
-  repr = repr->add(Object::CreatePyString(
-    Collections::CreateStringWithCString("\nprogramCounter: ")
+  auto frame = obj->as<PyFrame>();
+  return Object::StringConcat(Object::CreatePyList(
+    {Object::CreatePyString("<frame at ")->as<Object::PyString>(),
+     Object::Identity(obj)->as<Object::PyString>(),
+     Object::CreatePyString(">")->as<Object::PyString>()}
   ));
-  repr = repr->add(Object::CreatePyInteger(
-                     Collections::CreateIntegerWithU64(frame->ProgramCounter())
-  )
-                     ->repr());
-  repr = repr->add(Object::CreatePyString(
-    Collections::CreateStringWithCString("\n\ninstruction:\n")
-  ));
-  repr = repr->add(frame->Instruction()->repr());
-  repr = repr->add(
-    Object::CreatePyString(Collections::CreateStringWithCString("\n\nstack:\n"))
-  );
-  repr = repr->add(Object::CreatePyString("\n")->as<Object::PyString>()->Join(
-    frame->CurrentStack()
-  ));
-  repr = repr->add(
-    Object::CreatePyString(Collections::CreateStringWithCString("\nlocals:\n"))
-  );
-  repr = repr->add(frame->CurrentLocals()->repr());
-  repr = repr->add(Object::CreatePyString(
-    Collections::CreateStringWithCString("\n\nglobals:\n")
-  ));
-  repr = repr->add(frame->CurrentGlobals()->repr());
+}
 
-  repr = repr->add(Object::CreatePyString(
-    Collections::CreateStringWithCString("\n\nfastLocals:\n")
-  ));
-  repr = repr->add(frame->CurrentFastLocals()->repr());
-  repr = repr->add(Object::CreatePyString(
-    Collections::CreateStringWithCString("\n\ncaller:\n")
-  ));
+void PrintFrame(const PyFramePtr& frame) {
+  frame->repr()->as<Object::PyString>()->PrintLine();
+  Object::CreatePyString("Program Counter: ")->as<Object::PyString>()->Print();
+  Object::CreatePyInteger(frame->ProgramCounter())
+    ->repr()
+    ->as<Object::PyString>()
+    ->PrintLine(false);
+  Object::CreatePyString("Current Instruction: ")
+    ->as<Object::PyString>()
+    ->Print();
+  frame->Instruction()->repr()->as<Object::PyString>()->PrintLine(false);
+  Object::CreatePyString("Code: ")->as<Object::PyString>()->PrintLine();
+  Object::PyString::IncreaseIndent();
+  Object::PrintCode(frame->Code());
+  Object::PyString::DecreaseIndent();
+  Object::CreatePyString("Stack: ")->as<Object::PyString>()->PrintLine();
+  frame->CurrentStack()->str()->as<Object::PyString>()->PrintLine();
+  Object::CreatePyString("Locals: ")->as<Object::PyString>()->PrintLine();
+  frame->CurrentLocals()->str()->as<Object::PyString>()->PrintLine();
+  Object::CreatePyString("Globals: ")->as<Object::PyString>()->PrintLine();
+  frame->CurrentGlobals()->str()->as<Object::PyString>()->PrintLine();
+  Object::CreatePyString("FastLocals: ")->as<Object::PyString>()->PrintLine();
+  frame->CurrentFastLocals()->str()->as<Object::PyString>()->PrintLine();
+  // 调用栈
+  Object::CreatePyString("Caller: ")->as<Object::PyString>()->Print();
   if (frame->HasCaller()) {
-    repr = repr->add(frame->Caller()->repr());
+    Object::PyString::IncreaseIndent();
+    PrintFrame(frame->Caller());
+    Object::PyString::DecreaseIndent();
   } else {
-    repr = repr->add(Object::CreatePyString(
-      Collections::CreateStringWithCString("this is the top frame")
-    ));
+    Object::CreatePyString("This is the top frame")
+      ->as<Object::PyString>()
+      ->PrintLine();
   }
-  repr = repr->add(
-    Object::CreatePyString(Collections::CreateStringWithCString("\n\ncode:\n"))
-  );
-  repr = repr->add(code->str());
-  repr = repr->add(
-    Object::CreatePyString(Collections::CreateStringWithCString("</frame>\n"))
-  );
-  return repr;
 }
 
 PyFramePtr PyFrame::Caller() const {
@@ -397,8 +383,10 @@ Object::PyObjPtr PyFrame::Eval() {
   while (!Finished()) {
     const auto& inst = Instruction();
     if (ArgsHelper::Instance().Has("debug")) {
-      Object::DebugPrint(Object::CreatePyString("-------------------"));
-      Object::DebugPrint(shared_from_this());
+      Object::CreatePyString("-------------------")
+        ->as<Object::PyString>()
+        ->PrintLine();
+      PrintFrame(shared_from_this()->as<PyFrame>());
     }
     switch (inst->Code()) {
       case Object::ByteCode::LOAD_CONST: {
@@ -715,6 +703,7 @@ Object::PyObjPtr PyFrame::Eval() {
           value = Interpreter::Instance().Builtins()->getitem(key);
         }
         if (!found) {
+          throw std::runtime_error("NameError: name '" + key->as<Object::PyString>()->ToCppString() + "' is not defined");
           auto errorMessage = StringConcat(Object::CreatePyList(
             {Object::CreatePyString("NameError: name '"), key,
              Object::CreatePyString("' is not defined")}
@@ -736,7 +725,6 @@ Object::PyObjPtr PyFrame::Eval() {
         auto index = std::get<Index>(inst->Operand());
         auto key = Code()->Names()->GetItem(index);
         auto obj = stack.Pop();
-
         auto value = obj->getattr(key);
         stack.Push(value);
         NextProgramCounter();
@@ -816,20 +804,9 @@ Object::PyObjPtr PyFrame::Eval() {
         NextProgramCounter();
         break;
       }
-      case Object::ByteCode::GET_YIELD_FROM_ITER: {
-        auto iter = stack.Pop();
-        auto value = iter->next();
-        if (value->is<Object::IterDone>()) {
-          throw std::runtime_error("Yield from iterator ended");
-        }
-        stack.Push(value);
-        NextProgramCounter();
-        break;
-      }
       case Object::ByteCode::YIELD_VALUE: {
-        auto value = stack.Pop();
-        Interpreter::Instance().BackToParentFrame();
-        throw std::runtime_error("Yield from iterator ended");
+        NextProgramCounter();
+        return CreatePyGenerator(shared_from_this()->as<PyFrame>());
         break;
       }
       case Object::ByteCode::JUMP_FORWARD: {

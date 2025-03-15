@@ -22,6 +22,7 @@ class Matrix {
   explicit Matrix(List<List<double>> data);
 
   void Set(Index row, Index col, double value);
+  void Shuffle();
 
   [[nodiscard]] Matrix Transpose() const;
 

@@ -1,4 +1,5 @@
 
+#include "ByteCode/PyCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/StringHelper.h"
 #include "Generation/Generator.h"
@@ -96,7 +97,7 @@ void ParseAndGenerate(const fs::path& filePath) {
   visitor.Emit();
   auto code = visitor.Code();
   if (ArgsHelper::Instance().Has("show_code")) {
-    Object::DebugPrint(code->repr());
+    Object::PrintCode(code);
   }
   Collections::Bytes data =
     std::dynamic_pointer_cast<Object::PyBytes>(code->_serialize_())->Value();

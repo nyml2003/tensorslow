@@ -37,6 +37,7 @@ Object::PyObjPtr BinaryKlass::emit(
       break;
     case Binary::Operator::MATMUL:
       inst = Object::CreateBinaryMatrixMultiply();
+      break;
     case Binary::Operator::EQ:
       inst = Object::CreateCompareOp(Object::CompareOp::EQUAL);
       break;

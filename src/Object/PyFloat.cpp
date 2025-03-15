@@ -10,9 +10,9 @@
 
 namespace torchlight::Object {
 
-PyObjPtr FloatKlass::construct(const PyObjPtr& klass, const PyObjPtr& args) {
+PyObjPtr FloatKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {
   if (klass->as<PyType>()->Owner() != Self()) {
-    throw std::runtime_error("PyFloat::construct(): klass is not a float");
+    throw std::runtime_error("PyFloat::init(): klass is not a float");
   }
   auto argList = args->as<PyList>();
   if (argList->Length() == 0) {
@@ -20,12 +20,12 @@ PyObjPtr FloatKlass::construct(const PyObjPtr& klass, const PyObjPtr& args) {
   }
   if (argList->Length() != 1) {
     throw std::runtime_error(
-      "PyFloat::construct(): args must be a list with one element"
+      "PyFloat::init(): args must be a list with one element"
     );
   }
   auto value = argList->GetItem(0);
   if (!value->is<PyFloat>()) {
-    throw std::runtime_error("PyFloat::construct(): value is not a float");
+    throw std::runtime_error("PyFloat::init(): value is not a float");
   }
   return value;
 }
@@ -64,6 +64,13 @@ PyObjPtr FloatKlass::truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return CreatePyFloat(
     lhs->as<PyFloat>()->Value() / rhs->as<PyFloat>()->Value()
   );
+}
+
+PyObjPtr FloatKlass::neg(const PyObjPtr& obj) {
+  if (!obj->is<PyFloat>()) {
+    throw std::runtime_error("PyFloat::neg(): obj is not a float");
+  }
+  return CreatePyFloat(-obj->as<PyFloat>()->Value());
 }
 
 PyObjPtr FloatKlass::repr(const PyObjPtr& obj) {

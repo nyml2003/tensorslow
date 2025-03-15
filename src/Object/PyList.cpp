@@ -2,6 +2,7 @@
 #include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
 #include "Collections/Integer.h"
+#include "Function/FunctionForward.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/Iterator.h"
 #include "Object/Object.h"
@@ -39,11 +40,66 @@ void ListKlass::Initialize() {
   Self()->AddAttribute(
     CreatePyString("index")->as<PyString>(), CreatePyNativeFunction(ListIndex)
   );
+  // 注册重载函数
+  Self()->AddAttribute(
+    CreatePyString("__getitem__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<ListKlass>(&ListKlass::getitem)
+    )
+  );
+  Self()->AddAttribute(
+    CreatePyString("__setitem__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<ListKlass>(&ListKlass::setitem)
+    )
+  );
+  Self()->AddAttribute(
+    CreatePyString("__len__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<ListKlass>(&ListKlass::len))
+  );
+  Self()->AddAttribute(
+    CreatePyString("__contains__")->as<PyString>(),
+    CreatePyNativeFunction(
+      CreateForwardFunction<ListKlass>(&ListKlass ::contains)
+    )
+  );
+  Self()->AddAttribute(
+    CreatePyString("__iter__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<ListKlass>(&ListKlass::iter))
+  );
+  Self()->AddAttribute(
+    CreatePyString("__add__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<ListKlass>(&ListKlass::add))
+  );
+  Self()->AddAttribute(
+    CreatePyString("__mul__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<ListKlass>(&ListKlass::mul))
+  );
+  Self()->AddAttribute(
+    CreatePyString("__str__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<ListKlass>(&ListKlass::str))
+  );
+  Self()->AddAttribute(
+    CreatePyString("__repr__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<ListKlass>(&ListKlass::repr))
+  );
+  Self()->AddAttribute(
+    CreatePyString("__eq__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<ListKlass>(&ListKlass::eq))
+  );
+  Self()->AddAttribute(
+    CreatePyString("__init__")->as<PyString>(),
+    CreatePyNativeFunction(CreateForwardFunction<ListKlass>(&ListKlass::init))
+  );
+  Self()->AddAttribute(
+    CreatePyString("__serialize__")->as<PyString>(),
+    CreatePyNativeFunction(
+      CreateForwardFunction<ListKlass>(&ListKlass::_serialize_)
+    )
+  );
 }
 
-PyObjPtr ListKlass::construct(const PyObjPtr& type, const PyObjPtr& args) {
+PyObjPtr ListKlass::init(const PyObjPtr& type, const PyObjPtr& args) {
   if (type->as<PyType>()->Owner() != Self()) {
-    throw std::runtime_error("List does not support construct operation");
+    throw std::runtime_error("List does not support init operation");
   }
   if (!args->is<PyList>()) {
     throw std::runtime_error("List allocation argument must be a list");
@@ -67,12 +123,43 @@ PyObjPtr ListKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return lhs->as<PyList>()->Add(rhs->as<PyList>());
 }
 
+PyObjPtr ListKlass::mul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyList>() || !rhs->is<PyInteger>()) {
+    throw std::runtime_error("List does not support mul operation");
+  }
+  auto list = lhs->as<PyList>();
+  auto times = rhs->as<PyInteger>()->ToU64();
+  if (list->Length() == 1) {
+    auto value = list->GetItem(0);
+    Collections::List<PyObjPtr> result(times, value);
+    return CreatePyList(result);
+  }
+  Collections::List<PyObjPtr> result(list->Length() * times);
+  for (Index i = 0; i < times; i++) {
+    for (Index j = 0; j < list->Length(); j++) {
+      result.Push(list->GetItem(j));
+    }
+  }
+  return CreatePyList(result);
+}
+
 PyObjPtr ListKlass::str(const PyObjPtr& obj) {
   auto list = obj->as<PyList>();
+  auto strList = Map(list, [](const PyObjPtr& value) { return value->str(); });
   return StringConcat(CreatePyList(
     {CreatePyString("[")->as<PyString>(),
-     CreatePyString(", ")->as<PyString>()->Join(list),
+     CreatePyString(", ")->as<PyString>()->Join(strList),
      CreatePyString("]")->as<PyString>()}
+  ));
+}
+
+PyObjPtr ListKlass::repr(const PyObjPtr& obj) {
+  auto list = obj->as<PyList>();
+  auto reprList =
+    Map(list, [](const PyObjPtr& value) { return value->repr(); });
+  return StringConcat(CreatePyList(
+    {CreatePyString("["), CreatePyString(", ")->as<PyString>()->Join(reprList),
+     CreatePyString("]")}
   ));
 }
 

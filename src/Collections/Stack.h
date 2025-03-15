@@ -11,7 +11,7 @@ class Stack {
   void Push(const T& value) { content.Push(value); }
   T Pop() { return content.Pop(); }
   List<T> GetContent() const { return content; }
-  T Top() const { return content.Back(); }
+  T Top() const { return content.Last(); }
   [[nodiscard]] bool Empty() const { return content.Empty(); }
   [[nodiscard]] Index Size() const { return content.Size(); }
 };

@@ -32,11 +32,9 @@ enum class ByteCode {
   BINARY_XOR = 65,
   BINARY_OR = 66,
   GET_ITER = 68,
-  GET_YIELD_FROM_ITER = 69,
   LOAD_BUILD_CLASS = 71,
   RETURN_VALUE = 83,
   YIELD_VALUE = 86,
-  
   STORE_NAME = 90,
   FOR_ITER = 93,
   STORE_ATTR = 95,
@@ -134,7 +132,6 @@ static const std::map<ByteCode, const char*> ByteCodeNames = {
   {ByteCode::MAKE_FUNCTION, "MAKE_FUNCTION"},
   {ByteCode::BUILD_SLICE, "BUILD_SLICE"},
   {ByteCode::CALL_FUNCTION, "CALL_FUNCTION"},
-  {ByteCode::GET_YIELD_FROM_ITER, "GET_YIELD_FROM_ITER"},
   {ByteCode::YIELD_VALUE, "YIELD_VALUE"},
   {ByteCode::ERROR, "ERROR"},
 };

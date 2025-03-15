@@ -29,15 +29,11 @@ class FuncDefKlass : public INodeKlass {
 class FuncDef : public INode {
  public:
   explicit FuncDef(
-    const Object::PyObjPtr& _name,
-    const Object::PyObjPtr& _parameters,
-    const Object::PyObjPtr& _body,
-    INodePtr parent
-  )
-    : INode(FuncDefKlass::Self(), std::move(parent)),
-      name(_name->as<Object::PyString>()),
-      body(_body->as<Object::PyList>()),
-      parameters(_parameters->as<Object::PyList>()) {}
+    Object::PyStrPtr name,
+    Object::PyListPtr parameters,
+    Object::PyListPtr body,
+    const INodePtr& parent
+  );
 
   [[nodiscard]] Object::PyStrPtr Name() const { return name; }
 
@@ -45,11 +41,11 @@ class FuncDef : public INode {
 
   [[nodiscard]] Object::PyListPtr Body() const { return body; }
 
-  [[nodiscard]] Object::PyObjPtr Parents() const { return parents; }
+  [[nodiscard]] Object::PyListPtr Parents() const { return parents; }
 
   [[nodiscard]] Object::PyObjPtr CodeIndex() const { return codeIndex; }
 
-  void SetParents(const Object::PyObjPtr& _parents) { parents = _parents; }
+  void SetParents(const Object::PyListPtr& _parents) { parents = _parents; }
 
   void SetCodeIndex(const Object::PyObjPtr& _codeIndex) {
     codeIndex = _codeIndex;
@@ -63,22 +59,19 @@ class FuncDef : public INode {
   Object::PyStrPtr name;
   Object::PyListPtr body;
   Object::PyListPtr parameters;
-  Object::PyObjPtr
+  Object::PyListPtr
     parents;  // 保存整个调用链上的FuncDef或者Module所对应的PyCode对象
   Object::PyObjPtr
     codeIndex;  // 保存当前FuncDef对应的PyCode对象在codeList中的索引
 };
 
 inline INodePtr CreateFuncDef(
-  Object::PyObjPtr _name,
-  Object::PyObjPtr _parameters,
-  Object::PyObjPtr _body,
-  INodePtr parent
+  const Object::PyStrPtr& name,
+  const Object::PyListPtr& parameters,
+  const Object::PyListPtr& body,
+  const INodePtr& parent
 ) {
-  return std::make_shared<FuncDef>(
-    std::move(_name), std::move(_parameters), std::move(_body),
-    std::move(parent)
-  );
+  return std::make_shared<FuncDef>(name, parameters, body, parent);
 }
 }  // namespace torchlight::Ast
 

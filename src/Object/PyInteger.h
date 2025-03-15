@@ -19,7 +19,7 @@ class IntegerKlass : public Klass {
     ConfigureBasicAttributes(instance);
     return instance;
   }
-  PyObjPtr construct(const PyObjPtr& klass, const PyObjPtr& args) override;
+  PyObjPtr init(const PyObjPtr& klass, const PyObjPtr& args) override;
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
@@ -37,6 +37,7 @@ class IntegerKlass : public Klass {
   PyObjPtr gt(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr repr(const PyObjPtr& obj) override;
+  PyObjPtr str(const PyObjPtr& obj) override;
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 };
 
@@ -62,11 +63,8 @@ class PyInteger : public PyObject {
 
   Collections::Integer::IntSign GetSign() const { return value.GetSign(); }
 
-  int64_t ToI64() const {
-    return Collections::ToI64(value);
-  }
-
-  };
+  int64_t ToI64() const { return Collections::ToI64(value); }
+};
 
 }  // namespace torchlight::Object
 

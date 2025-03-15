@@ -2,6 +2,7 @@
 #define TORCHLIGHT_FUNCTION_PYNATIVEFUNCTION_H
 
 #include <functional>
+#include "Object/ObjectHelper.h"
 #include "Object/PyString.h"
 
 namespace torchlight::Object {
@@ -30,7 +31,7 @@ class PyNativeFunction : public PyObject {
     : PyObject(NativeFunctionKlass::Self()),
       nativeFunction(std::move(nativeFunction)) {}
 
-  PyObjPtr Call(const PyObjPtr& args) { return nativeFunction(args); }
+  PyObjPtr Call(const PyObjPtr& args);
 };
 
 using PyNativeFunctionPtr = std::shared_ptr<PyNativeFunction>;

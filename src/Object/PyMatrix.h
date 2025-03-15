@@ -3,6 +3,7 @@
 
 #include "Collections/Matrix.h"
 #include "Function/PyIife.h"
+#include "Function/PyNativeFunction.h"
 #include "Object/Klass.h"
 #include "Object/Object.h"
 #include "Object/ObjectHelper.h"
@@ -48,9 +49,16 @@ class MatrixKlass : public Klass {
     instance->AddAttribute(
       CreatePyString("shape")->as<PyString>(), CreatePyIife(Shape)
     );
+    instance->AddAttribute(
+      CreatePyString("reshape")->as<PyString>(), CreatePyNativeFunction(Reshape)
+    );
+    instance->AddAttribute(
+      CreatePyString("ravel")->as<PyString>(), CreatePyNativeFunction(Ravel)
+    );
     return instance;
   }
   PyObjPtr repr(const PyObjPtr& obj) override;
+  PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
 
   PyObjPtr matmul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
@@ -61,6 +69,14 @@ class MatrixKlass : public Klass {
   PyObjPtr gt(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+
+  PyObjPtr setitem(
+    const PyObjPtr& obj,
+    const PyObjPtr& key,
+    const PyObjPtr& value
+  ) override;
+
+  PyObjPtr getitem(const PyObjPtr& obj, const PyObjPtr& key) override;
 };
 
 class PyMatrix;
@@ -80,6 +96,7 @@ class PyMatrix : public PyObject {
   explicit PyMatrix(Collections::Matrix matrix)
     : PyObject(MatrixKlass::Self()), matrix(std::move(matrix)) {}
 
+  void Shuffle() { matrix.Shuffle(); }
   PyMatrixPtr Transpose() const { return CreatePyMatrix(matrix.Transpose()); }
   PyMatrixPtr MatrixMultiply(const PyMatrixPtr& other) const {
     return CreatePyMatrix(matrix.MatrixMultiply(other->matrix));

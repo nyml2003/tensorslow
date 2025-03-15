@@ -18,9 +18,9 @@ PyObjPtr CreatePyInteger(uint64_t value) {
   return std::make_shared<PyInteger>(Collections::CreateIntegerWithU64(value));
 }
 
-PyObjPtr IntegerKlass::construct(const PyObjPtr& klass, const PyObjPtr& args) {
+PyObjPtr IntegerKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {
   if (klass->as<PyType>()->Owner() != Self()) {
-    throw std::runtime_error("PyInteger::construct(): klass is not an integer");
+    throw std::runtime_error("PyInteger::init(): klass is not an integer");
   }
   auto argList = args->as<PyList>();
   if (argList->Length() == 0) {
@@ -28,7 +28,7 @@ PyObjPtr IntegerKlass::construct(const PyObjPtr& klass, const PyObjPtr& args) {
   }
   if (argList->Length() != 1) {
     throw std::runtime_error(
-      "PyInteger::construct(): args must be a list with one element"
+      "PyInteger::init(): args must be a list with one element"
     );
   }
   auto value = argList->GetItem(0);
@@ -39,7 +39,7 @@ PyObjPtr IntegerKlass::construct(const PyObjPtr& klass, const PyObjPtr& args) {
     auto str = std::dynamic_pointer_cast<PyString>(value);
     return CreatePyInteger(Collections::CreateIntegerWithString(str->Value()));
   }
-  throw std::runtime_error("PyInteger::construct(): value is not an integer");
+  throw std::runtime_error("PyInteger::init(): value is not an integer");
 }
 
 PyObjPtr IntegerKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -174,9 +174,14 @@ PyObjPtr IntegerKlass::repr(const PyObjPtr& obj) {
   auto integer = std::dynamic_pointer_cast<PyInteger>(obj);
   return CreatePyString((integer->value).ToString());
 }
+PyObjPtr IntegerKlass::str(const PyObjPtr& obj) {
+  return repr(obj);
+}
 
 PyObjPtr IntegerKlass::gt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
+    DebugPrint(lhs);
+    DebugPrint(rhs);
     throw std::runtime_error("PyInteger::gt(): lhs or rhs is not an integer");
   }
   auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
