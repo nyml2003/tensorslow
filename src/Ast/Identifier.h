@@ -29,12 +29,51 @@ class Identifier : public INode {
  public:
   explicit Identifier(const Object::PyObjPtr& _name, const INodePtr& parent)
     : INode(IdentifierKlass::Self(), parent),
-      name(_name->as<Object::PyString>()) {}
+      name(_name->as<Object::PyString>()) {
+    builtins = Object::CreatePyList({
+                                      Object::CreatePyString("print"),
+                                      Object::CreatePyString("reshape"),
+                                      Object::CreatePyString("len"),
+                                      Object::CreatePyString("__name__"),
+                                      Object::CreatePyString("randint"),
+                                      Object::CreatePyString("sleep"),
+                                      Object::CreatePyString("input"),
+                                      Object::CreatePyString("next"),
+                                      Object::CreatePyString("int"),
+                                      Object::CreatePyString("float"),
+                                      Object::CreatePyString("str"),
+                                      Object::CreatePyString("list"),
+                                      Object::CreatePyString("object"),
+                                      Object::CreatePyString("type"),
+                                      Object::CreatePyString("dict"),
+                                      Object::CreatePyString("slice"),
+                                      Object::CreatePyString("repr"),
+                                      Object::CreatePyString("bool"),
+                                      Object::CreatePyString("Array"),
+                                      Object::CreatePyString("Eye"),
+                                      Object::CreatePyString("Zeros"),
+                                      Object::CreatePyString("Ones"),
+                                      Object::CreatePyString("Diag"),
+                                      Object::CreatePyString("Transpose"),
+                                      Object::CreatePyString("Shape"),
+                                      Object::CreatePyString("Where"),
+                                      Object::CreatePyString("Concatenate"),
+                                      Object::CreatePyString("Ravel"),
+                                      Object::CreatePyString("Normal"),
+                                      Object::CreatePyString("Shuffle"),
+                                    })
+                 ->as<Object::PyList>();
+  }
 
   [[nodiscard]] Object::PyStrPtr Name() const { return name; }
+  void SetStoreMode() { mode = STOREORLOAD::STORE; }
+  STOREORLOAD Mode() const { return mode; }
+  [[nodiscard]] Object::PyListPtr Builtins() const { return builtins; }
 
  private:
   Object::PyStrPtr name;
+  STOREORLOAD mode = STOREORLOAD::LOAD;
+  Object::PyListPtr builtins;
 };
 
 using IdentifierPtr = std::shared_ptr<Identifier>;

@@ -41,9 +41,14 @@ class MemberAccess : public INode {
 
   [[nodiscard]] Object::PyStrPtr Member() const { return member; }
 
+  [[nodiscard]] STOREORLOAD Mode() const { return mode; }
+
+  void SetStoreMode() { mode = STOREORLOAD::STORE; }
+
  private:
   INodePtr obj;
   Object::PyStrPtr member;
+  STOREORLOAD mode = STOREORLOAD::LOAD;
 };
 
 using MemberAccessPtr = std::shared_ptr<MemberAccess>;

@@ -113,37 +113,18 @@ uint8_t Matrix::CheckBroadcast(const Matrix& other) const {
   if (rows == other.rows && cols == other.cols) {
     return 0b1111;
   }
-  uint8_t result = 0b0000;
-
-  // 检查this是否可以在列上广播到other
-  if (cols == 1 && other.cols != 1) {
-    result |= 0b1000;  // 设置第4位
-  }
-  if (rows == 1 && other.rows != 1) {
-    result |= 0b0100;  // 设置第3位
-  }
-
-  // 检查other是否可以在列上广播到this
-  if (other.cols == 1 && cols != 1) {
-    result |= 0b0010;  // 设置第2位
-  }
-  if (other.rows == 1 && rows != 1) {
-    result |= 0b0001;  // 设置第1位
-  }
-  return result;
+  uint8_t t1 = cols ^ 0b01;
+  uint8_t t2 = other.cols ^ 0b01;
+  uint8_t t3 = rows ^ 0b01;
+  uint8_t t4 = other.rows ^ 0b01;
+  return ((!t1 && t2) << 3) | ((!t3 && t4) << 2) | ((!t2 && t1) << 1) |
+         (!t4 && t3);
 }
 
 double Matrix::BroadcastAt(Index row, Index col, uint8_t broadcast_type) const {
-  if (((broadcast_type & 0b10) != 0) && ((broadcast_type & 0b01) != 0)) {
-    return At(0, 0);
-  }
-  if ((broadcast_type & 0b01) != 0) {
-    return At(0, col);
-  }
-  if ((broadcast_type & 0b10) != 0) {
-    return At(row, 0);
-  }
-  return At(row, col);
+  return At(
+    (broadcast_type & 0b01 ? 0 : row), (broadcast_type & 0b10 ? 0 : col)
+  );
 }
 
 Matrix Matrix::Add(const Matrix& other) const {
@@ -160,12 +141,14 @@ Matrix Matrix::Add(const Matrix& other) const {
     }
     return result;
   }
+  uint8_t thisBroadcastType = (broadcast_type & 0b1100) >> 2;
+  uint8_t otherBroadcastType = broadcast_type & 0b0011;
   Matrix result(std::max(rows, other.rows), std::max(cols, other.cols));
   for (Index i = 0; i < result.rows; i++) {
     for (Index j = 0; j < result.cols; j++) {
       result.data.Set(
-        i * result.cols + j, BroadcastAt(i, j, (broadcast_type & 0b1100) >> 2) +
-                               other.BroadcastAt(i, j, broadcast_type & 0b0011)
+        i * result.cols + j, BroadcastAt(i, j, thisBroadcastType) +
+                               other.BroadcastAt(i, j, otherBroadcastType)
       );
     }
   }
@@ -187,12 +170,14 @@ Matrix Matrix::Multiply(const Matrix& other) const {
     }
     return result;
   }
+  uint8_t thisBroadcastType = (broadcast_type & 0b1100) >> 2;
+  uint8_t otherBroadcastType = broadcast_type & 0b0011;
   Matrix result(std::max(rows, other.rows), std::max(cols, other.cols));
   for (Index i = 0; i < result.rows; i++) {
     for (Index j = 0; j < result.cols; j++) {
       result.data.Set(
-        i * result.cols + j, BroadcastAt(i, j, (broadcast_type & 0b1100) >> 2) *
-                               other.BroadcastAt(i, j, broadcast_type & 0b0011)
+        i * result.cols + j, BroadcastAt(i, j, thisBroadcastType) *
+                               other.BroadcastAt(i, j, otherBroadcastType)
       );
     }
   }
@@ -201,10 +186,8 @@ Matrix Matrix::Multiply(const Matrix& other) const {
 
 Matrix Matrix::Multiply(double scalar) const {
   Matrix result(rows, cols);
-  for (Index i = 0; i < rows; i++) {
-    for (Index j = 0; j < cols; j++) {
-      result.data.Set(i * cols + j, At(i, j) * scalar);
-    }
+  for (Index i = 0; i < rows * cols; i++) {
+    result.data.Set(i, data.Get(i) * scalar);
   }
   return result;
 }
@@ -290,7 +273,7 @@ Matrix Matrix::GetSlice(
 }
 
 void Matrix::SetRows(Index start, Index stop, const Matrix& other) {
-  if (start < 0 || stop > rows  || start > stop) {
+  if (start < 0 || stop > rows || start > stop) {
     throw std::out_of_range("Index out of range");
   }
   if (other.rows != stop - start || other.cols != cols) {

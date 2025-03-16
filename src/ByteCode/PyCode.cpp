@@ -186,39 +186,6 @@ void PyCode::RegisterVarName(const PyObjPtr& name) {
   }
 }
 
-void PyCode::LoadConst(const PyObjPtr& obj) {
-  auto index = IndexOfConst(obj);
-  instructions->Append(CreateLoadConst(index));
-}
-
-void PyCode::LoadName(const PyObjPtr& obj) {
-  auto index = IndexOfName(obj);
-  instructions->Append(CreateLoadName(index));
-}
-
-void PyCode::StoreName(const PyObjPtr& obj) {
-  auto index = IndexOfName(obj);
-  instructions->Append(CreateStoreName(index));
-}
-
-void PyCode::LoadAttr(const PyObjPtr& obj) {
-  auto index = IndexOfName(obj);
-  instructions->Append(CreateLoadAttr(index));
-}
-
-void PyCode::LoadGlobal(Index index) {
-  instructions->Append(CreateLoadGlobal(index));
-}
-
-void PyCode::LoadFast(Index index) {
-  instructions->Append(CreateLoadFast(index));
-}
-
-void PyCode::StoreFast(const PyObjPtr& obj) {
-  auto index = IndexOfVarName(obj);
-  instructions->Append(CreateStoreFast(index));
-}
-
 void PyCode::CallFunction(Index nArgs) {
   instructions->Append(CreateCallFunction(nArgs));
 }

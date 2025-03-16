@@ -67,19 +67,40 @@ class PyCode : public PyObject {
   /**
    * @param obj 可以是String, Integer, Float, Boolean, None, List，Code
    */
-  void LoadConst(const PyObjPtr& obj);
+  void LoadConst(const PyObjPtr& obj) {
+    auto index = IndexOfConst(obj);
+    instructions->Append(CreateLoadConst(index));
+  }
 
-  void LoadName(const PyObjPtr& obj);
+  void LoadName(const PyObjPtr& obj) {
+    auto index = IndexOfName(obj);
+    instructions->Append(CreateLoadName(index));
+  }
 
-  void StoreName(const PyObjPtr& obj);
+  void StoreName(const PyObjPtr& obj) {
+    auto index = IndexOfName(obj);
+    instructions->Append(CreateStoreName(index));
+  }
 
-  void LoadAttr(const PyObjPtr& obj);
+  void LoadAttr(const PyObjPtr& obj) {
+    auto index = IndexOfName(obj);
+    instructions->Append(CreateLoadAttr(index));
+  }
 
-  void LoadGlobal(Index index);
+  void LoadGlobal(const PyObjPtr& obj) {
+    auto index = IndexOfName(obj);
+    instructions->Append(CreateLoadGlobal(index));
+  }
 
-  void LoadFast(Index index);
+  void LoadFast(const PyObjPtr& obj) {
+    auto index = IndexOfVarName(obj);
+    instructions->Append(CreateLoadFast(index));
+  }
 
-  void StoreFast(const PyObjPtr& obj);
+  void StoreFast(const PyObjPtr& obj) {
+    auto index = IndexOfVarName(obj);
+    instructions->Append(CreateStoreFast(index));
+  }
 
   void BuildList(Index size) { instructions->Append(CreateBuildList(size)); }
   void BuildSlice() { instructions->Append(CreateBuildSlice()); }

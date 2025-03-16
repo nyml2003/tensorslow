@@ -371,15 +371,30 @@ Object::PyObjPtr Normal(const Object::PyObjPtr& args) {
   auto argList = args->as<PyList>();
   auto loc = argList->GetItem(0)->as<PyFloat>()->Value();
   auto scale = argList->GetItem(1)->as<PyFloat>()->Value();
-  auto size = argList->GetItem(2)->as<PyInteger>()->ToU64();
   std::random_device randomDevice;
   std::mt19937 gen(randomDevice());
   std::normal_distribution<> dis(loc, scale);
-  auto result = CreatePyList(size)->as<PyList>();
-  for (Index i = 0; i < size; i++) {
-    result->SetItem(i, CreatePyFloat(dis(gen)));
+  auto size = argList->GetItem(2);
+  if (size->is<PyInteger>()) {
+    auto sizeValue = size->as<PyInteger>()->ToU64();
+    auto result = CreatePyList(sizeValue)->as<PyList>();
+    for (Index i = 0; i < sizeValue; i++) {
+      result->SetItem(i, CreatePyFloat(dis(gen)));
+    }
+    return result;
   }
-  return result;
+  if (size->is<PyList>()) {
+    auto sizeList = size->as<PyList>();
+    auto row = sizeList->GetItem(0)->as<PyInteger>()->ToU64();
+    auto col = sizeList->GetItem(1)->as<PyInteger>()->ToU64();
+    auto sizeValue = row * col;
+    Collections::List<double> result(sizeValue);
+    for (Index i = 0; i < sizeValue; i++) {
+      result.Push(dis(gen));
+    }
+    return CreatePyMatrix(Collections::Matrix(row, col, result));
+  }
+  throw std::runtime_error("Normal function need integer or list argument");
 }
 
 Object::PyObjPtr Shuffle(const Object::PyObjPtr& args) {

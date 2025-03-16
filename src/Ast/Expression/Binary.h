@@ -29,30 +29,31 @@ class BinaryKlass : public INodeKlass {
 class Binary : public Ast::INode {
  public:
   enum class Operator {
-    LT,         // <
-    GT,         // >
-    EQ,         // ==
-    GE,         // >=
-    LE,         // <=
-    NE,         // "!="
-    IN,         // in
-    NOT_IN,     // not in
-    IS,         // is
-    IS_NOT,     // is not
-    ADD,        // +
-    SUB,        // -
-    MUL,        // "*"
-    DIV,        // "/"
-    MATMUL,     // @
-    MOD,        // %
-    FLOOR_DIV,  // "//"
-    SUBSCR,     // []
-    AND,        // and
-    OR,         // or
-    XOR,        // xor
-    LSHIFT,     // <<
-    RSHIFT,     // >>
-    POWER,      // "**"
+    LT,            // <
+    GT,            // >
+    EQ,            // ==
+    GE,            // >=
+    LE,            // <=
+    NE,            // "!="
+    IN,            // in
+    NOT_IN,        // not in
+    IS,            // is
+    IS_NOT,        // is not
+    ADD,           // +
+    SUB,           // -
+    MUL,           // "*"
+    DIV,           // "/"
+    MATMUL,        // @
+    MOD,           // %
+    FLOOR_DIV,     // "//"
+    SUBSCR,        // []
+    STORE_SUBSCR,  // []=
+    AND,           // and
+    OR,            // or
+    XOR,           // xor
+    LSHIFT,        // <<
+    RSHIFT,        // >>
+    POWER,         // "**"
   };
 
   explicit Binary(Operator oprt, INodePtr left, INodePtr right, INodePtr parent)
@@ -66,6 +67,8 @@ class Binary : public Ast::INode {
   [[nodiscard]] INodePtr Right() const { return right; }
 
   [[nodiscard]] Operator Oprt() const { return oprt; }
+
+  void SetOprt(Operator _oprt) { oprt = _oprt; }
 
  private:
   Operator oprt;

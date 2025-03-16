@@ -71,6 +71,9 @@ Object::PyObjPtr BinaryKlass::emit(
     case Binary::Operator::SUBSCR:
       inst = Object::CreateBinarySubscr();
       break;
+    case Binary::Operator::STORE_SUBSCR:
+      inst = Object::CreateStoreSubscr();
+      break;
     case Binary::Operator::FLOOR_DIV:
       inst = Object::CreateBinaryFloorDivide();
       break;

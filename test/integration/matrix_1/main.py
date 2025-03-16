@@ -1,20 +1,20 @@
-a = Matrix.eye(3)
+a = Eye(3)
 print(a)
-b = Matrix.array([
+b = Array([
     [1.0, 2.0, 3.0],
     [4.0, 5.0, 6.0],
     [7.0, 8.0, 9.0]
 ])
 print(b)
-c = Matrix.zeros([3, 3])
+c = Zeros([3, 3])
 print(c)
-d = Matrix.ones([3, 3])
+d = Ones([3, 3])
 print(d)
-e = Matrix.diag([1.0, 2.0, 3.0])
+e = Diag([1.0, 2.0, 3.0])
 print(b)
-print(Matrix.transpose(b))
+print(Transpose(b))
 print(b.T)
-f = Matrix.array([
+f = Array([
     [1.0, 2.0],
     [3.0, 4.0],
     [5.0, 6.0],
@@ -22,11 +22,11 @@ f = Matrix.array([
     [9.0, 10.0],
     [11.0, 12.0]
 ])
-print(Matrix.reshape(f, [3, 4]))
-print(Matrix.reshape(f, [6, 2]))
+print(Reshape(f, [3, 4]))
+print(Reshape(f, [6, 2]))
 print(f.shape)
-print(Matrix.shape(f))
+print(Shape(f))
 print(f > 5.0)
-print(Matrix.where(f >5.0, 114.0, 514.0))
-print(Matrix.concatenate([f,f]))
-print(Matrix.ravel(f))
+print(Where(f > 5.0, 114.0, 514.0))
+print(Concatenate([f, f]))
+print(Ravel(f))

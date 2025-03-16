@@ -126,6 +126,20 @@ PyObjPtr MatrixKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return lhs->as<PyMatrix>()->Add(rhs->as<PyMatrix>());
 }
 
+PyObjPtr MatrixKlass::sub(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyMatrix>() || !rhs->is<PyMatrix>()) {
+    throw std::runtime_error("MatrixKlass::sub(): lhs or rhs is not a matrix");
+  }
+  return lhs->as<PyMatrix>()->Subtract(rhs->as<PyMatrix>());
+}
+
+PyObjPtr MatrixKlass::len(const PyObjPtr& obj) {
+  if (!obj->is<PyMatrix>()) {
+    throw std::runtime_error("MatrixKlass::len(): obj is not a matrix");
+  }
+  return obj->as<PyMatrix>()->Rows();
+}
+
 PyObjPtr MatrixKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
   if (!obj->is<PyMatrix>()) {
     throw std::runtime_error("MatrixKlass::getitem(): obj is not a matrix");
@@ -159,7 +173,9 @@ PyObjPtr MatrixKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
       if (col->GetSign() == Collections::Integer::IntSign::Negative) {
         colValue = matrixCol + col->ToI64();
       }
-      return CreatePyFloat(matrix->At(rowValue, colValue));
+      return CreatePyMatrix(
+        Collections::Matrix(1, 1, {matrix->At(rowValue, colValue)})
+      );
     }
     if (keyList->GetItem(0)->is<PySlice>()) {
       // a[rowStart:rowEnd,colStart:colEnd]

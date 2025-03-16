@@ -52,7 +52,56 @@ Object::PyObjPtr Genesis() {
   builtins->Put(Object::CreatePyString("type"), CreatePyNativeFunction(Type));
 
   // 内置全局对象
-  builtins->Put(Object::CreatePyString("Matrix"), BuiltinMatrix());
+  builtins->Put(
+    Object::CreatePyString("Array"),
+    Object::CreatePyNativeFunction(Object::Matrix)
+  );
+  builtins->Put(
+    Object::CreatePyString("Eye"), Object::CreatePyNativeFunction(Object::Eye)
+  );
+  builtins->Put(
+    Object::CreatePyString("Zeros"),
+    Object::CreatePyNativeFunction(Object::Zeros)
+  );
+  builtins->Put(
+    Object::CreatePyString("Ones"), Object::CreatePyNativeFunction(Object::Ones)
+  );
+  builtins->Put(
+    Object::CreatePyString("Diag"),
+    Object::CreatePyNativeFunction(Object::Diagnostic)
+  );
+  builtins->Put(
+    Object::CreatePyString("Transpose"),
+    Object::CreatePyNativeFunction(Object::Transpose)
+  );
+  builtins->Put(
+    Object::CreatePyString("Reshape"),
+    Object::CreatePyNativeFunction(Object::Reshape)
+  );
+  builtins->Put(
+    Object::CreatePyString("Shape"),
+    Object::CreatePyNativeFunction(Object::Shape)
+  );
+  builtins->Put(
+    Object::CreatePyString("Where"),
+    Object::CreatePyNativeFunction(Object::Where)
+  );
+  builtins->Put(
+    Object::CreatePyString("Concatenate"),
+    Object::CreatePyNativeFunction(Object::Concatenate)
+  );
+  builtins->Put(
+    Object::CreatePyString("Ravel"),
+    Object::CreatePyNativeFunction(Object::Ravel)
+  );
+  builtins->Put(
+    Object::CreatePyString("Normal"),
+    Object::CreatePyNativeFunction(Object::Normal)
+  );
+  builtins->Put(
+    Object::CreatePyString("Shuffle"),
+    Object::CreatePyNativeFunction(Object::Shuffle)
+  );
 
   // 系统相关函数
   builtins->Put(

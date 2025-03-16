@@ -52,11 +52,6 @@ Object::PyObjPtr Interpreter::EvalMethod(
 ) {
   auto owner = func->Owner();
   auto function = func->Method();
-  if (owner->Klass()->Name()->Equal(
-        Object::CreatePyString("matrix_module")->as<Object::PyString>()
-      )) {
-    return Eval(function, arguments);
-  }
   return Eval(function, arguments->Prepend(owner)->as<Object::PyList>());
 }
 

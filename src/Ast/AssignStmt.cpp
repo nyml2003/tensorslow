@@ -2,7 +2,6 @@
 #include "Ast/Expression/Binary.h"
 #include "Ast/Identifier.h"
 #include "Ast/MemberAccess.h"
-#include "Object/PyBoolean.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
 
@@ -19,33 +18,13 @@ Object::PyObjPtr AssignStmtKlass::emit(
 
   if (target->Klass() == IdentifierKlass::Self()) {
     auto targetIdentifier = std::dynamic_pointer_cast<Identifier>(target);
-    auto name = targetIdentifier->Name();
-    auto code = GetCodeFromList(codeList, assignStmt);
-    if (Object::IsTrue(code->VarNames()->contains(name))) {
-      code->StoreFast(name);
-    }
-    if (Object::IsTrue(code->Names()->contains(name))) {
-      code->StoreName(name);
-    }
+    targetIdentifier->emit(codeList);
   } else if (target->Klass() == MemberAccessKlass::Self()) {
     auto memberAccess = std::dynamic_pointer_cast<MemberAccess>(target);
-    auto object = memberAccess->Obj();
-    object->emit(codeList);
-    auto member = memberAccess->Member();
-    auto code = GetCodeFromList(codeList, memberAccess);
-    code->StoreAttr(member);
+    memberAccess->emit(codeList);
   } else if (target->Klass() == BinaryKlass::Self()) {
     auto binary = std::dynamic_pointer_cast<Binary>(target);
-    auto oprt = binary->Oprt();
-    if (oprt != Binary::Operator::SUBSCR) {
-      throw std::runtime_error("Unknown target type");
-    }
-    auto left = binary->Left();
-    left->emit(codeList);
-    auto right = binary->Right();
-    right->emit(codeList);
-    auto code = GetCodeFromList(codeList, target);
-    code->StoreSubscr();
+    binary->emit(codeList);
     return Object::CreatePyNone();
   }
   return Object::CreatePyNone();
@@ -61,32 +40,20 @@ Object::PyObjPtr AssignStmtKlass::visit(
   auto target = assignStmt->Target();
   if (target->Klass() == IdentifierKlass::Self()) {
     auto targetIdentifier = std::dynamic_pointer_cast<Identifier>(target);
-    auto code = GetCodeFromList(codeList, targetIdentifier);
-    if (code->Scope() == Object::Scope::GLOBAL) {
-      code->RegisterName(targetIdentifier->Name());
-    }
-    if (code->Scope() == Object::Scope::LOCAL) {
-      auto module = targetIdentifier->Parent()->Parent();
-      auto moduleCode = GetCodeFromList(codeList, module);
-      if (!Object::IsTrue(moduleCode->Names()->contains(targetIdentifier->Name()
-          ))) {
-        // Global没有这个变量，那一定是在local中定义的局部变量
-        code->RegisterVarName(targetIdentifier->Name());
-      }
-    }
+    targetIdentifier->SetStoreMode();
+    targetIdentifier->visit(codeList);
   } else if (target->Klass() == MemberAccessKlass::Self()) {
     auto memberAccess = std::dynamic_pointer_cast<MemberAccess>(target);
+    memberAccess->SetStoreMode();
     memberAccess->visit(codeList);
   } else if (target->Klass() == BinaryKlass::Self()) {
     auto binary = std::dynamic_pointer_cast<Binary>(target);
     auto oprt = binary->Oprt();
     if (oprt != Binary::Operator::SUBSCR) {
-      throw std::runtime_error("Unknown target type");
+      throw std::runtime_error("When assigning, only support subscript operation");
     }
-    auto left = binary->Left();
-    left->visit(codeList);
-    auto right = binary->Right();
-    right->visit(codeList);
+    binary->SetOprt(Binary::Operator::STORE_SUBSCR);
+    binary->visit(codeList);
     return Object::CreatePyNone();
   }
   return Object::CreatePyNone();

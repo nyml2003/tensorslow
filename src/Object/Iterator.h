@@ -36,7 +36,8 @@ class ListIteratorKlass : public Klass {
   }
   PyObjPtr iter(const PyObjPtr& obj) override { return obj; }
   PyObjPtr next(const PyObjPtr& obj) override;
-  PyObjPtr str(const PyObjPtr& obj) override;
+  PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
+  PyObjPtr repr(const PyObjPtr& obj) override;
 
   static void Initialize() {
     LoadClass(CreatePyString("ListIterator")->as<PyString>(), Self());

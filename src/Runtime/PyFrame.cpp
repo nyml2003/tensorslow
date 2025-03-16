@@ -703,7 +703,10 @@ Object::PyObjPtr PyFrame::Eval() {
           value = Interpreter::Instance().Builtins()->getitem(key);
         }
         if (!found) {
-          throw std::runtime_error("NameError: name '" + key->as<Object::PyString>()->ToCppString() + "' is not defined");
+          throw std::runtime_error(
+            "NameError: name '" + key->as<Object::PyString>()->ToCppString() +
+            "' is not defined"
+          );
           auto errorMessage = StringConcat(Object::CreatePyList(
             {Object::CreatePyString("NameError: name '"), key,
              Object::CreatePyString("' is not defined")}

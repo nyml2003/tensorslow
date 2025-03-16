@@ -1,5 +1,6 @@
 #include "Object/Iterator.h"
 #include "Object/Object.h"
+#include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyString.h"
 
@@ -16,9 +17,13 @@ PyObjPtr ListIteratorKlass::next(const PyObjPtr& obj) {
   return value;
 }
 
-PyObjPtr ListIteratorKlass::str(const PyObjPtr& obj) {
-  auto iterator = std::dynamic_pointer_cast<ListIterator>(obj);
-  return iterator->List()->GetItem(iterator->CurrentIndex())->str();
+PyObjPtr ListIteratorKlass::repr(const PyObjPtr& obj) {
+  auto iterator = obj->as<ListIterator>();
+  return StringConcat(CreatePyList(
+    {CreatePyString("<list_iterator object of "), iterator->List()->str(),
+     CreatePyString(" index: "),
+     CreatePyInteger(iterator->CurrentIndex())->str(), CreatePyString(">")}
+  ));
 }
 
 PyObjPtr StringIteratorKlass::next(const PyObjPtr& obj) {
@@ -53,7 +58,8 @@ PyObjPtr DictItemIteratorKlass::str(const PyObjPtr& obj) {
   auto dict = iterator->Dict();
   auto value = dict->GetItem(iterator->CurrentIndex())->as<PyList>();
   auto result = StringConcat(CreatePyList(
-    {value->GetItem(0)->str(), CreatePyString(": ")->as<PyString>(), value->GetItem(1)->str()}
+    {value->GetItem(0)->str(), CreatePyString(": ")->as<PyString>(),
+     value->GetItem(1)->str()}
   ));
   return result;
 }

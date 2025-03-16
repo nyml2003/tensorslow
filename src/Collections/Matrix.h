@@ -4,11 +4,15 @@
 #include "Collections/List.h"
 #include "Collections/String.h"
 namespace torchlight::Collections {
+
+using BroadcastType = uint8_t;
+
 class Matrix {
  private:
   Index rows{};
   Index cols{};
   List<double> data;
+  BroadcastType broadcastType = 0b1111;
 
   [[nodiscard]] uint8_t CheckBroadcast(const Matrix& other) const;
 

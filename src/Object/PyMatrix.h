@@ -66,9 +66,13 @@ class MatrixKlass : public Klass {
 
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
+  PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+
   PyObjPtr gt(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+
+  PyObjPtr len(const PyObjPtr& obj) override;
 
   PyObjPtr setitem(
     const PyObjPtr& obj,
@@ -110,6 +114,9 @@ class PyMatrix : public PyObject {
   PyMatrixPtr Add(const PyMatrixPtr& other) const {
     return CreatePyMatrix(matrix.Add(other->matrix));
   }
+  PyMatrixPtr Subtract(const PyMatrixPtr& other) const {
+    return CreatePyMatrix(matrix.Add(other->matrix.Multiply(-1)));
+  }
   PyStrPtr ToString() const {
     return CreatePyString(matrix.ToString())->as<PyString>();
   }
@@ -118,6 +125,13 @@ class PyMatrix : public PyObject {
                          CreatePyInteger(matrix.Shape()[1])})
       ->as<PyList>();
   }
+  PyIntPtr Rows() const {
+    return CreatePyInteger(matrix.Rows())->as<PyInteger>();
+  }
+  PyIntPtr Cols() const {
+    return CreatePyInteger(matrix.Cols())->as<PyInteger>();
+  }
+
   PyMatrixPtr Reshape(Index rows, Index cols) const {
     return CreatePyMatrix(matrix.Reshape(rows, cols));
   }

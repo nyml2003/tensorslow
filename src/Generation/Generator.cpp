@@ -281,25 +281,27 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
   if (ctx->augassign() != nullptr) {
     auto target =
       visitTestlist_star_expr(ctx->testlist_star_expr(0)).as<Ast::INodePtr>();
+    auto targetCopy =
+      visitTestlist_star_expr(ctx->testlist_star_expr(0)).as<Ast::INodePtr>();
     auto source = visitTestlist(ctx->testlist()).as<Ast::INodePtr>();
     if (ctx->augassign()->ADD_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::ADD, target, source, context),
+        Ast::CreateBinary(Ast::Binary::Operator::ADD, targetCopy, source, context),
         context
       );
     }
     if (ctx->augassign()->SUB_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::SUB, target, source, context),
+        Ast::CreateBinary(Ast::Binary::Operator::SUB, targetCopy, source, context),
         context
       );
     }
     if (ctx->augassign()->MULT_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::MUL, target, source, context),
+        Ast::CreateBinary(Ast::Binary::Operator::MUL, targetCopy, source, context),
         context
       );
     }
@@ -307,7 +309,7 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
       return Ast::CreateAssignStmt(
         target,
         Ast::CreateBinary(
-          Ast::Binary::Operator::MATMUL, target, source, context
+          Ast::Binary::Operator::MATMUL, targetCopy, source, context
         ),
         context
       );
@@ -315,35 +317,35 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
     if (ctx->augassign()->DIV_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::DIV, target, source, context),
+        Ast::CreateBinary(Ast::Binary::Operator::DIV, targetCopy, source, context),
         context
       );
     }
     if (ctx->augassign()->MOD_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::MOD, target, source, context),
+        Ast::CreateBinary(Ast::Binary::Operator::MOD, targetCopy, source, context),
         context
       );
     }
     if (ctx->augassign()->AND_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::AND, target, source, context),
+        Ast::CreateBinary(Ast::Binary::Operator::AND, targetCopy, source, context),
         context
       );
     }
     if (ctx->augassign()->OR_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::OR, target, source, context),
+        Ast::CreateBinary(Ast::Binary::Operator::OR, targetCopy, source, context),
         context
       );
     }
     if (ctx->augassign()->XOR_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::XOR, target, source, context),
+        Ast::CreateBinary(Ast::Binary::Operator::XOR, targetCopy, source, context),
         context
       );
     }
@@ -351,7 +353,7 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
       return Ast::CreateAssignStmt(
         target,
         Ast::CreateBinary(
-          Ast::Binary::Operator::LSHIFT, target, source, context
+          Ast::Binary::Operator::LSHIFT, targetCopy, source, context
         ),
         context
       );
@@ -360,7 +362,7 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
       return Ast::CreateAssignStmt(
         target,
         Ast::CreateBinary(
-          Ast::Binary::Operator::RSHIFT, target, source, context
+          Ast::Binary::Operator::RSHIFT, targetCopy, source, context
         ),
         context
       );
@@ -369,7 +371,7 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
       return Ast::CreateAssignStmt(
         target,
         Ast::CreateBinary(
-          Ast::Binary::Operator::POWER, target, source, context
+          Ast::Binary::Operator::POWER, targetCopy, source, context
         ),
         context
       );
@@ -378,7 +380,7 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
       return Ast::CreateAssignStmt(
         target,
         Ast::CreateBinary(
-          Ast::Binary::Operator::FLOOR_DIV, target, source, context
+          Ast::Binary::Operator::FLOOR_DIV, targetCopy, source, context
         ),
         context
       );

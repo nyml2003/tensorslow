@@ -25,7 +25,12 @@ Object::PyObjPtr MemberAccessKlass::emit(
   object->emit(codeList);
   auto member = memberAccess->Member();
   auto code = GetCodeFromList(codeList, memberAccess);
-  code->LoadAttr(member);
+  if (memberAccess->Mode() == STOREORLOAD::STORE) {
+    code->StoreAttr(member);
+  }
+  if (memberAccess->Mode() == STOREORLOAD::LOAD) {
+    code->LoadAttr(member);
+  }
   return Object::CreatePyNone();
 }
 

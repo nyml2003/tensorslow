@@ -135,6 +135,12 @@ void RunTest(const fs::path& filename) {
   Runtime::Interpreter::Instance().Run(code);
   HandleResultEnd(filename);
 }
+
+void AddOptionWhenDebug(int& argc, char** argv) {
+  argc++;
+  argv[argc - 1] = "--debug";
+}
+
 int main(int argc, char** argv) {
   DefineOption();
   ArgsHelper::Instance().Accept(argc, argv);

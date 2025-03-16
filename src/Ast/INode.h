@@ -6,6 +6,11 @@
 #include "Object/PyObject.h"
 namespace torchlight::Ast {
 
+enum class STOREORLOAD {
+  STORE,
+  LOAD,
+};
+
 class INodeKlass : public Object::Klass {
  public:
   virtual Object::PyObjPtr
