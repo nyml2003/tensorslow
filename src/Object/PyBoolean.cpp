@@ -32,20 +32,20 @@ PyObjPtr BooleanKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr BooleanKlass::_and_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyBoolean>() || !rhs->is<PyBoolean>()) {
+  if (!lhs->is<PyBoolean>()) {
     throw std::runtime_error("Boolean does not support and operation");
   }
   auto left = lhs->as<PyBoolean>();
-  auto right = rhs->as<PyBoolean>();
+  auto right = rhs->boolean()->as<PyBoolean>();
   return CreatePyBoolean(left->Value() && right->Value());
 }
 
 PyObjPtr BooleanKlass::_or_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyBoolean>() || !rhs->is<PyBoolean>()) {
+  if (!lhs->is<PyBoolean>()) {
     throw std::runtime_error("Boolean does not support or operation");
   }
   auto left = lhs->as<PyBoolean>();
-  auto right = rhs->as<PyBoolean>();
+  auto right = rhs->boolean()->as<PyBoolean>();
   return CreatePyBoolean(left->Value() || right->Value());
 }
 

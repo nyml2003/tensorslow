@@ -25,9 +25,10 @@ class FloatKlass : public Klass {
   PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
   PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
+  PyObjPtr floordiv(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
+  PyObjPtr mod(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr pow(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr repr(const PyObjPtr& obj) override;
   PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
 

@@ -1,6 +1,6 @@
+#include "Collections/Integer.h"
 #include <gtest/gtest.h>
 #include "../test_default.h"
-#include "Collections/Integer.h"
 #include "Collections/IntegerHelper.h"
 
 #include "Collections.h"
@@ -259,4 +259,86 @@ TEST(Integer, LessThanOrEqual) {
   ASSERT_FALSE(
     CreateIntegerWithCString("1").LessThanOrEqual(CreateIntegerWithCString("0"))
   );
+}
+
+TEST(Integer, Right_SHIFT) {
+  Integer a = CreateIntegerWithCString("18446744073709551615");
+  Integer b = CreateIntegerWithCString("1");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "9223372036854775807");
+  b = CreateIntegerWithCString("2");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "4611686018427387903");
+  b = CreateIntegerWithCString("3");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "2305843009213693951");
+  b = CreateIntegerWithCString("4");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "1152921504606846975");
+  b = CreateIntegerWithCString("5");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "576460752303423487");
+  b = CreateIntegerWithCString("6");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "288230376151711743");
+  b = CreateIntegerWithCString("7");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "144115188075855871");
+  b = CreateIntegerWithCString("8");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "72057594037927935");
+  b = CreateIntegerWithCString("9");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "36028797018963967");
+  b = CreateIntegerWithCString("10");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "18014398509481983");
+  b = CreateIntegerWithCString("11");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "9007199254740991");
+  b = CreateIntegerWithCString("12");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "4503599627370495");
+  b = CreateIntegerWithCString("13");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "2251799813685247");
+  b = CreateIntegerWithCString("14");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "1125899906842623");
+  b = CreateIntegerWithCString("15");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "562949953421311");
+  b = CreateIntegerWithCString("16");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "281474976710655");
+  b = CreateIntegerWithCString("17");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "140737488355327");
+  b = CreateIntegerWithCString("18");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "70368744177663");
+  b = CreateIntegerWithCString("19");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "35184372088831");
+  b = CreateIntegerWithCString("20");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "17592186044415");
+  b = CreateIntegerWithCString("21");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "8796093022207");
+  b = CreateIntegerWithCString("22");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "4398046511103");
+  b = CreateIntegerWithCString("23");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "2199023255551");
+  b = CreateIntegerWithCString("24");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "1099511627775");
+  b = CreateIntegerWithCString("25");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "549755813887");
+  b = CreateIntegerWithCString("26");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "274877906943");
+  b = CreateIntegerWithCString("27");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "137438953471");
+  b = CreateIntegerWithCString("28");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "68719476735");
+  b = CreateIntegerWithCString("29");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "34359738367");
+  b = CreateIntegerWithCString("30");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "17179869183");
+  b = CreateIntegerWithCString("31");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "8589934591");
+  b = CreateIntegerWithCString("32");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "4294967295");
+  b = CreateIntegerWithCString("33");
+  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "2147483647");
+}
+
+TEST(Integer, LEFT_SHIFT) {
+  Integer a = CreateIntegerWithCString("65535");
+  Integer b = CreateIntegerWithCString("1");
+  ASSERT_EQ(ToCppString(a.LeftShift(b).ToString()), "131070");
+  b = CreateIntegerWithCString("2");
+  ASSERT_EQ(ToCppString(a.LeftShift(b).ToString()), "262140");
+  b = CreateIntegerWithCString("15");
+  ASSERT_EQ(ToCppString(a.LeftShift(b).ToString()), "2147450880");
+  b = CreateIntegerWithCString("16");
+  ASSERT_EQ(ToCppString(a.LeftShift(b).ToString()), "4294901760");
 }

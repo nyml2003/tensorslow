@@ -375,37 +375,20 @@ Integer Integer::LeftShift(const Integer& rhs) const {
     return Copy();
   }
 
+  // 计算总位移量（使用uint64_t防止32位溢出）
+  uint64_t totalShift = ToU64(rhs);
+  uint64_t blockShift = (totalShift-1) / 16 + 1;
+  uint64_t bitShift = totalShift % 16;
+  if (bitShift != 0) {
+    bitShift = 16 - bitShift;
+  }
   Integer result = Copy();
-  uint32_t totalShift = 0;
-
-  // 计算总位移量
-  for (Index i = 0; i < rhs.parts.Size(); i++) {
-    totalShift += rhs.parts.Get(i);
+  result.parts.ExpandWithElement(result.parts.Size() + blockShift, 0);
+  if (bitShift == 0) {
+    return result;
   }
-
-  // 如果总位移量超过最大范围，直接返回0
-  if (totalShift >= 16 * result.parts.Size()) {
-    return CreateIntegerZero();
-  }
-
-  // 扩展数组大小以容纳新的位移结果
-  Index newPartsSize = result.parts.Size() + (totalShift + 15) / 16;
-  result.parts.ExpandWithElement(newPartsSize, 0);
-
-  // 逐位进行位移
-  for (Index i = 0; i < result.parts.Size(); i++) {
-    uint32_t lowShift = totalShift % 16;
-    uint32_t highShift = 16 - lowShift;
-
-    if (i + 1 < result.parts.Size()) {
-      uint32_t overflow = result.parts.Get(i) >> highShift;
-      result.parts.Set(i + 1, result.parts.Get(i + 1) | overflow);
-    }
-
-    result.parts.Set(i, result.parts.Get(i) << lowShift);
-  }
-
-  return result;
+  Integer IntBitShift = CreateIntegerWithU64(bitShift);
+  return result.RightShift(IntBitShift);
 }
 
 Integer Integer::RightShift(const Integer& rhs) const {
@@ -415,21 +398,29 @@ Integer Integer::RightShift(const Integer& rhs) const {
   if (rhs.IsZero()) {
     return Copy();
   }
-  Integer result = Copy();
-  for (Index i = 0; i < rhs.parts.Size(); i++) {
-    uint32_t shift = rhs.parts.Get(i);
-    if (shift == 0) {
-      continue;
-    }
-    for (Index j = 0; j < result.parts.Size(); j++) {
-      result.parts.Set(j, result.parts.Get(j) >> shift);
-      if (j + 1 < result.parts.Size()) {
-        result.parts.Set(
-          j, result.parts.Get(j) | (result.parts.Get(j + 1) << (16 - shift))
-        );
-      }
-    }
+  // 计算总位移量
+  uint64_t totalShift = ToU64(rhs);
+  // 如果总位移量超过最大范围，直接返回0
+  if (totalShift >= 16 * parts.Size()) {
+    return CreateIntegerZero();
   }
+  Integer result = Copy();
+  uint64_t blockShift = totalShift / 16;
+  uint64_t bitShift = totalShift % 16;
+  result.parts.RemoveRange(result.parts.Size() - 1 - blockShift, blockShift);
+  if (bitShift == 0) {
+    return result;
+  }
+  uint32_t overflowPicker = (1 << (bitShift + 1)) - 1;
+  for (Index i = result.parts.Size(); i > 1; i--) {
+    uint32_t high = result.parts.Get(i - 2);
+    uint32_t low = result.parts.Get(i - 1);
+    low >>= bitShift;
+    high &= overflowPicker;
+    high = (high << (16 - bitShift)) & 0xFFFF;
+    result.parts.Set(i - 1, low | high);
+  }
+  result.parts.Set(0, result.parts.Get(0) >> bitShift);
   TrimLeadingZero(result.parts);
   return result;
 }

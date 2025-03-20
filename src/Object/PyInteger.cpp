@@ -4,6 +4,7 @@
 #include "Collections/IntegerHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
+#include "Object/PyFloat.h"
 #include "Object/PyList.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
@@ -78,6 +79,15 @@ PyObjPtr IntegerKlass::floordiv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return CreatePyInteger(left->value.Divide(right->value));
 }
 
+PyObjPtr IntegerKlass::truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyInteger>() || !rhs->is<PyInteger>()) {
+    throw std::runtime_error("PyInteger::div(): lhs or rhs is not an integer");
+  }
+  auto left = static_cast<double>(lhs->as<PyInteger>()->ToU64());
+  auto right = static_cast<double>(rhs->as<PyInteger>()->ToU64());
+  return CreatePyFloat(left / right);
+}
+
 PyObjPtr IntegerKlass::mod(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
     throw std::runtime_error("PyInteger::mod(): lhs or rhs is not an integer");
@@ -111,23 +121,20 @@ PyObjPtr IntegerKlass::neg(const PyObjPtr& obj) {
   return CreatePyInteger(integer->value.Negate());
 }
 
-PyObjPtr IntegerKlass::_and_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
-    throw std::runtime_error("PyInteger::_and_(): lhs or rhs is not an integer"
-    );
+PyObjPtr IntegerKlass::boolean(const PyObjPtr& obj) {
+  if (obj->Klass() != Self()) {
+    throw std::runtime_error("PyInteger::boolean(): obj is not an integer");
   }
-  auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
-  auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
-  return CreatePyInteger(left->value.BitWiseAnd(right->value));
+  auto integer = std::dynamic_pointer_cast<PyInteger>(obj);
+  return CreatePyBoolean(!integer->value.IsZero());
+}
+
+PyObjPtr IntegerKlass::_and_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  return lhs->boolean()->_and_(rhs);
 }
 
 PyObjPtr IntegerKlass::_or_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
-    throw std::runtime_error("PyInteger::_or_(): lhs or rhs is not an integer");
-  }
-  auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
-  auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
-  return CreatePyInteger(left->value.BitWiseOr(right->value));
+  return lhs->boolean()->_or_(rhs);
 }
 
 PyObjPtr IntegerKlass::_xor_(const PyObjPtr& lhs, const PyObjPtr& rhs) {

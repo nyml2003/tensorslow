@@ -4,6 +4,7 @@
 #include "Collections/StringHelper.h"
 #include "Common.h"
 
+#include <cstdint>
 #include <limits>
 #include <stdexcept>
 namespace torchlight::Collections {

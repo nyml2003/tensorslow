@@ -66,6 +66,33 @@ PyObjPtr FloatKlass::truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   );
 }
 
+PyObjPtr FloatKlass::floordiv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+    throw std::runtime_error("PyFloat::floordiv(): lhs or rhs is not a float");
+  }
+  return CreatePyFloat(
+    std::floor(lhs->as<PyFloat>()->Value() / rhs->as<PyFloat>()->Value())
+  );
+}
+
+PyObjPtr FloatKlass::mod(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+    throw std::runtime_error("PyFloat::mod(): lhs or rhs is not a float");
+  }
+  return CreatePyFloat(
+    std::fmod(lhs->as<PyFloat>()->Value(), rhs->as<PyFloat>()->Value())
+  );
+}
+
+PyObjPtr FloatKlass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+    throw std::runtime_error("PyFloat::pow(): lhs or rhs is not a float");
+  }
+  return CreatePyFloat(
+    std::pow(lhs->as<PyFloat>()->Value(), rhs->as<PyFloat>()->Value())
+  );
+}
+
 PyObjPtr FloatKlass::neg(const PyObjPtr& obj) {
   if (!obj->is<PyFloat>()) {
     throw std::runtime_error("PyFloat::neg(): obj is not a float");

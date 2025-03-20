@@ -368,6 +368,9 @@ void List<T>::RemoveRange(Index start, Index length) {
   if (start >= size || start + length > size || length < 0) {
     throw std::runtime_error("List::RemoveRange::Index out of range");
   }
+  if (length == 0) {
+    return;
+  }
   std::move(
     elements.get() + start + length, elements.get() + size,
     elements.get() + start
@@ -530,6 +533,7 @@ void List<T>::ExpandWithElement(Index newCapacity, T element) {
   std::copy(elements.get(), elements.get() + size, newElements.get());
   elements = std::move(newElements);
   capacity = newCapacity;
+  size = newCapacity;
 }
 template <typename T>
 void List<T>::Fill(T element) {

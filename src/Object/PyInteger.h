@@ -24,10 +24,12 @@ class IntegerKlass : public Klass {
   PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr floordiv(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr pow(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr pos(const PyObjPtr& obj) override;
   PyObjPtr neg(const PyObjPtr& obj) override;
   PyObjPtr invert(const PyObjPtr& obj) override;
+  PyObjPtr boolean(const PyObjPtr& obj) override;
   PyObjPtr _and_(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr _or_(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr _xor_(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
