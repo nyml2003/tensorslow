@@ -82,6 +82,7 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   PyObjPtr ne(const PyObjPtr& other) {
     return klass->ne(shared_from_this(), other);
   }
+  PyObjPtr hash() { return klass->hash(shared_from_this()); }
   PyObjPtr repr() { return klass->repr(shared_from_this()); }
   PyObjPtr str() { return klass->str(shared_from_this()); }
   PyObjPtr getitem(const PyObjPtr& key) {

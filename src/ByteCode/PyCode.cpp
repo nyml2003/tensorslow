@@ -22,23 +22,23 @@ PyCode::PyCode(
   Index nLocals
 )
   : PyObject(CodeKlass::Self()) {
-  if (byteCodes->Klass() != BytesKlass::Self()) {
+  if (!byteCodes->is<PyBytes>()) {
     throw std::runtime_error("byteCodes must be a bytes object");
   }
   byteCode = std::dynamic_pointer_cast<PyBytes>(byteCodes);
-  if (consts->Klass() != ListKlass::Self()) {
+  if (!consts->is<PyList>()) {
     throw std::runtime_error("consts must be a list object");
   }
   this->consts = std::dynamic_pointer_cast<PyList>(consts);
-  if (names->Klass() != ListKlass::Self()) {
+  if (!names->is<PyList>()) {
     throw std::runtime_error("names must be a list object");
   }
   this->names = std::dynamic_pointer_cast<PyList>(names);
-  if (varNames->Klass() != ListKlass::Self()) {
+  if (!varNames->is<PyList>()) {
     throw std::runtime_error("varNames must be a list object");
   }
   this->varNames = std::dynamic_pointer_cast<PyList>(varNames);
-  if (name->Klass() != StringKlass::Self()) {
+  if (!name->is<PyString>()) {
     throw std::runtime_error("filename must be a string object");
   }
   this->name = std::dynamic_pointer_cast<PyString>(name);
@@ -125,7 +125,7 @@ PyObjPtr CodeKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 PyObjPtr CodeKlass::repr(const PyObjPtr& self) {
   return StringConcat(CreatePyList(
     {CreatePyString("<code object at ")->as<PyString>(),
-     Identity(self)->as<PyString>(), CreatePyString(">")->as<PyString>()}
+     Identity(CreatePyList({self}))->as<PyString>(), CreatePyString(">")->as<PyString>()}
   ));
 }
 

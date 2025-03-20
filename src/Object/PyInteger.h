@@ -15,10 +15,9 @@ class IntegerKlass : public Klass {
   explicit IntegerKlass() = default;
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<IntegerKlass>();
-    LoadClass(CreatePyString("int")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
   }
+  static void Initialize();
   PyObjPtr init(const PyObjPtr& klass, const PyObjPtr& args) override;
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
@@ -30,6 +29,7 @@ class IntegerKlass : public Klass {
   PyObjPtr neg(const PyObjPtr& obj) override;
   PyObjPtr invert(const PyObjPtr& obj) override;
   PyObjPtr boolean(const PyObjPtr& obj) override;
+  PyObjPtr hash(const PyObjPtr& obj) override;
   PyObjPtr _and_(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr _or_(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr _xor_(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
@@ -63,9 +63,13 @@ class PyInteger : public PyObject {
 
   [[nodiscard]] Index ToU64() const { return Collections::ToU64(value); }
 
+  [[nodiscard]] bool IsBigNumber() const { return Collections::IsBigNumber(value); }
+
   Collections::Integer::IntSign GetSign() const { return value.GetSign(); }
 
   int64_t ToI64() const { return Collections::ToI64(value); }
+
+  bool LessThan(const PyObjPtr& other) const; 
 };
 
 }  // namespace torchlight::Object

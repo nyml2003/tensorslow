@@ -144,8 +144,18 @@ PyObjPtr Klass::repr(const PyObjPtr& self) {
   return StringConcat(CreatePyList(
     {CreatePyString("<"),
      self->getattr(CreatePyString("__name__")->as<PyString>()),
-     CreatePyString(" object at "), Identity(self), CreatePyString(">")}
+     CreatePyString(" object at "), Identity(CreatePyList({self})), CreatePyString(">")}
   ));
+}
+
+PyObjPtr Klass::hash(const PyObjPtr& obj) {
+  auto hashFunc = obj->getattr(CreatePyString("__hash__")->as<PyString>());
+  if (hashFunc != nullptr) {
+    return Runtime::Interpreter::Eval(hashFunc, CreatePyList({})->as<PyList>());
+  }
+  return CreatePyInteger(
+    Collections::CreateIntegerWithU64(reinterpret_cast<uint64_t>(obj.get()))
+  );
 }
 
 PyObjPtr Klass::gt(const PyObjPtr& lhs, const PyObjPtr& rhs) {

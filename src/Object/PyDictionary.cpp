@@ -2,6 +2,7 @@
 #include "Object/Iterator.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
+#include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
@@ -14,29 +15,30 @@ PyObjPtr CreatePyDict() {
 }
 
 void PyDictionary::Put(const PyObjPtr& key, const PyObjPtr& value) {
-  dict.Put(key, value);
+  dict.insert_or_assign(key, value);
 }
 
 PyObjPtr PyDictionary::Get(const PyObjPtr& key) {
-  return dict.Get(key);
+  return dict[key];
 }
 
 void PyDictionary::Remove(const PyObjPtr& key) {
-  dict.Remove(key);
+  dict.erase(key);
 }
 
 bool PyDictionary::Contains(const PyObjPtr& key) {
-  return dict.Contains(key);
+  return dict.find(key) != dict.end();
 }
 
 PyObjPtr PyDictionary::GetItem(Index index) const {
-  auto entries = dict.Entries();
-  auto entry = entries[index];
-  return CreatePyList({entry.Key(), entry.Value()});
+  auto dictIterator = dict.begin();
+  std::advance(dictIterator, index);
+  auto entry = *dictIterator;
+  return CreatePyList({entry.first, entry.second});
 }
 
 Index PyDictionary::Size() const {
-  return dict.Size();
+  return dict.size();
 }
 
 void DictionaryKlass::Initialize() {
@@ -138,6 +140,12 @@ PyObjPtr DictionaryKlass::contains(const PyObjPtr& obj, const PyObjPtr& key) {
   }
   auto dict = std::dynamic_pointer_cast<PyDictionary>(obj);
   return CreatePyBoolean(dict->Contains(key));
+}
+
+bool KeyCompare(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  auto leftHash = lhs->hash()->as<PyInteger>();
+  auto rightHash = rhs->hash()->as<PyInteger>();
+  return leftHash->LessThan(rightHash);
 }
 
 }  // namespace torchlight::Object

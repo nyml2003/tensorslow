@@ -19,6 +19,11 @@ PyObjPtr CreatePyInteger(uint64_t value) {
   return std::make_shared<PyInteger>(Collections::CreateIntegerWithU64(value));
 }
 
+void IntegerKlass::Initialize() {
+  LoadClass(CreatePyString("int")->as<PyString>(), Self());
+  ConfigureBasicAttributes(Self());
+}
+
 PyObjPtr IntegerKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {
   if (klass->as<PyType>()->Owner() != Self()) {
     throw std::runtime_error("PyInteger::init(): klass is not an integer");
@@ -114,19 +119,31 @@ PyObjPtr IntegerKlass::pos(const PyObjPtr& obj) {
 }
 
 PyObjPtr IntegerKlass::neg(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::neg(): obj is not an integer");
   }
-  auto integer = std::dynamic_pointer_cast<PyInteger>(obj);
+  auto integer = obj->as<PyInteger>();
   return CreatePyInteger(integer->value.Negate());
 }
 
 PyObjPtr IntegerKlass::boolean(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::boolean(): obj is not an integer");
   }
-  auto integer = std::dynamic_pointer_cast<PyInteger>(obj);
+  auto integer = obj->as<PyInteger>();
   return CreatePyBoolean(!integer->value.IsZero());
+}
+
+PyObjPtr IntegerKlass::hash(const PyObjPtr& obj) {
+  if (!obj->is<PyInteger>()) {
+    throw std::runtime_error("PyInteger::hash(): obj is not an integer");
+  }
+  if (obj->as<PyInteger>()->IsBigNumber()) {
+    return CreatePyInteger(
+      Collections::CreateIntegerWithU64(reinterpret_cast<uint64_t>(obj.get()))
+    );
+  }
+  return obj;
 }
 
 PyObjPtr IntegerKlass::_and_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -215,6 +232,14 @@ PyObjPtr IntegerKlass::_serialize_(const PyObjPtr& obj) {
   }
   return CreatePyBytes(Collections::Serialize(Literal::INTEGER)
                          .Add(Collections::Serialize(integer->value)));
+}
+
+bool PyInteger::LessThan(const PyObjPtr& other) const {
+  if (!other->is<PyInteger>()) {
+    throw std::runtime_error("PyInteger::LessThan(): other is not an integer");
+  }
+  auto otherInteger = other->as<PyInteger>();
+  return value.LessThan(otherInteger->value);
 }
 
 }  // namespace torchlight::Object

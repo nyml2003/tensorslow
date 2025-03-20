@@ -39,6 +39,7 @@ Invoke(const PyObjPtr& obj, const PyObjPtr& methodName, const PyListPtr& args) {
 
 void BasicKlassLoad() {
   Object::StringKlass::Initialize();
+  Object::IntegerKlass::Initialize();
   Object::ListKlass::Initialize();
   Object::DictionaryKlass::Initialize();
   Object::TypeKlass::Initialize();
@@ -83,17 +84,6 @@ PyObjPtr Map(
   }
   return CreatePyList(result)->as<PyList>();
 }
-PyObjPtr SolveStr(const KlassPtr& klass, const PyObjPtr& self) {
-  auto strFunc = self->getattr(CreatePyString("__str__")->as<PyString>());
-  if (strFunc != nullptr) {
-    return Runtime::Interpreter::Eval(strFunc, CreatePyList({})->as<PyList>());
-  }
-  auto reprFunc = self->getattr(CreatePyString("__repr__")->as<PyString>());
-  if (reprFunc != nullptr) {
-    return Runtime::Interpreter::Eval(reprFunc, CreatePyList({})->as<PyList>());
-  }
-  return klass->repr(self);
-}
 
 PyObjPtr Str(const PyObjPtr& args) {
   CheckNativeFunctionArguments(args);
@@ -110,7 +100,7 @@ PyObjPtr Str(const PyObjPtr& args) {
 PyObjPtr KlassStr(const PyObjPtr& args) {
   return StringConcat(CreatePyList(
     {CreatePyString("<"), args->as<PyList>()->GetItem(0)->Klass()->Name(),
-     CreatePyString(" object at "), Identity(args->as<PyList>()->GetItem(0)),
+     CreatePyString(" object at "), Identity(args),
      CreatePyString(">")}
   ));
 }
@@ -123,7 +113,7 @@ PyObjPtr Repr(const PyObjPtr& args) {
 PyObjPtr KlassRepr(const PyObjPtr& args) {
   return StringConcat(CreatePyList(
     {CreatePyString("<"), args->as<PyList>()->GetItem(0)->Klass()->Name(),
-     CreatePyString(" object at "), Identity(args->as<PyList>()->GetItem(0)),
+     CreatePyString(" object at "), Identity(args),
      CreatePyString(">")}
   ));
 }
@@ -138,7 +128,9 @@ PyObjPtr KlassBool(const PyObjPtr& args) {
   return CreatePyBoolean(true);
 }
 
-PyObjPtr Identity(const PyObjPtr& obj) {
+PyObjPtr Identity(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
+  auto obj = args->as<PyList>()->GetItem(0);
   return CreatePyString(
     Collections::CreateIntegerWithU64(reinterpret_cast<uint64_t>(obj.get()))
       .ToHexString()

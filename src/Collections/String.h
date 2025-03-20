@@ -1,6 +1,7 @@
 #ifndef TORCHLIGHT_COLLECTIONS_STRING_H
 #define TORCHLIGHT_COLLECTIONS_STRING_H
 #include "Collections/List.h"
+
 namespace torchlight::Collections {
 class String {
  private:
@@ -50,5 +51,7 @@ class String {
   Unicode operator[](Index index);
   Unicode operator[](Index index) const;
 };
+
+ // namespace std
 }  // namespace torchlight::Collections
 #endif  // TORCHLIGHT_COLLECTIONS_STRING_H

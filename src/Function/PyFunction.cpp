@@ -7,7 +7,7 @@ PyObjPtr FunctionKlass::repr(const PyObjPtr& obj) {
   return StringConcat(CreatePyList(
     {CreatePyString("<function ")->as<PyString>(),
      obj->as<PyFunction>()->Name(), CreatePyString(" at ")->as<PyString>(),
-     Identity(obj)->as<PyString>(), CreatePyString(">")->as<PyString>()}
+     Identity(CreatePyList({obj}))->as<PyString>(), CreatePyString(">")->as<PyString>()}
   ));
 }
 

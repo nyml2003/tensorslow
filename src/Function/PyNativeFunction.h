@@ -2,7 +2,6 @@
 #define TORCHLIGHT_FUNCTION_PYNATIVEFUNCTION_H
 
 #include <functional>
-#include "Object/ObjectHelper.h"
 #include "Object/PyString.h"
 
 namespace torchlight::Object {

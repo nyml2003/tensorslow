@@ -46,6 +46,9 @@ Object::PyObjPtr Genesis() {
     Object::CreatePyString("bool"), CreatePyNativeFunction(Object::Bool)
   );
   builtins->Put(
+    Object::CreatePyString("id"), CreatePyNativeFunction(Object::Identity)
+  );
+  builtins->Put(
     Object::CreatePyString("__build_class__"),
     CreatePyNativeFunction(BuildClass)
   );

@@ -87,7 +87,7 @@ Object::PyObjPtr ReadList(Collections::Iterator<Byte>& byteIter) {
     auto obj = ReadObject(byteIter);
     result.Push(obj);
   }
-  return std::make_shared<Object::PyList>(result);
+  return Object::CreatePyList(result);
 }
 
 Object::PyObjPtr ReadObject(Collections::Iterator<Byte>& byteIter) {

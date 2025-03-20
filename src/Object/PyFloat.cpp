@@ -1,9 +1,11 @@
 #include "Object/PyFloat.h"
 #include "ByteCode/ByteCode.h"
 #include "Collections/BytesHelper.h"
+#include "Collections/IntegerHelper.h"
 #include "Collections/StringHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
+#include "Object/PyInteger.h"
 #include "Object/PyList.h"
 #include "Object/PyString.h"
 #include "Object/PyType.h"
@@ -91,6 +93,15 @@ PyObjPtr FloatKlass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return CreatePyFloat(
     std::pow(lhs->as<PyFloat>()->Value(), rhs->as<PyFloat>()->Value())
   );
+}
+
+PyObjPtr FloatKlass::hash(const PyObjPtr& obj) {
+  if (!obj->is<PyFloat>()) {
+    throw std::runtime_error("PyFloat::hash(): obj is not a float");
+  }
+  return CreatePyInteger(Collections::CreateIntegerWithU64(
+    static_cast<uint64_t>(obj->as<PyFloat>()->Value())
+  ));
 }
 
 PyObjPtr FloatKlass::neg(const PyObjPtr& obj) {

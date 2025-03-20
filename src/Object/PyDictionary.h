@@ -1,11 +1,11 @@
 #ifndef TORCHLIGHT_OBJECT_PYDICTIONARY_H
 #define TORCHLIGHT_OBJECT_PYDICTIONARY_H
 
-#include <map>
-#include "Collections/Map.h"
 #include "Common.h"
 #include "Object/Klass.h"
 #include "Object/PyObject.h"
+
+#include <map>
 
 namespace torchlight::Object {
 
@@ -34,9 +34,11 @@ class DictionaryKlass : public Klass {
   static void Initialize();
 };
 
+bool KeyCompare(const PyObjPtr& lhs, const PyObjPtr& rhs);
+
 class PyDictionary : public PyObject {
  private:
-  Collections::Map<PyObjPtr, PyObjPtr> dict;
+  std::map<PyObjPtr, PyObjPtr, decltype(KeyCompare)*> dict{KeyCompare};
 
  public:
   explicit PyDictionary() : PyObject(DictionaryKlass::Self()) {}

@@ -144,6 +144,11 @@ Integer CreateIntegerWithU64(uint64_t value) {
   parts.Reverse();
   return Integer(parts, false);
 }
+
+bool IsBigNumber(const Integer& integer) {
+  return integer.Data().Size() > 4;
+}
+
 Integer CreateIntegerWithI64(int64_t value) {
   if (value == 0) {
     return CreateIntegerZero();

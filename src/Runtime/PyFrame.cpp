@@ -330,7 +330,7 @@ Object::PyObjPtr FrameKlass::repr(const Object::PyObjPtr& obj) {
   auto frame = obj->as<PyFrame>();
   return Object::StringConcat(Object::CreatePyList(
     {Object::CreatePyString("<frame at ")->as<Object::PyString>(),
-     Object::Identity(obj)->as<Object::PyString>(),
+     Object::Identity(Object::CreatePyList({obj}))->as<Object::PyString>(),
      Object::CreatePyString(">")->as<Object::PyString>()}
   ));
 }
@@ -350,8 +350,14 @@ void PrintFrame(const PyFramePtr& frame) {
   Object::PyString::IncreaseIndent();
   Object::PrintCode(frame->Code());
   Object::PyString::DecreaseIndent();
-  Object::CreatePyString("Stack: ")->as<Object::PyString>()->PrintLine();
-  frame->CurrentStack()->str()->as<Object::PyString>()->PrintLine();
+  Object::CreatePyString("Stack(*ptr): ")->as<Object::PyString>()->PrintLine();
+  auto stack = frame->CurrentStack();
+  for (Index i = 0; i < stack->Length(); i++) {
+    Object::CreatePyInteger(i)->repr()->as<Object::PyString>()->Print();
+    Object::CreatePyString("  ")->as<Object::PyString>()->Print();
+    stack->GetItem(i)->repr()->as<Object::PyString>()->Print();
+    std::cout << " ( " << stack->GetItem(i).get() << " ) " << std::endl;
+  }
   Object::CreatePyString("Locals: ")->as<Object::PyString>()->PrintLine();
   frame->CurrentLocals()->str()->as<Object::PyString>()->PrintLine();
   Object::CreatePyString("Globals: ")->as<Object::PyString>()->PrintLine();

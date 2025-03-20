@@ -2,8 +2,10 @@
 #define TORCHLIGHT_OBJECT_PYSTRING_H
 
 #include "Collections/String.h"
-#include "Collections/StringHelper.h"
+#include "Object/Object.h"
 #include "Object/PyObject.h"
+
+#include <mutex>
 
 namespace torchlight::Object {
 
@@ -25,7 +27,7 @@ class StringKlass : public Klass {
   PyObjPtr str(const PyObjPtr& obj) override;
   PyObjPtr repr(const PyObjPtr& obj) override;
   PyObjPtr iter(const PyObjPtr& obj) override;
-
+  PyObjPtr hash(const PyObjPtr& obj) override;
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 };
 
@@ -36,6 +38,8 @@ class PyString : public PyObject {
   Collections::String value;
   // 缩进深度
   static Index indent;
+  static std::unordered_map<Collections::String, PyObjPtr> stringPool;
+  static std::mutex poolMutex;
 
  public:
   explicit PyString(Collections::String value)
@@ -63,6 +67,7 @@ class PyString : public PyObject {
   PyStrPtr Upper() const;
 
   Collections::String Value() const { return value; }
+  static PyObjPtr Create(const Collections::String& value);
 };
 
 using PyStrPtr = std::shared_ptr<PyString>;
@@ -75,15 +80,9 @@ PyObjPtr StringSplit(const PyObjPtr& args);
 
 PyObjPtr StringConcat(const PyObjPtr& args);
 
-inline PyObjPtr CreatePyString(const Collections::String& value) {
-  return std::make_shared<PyString>(value);
-}
-inline PyObjPtr CreatePyString(const char* value) {
-  return CreatePyString(Collections::CreateStringWithCString(value));
-}
-inline PyObjPtr CreatePyString(const std::string& value) {
-  return CreatePyString(Collections::CreateStringWithCString(value.c_str()));
-}
+PyObjPtr CreatePyString(const Collections::String& value);
+PyObjPtr CreatePyString(const char* value);
+PyObjPtr CreatePyString(const std::string& value);
 
 }  // namespace torchlight::Object
 

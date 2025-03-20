@@ -5,6 +5,7 @@
 #include "Function/FunctionForward.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/Iterator.h"
+#include "Object/Object.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBoolean.h"
 #include "Object/PyBytes.h"
@@ -16,6 +17,8 @@
 
 namespace torchlight::Object {
 Index PyString::indent = 0;
+std::unordered_map<Collections::String, PyObjPtr> PyString::stringPool;
+std::mutex PyString::poolMutex;
 void StringKlass::Initialize() {
   LoadClass(CreatePyString("str")->as<PyString>(), Self());
   ConfigureBasicAttributes(Self());
@@ -134,6 +137,14 @@ PyObjPtr StringKlass::iter(const PyObjPtr& obj) {
   return CreateStringIterator(obj);
 }
 
+PyObjPtr StringKlass::hash(const PyObjPtr& obj) {
+  if (!obj->is<PyString>()) {
+    throw std::runtime_error("StringKlass::hash(): obj is not a string");
+  }
+  auto string = obj->as<PyString>();
+  return CreatePyInteger(std::hash<std::string>{}(string->ToCppString()));
+}
+
 PyObjPtr StringKlass::_serialize_(const PyObjPtr& obj) {
   if (!obj->is<PyString>()) {
     throw std::runtime_error("StringKlass::_serialize_(): obj is not a string");
@@ -250,6 +261,34 @@ PyObjPtr StringSplit(const PyObjPtr& args) {
   auto delimiter = argList->GetItem(0)->as<PyString>();
   auto value = argList->GetItem(1)->as<PyString>();
   return value->Split(delimiter);
+}
+
+PyObjPtr PyString::Create(const Collections::String& value) {
+  std::lock_guard<std::mutex> lock(poolMutex);
+  auto iter = stringPool.find(value);
+  if (iter != stringPool.end()) {
+    auto result = iter->second;
+    if (result != nullptr) {
+      return result;
+    }
+  }
+
+  // 如果没有找到或者弱指针已经失效，则创建新的实例
+  auto result = std::make_shared<PyString>(value);
+  stringPool[value] = result;
+  return result;
+}
+
+PyObjPtr CreatePyString(const Collections::String& value) {
+  return PyString::Create(value);
+}
+
+PyObjPtr CreatePyString(const std::string& value) {
+  return PyString::Create(Collections::CreateStringWithCString(value.c_str()));
+}
+
+PyObjPtr CreatePyString(const char* value) {
+  return PyString::Create(Collections::CreateStringWithCString(value));
 }
 
 }  // namespace torchlight::Object

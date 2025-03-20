@@ -50,6 +50,7 @@ class Klass : public std::enable_shared_from_this<Klass> {
   virtual PyObjPtr _and_(const PyObjPtr& lhs, const PyObjPtr& rhs);
   virtual PyObjPtr _or_(const PyObjPtr& lhs, const PyObjPtr& rhs);
   virtual PyObjPtr _xor_(const PyObjPtr& lhs, const PyObjPtr& rhs);
+  virtual PyObjPtr hash(const PyObjPtr& obj);
   virtual PyObjPtr gt(const PyObjPtr& lhs, const PyObjPtr& rhs);
   virtual PyObjPtr lt(const PyObjPtr& lhs, const PyObjPtr& rhs);
   virtual PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs);

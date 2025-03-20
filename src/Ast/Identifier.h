@@ -3,6 +3,7 @@
 
 #include "Ast/INode.h"
 #include "Object/ObjectHelper.h"
+#include "Object/PyString.h"
 
 namespace torchlight::Ast {
 
@@ -61,6 +62,7 @@ class Identifier : public INode {
                                       Object::CreatePyString("Ravel"),
                                       Object::CreatePyString("Normal"),
                                       Object::CreatePyString("Shuffle"),
+                                      Object::CreatePyString("id"),
                                     })
                  ->as<Object::PyList>();
   }

@@ -19,7 +19,6 @@ PyObjPtr Map(
   const PyObjPtr& iterable,
   const std::function<PyObjPtr(const PyObjPtr& value)>& func
 );
-PyObjPtr SolveStr(const KlassPtr& klass, const PyObjPtr& self);
 // 内置函数str
 PyObjPtr Str(const PyObjPtr& args);
 // object.__str__
@@ -32,7 +31,7 @@ PyObjPtr KlassRepr(const PyObjPtr& args);
 PyObjPtr Bool(const PyObjPtr& args);
 // object.__bool__
 PyObjPtr KlassBool(const PyObjPtr& args);
-PyObjPtr Identity(const PyObjPtr& obj);
+PyObjPtr Identity(const PyObjPtr& args);
 PyObjPtr RandInt(const PyObjPtr& args);
 PyObjPtr Sleep(const PyObjPtr& args);
 PyObjPtr Input(const PyObjPtr& args);

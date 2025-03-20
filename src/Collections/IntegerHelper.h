@@ -16,6 +16,7 @@ Integer CreateIntegerTwo();
 Integer CreateIntegerWithU64(uint64_t value);
 Integer CreateIntegerWithI64(int64_t value);
 uint64_t ToU64(const Integer& integer);
+bool IsBigNumber(const Integer& integer);
 int64_t ToI64(const Integer& integer);
 uint64_t safe_add(uint64_t lhs, int64_t rhs);
 }  // namespace torchlight::Collections

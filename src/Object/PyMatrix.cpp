@@ -219,6 +219,7 @@ PyObjPtr MatrixKlass::setitem(
   if (!key->is<PyList>()) {
     throw std::runtime_error("MatrixKlass::setitem(): key is not a list");
   }
+  // TODO a[0,0] = 0的情况
   if (!value->is<PyMatrix>()) {
     throw std::runtime_error("MatrixKlass::setitem(): value is not a matrix");
   }
