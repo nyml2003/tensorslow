@@ -6,11 +6,10 @@ namespace torchlight::Ast {
 
 Object::PyObjPtr
 AtomKlass::emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) {
-  auto atom = std::dynamic_pointer_cast<Atom>(obj);
+  auto atom = obj->as<Atom>();
   auto code = GetCodeFromList(codeList, atom);
   auto object = atom->Obj();
-  auto isNode = std::dynamic_pointer_cast<INode>(object);
-  if (isNode == nullptr) {
+  if (!object->is<INode>()) {
     code->LoadConst(object);
     return Object::CreatePyNone();
   }
@@ -21,11 +20,10 @@ Object::PyObjPtr AtomKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto atom = std::dynamic_pointer_cast<Atom>(obj);
+  auto atom = obj->as<Atom>();
   auto code = GetCodeFromList(codeList, atom);
   auto object = atom->Obj();
-  auto isNode = std::dynamic_pointer_cast<INode>(object);
-  if (isNode == nullptr) {
+  if (!object->is<INode>()) {
     code->RegisterConst(object);
     return Object::CreatePyNone();
   }

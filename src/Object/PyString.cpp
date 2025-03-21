@@ -145,6 +145,14 @@ PyObjPtr StringKlass::hash(const PyObjPtr& obj) {
   return CreatePyInteger(std::hash<std::string>{}(string->ToCppString()));
 }
 
+PyObjPtr StringKlass::boolean(const PyObjPtr& obj) {
+  if (!obj->is<PyString>()) {
+    throw std::runtime_error("StringKlass::boolean(): obj is not a string");
+  }
+  auto string = obj->as<PyString>();
+  return CreatePyBoolean(string->Length() > 0);
+}
+
 PyObjPtr StringKlass::_serialize_(const PyObjPtr& obj) {
   if (!obj->is<PyString>()) {
     throw std::runtime_error("StringKlass::_serialize_(): obj is not a string");

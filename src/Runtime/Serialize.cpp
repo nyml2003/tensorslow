@@ -1,3 +1,4 @@
+#include "Runtime/Serialize.h"
 #include "ByteCode/ByteCode.h"
 #include "Collections/Bytes.h"
 #include "Collections/BytesHelper.h"
@@ -9,7 +10,6 @@
 #include "Object/PyList.h"
 #include "Object/PyNone.h"
 #include "Object/PyString.h"
-#include "Runtime/Serialize.h"
 
 #include <cstring>
 namespace torchlight::Runtime {
@@ -127,18 +127,20 @@ Object::PyObjPtr ReadCode(Collections::Iterator<Byte>& byteIter) {
   auto nLocals = ReadU64(byteIter);
   auto byteCode = ReadObject(byteIter);
   return std::make_shared<Object::PyCode>(
-    byteCode, consts, names, varNames, name, nLocals
+    byteCode->as<Object::PyBytes>(), consts->as<Object::PyList>(),
+    names->as<Object::PyList>(), varNames->as<Object::PyList>(),
+    name->as<Object::PyString>(), nLocals
   );
 }
 
 Object::PyCodePtr MakeCode(const Object::PyObjPtr& byteCode) {
-  if (byteCode->Klass() != Object::BytesKlass::Self()) {
+  if (!byteCode->is<Object::PyBytes>()) {
     throw std::runtime_error("Invalid byte code");
   }
-  auto bytes = std::dynamic_pointer_cast<Object::PyBytes>(byteCode)->Value().Value();
+  auto bytes = byteCode->as<Object::PyBytes>()->Value().Value();
   Collections::Iterator<Byte> byteIter =
     Collections::Iterator<Byte>::Begin(bytes);
   auto obj = ReadObject(byteIter);
-  return std::dynamic_pointer_cast<Object::PyCode>(obj);
+  return obj->as<Object::PyCode>();
 }
 }  // namespace torchlight::Runtime

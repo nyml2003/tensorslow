@@ -6,15 +6,14 @@ Object::PyObjPtr FunctionCallKlass::emit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto functionCall = std::dynamic_pointer_cast<FunctionCall>(obj);
+  auto functionCall = obj->as<FunctionCall>();
   auto func = functionCall->Func();
   auto args = functionCall->Args();
   func->emit(codeList);
   Object::ForEach(
-    std::dynamic_pointer_cast<Object::PyList>(args),
+    args,
     [&codeList](const Object::PyObjPtr& arg, Index, const Object::PyObjPtr&) {
-      auto argNode = std::dynamic_pointer_cast<INode>(arg);
-      argNode->emit(codeList);
+      arg->as<INode>()->emit(codeList);
     }
   );
   auto code = GetCodeFromList(codeList, functionCall);
@@ -26,15 +25,14 @@ Object::PyObjPtr FunctionCallKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto functionCall = std::dynamic_pointer_cast<FunctionCall>(obj);
+  auto functionCall = obj->as<FunctionCall>();
   auto func = functionCall->Func();
   auto args = functionCall->Args();
   func->visit(codeList);
   Object::ForEach(
-    std::dynamic_pointer_cast<Object::PyList>(args),
+    args,
     [&codeList](const Object::PyObjPtr& arg, Index, const Object::PyObjPtr&) {
-      auto argNode = std::dynamic_pointer_cast<INode>(arg);
-      argNode->visit(codeList);
+      arg->as<INode>()->visit(codeList);
     }
   );
   return Object::CreatePyNone();

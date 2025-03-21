@@ -55,7 +55,7 @@ class INode : public Object::PyObject {
   INodePtr parent;  // 保存父结点在codeList中的索引
 };
 
-Object::PyCodePtr GetCodeFromList(Object::PyObjPtr codeList, INodePtr node);
+Object::PyCodePtr GetCodeFromList(const Object::PyObjPtr& codeList, const INodePtr& node);
 
 }  // namespace torchlight::Ast
 

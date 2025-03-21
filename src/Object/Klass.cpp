@@ -21,11 +21,8 @@ void Klass::SetAttributes(const PyObjPtr& attributes) {
   this->attributes = attributes->as<PyDictionary>();
 }
 
-void Klass::SetType(const PyObjPtr& type) {
-  if (type->Klass() != TypeKlass::Self()) {
-    throw std::runtime_error("Cannot set non-type object as type");
-  }
-  this->type = std::dynamic_pointer_cast<PyType>(type);
+void Klass::SetType(const PyTypePtr& type) {
+  this->type = type;
 }
 
 void Klass::SetSuper(const PyObjPtr& super) {
@@ -310,7 +307,7 @@ KlassPtr CreatePyKlass(
   auto klass = std::make_shared<Klass>();
   klass->SetName(name);
   klass->SetAttributes(attributes);
-  klass->SetType(CreatePyType(klass));
+  klass->SetType(CreatePyType(klass)->as<PyType>());
   klass->SetSuper(super);
   klass->SetMro(ComputeMro(klass->Type()));
   ConfigureBasicAttributes(klass);

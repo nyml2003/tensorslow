@@ -4,7 +4,6 @@
 #include "Function/PyMethod.h"
 #include "Function/PyNativeFunction.h"
 #include "Object/Object.h"
-#include "Object/PyBoolean.h"
 #include "Object/PyDictionary.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
@@ -16,7 +15,7 @@ namespace torchlight::Runtime {
 
 Interpreter::Interpreter() {
   frame = nullptr;
-  builtins = std::dynamic_pointer_cast<Object::PyDictionary>(Genesis());
+  builtins = Genesis();
 }
 
 Interpreter& Interpreter::Instance() {
@@ -100,7 +99,7 @@ void Interpreter::BackToParentFrame() {
   if (!frame->is<PyFrame>()) {
     throw std::runtime_error("Cannot destroy non-frame object");
   }
-  frame = std::dynamic_pointer_cast<PyFrame>(frame)->Caller();
+  frame = frame->as<PyFrame>()->Caller();
 }
 
 }  // namespace torchlight::Runtime

@@ -10,10 +10,10 @@ void TypeKlass::Initialize() {
 }
 
 PyObjPtr TypeKlass::repr(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyType>()) {
     throw std::runtime_error("PyType::repr(): obj is not a type object");
   }
-  auto type = std::dynamic_pointer_cast<PyType>(obj);
+  auto type = obj->as<PyType>();
   return CreatePyString("<class '")
     ->add(type->Owner()->Name())
     ->add(CreatePyString("'>"));

@@ -18,11 +18,11 @@ PyInst::PyInst(ByteCode code, OperandKind operand)
 }
 
 PyObjPtr InstKlass::_serialize_(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyInst>()) {
     throw std::runtime_error("PyInst::_serialize_(): obj is not an inst object"
     );
   }
-  auto inst = std::dynamic_pointer_cast<PyInst>(obj);
+  auto inst = obj->as<PyInst>();
   Collections::Bytes bytes = Collections::Serialize(inst->Code());
   std::visit(
     overload{
@@ -39,10 +39,10 @@ PyObjPtr InstKlass::_serialize_(const PyObjPtr& obj) {
 }
 
 PyObjPtr InstKlass::repr(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyInst>()) {
     throw std::runtime_error("PyInst::repr(): obj is not an inst object");
   }
-  auto inst = std::dynamic_pointer_cast<PyInst>(obj);
+  auto inst = obj->as<PyInst>();
   Collections::String result =
     Collections::ToString(inst->Code())
       .Add(Collections::CreateStringWithCString(" "));

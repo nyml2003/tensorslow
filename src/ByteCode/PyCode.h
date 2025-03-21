@@ -3,6 +3,7 @@
 
 #include "ByteCode/PyInst.h"
 #include "Object/Klass.h"
+#include "Object/Object.h"
 #include "Object/ObjectHelper.h"
 #include "Object/PyBytes.h"
 #include "Object/PyList.h"
@@ -20,11 +21,11 @@ class PyCode : public PyObject {
 
  public:
   explicit PyCode(
-    const PyObjPtr& byteCodes,
-    const PyObjPtr& consts,
-    const PyObjPtr& names,
-    const PyObjPtr& varNames,
-    const PyObjPtr& name,
+    PyBytesPtr byteCodes,
+    PyListPtr consts,
+    PyListPtr names,
+    PyListPtr varNames,
+    PyStrPtr name,
     Index nLocals
   );
 
@@ -169,9 +170,21 @@ class CodeKlass : public Klass {
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 };
 
-PyObjPtr CreatePyCode(const PyObjPtr& name);
+PyObjPtr CreatePyCode(const PyStrPtr& name);
 // 打印PyCode的详细信息
 void PrintCode(const PyCodePtr& code);
+inline PyObjPtr CreatePyCode(
+  const PyBytesPtr& byteCode,
+  const PyListPtr& consts,
+  const PyListPtr& names,
+  const PyListPtr& varNames,
+  const PyStrPtr& name,
+  Index nLocals
+) {
+  return std::make_shared<PyCode>(
+    byteCode, consts, names, varNames, name, nLocals
+  );
+}
 
 }  // namespace torchlight::Object
 

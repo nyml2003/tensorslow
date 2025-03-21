@@ -68,7 +68,7 @@ class Binary : public Ast::INode {
 
   [[nodiscard]] Operator Oprt() const { return oprt; }
 
-  void SetOprt(Operator _oprt) { oprt = _oprt; }
+  void SetOprt(Operator oprt) { this->oprt = oprt; }
 
  private:
   Operator oprt;

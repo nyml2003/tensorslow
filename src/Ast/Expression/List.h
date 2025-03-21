@@ -1,6 +1,8 @@
 #ifndef TORCHLIGHT_AST_LIST_H
 #define TORCHLIGHT_AST_LIST_H
 
+#include <utility>
+
 #include "Ast/INode.h"
 #include "Object/ObjectHelper.h"
 
@@ -29,9 +31,9 @@ class ListKlass : public INodeKlass {
 // 作为右值的list
 class List : public INode {
  public:
-  explicit List(const Object::PyObjPtr& elements, INodePtr parent)
+  explicit List(Object::PyListPtr elements, INodePtr parent)
     : INode(ListKlass::Self(), std::move(parent)),
-      elements(elements->as<Object::PyList>()) {}
+      elements(std::move(elements)) {}
 
   [[nodiscard]] Object::PyListPtr Elements() const { return elements; }
 
@@ -41,7 +43,8 @@ class List : public INode {
 
 using ListPtr = std::shared_ptr<List>;
 
-inline INodePtr CreateList(Object::PyObjPtr elements, INodePtr parent) {
+inline INodePtr
+CreateList(const Object::PyListPtr& elements, const INodePtr& parent) {
   return std::make_shared<List>(elements, parent);
 }
 

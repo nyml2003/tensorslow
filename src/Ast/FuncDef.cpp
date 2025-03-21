@@ -21,7 +21,7 @@ FuncDef::FuncDef(
     parameters(std::move(parameters)),
     body(std::move(body)),
     parents(Object::CreatePyList({})->as<Object::PyList>()),
-    codeIndex(nullptr) {
+    codeIndex(0) {
   if (parent->is<Module>()) {
     parents = Object::CreatePyList({parent})->as<Object::PyList>();
   }
@@ -39,11 +39,9 @@ Object::PyObjPtr FuncDefKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto funcDef = std::dynamic_pointer_cast<FuncDef>(obj);
-  funcDef->SetCodeIndex(codeList->len());
-  auto code = std::dynamic_pointer_cast<Object::PyCode>(
-    Object::CreatePyCode(funcDef->Name())
-  );
+  auto funcDef = obj->as<FuncDef>();
+  funcDef->SetCodeIndex(codeList->as<Object::PyList>()->Length());
+  auto code = Object::CreatePyCode(funcDef->Name())->as<Object::PyCode>();
   code->SetScope(Object::Scope::LOCAL);
   Object::ForEach(
     funcDef->Parameters(),
@@ -58,8 +56,7 @@ Object::PyObjPtr FuncDefKlass::visit(
   Object::ForEach(
     funcDef->Body(),
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtNode = std::dynamic_pointer_cast<INode>(stmt);
-      stmtNode->visit(codeList);
+      stmt->as<INode>()->visit(codeList);
     }
   );
   parent->RegisterConst(code);
@@ -71,13 +68,12 @@ Object::PyObjPtr FuncDefKlass::emit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto funcDef = std::dynamic_pointer_cast<FuncDef>(obj);
+  auto funcDef = obj->as<FuncDef>();
   auto selfCode = GetCodeFromList(codeList, funcDef);
   Object::ForEach(
     funcDef->Body(),
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtNode = std::dynamic_pointer_cast<INode>(stmt);
-      stmtNode->emit(codeList);
+      stmt->as<INode>()->emit(codeList);
     }
   );
   if (selfCode->VarNames()->len()->ge(funcDef->Parameters()->len())) {

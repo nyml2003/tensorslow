@@ -29,6 +29,7 @@ class ListKlass : public Klass {
   PyObjPtr contains(const PyObjPtr& obj, const PyObjPtr& key) override;
   PyObjPtr init(const PyObjPtr& type, const PyObjPtr& args) override;
   PyObjPtr iter(const PyObjPtr& obj) override;
+  PyObjPtr boolean(const PyObjPtr& obj) override;
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
   static void Initialize();
 };

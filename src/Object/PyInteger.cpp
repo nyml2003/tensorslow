@@ -42,45 +42,47 @@ PyObjPtr IntegerKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {
     return value;
   }
   if (value->is<PyString>()) {
-    auto str = std::dynamic_pointer_cast<PyString>(value);
+    auto str = value->as<PyString>();
     return CreatePyInteger(Collections::CreateIntegerWithString(str->Value()));
   }
   throw std::runtime_error("PyInteger::init(): value is not an integer");
 }
 
 PyObjPtr IntegerKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
+  if (!lhs->is<PyInteger>() || !rhs->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::add(): lhs or rhs is not an integer");
   }
-  auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
-  auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
+  auto left = lhs->as<PyInteger>();
+  auto right = rhs->as<PyInteger>();
   return CreatePyInteger(left->value.Add(right->value));
 }
 
 PyObjPtr IntegerKlass::sub(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
+  if (!lhs->is<PyInteger>() || !rhs->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::sub(): lhs or rhs is not an integer");
   }
-  auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
-  auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
+  auto left = lhs->as<PyInteger>();
+  auto right = rhs->as<PyInteger>();
   return CreatePyInteger(left->value.Subtract(right->value));
 }
 
 PyObjPtr IntegerKlass::mul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
+  if (!lhs->is<PyInteger>() || !rhs->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::mul(): lhs or rhs is not an integer");
   }
-  auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
-  auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
+  auto left = lhs->as<PyInteger>();
+  auto right = rhs->as<PyInteger>();
   return CreatePyInteger(left->value.Multiply(right->value));
 }
 
 PyObjPtr IntegerKlass::floordiv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
-    throw std::runtime_error("PyInteger::div(): lhs or rhs is not an integer");
+  if (!lhs->is<PyInteger>() || !rhs->is<PyInteger>()) {
+    throw std::runtime_error(
+      "PyInteger::floordiv(): lhs or rhs is not an integer"
+    );
   }
-  auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
-  auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
+  auto left = lhs->as<PyInteger>();
+  auto right = rhs->as<PyInteger>();
   return CreatePyInteger(left->value.Divide(right->value));
 }
 
@@ -94,25 +96,25 @@ PyObjPtr IntegerKlass::truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr IntegerKlass::mod(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
+  if (!lhs->is<PyInteger>() || !rhs->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::mod(): lhs or rhs is not an integer");
   }
-  auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
-  auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
+  auto left = lhs->as<PyInteger>();
+  auto right = rhs->as<PyInteger>();
   return CreatePyInteger(left->value.Modulo(right->value));
 }
 
 PyObjPtr IntegerKlass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
+  if (!lhs->is<PyInteger>() || !rhs->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::pow(): lhs or rhs is not an integer");
   }
-  auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
-  auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
+  auto left = lhs->as<PyInteger>();
+  auto right = rhs->as<PyInteger>();
   return CreatePyInteger(left->value.Power(right->value));
 }
 
 PyObjPtr IntegerKlass::pos(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::pos(): obj is not an integer");
   }
   return obj;
@@ -155,47 +157,47 @@ PyObjPtr IntegerKlass::_or_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr IntegerKlass::_xor_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
+  if (!lhs->is<PyInteger>() || !rhs->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::_xor_(): lhs or rhs is not an integer"
     );
   }
-  auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
-  auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
+  auto left = lhs->as<PyInteger>();
+  auto right = rhs->as<PyInteger>();
   return CreatePyInteger(left->value.BitWiseXor(right->value));
 }
 
 PyObjPtr IntegerKlass::invert(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::invert(): obj is not an integer");
   }
-  auto integer = std::dynamic_pointer_cast<PyInteger>(obj);
+  auto integer = obj->as<PyInteger>();
   return CreatePyInteger(integer->value.BitWiseNot());
 }
 
 PyObjPtr IntegerKlass::lshift(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
+  if (!lhs->is<PyInteger>() || !rhs->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::lshift(): lhs or rhs is not an integer"
     );
   }
-  auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
-  auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
+  auto left = lhs->as<PyInteger>();
+  auto right = rhs->as<PyInteger>();
   return CreatePyInteger(left->value.LeftShift(right->value));
 }
 
 PyObjPtr IntegerKlass::rshift(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
+  if (!lhs->is<PyInteger>() || !rhs->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::rshift(): lhs or rhs is not an integer"
     );
   }
-  auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
-  auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
+  auto left = lhs->as<PyInteger>();
+  auto right = rhs->as<PyInteger>();
   return CreatePyInteger(left->value.RightShift(right->value));
 }
 PyObjPtr IntegerKlass::repr(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::repr(): obj is not an integer");
   }
-  auto integer = std::dynamic_pointer_cast<PyInteger>(obj);
+  auto integer = obj->as<PyInteger>();
   return CreatePyString((integer->value).ToString());
 }
 PyObjPtr IntegerKlass::str(const PyObjPtr& obj) {
@@ -203,30 +205,28 @@ PyObjPtr IntegerKlass::str(const PyObjPtr& obj) {
 }
 
 PyObjPtr IntegerKlass::gt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
-    DebugPrint(lhs);
-    DebugPrint(rhs);
+  if (!lhs->is<PyInteger>() || !rhs->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::gt(): lhs or rhs is not an integer");
   }
-  auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
-  auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
+  auto left = lhs->as<PyInteger>();
+  auto right = rhs->as<PyInteger>();
   return CreatePyBoolean(left->value.GreaterThan(right->value));
 }
 
 PyObjPtr IntegerKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
+  if (!lhs->is<PyInteger>() || !rhs->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::eq(): lhs or rhs is not an integer");
   }
-  auto left = std::dynamic_pointer_cast<PyInteger>(lhs);
-  auto right = std::dynamic_pointer_cast<PyInteger>(rhs);
+  auto left = lhs->as<PyInteger>();
+  auto right = rhs->as<PyInteger>();
   return CreatePyBoolean(left->value.Equal(right->value));
 }
 
 PyObjPtr IntegerKlass::_serialize_(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::_serialize_(): obj is not an integer");
   }
-  auto integer = std::dynamic_pointer_cast<PyInteger>(obj);
+  auto integer = obj->as<PyInteger>();
   if (integer->value.IsZero()) {
     return CreatePyBytes(Collections::Serialize(Literal::ZERO));
   }

@@ -43,17 +43,13 @@ class FuncDef : public INode {
 
   [[nodiscard]] Object::PyListPtr Parents() const { return parents; }
 
-  [[nodiscard]] Object::PyObjPtr CodeIndex() const { return codeIndex; }
+  [[nodiscard]] Index CodeIndex() const { return codeIndex; }
 
   void SetParents(const Object::PyListPtr& _parents) { parents = _parents; }
 
-  void SetCodeIndex(const Object::PyObjPtr& _codeIndex) {
-    codeIndex = _codeIndex;
-  }
+  void SetCodeIndex(const Index codeIndex) { this->codeIndex = codeIndex; }
 
-  void SetBody(const Object::PyObjPtr& _body) {
-    body = _body->as<Object::PyList>();
-  }
+  void SetBody(const Object::PyListPtr& body) { this->body = body; }
 
  private:
   Object::PyStrPtr name;
@@ -61,8 +57,7 @@ class FuncDef : public INode {
   Object::PyListPtr parameters;
   Object::PyListPtr
     parents;  // 保存整个调用链上的FuncDef或者Module所对应的PyCode对象
-  Object::PyObjPtr
-    codeIndex;  // 保存当前FuncDef对应的PyCode对象在codeList中的索引
+  Index codeIndex;  // 保存当前FuncDef对应的PyCode对象在codeList中的索引
 };
 
 inline INodePtr CreateFuncDef(

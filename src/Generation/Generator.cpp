@@ -34,10 +34,10 @@
 
 namespace torchlight::Generation {
 
-Generator::Generator(const Object::PyObjPtr& filename) {
-  context = Ast::CreateModule(Object::CreatePyList({}), filename);
-  codeList =
-    std::dynamic_pointer_cast<Object::PyList>(Object::CreatePyList({}));
+Generator::Generator(const Object::PyStrPtr& filename)
+  : codeList(Object::CreatePyList({})->as<Object::PyList>()) {
+  context =
+    Ast::CreateModule(Object::CreatePyList({})->as<Object::PyList>(), filename);
 }
 
 void Generator::Visit() {
@@ -72,7 +72,7 @@ antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
     auto stmt = visitStmt(stmtItertor);
     if (stmt.is<Object::PyObjPtr>()) {
       Object::ForEach(
-        std::dynamic_pointer_cast<Object::PyList>(stmt.as<Object::PyObjPtr>()),
+        stmt.as<Object::PyObjPtr>(),
         [&statements](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
           statements.Push(stmt);
         }
@@ -81,14 +81,16 @@ antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
       statements.Push(stmt.as<Ast::INodePtr>());
     }
   }
-  auto IsModule = std::dynamic_pointer_cast<Ast::Module>(context);
-  if (IsModule != nullptr) {
-    IsModule->SetBody(Object::CreatePyList(statements));
+  if (context->is<Ast::Module>()) {
+    context->as<Ast::Module>()->SetBody(
+      Object::CreatePyList(statements)->as<Object::PyList>()
+    );
     return nullptr;
   }
-  auto IsFuncDef = std::dynamic_pointer_cast<Ast::FuncDef>(context);
-  if (IsFuncDef != nullptr) {
-    IsFuncDef->SetBody(Object::CreatePyList(statements));
+  if (context->is<Ast::FuncDef>()) {
+    context->as<Ast::FuncDef>()->SetBody(
+      Object::CreatePyList(statements)->as<Object::PyList>()
+    );
     return nullptr;
   }
   std::cerr << "visitFile_input: Unknown context type" << std::endl;
@@ -114,12 +116,14 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
   if (ctx->OPEN_BRACK() != nullptr) {
     // 情况 2: '[' testlist_comp? ']'
     if (ctx->testlist_comp() == nullptr) {
-      return Ast::CreateList(Object::CreatePyList({}), context);
+      return Ast::CreateList(
+        Object::CreatePyList({})->as<Object::PyList>(), context
+      );
     }
     auto testlist_comp =
       visitTestlist_comp(ctx->testlist_comp()).as<Object::PyObjPtr>();
-    if (testlist_comp->Klass() == Object::ListKlass::Self()) {
-      return Ast::CreateList(testlist_comp, context);
+    if (testlist_comp->is<Object::PyList>()) {
+      return Ast::CreateList(testlist_comp->as<Object::PyList>(), context);
     }
     std::cerr << "visitAtom: testlist_comp is not a List" << std::endl;
 
@@ -287,21 +291,27 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
     if (ctx->augassign()->ADD_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::ADD, targetCopy, source, context),
+        Ast::CreateBinary(
+          Ast::Binary::Operator::ADD, targetCopy, source, context
+        ),
         context
       );
     }
     if (ctx->augassign()->SUB_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::SUB, targetCopy, source, context),
+        Ast::CreateBinary(
+          Ast::Binary::Operator::SUB, targetCopy, source, context
+        ),
         context
       );
     }
     if (ctx->augassign()->MULT_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::MUL, targetCopy, source, context),
+        Ast::CreateBinary(
+          Ast::Binary::Operator::MUL, targetCopy, source, context
+        ),
         context
       );
     }
@@ -317,35 +327,45 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
     if (ctx->augassign()->DIV_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::DIV, targetCopy, source, context),
+        Ast::CreateBinary(
+          Ast::Binary::Operator::DIV, targetCopy, source, context
+        ),
         context
       );
     }
     if (ctx->augassign()->MOD_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::MOD, targetCopy, source, context),
+        Ast::CreateBinary(
+          Ast::Binary::Operator::MOD, targetCopy, source, context
+        ),
         context
       );
     }
     if (ctx->augassign()->AND_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::AND, targetCopy, source, context),
+        Ast::CreateBinary(
+          Ast::Binary::Operator::AND, targetCopy, source, context
+        ),
         context
       );
     }
     if (ctx->augassign()->OR_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::OR, targetCopy, source, context),
+        Ast::CreateBinary(
+          Ast::Binary::Operator::OR, targetCopy, source, context
+        ),
         context
       );
     }
     if (ctx->augassign()->XOR_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
         target,
-        Ast::CreateBinary(Ast::Binary::Operator::XOR, targetCopy, source, context),
+        Ast::CreateBinary(
+          Ast::Binary::Operator::XOR, targetCopy, source, context
+        ),
         context
       );
     }
@@ -600,17 +620,18 @@ antlrcpp::Any Generator::visitFuncdef(Python3Parser::FuncdefContext* ctx) {
   auto funcName = Object::CreatePyString(ctx->name()->getText().c_str());
   // 2. 获取函数参数列表
   auto parameters = visitParameters(ctx->parameters()).as<Object::PyObjPtr>();
-  // 3. 获取函数体
-
-  // 4. 创建函数对象
-  auto funcDef = std::dynamic_pointer_cast<Ast::FuncDef>(Ast::CreateFuncDef(
-    funcName->as<Object::PyString>(), parameters->as<Object::PyList>(),
-    Object::CreatePyList({})->as<Object::PyList>(), context
-  ));
+  // 3. 创建函数对象
+  auto funcDef =
+    Ast::CreateFuncDef(
+      funcName->as<Object::PyString>(), parameters->as<Object::PyList>(),
+      Object::CreatePyList({})->as<Object::PyList>(), context
+    )
+      ->as<Ast::FuncDef>();
   auto oldContext = context;
   context = funcDef;
+  // 4. 获取函数体
   auto body = visitBlock(ctx->block()).as<Object::PyObjPtr>();
-  funcDef->SetBody(body);
+  funcDef->SetBody(body->as<Object::PyList>());
   context = oldContext;
   return std::dynamic_pointer_cast<Ast::INode>(funcDef);
 }
@@ -750,7 +771,7 @@ antlrcpp::Any Generator::visitSubscriptlist(
   for (auto* subscript : ctx->subscript_()) {
     subscripts.Push(visitSubscript_(subscript).as<Ast::INodePtr>());
   }
-  return Ast::CreateList(Object::CreatePyList(subscripts), context);
+  return Ast::CreateList(Object::CreatePyList(subscripts)->as<Object::PyList>(), context);
 }
 
 antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx
@@ -820,13 +841,13 @@ antlrcpp::Any Generator::visitClassdef(Python3Parser::ClassdefContext* ctx) {
       Ast::CreateIdentifier(Object::CreatePyString("object"), context)
     );
   }
-  auto classDef = std::dynamic_pointer_cast<Ast::ClassDef>(
+  auto classDef =
     Ast::CreateClassDef(className, Ast::CreateList(bases, context), context)
-  );
+      ->as<Ast::ClassDef>();
   auto oldContext = context;
   context = classDef;
   auto body = visitBlock(ctx->block()).as<Object::PyObjPtr>();
-  classDef->SetBody(body);
+  classDef->SetBody(body->as<Object::PyList>());
   context = oldContext;
   return std::dynamic_pointer_cast<Ast::INode>(classDef);
 }

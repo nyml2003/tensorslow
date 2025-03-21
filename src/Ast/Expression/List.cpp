@@ -4,13 +4,12 @@
 namespace torchlight::Ast {
 Object::PyObjPtr
 ListKlass::emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) {
-  auto list = std::dynamic_pointer_cast<List>(obj);
+  auto list = obj->as<List>();
   auto elements = list->Elements();
   Object::ForEach(
-    std::dynamic_pointer_cast<Object::PyList>(elements),
+    elements,
     [&codeList](const Object::PyObjPtr& element, Index, const Object::PyObjPtr&) {
-      auto elementNode = std::dynamic_pointer_cast<INode>(element);
-      elementNode->emit(codeList);
+      element->as<INode>()->emit(codeList);
     }
   );
   auto code = GetCodeFromList(codeList, list);
@@ -22,13 +21,12 @@ Object::PyObjPtr ListKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto list = std::dynamic_pointer_cast<List>(obj);
+  auto list = obj->as<List>();
   auto elements = list->Elements();
   Object::ForEach(
-    std::dynamic_pointer_cast<Object::PyList>(elements),
+    elements,
     [&codeList](const Object::PyObjPtr& element, Index, const Object::PyObjPtr&) {
-      auto elementNode = std::dynamic_pointer_cast<INode>(element);
-      elementNode->visit(codeList);
+      element->as<INode>()->visit(codeList);
     }
   );
   return Object::CreatePyNone();

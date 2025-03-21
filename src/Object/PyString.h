@@ -28,6 +28,7 @@ class StringKlass : public Klass {
   PyObjPtr repr(const PyObjPtr& obj) override;
   PyObjPtr iter(const PyObjPtr& obj) override;
   PyObjPtr hash(const PyObjPtr& obj) override;
+  PyObjPtr boolean(const PyObjPtr& obj) override;
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 };
 

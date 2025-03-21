@@ -5,24 +5,22 @@
 #include "Ast/Module.h"
 
 namespace torchlight::Ast {
-Object::PyCodePtr GetCodeFromList(Object::PyObjPtr codeList, INodePtr node) {
-  auto IsModule = std::dynamic_pointer_cast<Module>(node);
-  auto IsFuncDef = std::dynamic_pointer_cast<FuncDef>(node);
-  auto IsClassDef = std::dynamic_pointer_cast<ClassDef>(node);
-  if (IsModule != nullptr) {
-    return std::dynamic_pointer_cast<Object::PyCode>(
-      codeList->getitem(IsModule->CodeIndex())
-    );
+Object::PyCodePtr
+GetCodeFromList(const Object::PyObjPtr& codeList, const INodePtr& node) {
+  if (node->is<Module>()) {
+    return codeList->as<Object::PyList>()
+      ->GetItem(node->as<Module>()->CodeIndex())
+      ->as<Object::PyCode>();
   }
-  if (IsFuncDef != nullptr) {
-    return std::dynamic_pointer_cast<Object::PyCode>(
-      codeList->getitem(IsFuncDef->CodeIndex())
-    );
+  if (node->is<FuncDef>()) {
+    return codeList->as<Object::PyList>()
+      ->GetItem(node->as<FuncDef>()->CodeIndex())
+      ->as<Object::PyCode>();
   }
-  if (IsClassDef != nullptr) {
-    return std::dynamic_pointer_cast<Object::PyCode>(
-      codeList->getitem(IsClassDef->CodeIndex())
-    );
+  if (node->is<ClassDef>()) {
+    return codeList->as<Object::PyList>()
+      ->GetItem(node->as<ClassDef>()->CodeIndex())
+      ->as<Object::PyCode>();
   }
   return GetCodeFromList(codeList, node->Parent());
 }

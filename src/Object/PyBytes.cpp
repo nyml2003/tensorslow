@@ -10,29 +10,29 @@
 namespace torchlight::Object {
 
 PyObjPtr BytesKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
-    throw std::runtime_error("PyBytes::add(): lhs or rhs is not a bytes");
+  if (!lhs->is<PyBytes>() || !rhs->is<PyBytes>()) {
+    throw std::runtime_error("Bytes does not support add operation");
   }
-  auto left = std::dynamic_pointer_cast<PyBytes>(lhs);
-  auto right = std::dynamic_pointer_cast<PyBytes>(rhs);
+  auto left = lhs->as<PyBytes>();
+  auto right = rhs->as<PyBytes>();
   return CreatePyBytes(left->Value().Add(right->Value()));
 }
 
 PyObjPtr BytesKlass::_serialize_(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyBytes>()) {
     throw std::runtime_error("PyBytes::_serialize_(): obj is not a bytes");
   }
   return CreatePyBytes(
     Collections::Serialize(Literal::BYTES)
-      .Add(Serialize(std::dynamic_pointer_cast<PyBytes>(obj)->Value()))
+      .Add(Serialize(obj->as<PyBytes>()->Value()))
   );
 }
 
 PyObjPtr BytesKlass::repr(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyBytes>()) {
     throw std::runtime_error("PyBytes::repr(): obj is not a bytes");
   }
-  auto bytes = std::dynamic_pointer_cast<PyBytes>(obj);
+  auto bytes = obj->as<PyBytes>();
   Collections::List<Collections::String> reprs;
   auto bytesValue = bytes->Value().Value();
   for (auto it = Collections::Iterator<Byte>::Begin(bytesValue); !it.End();
@@ -46,11 +46,11 @@ PyObjPtr BytesKlass::repr(const PyObjPtr& obj) {
 }
 
 PyObjPtr BytesKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
-    return CreatePyBoolean(false);
+  if (!lhs->is<PyBytes>() || !rhs->is<PyBytes>()) {
+    throw std::runtime_error("Bytes does not support eq operation");
   }
-  auto left = std::dynamic_pointer_cast<PyBytes>(lhs);
-  auto right = std::dynamic_pointer_cast<PyBytes>(rhs);
+  auto left = lhs->as<PyBytes>();
+  auto right = rhs->as<PyBytes>();
   return CreatePyBoolean(left->Value().Equal(right->Value()));
 }
 

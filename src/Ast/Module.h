@@ -27,36 +27,31 @@ class ModuleKlass : public INodeKlass {
 
 class Module : public INode {
  public:
-  explicit Module(const Object::PyObjPtr& body, const Object::PyObjPtr& name)
+  explicit Module(Object::PyListPtr body, Object::PyStrPtr name)
     : INode(ModuleKlass::Self(), nullptr),
-      body(body->as<Object::PyList>()),
-      name(name->as<Object::PyString>()) {}
+      body(std::move(body)),
+      name(std::move(name)) {}
 
   Object::PyListPtr Body() const { return body; }
 
   Object::PyStrPtr Name() const { return name; }
 
-  [[nodiscard]] Object::PyObjPtr CodeIndex() const { return codeIndex; }
+  [[nodiscard]] Index CodeIndex() const { return codeIndex; }
 
-  void SetCodeIndex(const Object::PyObjPtr& _codeIndex) {
-    codeIndex = _codeIndex;
-  }
+  void SetCodeIndex(const Index codeIndex) { this->codeIndex = codeIndex; }
 
-  void SetBody(const Object::PyObjPtr& _body) {
-    body = _body->as<Object::PyList>();
-  }
+  void SetBody(const Object::PyListPtr& body) { this->body = body; }
 
  private:
   Object::PyListPtr body;
   Object::PyStrPtr name;
-  Object::PyObjPtr
-    codeIndex;  // 保存当前FuncDef对应的PyCode对象在codeList中的索引
+  Index codeIndex{};  // 保存当前FuncDef对应的PyCode对象在codeList中的索引
 };
 
 using ModulePtr = std::shared_ptr<Module>;
 
 inline INodePtr
-CreateModule(const Object::PyObjPtr& body, const Object::PyObjPtr& name) {
+CreateModule(const Object::PyListPtr& body, const Object::PyStrPtr& name) {
   return std::make_shared<Module>(body, name);
 }
 

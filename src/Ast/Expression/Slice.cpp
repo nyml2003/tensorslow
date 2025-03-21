@@ -11,8 +11,7 @@ Object::PyObjPtr SliceKlass::emit(
   Object::ForEach(
     elements,
     [&codeList](const Object::PyObjPtr& element, Index, const Object::PyObjPtr&) {
-      auto elementNode = std::dynamic_pointer_cast<INode>(element);
-      elementNode->emit(codeList);
+      element->as<INode>()->emit(codeList);
     }
   );
   auto code = GetCodeFromList(codeList, list);
@@ -27,10 +26,9 @@ Object::PyObjPtr SliceKlass::visit(
   auto list = obj->as<Ast::Slice>();
   auto elements = list->Elements();
   Object::ForEach(
-    std::dynamic_pointer_cast<Object::PyList>(elements),
+    elements,
     [&codeList](const Object::PyObjPtr& element, Index, const Object::PyObjPtr&) {
-      auto elementNode = std::dynamic_pointer_cast<INode>(element);
-      elementNode->visit(codeList);
+      element->as<INode>()->visit(codeList);
     }
   );
   return Object::CreatePyNone();

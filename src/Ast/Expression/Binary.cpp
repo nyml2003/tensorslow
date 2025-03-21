@@ -8,7 +8,7 @@ Object::PyObjPtr BinaryKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto binary = std::dynamic_pointer_cast<Binary>(obj);
+  auto binary = obj->as<Binary>();
   auto left = binary->Left();
   auto right = binary->Right();
   left->visit(codeList);
@@ -19,7 +19,7 @@ Object::PyObjPtr BinaryKlass::emit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto binary = std::dynamic_pointer_cast<Binary>(obj);
+  auto binary = obj->as<Binary>();
   auto left = binary->Left();
   auto right = binary->Right();
   left->emit(codeList);

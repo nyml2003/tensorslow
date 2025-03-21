@@ -14,7 +14,7 @@ class Generator : public Python3ParserBaseVisitor {
   Ast::INodePtr context;
 
  public:
-  explicit Generator(const Object::PyObjPtr& filename);
+  explicit Generator(const Object::PyStrPtr& filename);
   void Visit();
   void Emit();
   [[nodiscard]] Object::PyCodePtr Code() const;
@@ -92,9 +92,9 @@ class Generator : public Python3ParserBaseVisitor {
 
   antlrcpp::Any visitYield_expr(Python3Parser::Yield_exprContext* ctx) override;
 
-  antlrcpp::Any visitImport_stmt(Python3Parser::Import_stmtContext* ctx) override;
-
-  };
+  antlrcpp::Any visitImport_stmt(Python3Parser::Import_stmtContext* ctx
+  ) override;
+};
 
 }  // namespace torchlight::Generation
 

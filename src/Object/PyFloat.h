@@ -19,11 +19,8 @@ class FloatKlass : public Klass {
   }
 
   PyObjPtr init(const PyObjPtr& klass, const PyObjPtr& args) override;
-
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
   PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
   PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr floordiv(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
@@ -33,10 +30,12 @@ class FloatKlass : public Klass {
   PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
   PyObjPtr hash(const PyObjPtr& obj) override;
   PyObjPtr neg(const PyObjPtr& obj) override;
+  PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr boolean(const PyObjPtr& obj) override;
 
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 
-  PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+
 };
 
 class PyFloat : public PyObject {

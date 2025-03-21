@@ -30,9 +30,9 @@ class PyFrame : public Object::PyObject {
  public:
   explicit PyFrame(
     Object::PyCodePtr code,
-    const Object::PyObjPtr& _locals,      // 传入的是 PyObjPtr
-    const Object::PyObjPtr& _globals,     // 传入的是 PyObjPtr
-    const Object::PyObjPtr& _fastLocals,  // 传入的是 PyObjPtr
+    Object::PyDictPtr locals,      // 传入的是 PyObjPtr
+    Object::PyDictPtr globals,     // 传入的是 PyObjPtr
+    Object::PyListPtr fastLocals,  // 传入的是 PyObjPtr
     PyFramePtr caller
   );
 
@@ -93,7 +93,15 @@ class FrameKlass : public Object::Klass {
 
 void ParseByteCode(const Object::PyCodePtr& code);
 void PrintFrame(const PyFramePtr& frame);
-
+inline PyFramePtr CreatePyFrame(
+  const Object::PyCodePtr& code,
+  const Object::PyDictPtr& locals,
+  const Object::PyDictPtr& globals,
+  const Object::PyListPtr& fastLocals,
+  const PyFramePtr& caller
+) {
+  return std::make_shared<PyFrame>(code, locals, globals, fastLocals, caller);
+}
 }  // namespace torchlight::Runtime
 
 #endif

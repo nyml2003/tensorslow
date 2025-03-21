@@ -21,7 +21,7 @@ class Klass : public std::enable_shared_from_this<Klass> {
       mro(nullptr) {}
   void SetName(const PyObjPtr& name);
   void SetAttributes(const PyObjPtr& attributes);
-  void SetType(const PyObjPtr& type);
+  void SetType(const PyTypePtr& type);
   void SetNative() { this->isNative = true; }
   void SetSuper(const PyObjPtr& super);
   void SetMro(const PyObjPtr& mro);

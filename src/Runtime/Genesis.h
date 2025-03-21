@@ -5,7 +5,7 @@
 
 namespace torchlight::Runtime {
 
-Object::PyObjPtr Genesis();
+Object::PyDictPtr Genesis();
 
 Object::PyObjPtr BuildClass(const Object::PyObjPtr& args);
 Object::PyObjPtr Type(const Object::PyObjPtr& args);

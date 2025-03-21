@@ -7,14 +7,14 @@
 namespace torchlight::Object {
 
 PyObjPtr NoneKlass::_serialize_(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyNone>()) {
     throw std::runtime_error("NoneType does not support serialization");
   }
   return CreatePyBytes(Collections::Serialize(Literal::NONE));
 }
 
 PyObjPtr NoneKlass::repr(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyNone>()) {
     throw std::runtime_error("NoneType does not support repr operation");
   }
   return CreatePyString("None");
@@ -23,6 +23,13 @@ PyObjPtr NoneKlass::repr(const PyObjPtr& obj) {
 PyObjPtr NoneKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (lhs->is<PyNone>() && rhs->is<PyNone>()) {
     return CreatePyBoolean(true);
+  }
+  return CreatePyBoolean(false);
+}
+
+PyObjPtr NoneKlass::boolean(const PyObjPtr& obj) {
+  if (!obj->is<PyNone>()) {
+    throw std::runtime_error("NoneType does not support boolean operation");
   }
   return CreatePyBoolean(false);
 }

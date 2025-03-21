@@ -1,8 +1,4 @@
 #include "Object/ObjectHelper.h"
-#include <iostream>
-#include <memory>
-#include <random>
-#include <thread>
 #include "Collections/IntegerHelper.h"
 #include "Function/PyFunction.h"
 #include "Function/PyIife.h"
@@ -21,6 +17,10 @@
 #include "Object/PyString.h"
 #include "Object/PyType.h"
 #include "Runtime/Interpreter.h"
+
+#include <random>
+#include <thread>
+#include <iostream>
 namespace torchlight::Object {
 
 PyObjPtr
@@ -56,7 +56,7 @@ void ForEach(
     void(const PyObjPtr& value, Index index, const PyObjPtr& obj)>& func
 ) {
   auto iter = obj->iter();
-  auto iterable = std::dynamic_pointer_cast<IIterator>(iter);
+  auto iterable = iter->as<IIterator>();
   if (!iterable) {
     throw std::runtime_error("object is not iterable");
   }
@@ -72,7 +72,7 @@ PyObjPtr Map(
   const std::function<PyObjPtr(const PyObjPtr& value)>& func
 ) {
   auto iter = iterable->iter();
-  auto iterableObj = std::dynamic_pointer_cast<IIterator>(iter);
+  auto iterableObj = iter->as<IIterator>();
   if (!iterableObj) {
     throw std::runtime_error("object is not iterable");
   }
@@ -418,7 +418,7 @@ Object::PyObjPtr Input(const Object::PyObjPtr& args) {
 void LoadClass(const PyStrPtr& name, const KlassPtr& klass) {
   klass->SetName(name);
   klass->SetAttributes(CreatePyDict());
-  klass->SetType(CreatePyType(klass));
+  klass->SetType(CreatePyType(klass)->as<PyType>());
   klass->SetSuper(CreatePyList({PyObject::Instance()}));
   klass->SetMro(
     CreatePyList({CreatePyType(klass), CreatePyType(ObjectKlass::Self())})

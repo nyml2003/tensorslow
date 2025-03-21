@@ -11,7 +11,7 @@ Object::PyObjPtr ForStmtKlass::emit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto stmt = std::dynamic_pointer_cast<ForStmt>(obj);
+  auto stmt = obj->as<ForStmt>();
   auto iter = stmt->Iter();
   iter->emit(codeList);
   auto code = GetCodeFromList(codeList, stmt);
@@ -19,12 +19,13 @@ Object::PyObjPtr ForStmtKlass::emit(
   Index start = code->ForIter(0);
   auto target = stmt->Target();
   if (target->is<Identifier>()) {
-    auto identifier = std::dynamic_pointer_cast<Identifier>(target);
+    auto identifier = target->as<Identifier>();
+    auto name = identifier->Name();
     if (code->Scope() == Object::Scope::GLOBAL) {
-      code->StoreName(identifier->Name());
+      code->StoreName(name);
     }
     if (code->Scope() == Object::Scope::LOCAL) {
-      code->StoreFast(identifier->Name());
+      code->StoreFast(name);
     }
   } else {
     throw std::runtime_error("ForStmt::emit(): unsupported target type");
@@ -33,8 +34,7 @@ Object::PyObjPtr ForStmtKlass::emit(
   Object::ForEach(
     body,
     [codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtNode = std::dynamic_pointer_cast<Ast::INode>(stmt);
-      stmtNode->emit(codeList);
+      stmt->as<INode>()->emit(codeList);
     }
   );
   code->JumpAbsolute(start - 1);
@@ -49,19 +49,20 @@ Object::PyObjPtr ForStmtKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto stmt = std::dynamic_pointer_cast<ForStmt>(obj);
+  auto stmt = obj->as<ForStmt>();
   auto target = stmt->Target();
   auto iter = stmt->Iter();
   auto body = stmt->Body();
   iter->visit(codeList);
   if (target->is<Identifier>()) {
-    auto identifier = std::dynamic_pointer_cast<Identifier>(target);
+    auto identifier = target->as<Identifier>();
     auto code = GetCodeFromList(codeList, stmt);
+    auto name = identifier->Name();
     if (code->Scope() == Object::Scope::GLOBAL) {
-      code->RegisterName(identifier->Name());
+      code->RegisterName(name);
     }
     if (code->Scope() == Object::Scope::LOCAL) {
-      code->RegisterVarName(identifier->Name());
+      code->RegisterVarName(name);
     }
   } else {
     DebugPrint(target);
@@ -70,8 +71,7 @@ Object::PyObjPtr ForStmtKlass::visit(
   Object::ForEach(
     body,
     [codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtNode = std::dynamic_pointer_cast<Ast::INode>(stmt);
-      stmtNode->visit(codeList);
+      stmt->as<INode>()->visit(codeList);
     }
   );
   return Object::CreatePyNone();

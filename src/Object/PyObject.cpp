@@ -48,7 +48,7 @@ KlassPtr ObjectKlass::Self() {
     CreatePyString("__bool__")->as<PyString>(),
     CreatePyNativeFunction(KlassBool)
   );
-  instance->SetType(CreatePyType(instance));
+  instance->SetType(CreatePyType(instance)->as<PyType>());
   instance->SetSuper(CreatePyList({}));
   instance->SetMro(CreatePyList({CreatePyType(instance)->as<PyType>()}));
   instance->SetNative();

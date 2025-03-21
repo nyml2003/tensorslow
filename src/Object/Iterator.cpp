@@ -64,48 +64,4 @@ PyObjPtr DictItemIteratorKlass::str(const PyObjPtr& obj) {
   return result;
 }
 
-// StringIterator::StringIterator(const PyObjPtr& string)
-//   : PyObject(StringIteratorKlass::Self()),
-//     string(std::dynamic_pointer_cast<PyString>(string)),
-//     index(0) {}
-
-// PyStrPtr StringIterator::String() const {
-//   return string;
-// }
-
-// Index StringIterator::Index() const {
-//   return index;
-// }
-
-// StringIteratorKlass::StringIteratorKlass() = default;
-
-// void StringIteratorKlass::Initialize() {
-//   SetType(CreatePyType(Self()));
-//   SetName(CreatePyString("StringIterator"));
-//   SetAttributes(CreatePyDict());
-//   Klass::Initialize();
-// }
-
-// KlassPtr StringIteratorKlass::Self() {
-//   static KlassPtr self = std::make_shared<StringIteratorKlass>();
-//   return self;
-// }
-
-// PyObjPtr StringIteratorKlass::iter(const PyObjPtr& obj) {
-//   return obj;
-// }
-
-// PyObjPtr StringIteratorKlass::next(const
-
-//                                    PyObjPtr& obj) {
-//   auto iterator = std::dynamic_pointer_cast<StringIterator>(obj);
-//   auto string = iterator->String();
-//   if (iterator->Index() >= string->Length()) {
-//     return CreateIterDone();
-//   }
-//   auto value = string->GetItem(iterator->Index());
-//   iterator->Next();
-//   return value;
-// }
-
 }  // namespace torchlight::Object

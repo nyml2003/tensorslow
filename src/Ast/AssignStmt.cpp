@@ -11,19 +11,19 @@ Object::PyObjPtr AssignStmtKlass::emit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto assignStmt = std::dynamic_pointer_cast<AssignStmt>(obj);
+  auto assignStmt = obj->as<AssignStmt>();
   auto source = assignStmt->Source();
   source->emit(codeList);
   auto target = assignStmt->Target();
 
-  if (target->Klass() == IdentifierKlass::Self()) {
-    auto targetIdentifier = std::dynamic_pointer_cast<Identifier>(target);
+  if (target->is<Identifier>()) {
+    auto targetIdentifier = target->as<Identifier>();
     targetIdentifier->emit(codeList);
-  } else if (target->Klass() == MemberAccessKlass::Self()) {
-    auto memberAccess = std::dynamic_pointer_cast<MemberAccess>(target);
+  } else if (target->is<MemberAccess>()) {
+    auto memberAccess = target->as<MemberAccess>();
     memberAccess->emit(codeList);
-  } else if (target->Klass() == BinaryKlass::Self()) {
-    auto binary = std::dynamic_pointer_cast<Binary>(target);
+  } else if (target->is<Binary>()) {
+    auto binary = target->as<Binary>();
     binary->emit(codeList);
     return Object::CreatePyNone();
   }
@@ -34,20 +34,20 @@ Object::PyObjPtr AssignStmtKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto assignStmt = std::dynamic_pointer_cast<AssignStmt>(obj);
+  auto assignStmt = obj->as<AssignStmt>();
   auto source = assignStmt->Source();
   source->visit(codeList);
   auto target = assignStmt->Target();
-  if (target->Klass() == IdentifierKlass::Self()) {
-    auto targetIdentifier = std::dynamic_pointer_cast<Identifier>(target);
+  if (target->is<Identifier>()) {
+    auto targetIdentifier = target->as<Identifier>();
     targetIdentifier->SetStoreMode();
     targetIdentifier->visit(codeList);
-  } else if (target->Klass() == MemberAccessKlass::Self()) {
-    auto memberAccess = std::dynamic_pointer_cast<MemberAccess>(target);
+  } else if (target->is<MemberAccess>()) {
+    auto memberAccess = target->as<MemberAccess>();
     memberAccess->SetStoreMode();
     memberAccess->visit(codeList);
-  } else if (target->Klass() == BinaryKlass::Self()) {
-    auto binary = std::dynamic_pointer_cast<Binary>(target);
+  } else if (target->is<Binary>()) {
+    auto binary = target->as<Binary>();
     auto oprt = binary->Oprt();
     if (oprt != Binary::Operator::SUBSCR) {
       throw std::runtime_error("When assigning, only support subscript operation");

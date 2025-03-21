@@ -7,7 +7,7 @@ Object::PyObjPtr MemberAccessKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto memberAccess = std::dynamic_pointer_cast<MemberAccess>(obj);
+  auto memberAccess = obj->as<MemberAccess>();
   auto object = memberAccess->Obj();
   object->visit(codeList);
   auto member = memberAccess->Member();
@@ -20,7 +20,7 @@ Object::PyObjPtr MemberAccessKlass::emit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto memberAccess = std::dynamic_pointer_cast<MemberAccess>(obj);
+  auto memberAccess = obj->as<MemberAccess>();
   auto object = memberAccess->Obj();
   object->emit(codeList);
   auto member = memberAccess->Member();

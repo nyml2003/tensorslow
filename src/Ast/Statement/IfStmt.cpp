@@ -12,7 +12,7 @@ Object::PyObjPtr IfStmtKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto stmt = std::dynamic_pointer_cast<IfStmt>(obj);
+  auto stmt = obj->as<IfStmt>();
   auto condition = stmt->Condition();
   auto thenStmts = stmt->ThenStmts();
   auto elseStmts = stmt->ElseStmts();
@@ -22,15 +22,13 @@ Object::PyObjPtr IfStmtKlass::visit(
   Object::ForEach(
     thenStmts,
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
-      stmtObj->visit(codeList);
+      stmt->as<INode>()->visit(codeList);
     }
   );
   Object::ForEach(
     elifConditions,
     [&codeList](const Object::PyObjPtr& elif, Index, const Object::PyObjPtr&) {
-      auto elifObj = std::dynamic_pointer_cast<Ast::INode>(elif);
-      elifObj->visit(codeList);
+      elif->as<INode>()->visit(codeList);
     }
   );
   Object::ForEach(
@@ -40,8 +38,7 @@ Object::PyObjPtr IfStmtKlass::visit(
       Object::ForEach(
         elifStms,
         [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-          auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
-          stmtObj->visit(codeList);
+          stmt->as<INode>()->visit(codeList);
         }
       );
     }
@@ -49,8 +46,7 @@ Object::PyObjPtr IfStmtKlass::visit(
   Object::ForEach(
     elseStmts,
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
-      stmtObj->visit(codeList);
+      stmt->as<INode>()->visit(codeList);
     }
   );
 
@@ -61,7 +57,7 @@ Object::PyObjPtr IfStmtKlass::emit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto stmt = std::dynamic_pointer_cast<IfStmt>(obj);
+  auto stmt = obj->as<IfStmt>();
   auto condition = stmt->Condition();
   auto thenStmts = stmt->ThenStmts();
   auto elseStmts = stmt->ElseStmts();
@@ -78,8 +74,7 @@ Object::PyObjPtr IfStmtKlass::emit(
   Object::ForEach(
     thenStmts,
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
-      stmtObj->emit(codeList);
+      stmt->as<INode>()->emit(codeList);
     }
   );
   // then 块结束后，添加 JUMP_FORWARD 跳转到整个 if 结束的位置
@@ -105,8 +100,7 @@ Object::PyObjPtr IfStmtKlass::emit(
     Object::ForEach(
       elifStms,
       [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-        auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
-        stmtObj->emit(codeList);
+        stmt->as<Ast::INode>()->emit(codeList);
       }
     );
     // elif 块结束后，添加 JUMP_FORWARD 跳转到整个 if 结束的位置
@@ -125,8 +119,7 @@ Object::PyObjPtr IfStmtKlass::emit(
     Object::ForEach(
       elseStmts,
       [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-        auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
-        stmtObj->emit(codeList);
+        stmt->as<Ast::INode>()->emit(codeList);
       }
     );
   }

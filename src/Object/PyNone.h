@@ -20,8 +20,8 @@ class NoneKlass : public Klass {
 
   PyObjPtr repr(const PyObjPtr& obj) override;
   PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
-
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr boolean(const PyObjPtr& obj) override;
 
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 };

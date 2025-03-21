@@ -7,15 +7,14 @@ Object::PyObjPtr WhileStmtKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto stmt = std::dynamic_pointer_cast<WhileStmt>(obj);
+  auto stmt = obj->as<WhileStmt>();
   auto condition = stmt->Condition();
   auto body = stmt->Body();
   condition->visit(codeList);
   Object::ForEach(
     body,
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
-      stmtObj->visit(codeList);
+      stmt->as<INode>()->visit(codeList);
     }
   );
   return Object::CreatePyNone();
@@ -25,7 +24,7 @@ Object::PyObjPtr WhileStmtKlass::emit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto stmt = std::dynamic_pointer_cast<WhileStmt>(obj);
+  auto stmt = obj->as<WhileStmt>();
   auto condition = stmt->Condition();
   auto body = stmt->Body();
   auto code = GetCodeFromList(codeList, stmt);
@@ -35,8 +34,7 @@ Object::PyObjPtr WhileStmtKlass::emit(
   Object::ForEach(
     body,
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtObj = std::dynamic_pointer_cast<Ast::INode>(stmt);
-      stmtObj->emit(codeList);
+      stmt->as<INode>()->emit(codeList);
     }
   );
   code->JumpAbsolute(condBegin);

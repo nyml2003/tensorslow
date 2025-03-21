@@ -2,6 +2,7 @@
 #define TORCHLIGHT_AST_CLASSDEF_H
 
 #include "Ast/INode.h"
+#include "Object/Object.h"
 #include "Object/ObjectHelper.h"
 
 namespace torchlight::Ast {
@@ -40,15 +41,11 @@ class ClassDef : public INode {
 
   [[nodiscard]] Object::PyListPtr Parents() const { return parents; }
 
-  [[nodiscard]] Object::PyObjPtr CodeIndex() const { return codeIndex; }
+  [[nodiscard]] Index CodeIndex() const { return codeIndex; }
 
-  void SetCodeIndex(const Object::PyObjPtr& _codeIndex) {
-    codeIndex = _codeIndex;
-  }
+  void SetCodeIndex(const Index codeIndex) { this->codeIndex = codeIndex; }
 
-  void SetBody(const Object::PyObjPtr& _body) {
-    body = _body->as<Object::PyList>();
-  }
+  void SetBody(const Object::PyListPtr& body) { this->body = body; }
 
  private:
   Object::PyStrPtr name;   // 类名
@@ -56,8 +53,7 @@ class ClassDef : public INode {
   INodePtr bases;  // 保存当前ClassDef的基类, 是一个Identifier对象的列表
   Object::PyListPtr
     parents;  // 保存整个调用链上的ClassDef,Module和FuncDef所对应的PyCode对象
-  Object::PyObjPtr
-    codeIndex;  // 保存当前ClassDef对应的PyCode对象在codeList中的索引
+  Index codeIndex;  // 保存当前ClassDef对应的PyCode对象在codeList中的索引
 };
 
 inline INodePtr CreateClassDef(

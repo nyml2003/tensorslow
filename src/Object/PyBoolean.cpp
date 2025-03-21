@@ -50,10 +50,10 @@ PyObjPtr BooleanKlass::_or_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr BooleanKlass::_serialize_(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyBoolean>()) {
     throw std::runtime_error("PyBoolean::_serialize_(): obj is not a bool");
   }
-  auto boolean = std::dynamic_pointer_cast<PyBoolean>(obj);
+  auto boolean = obj->as<PyBoolean>();
   if (boolean->Value()) {
     return CreatePyBytes(Collections::Serialize(Literal::TRUE));
   }

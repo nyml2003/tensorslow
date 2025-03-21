@@ -16,7 +16,7 @@
 
 namespace torchlight::Runtime {
 
-Object::PyObjPtr Genesis() {
+Object::PyDictPtr Genesis() {
   Object::BasicKlassLoad();
   auto builtins = Object::CreatePyDict()->as<Object::PyDictionary>();
   // 注册内置函数和类型
@@ -124,31 +124,24 @@ Object::PyObjPtr Genesis() {
 
   // 注册内置类型
   builtins->Put(
-    Object::CreatePyString("int"), std::dynamic_pointer_cast<Object::PyObject>(
-                                     Object::IntegerKlass::Self()->Type()
-                                   )
+    Object::CreatePyString("int"), Object::IntegerKlass::Self()->Type()
   );
   builtins->Put(
-    Object::CreatePyString("float"),
-    std::dynamic_pointer_cast<Object::PyObject>(
-      Object::FloatKlass::Self()->Type()
-    )
+    Object::CreatePyString("float"), Object::FloatKlass::Self()->Type()
   );
   builtins->Put(
-    Object::CreatePyString("list"), std::dynamic_pointer_cast<Object::PyObject>(
-                                      Object::ListKlass::Self()->Type()
-                                    )
+    Object::CreatePyString("list"), Object::ListKlass::Self()->Type()
+
   );
   builtins->Put(
-    Object::CreatePyString("dict"), std::dynamic_pointer_cast<Object::PyObject>(
-                                      Object::DictionaryKlass::Self()->Type()
-                                    )
+    Object::CreatePyString("dict"), Object::DictionaryKlass::Self()->Type()
+
   );
   builtins->Put(
     Object::CreatePyString("object"),
-    std::dynamic_pointer_cast<Object::PyObject>(
-      Object::ObjectKlass::Self()->Type()
-    )
+
+    Object::ObjectKlass::Self()->Type()
+
   );
   return builtins;
 }

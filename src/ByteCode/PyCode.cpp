@@ -14,38 +14,21 @@
 namespace torchlight::Object {
 
 PyCode::PyCode(
-  const PyObjPtr& byteCodes,
-  const PyObjPtr& consts,
-  const PyObjPtr& names,
-  const PyObjPtr& varNames,
-  const PyObjPtr& name,
+  PyBytesPtr byteCodes,
+  PyListPtr consts,
+  PyListPtr names,
+  PyListPtr varNames,
+  PyStrPtr name,
   Index nLocals
 )
-  : PyObject(CodeKlass::Self()) {
-  if (!byteCodes->is<PyBytes>()) {
-    throw std::runtime_error("byteCodes must be a bytes object");
-  }
-  byteCode = std::dynamic_pointer_cast<PyBytes>(byteCodes);
-  if (!consts->is<PyList>()) {
-    throw std::runtime_error("consts must be a list object");
-  }
-  this->consts = std::dynamic_pointer_cast<PyList>(consts);
-  if (!names->is<PyList>()) {
-    throw std::runtime_error("names must be a list object");
-  }
-  this->names = std::dynamic_pointer_cast<PyList>(names);
-  if (!varNames->is<PyList>()) {
-    throw std::runtime_error("varNames must be a list object");
-  }
-  this->varNames = std::dynamic_pointer_cast<PyList>(varNames);
-  if (!name->is<PyString>()) {
-    throw std::runtime_error("filename must be a string object");
-  }
-  this->name = std::dynamic_pointer_cast<PyString>(name);
-  auto insts = CreatePyList({});
-  instructions = std::dynamic_pointer_cast<PyList>(insts);
-  this->nLocals = nLocals;
-}
+  : PyObject(CodeKlass::Self()),
+    byteCode(std::move(byteCodes)),
+    consts(std::move(consts)),
+    names(std::move(names)),
+    varNames(std::move(varNames)),
+    name(std::move(name)),
+    nLocals(nLocals),
+    instructions(CreatePyList(0)->as<PyList>()) {}
 
 PyListPtr PyCode::Instructions() {
   return instructions;
@@ -125,15 +108,16 @@ PyObjPtr CodeKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 PyObjPtr CodeKlass::repr(const PyObjPtr& self) {
   return StringConcat(CreatePyList(
     {CreatePyString("<code object at ")->as<PyString>(),
-     Identity(CreatePyList({self}))->as<PyString>(), CreatePyString(">")->as<PyString>()}
+     Identity(CreatePyList({self}))->as<PyString>(),
+     CreatePyString(">")->as<PyString>()}
   ));
 }
 
 PyObjPtr CodeKlass::_serialize_(const PyObjPtr& self) {
-  if (self->Klass() != Self()) {
+  if (!self->is<PyCode>()) {
     throw std::runtime_error("PyCode::_serialize_(): obj is not a code object");
   }
-  auto code = std::dynamic_pointer_cast<PyCode>(self);
+  auto code = self->as<PyCode>();
   PyObjPtr result =
     CreatePyBytes(Collections::Serialize(Literal::CODE))
       ->add(code->Consts()->_serialize_())
@@ -289,11 +273,11 @@ void PyCode::BinaryOr() {
   instructions->Append(CreateBinaryOr());
 }
 
-PyObjPtr CreatePyCode(const PyObjPtr& name) {
-  auto byteCode = CreatePyBytes();
-  auto consts = CreatePyList({});
-  auto names = CreatePyList({});
-  auto varNames = CreatePyList({});
+PyObjPtr CreatePyCode(const PyStrPtr& name) {
+  auto byteCode = CreatePyBytes()->as<PyBytes>();
+  auto consts = CreatePyList({})->as<PyList>();
+  auto names = CreatePyList({})->as<PyList>();
+  auto varNames = CreatePyList({})->as<PyList>();
   return std::make_shared<PyCode>(byteCode, consts, names, varNames, name, 0);
 }
 

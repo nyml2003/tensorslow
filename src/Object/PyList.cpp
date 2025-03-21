@@ -164,11 +164,11 @@ PyObjPtr ListKlass::repr(const PyObjPtr& obj) {
 }
 
 PyObjPtr ListKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
-    throw std::runtime_error("List does not support eq operation");
+  if (!lhs->is<PyList>() || !rhs->is<PyList>()) {
+    return CreatePyBoolean(false);
   }
-  auto left = std::dynamic_pointer_cast<PyList>(lhs);
-  auto right = std::dynamic_pointer_cast<PyList>(rhs);
+  auto left = lhs->as<PyList>();
+  auto right = rhs->as<PyList>();
   if (left->Length() != right->Length()) {
     return CreatePyBoolean(false);
   }
@@ -286,17 +286,24 @@ PyObjPtr ListKlass::contains(const PyObjPtr& obj, const PyObjPtr& key) {
   return CreatePyBoolean(obj->as<PyList>()->Contains(key));
 }
 
-PyObjPtr ListKlass::_serialize_(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
-    throw std::runtime_error("List does not support serialization");
+PyObjPtr ListKlass::boolean(const PyObjPtr& obj) {
+  if (!obj->is<PyList>()) {
+    throw std::runtime_error("List does not support boolean operation");
   }
-  auto list = std::dynamic_pointer_cast<PyList>(obj);
+  return CreatePyBoolean(obj->as<PyList>()->Length() > 0);
+}
+
+PyObjPtr ListKlass::_serialize_(const PyObjPtr& obj) {
+  if (!obj->is<PyList>()) {
+    throw std::runtime_error("List does not support serialize operation");
+  }
+  auto list = obj->as<PyList>();
   PyObjPtr bytes =
     CreatePyBytes(Collections::Serialize(Literal::LIST)
                     .Add(Collections::Serialize(list->Length())));
   auto iter = CreateListIterator(obj);
   auto value = iter->next();
-  while (value->Klass() != IterDoneKlass::Self()) {
+  while (!value->is<IterDone>()) {
     bytes = bytes->add(value->_serialize_());
     value = iter->next();
   }

@@ -20,7 +20,7 @@ ClassDef::ClassDef(
     name(std::move(name)),
     bases(std::move(bases)),
     body(Object::CreatePyList({})->as<Object::PyList>()),
-    codeIndex(nullptr) {
+    codeIndex(0) {
   if (parent->is<Module>()) {
     parents = Object::CreatePyList({parent})->as<Object::PyList>();
   }
@@ -38,11 +38,9 @@ Object::PyObjPtr ClassDefKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto classDef = std::dynamic_pointer_cast<ClassDef>(obj);
-  classDef->SetCodeIndex(codeList->len());
-  auto code = std::dynamic_pointer_cast<Object::PyCode>(
-    Object::CreatePyCode(classDef->Name())
-  );
+  auto classDef = obj->as<ClassDef>();
+  classDef->SetCodeIndex(codeList->as<Object::PyList>()->Length());
+  auto code = Object::CreatePyCode(classDef->Name())->as<Object::PyCode>();
   code->RegisterName(Object::CreatePyString("__name__"));
   code->RegisterName(Object::CreatePyString("__module__"));
   code->RegisterName(Object::CreatePyString("__qualname__"));
@@ -55,8 +53,7 @@ Object::PyObjPtr ClassDefKlass::visit(
   Object::ForEach(
     classDef->Body(),
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtNode = std::dynamic_pointer_cast<INode>(stmt);
-      stmtNode->visit(codeList);
+      stmt->as<INode>()->visit(codeList);
     }
   );
   code->RegisterConst(Object::CreatePyNone());
@@ -69,7 +66,7 @@ Object::PyObjPtr ClassDefKlass::emit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto classDef = std::dynamic_pointer_cast<ClassDef>(obj);
+  auto classDef = obj->as<ClassDef>();
   auto selfCode = GetCodeFromList(codeList, classDef);
   selfCode->LoadName(Object::CreatePyString("__name__"));
   selfCode->StoreName(Object::CreatePyString("__module__"));
@@ -78,8 +75,7 @@ Object::PyObjPtr ClassDefKlass::emit(
   Object::ForEach(
     classDef->Body(),
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtNode = std::dynamic_pointer_cast<INode>(stmt);
-      stmtNode->emit(codeList);
+      stmt->as<INode>()->emit(codeList);
     }
   );
   selfCode->LoadConst(Object::CreatePyNone());

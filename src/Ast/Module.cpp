@@ -2,9 +2,9 @@
 #include "Ast/INode.h"
 #include "ByteCode/PyCode.h"
 #include "Object/ObjectHelper.h"
+#include "Object/PyList.h"
 #include "Object/PyNone.h"
 #include "Object/PyObject.h"
-#include "Object/PyString.h"
 
 namespace torchlight::Ast {
 
@@ -12,18 +12,15 @@ Object::PyObjPtr ModuleKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto module = std::dynamic_pointer_cast<Module>(obj);
-  module->SetCodeIndex(codeList->len());
-  auto code = std::dynamic_pointer_cast<Object::PyCode>(
-    Object::CreatePyCode(module->Name())
-  );
+  auto module = obj->as<Module>();
+  module->SetCodeIndex(codeList->as<Object::PyList>()->Length());
+  auto code = Object::CreatePyCode(module->Name())->as<Object::PyCode>();
   code->SetScope(Object::Scope::GLOBAL);
   codeList->as<Object::PyList>()->Append(code);
   Object::ForEach(
     module->Body(),
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtNode = std::dynamic_pointer_cast<INode>(stmt);
-      stmtNode->visit(codeList);
+      stmt->as<INode>()->visit(codeList);
     }
   );
   code->RegisterConst(Object::CreatePyNone());
@@ -34,12 +31,11 @@ Object::PyObjPtr ModuleKlass::emit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto module = std::dynamic_pointer_cast<Module>(obj);
+  auto module = obj->as<Module>();
   Object::ForEach(
     module->Body(),
     [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      auto stmtNode = std::dynamic_pointer_cast<INode>(stmt);
-      stmtNode->emit(codeList);
+      stmt->as<INode>()->emit(codeList);
     }
   );
   auto selfCode = GetCodeFromList(codeList, module);

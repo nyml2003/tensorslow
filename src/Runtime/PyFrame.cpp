@@ -4,7 +4,6 @@
 #include "ByteCode/PyInst.h"
 #include "Collections/IntegerHelper.h"
 #include "Collections/Stack.h"
-#include "Collections/StringHelper.h"
 #include "Function/PyFunction.h"
 #include "Object/Iterator.h"
 #include "Object/ObjectHelper.h"
@@ -25,31 +24,27 @@ namespace torchlight::Runtime {
 
 PyFrame::PyFrame(
   Object::PyCodePtr code,
-  const Object::PyObjPtr& _locals,      // 传入的是 PyObjPtr
-  const Object::PyObjPtr& _globals,     // 传入的是 PyObjPtr
-  const Object::PyObjPtr& _fastLocals,  // 传入的是 PyObjPtr
+  Object::PyDictPtr locals,      // 传入的是 PyObjPtr
+  Object::PyDictPtr globals,     // 传入的是 PyObjPtr
+  Object::PyListPtr fastLocals,  // 传入的是 PyObjPtr
   PyFramePtr caller
 )
   : Object::PyObject(FrameKlass::Self()),
     stack(),
     programCounter(0),
     code(std::move(code)),
-    locals(std::dynamic_pointer_cast<Object::PyDictionary>(_locals)
-    ),  // 转换为 PyDictPtr
-    globals(std::dynamic_pointer_cast<Object::PyDictionary>(_globals)
-    ),  // 转换为 PyDictPtr
-    fastLocals(std::dynamic_pointer_cast<Object::PyList>(_fastLocals)
-    ),  // 转换为 PyListPtr
+    locals(std::move(locals)),
+    globals(std::move(globals)),
+    fastLocals(std::move(fastLocals)),
     caller(std::move(caller)) {}
 
 PyFramePtr CreateModuleEntryFrame(const Object::PyCodePtr& code) {
-  auto locals =
-    std::dynamic_pointer_cast<Object::PyDictionary>(Object::CreatePyDict());
+  auto locals = Object::CreatePyDict()->as<Object::PyDictionary>();
   auto globals = locals;
   locals->Put(
     Object::CreatePyString("__name__"), Object::CreatePyString("__main__")
   );
-  auto fastLocals = Object::CreatePyList(code->NLocals());
+  auto fastLocals = Object::CreatePyList(code->NLocals())->as<Object::PyList>();
   auto caller = nullptr;
   auto frame =
     std::make_shared<PyFrame>(code, locals, globals, fastLocals, caller);
@@ -63,7 +58,7 @@ PyFramePtr CreateFrameWithPyFunction(
 ) {
   auto code = function->Code();
   auto globals = function->Globals();
-  auto locals = Object::CreatePyDict();
+  auto locals = Object::CreatePyDict()->as<Object::PyDictionary>();
   Index nLocals = code->NLocals();
   for (Index i = arguments->Length(); i < nLocals; i++) {
     arguments->Append(Object::PyNone::Instance());
@@ -100,18 +95,15 @@ Object::PyListPtr PyFrame::CurrentFastLocals() const {
 }
 
 Object::PyListPtr PyFrame::CurrentStack() const {
-  return std::dynamic_pointer_cast<Object::PyList>(
-    Object::CreatePyList(stack.GetContent())
-  );
+  return Object::CreatePyList(stack.GetContent())->as<Object::PyList>();
 }
 
 Object::PyInstPtr PyFrame::Instruction() const {
   if (!isParsed) {
     ParseByteCode(code);
   }
-  auto insts = std::dynamic_pointer_cast<Object::PyList>(code->Instructions());
-  return std::dynamic_pointer_cast<Object::PyInst>(insts->GetItem(programCounter
-  ));
+  auto insts = code->Instructions()->as<Object::PyList>();
+  return insts->GetItem(programCounter)->as<Object::PyInst>();
 }
 
 bool PyFrame::Finished() const {
@@ -619,11 +611,11 @@ Object::PyObjPtr PyFrame::Eval() {
       }
       case Object::ByteCode::MAKE_FUNCTION: {
         auto name = stack.Pop();
-        if (name->Klass() != Object::StringKlass::Self()) {
+        if (!name->is<Object::PyString>()) {
           throw std::runtime_error("Function name must be string");
         }
         auto code = stack.Pop();
-        if (code->Klass() != Object::CodeKlass::Self()) {
+        if (!code->is<Object::PyCode>()) {
           throw std::runtime_error("Function code must be code object");
         }
         auto func = Object::CreatePyFunction(code, globals);

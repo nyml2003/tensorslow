@@ -36,8 +36,8 @@ class ExprStmt : public INode {
   INodePtr content;
 };
 
-inline INodePtr CreateExprStmt(INodePtr content, INodePtr parent) {
-  return std::make_shared<ExprStmt>(std::move(content), std::move(parent));
+inline INodePtr CreateExprStmt(const INodePtr& content, const INodePtr& parent) {
+  return std::make_shared<ExprStmt>(content, parent);
 }
 
 }  // namespace torchlight::Ast

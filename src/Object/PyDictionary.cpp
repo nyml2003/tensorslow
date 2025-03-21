@@ -62,27 +62,27 @@ PyObjPtr DictionaryKlass::setitem(
   const PyObjPtr& key,
   const PyObjPtr& value
 ) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyDictionary>()) {
     throw std::runtime_error("PyDictionary::setitem(): obj is not a dict");
   }
-  auto dict = std::dynamic_pointer_cast<PyDictionary>(obj);
+  auto dict = obj->as<PyDictionary>();
   dict->Put(key, value);
   return CreatePyNone();
 }
 
 PyObjPtr DictionaryKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyDictionary>()) {
     throw std::runtime_error("PyDictionary::getitem(): obj is not a dict");
   }
-  auto dict = std::dynamic_pointer_cast<PyDictionary>(obj);
+  auto dict = obj->as<PyDictionary>();
   return dict->Get(key);
 }
 
 PyObjPtr DictionaryKlass::delitem(const PyObjPtr& obj, const PyObjPtr& key) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyDictionary>()) {
     throw std::runtime_error("PyDictionary::delitem(): obj is not a dict");
   }
-  auto dict = std::dynamic_pointer_cast<PyDictionary>(obj);
+  auto dict = obj->as<PyDictionary>();
   dict->Remove(key);
   return obj;
 }
@@ -135,10 +135,10 @@ PyObjPtr DictionaryKlass::str(const PyObjPtr& obj) {
 }
 
 PyObjPtr DictionaryKlass::contains(const PyObjPtr& obj, const PyObjPtr& key) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyDictionary>()) {
     throw std::runtime_error("PyDictionary::contains(): obj is not a dict");
   }
-  auto dict = std::dynamic_pointer_cast<PyDictionary>(obj);
+  auto dict = obj->as<PyDictionary>();
   return CreatePyBoolean(dict->Contains(key));
 }
 

@@ -91,7 +91,9 @@ void ParseAndGenerate(const fs::path& filePath) {
     std::cout << tree->toStringTree(&parser) << std::endl;
   }
 
-  Generator visitor(Object::CreatePyString(filePath.string()));
+  Generator visitor(
+    Object::CreatePyString(filePath.string())->as<Object::PyString>()
+  );
   visitor.visit(tree);
   visitor.Visit();
   visitor.Emit();
@@ -99,8 +101,7 @@ void ParseAndGenerate(const fs::path& filePath) {
   if (ArgsHelper::Instance().Has("show_code")) {
     Object::PrintCode(code);
   }
-  Collections::Bytes data =
-    std::dynamic_pointer_cast<Object::PyBytes>(code->_serialize_())->Value();
+  Collections::Bytes data = code->_serialize_()->as<Object::PyBytes>()->Value();
   auto writePath = fs::path(filePath).replace_extension(".pyc");
   Collections::Write(
     data, Collections::CreateStringWithCString(writePath.c_str())

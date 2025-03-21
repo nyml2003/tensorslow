@@ -1,12 +1,10 @@
 #include "Runtime/BinaryFileParser.h"
-
 #include "ByteCode/PyCode.h"
 #include "Collections/List.h"
 #include "Runtime/Serialize.h"
 
 
 #include <cstdio>
-#include <memory>
 
 namespace torchlight::Runtime {
 

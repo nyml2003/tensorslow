@@ -120,21 +120,28 @@ PyObjPtr FloatKlass::repr(const PyObjPtr& obj) {
 }
 
 PyObjPtr FloatKlass::_serialize_(const PyObjPtr& obj) {
-  if (obj->Klass() != Self()) {
+  if (!obj->is<PyFloat>()) {
     throw std::runtime_error("PyFloat::_serialize_(): obj is not a float");
   }
-  auto floatObj = std::dynamic_pointer_cast<PyFloat>(obj);
+  auto floatObj = obj->as<PyFloat>();
   return CreatePyBytes(Collections::Serialize(Literal::FLOAT)
                          .Add(Collections::Serialize(floatObj->Value())));
 }
 
 PyObjPtr FloatKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() != Self() || rhs->Klass() != Self()) {
-    return CreatePyBoolean(false);
+  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+    throw std::runtime_error("PyFloat::eq(): lhs or rhs is not a float");
   }
-  auto left = std::dynamic_pointer_cast<PyFloat>(lhs);
-  auto right = std::dynamic_pointer_cast<PyFloat>(rhs);
-  return CreatePyBoolean(left->Value() == right->Value());
+  return CreatePyBoolean(
+    lhs->as<PyFloat>()->Value() == rhs->as<PyFloat>()->Value()
+  );
+}
+
+PyObjPtr FloatKlass::boolean(const PyObjPtr& obj) {
+  if (!obj->is<PyFloat>()) {
+    throw std::runtime_error("PyFloat::boolean(): obj is not a float");
+  }
+  return CreatePyBoolean(obj->as<PyFloat>()->Value() != 0.0);
 }
 
 }  // namespace torchlight::Object

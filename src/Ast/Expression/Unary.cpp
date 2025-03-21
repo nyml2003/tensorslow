@@ -8,7 +8,7 @@ Object::PyObjPtr UnaryKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto unary = std::dynamic_pointer_cast<Unary>(obj);
+  auto unary = obj->as<Unary>();
   auto operand = unary->Operand();
   operand->visit(codeList);
   return Object::CreatePyNone();
@@ -17,7 +17,7 @@ Object::PyObjPtr UnaryKlass::emit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto unary = std::dynamic_pointer_cast<Unary>(obj);
+  auto unary = obj->as<Unary>();
   auto operand = unary->Operand();
   operand->emit(codeList);
   Object::PyObjPtr inst = nullptr;
