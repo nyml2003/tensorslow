@@ -1,17 +1,17 @@
 #ifndef TORCHLIGHT_RUNTIME_INTERPRETER_H
 #define TORCHLIGHT_RUNTIME_INTERPRETER_H
 
-#include "ByteCode/PyCode.h"
-#include "Function/PyMethod.h"
-#include "Function/PyNativeFunction.h"
+#include "Object/Function/PyMethod.h"
+#include "Object/Function/PyNativeFunction.h"
 #include "Object/Object.h"
-#include "Runtime/PyFrame.h"
+#include "Object/Runtime/PyCode.h"
+#include "Object/Runtime/PyFrame.h"
 
 namespace torchlight::Runtime {
 
 class Interpreter {
  private:
-  PyFramePtr frame;
+  Object::PyFramePtr frame;
   Object::PyDictPtr builtins;
   explicit Interpreter();
 
@@ -46,8 +46,8 @@ class Interpreter {
   Eval(const Object::PyObjPtr& func, const Object::PyListPtr& arguments);
 
   void BackToParentFrame();
-  void SetFrame(const PyFramePtr& child);
-  [[nodiscard]] PyFramePtr CurrentFrame() const;
+  void SetFrame(const Object::PyFramePtr& child);
+  [[nodiscard]] Object::PyFramePtr CurrentFrame() const;
 };
 
 }  // namespace torchlight::Runtime

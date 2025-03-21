@@ -1,14 +1,14 @@
 #include "Object/PyMatrix.h"
 #include "Collections/Matrix.h"
-#include "Function/PyNativeFunction.h"
+#include "Function/ObjectHelper.h"
+#include "Object/Container/PyList.h"
+#include "Object/Core/PyBoolean.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Function/PyNativeFunction.h"
+#include "Object/Number/PyFloat.h"
+#include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyBoolean.h"
-#include "Object/PyFloat.h"
-#include "Object/PyInteger.h"
-#include "Object/PyList.h"
-#include "Object/PyNone.h"
-#include "Object/PyString.h"
+#include "Object/String/PyString.h"
 
 namespace torchlight::Object {
 
@@ -274,7 +274,6 @@ PyObjPtr Eye(const PyObjPtr& args) {
   auto argList = args->as<PyList>();
 
   if (argList->Length() != 1) {
-    DebugPrint(args);
     throw std::runtime_error("Eye(): args length is not 1");
   }
   auto dim = argList->GetItem(0)->as<PyInteger>()->ToU64();

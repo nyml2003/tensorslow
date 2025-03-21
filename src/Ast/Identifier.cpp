@@ -2,10 +2,10 @@
 #include "Ast/ClassDef.h"
 #include "Ast/FuncDef.h"
 #include "Ast/INode.h"
-#include "ByteCode/PyCode.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyBoolean.h"
-#include "Object/PyNone.h"
+#include "Function/ObjectHelper.h"
+#include "Object/Core/PyBoolean.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Runtime/PyCode.h"
 
 namespace torchlight::Ast {
 
@@ -140,11 +140,11 @@ Object::PyObjPtr IdentifierKlass::emit(
 
     } catch (const std::exception& e) {
       auto name = identifier->Name();
-      Object::DebugPrint(name);
-      Object::DebugPrint(moduleCode->Names());
-      Object::DebugPrint(moduleCode->VarNames());
-      Object::DebugPrint(code->Names());
-      Object::DebugPrint(code->VarNames());
+      Function::DebugPrint(name);
+      Function::DebugPrint(moduleCode->Names());
+      Function::DebugPrint(moduleCode->VarNames());
+      Function::DebugPrint(code->Names());
+      Function::DebugPrint(code->VarNames());
       throw(e);
     }
   }

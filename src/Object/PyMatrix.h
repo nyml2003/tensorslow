@@ -2,16 +2,16 @@
 #define TORCHLIGHT_OBJECT_PYMATRIX_H
 
 #include "Collections/Matrix.h"
-#include "Function/PyIife.h"
-#include "Function/PyNativeFunction.h"
-#include "Object/Klass.h"
+#include "Function/ObjectHelper.h"
+#include "Object/Container/PyList.h"
+#include "Object/Core/CoreHelper.h"
+#include "Object/Core/Klass.h"
+#include "Object/Core/PyObject.h"
+#include "Object/Function/PyIife.h"
+#include "Object/Function/PyNativeFunction.h"
+#include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyInteger.h"
-#include "Object/PyList.h"
-#include "Object/PyObject.h"
-#include "Object/PyString.h"
-
+#include "Object/String/PyString.h"
 namespace torchlight::Object {
 
 PyObjPtr Transpose(const PyObjPtr& args);

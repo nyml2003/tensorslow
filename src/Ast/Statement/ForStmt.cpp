@@ -1,10 +1,10 @@
 #include "Ast/Statement/ForStmt.h"
 #include "Ast/INode.h"
 #include "Ast/Identifier.h"
-#include "ByteCode/PyInst.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyNone.h"
-
+#include "Function/ObjectHelper.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Iterator/IteratorHelper.h"
+#include "Object/Runtime/PyInst.h"
 namespace torchlight::Ast {
 
 Object::PyObjPtr ForStmtKlass::emit(
@@ -65,7 +65,7 @@ Object::PyObjPtr ForStmtKlass::visit(
       code->RegisterVarName(name);
     }
   } else {
-    DebugPrint(target);
+    Function::DebugPrint(target);
     throw std::runtime_error("ForStmt::visit(): unsupported target type");
   }
   Object::ForEach(

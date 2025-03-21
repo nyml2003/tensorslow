@@ -1,15 +1,15 @@
 #ifndef TORCHLIGHT_OBJECT_IMPORT
 #define TORCHLIGHT_OBJECT_IMPORT
 
-#include "Object/PyBoolean.h"
-#include "Object/PyBytes.h"
-#include "Object/PyDictionary.h"
-#include "Object/PyFloat.h"
-#include "Object/PyInteger.h"
-#include "Object/PyList.h"
-#include "Object/PyNone.h"
-#include "Object/PyObject.h"
-#include "Object/PyString.h"
-#include "Object/PyType.h"
+#include "Object/Container/PyDictionary.h"
+#include "Object/Container/PyList.h"
+#include "Object/Core/PyBoolean.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Core/PyObject.h"
+#include "Object/Core/PyType.h"
+#include "Object/Number/PyFloat.h"
+#include "Object/Number/PyInteger.h"
+#include "Object/String/PyBytes.h"
+#include "Object/String/PyString.h"
 
 #endif

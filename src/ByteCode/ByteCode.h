@@ -1,8 +1,8 @@
 #ifndef TORCHLIGHT_BYTECODE_H
 #define TORCHLIGHT_BYTECODE_H
 
-#include "Collections/Bytes.h"
-#include "Collections/String.h"
+#include "Collections/String/String.h"
+#include "Collections/String/Bytes.h"
 
 #include <map>
 #include <variant>

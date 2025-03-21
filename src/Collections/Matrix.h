@@ -2,7 +2,7 @@
 #define TORCHLIGHT_MATRIX_H
 
 #include "Collections/List.h"
-#include "Collections/String.h"
+#include "Collections/String/String.h"
 namespace torchlight::Collections {
 
 using BroadcastType = uint8_t;

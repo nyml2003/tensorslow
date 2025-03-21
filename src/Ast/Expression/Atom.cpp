@@ -1,6 +1,6 @@
 #include "Ast/Expression/Atom.h"
-#include "Object/PyNone.h"
-#include "Object/PyObject.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Core/PyObject.h"
 
 namespace torchlight::Ast {
 

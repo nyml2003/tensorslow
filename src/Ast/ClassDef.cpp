@@ -2,13 +2,13 @@
 #include "Ast/FuncDef.h"
 #include "Ast/INode.h"
 #include "Ast/Module.h"
-#include "ByteCode/PyCode.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyNone.h"
-#include "Object/PyObject.h"
-#include "Object/PyString.h"
+#include "Function/ObjectHelper.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Core/PyObject.h"
+#include "Object/Iterator/IteratorHelper.h"
+#include "Object/Runtime/PyCode.h"
+#include "Object/String/PyString.h"
 #include "Tools/Tools.h"
-
 namespace torchlight::Ast {
 
 ClassDef::ClassDef(

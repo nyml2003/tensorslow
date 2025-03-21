@@ -4,7 +4,7 @@
 #include <utility>
 
 #include "Ast/INode.h"
-#include "Object/ObjectHelper.h"
+#include "Function/ObjectHelper.h"
 
 namespace torchlight::Ast {
 

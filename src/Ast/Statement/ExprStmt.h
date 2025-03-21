@@ -2,7 +2,7 @@
 #define TORCHLIGHT_AST_EXPRESSION_STATEMENT_H
 
 #include "Ast/INode.h"
-#include "Object/ObjectHelper.h"
+#include "Function/ObjectHelper.h"
 
 namespace torchlight::Ast {
 
@@ -36,7 +36,8 @@ class ExprStmt : public INode {
   INodePtr content;
 };
 
-inline INodePtr CreateExprStmt(const INodePtr& content, const INodePtr& parent) {
+inline INodePtr
+CreateExprStmt(const INodePtr& content, const INodePtr& parent) {
   return std::make_shared<ExprStmt>(content, parent);
 }
 

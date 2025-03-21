@@ -19,17 +19,17 @@
 #include "Ast/Statement/ReturnStmt.h"
 #include "Ast/Statement/WhileStmt.h"
 #include "Ast/Statement/YieldStmt.h"
-#include "ByteCode/PyCode.h"
-#include "Collections/IntegerHelper.h"
+#include "Function/ObjectHelper.h"
+#include "Object/Container/PyList.h"
+#include "Object/Core/PyBoolean.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Core/PyObject.h"
+#include "Object/Iterator/IteratorHelper.h"
+#include "Object/Number/PyFloat.h"
+#include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyBoolean.h"
-#include "Object/PyFloat.h"
-#include "Object/PyInteger.h"
-#include "Object/PyList.h"
-#include "Object/PyNone.h"
-#include "Object/PyObject.h"
-#include "Object/PyString.h"
+#include "Object/Runtime/PyCode.h"
+#include "Object/String/PyString.h"
 #include "support/Any.h"
 
 namespace torchlight::Generation {
@@ -771,7 +771,9 @@ antlrcpp::Any Generator::visitSubscriptlist(
   for (auto* subscript : ctx->subscript_()) {
     subscripts.Push(visitSubscript_(subscript).as<Ast::INodePtr>());
   }
-  return Ast::CreateList(Object::CreatePyList(subscripts)->as<Object::PyList>(), context);
+  return Ast::CreateList(
+    Object::CreatePyList(subscripts)->as<Object::PyList>(), context
+  );
 }
 
 antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx

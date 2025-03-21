@@ -3,11 +3,11 @@
 
 #include "../Collections/Collections.h"
 #include "ByteCode/ByteCode.h"
+#include "Function/ObjectHelper.h"
 #include "Object.h"
-#include "Object/Klass.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyInteger.h"
-#include "Object/PyString.h"
+#include "Object/Core/Klass.h"
+#include "Object/Number/PyInteger.h"
+#include "Object/String/PyString.h"
 
 using namespace torchlight::Object;
 using namespace torchlight::Collections;

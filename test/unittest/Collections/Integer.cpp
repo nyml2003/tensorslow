@@ -1,7 +1,7 @@
-#include "Collections/Integer.h"
+#include "Collections/Integer/Integer.h"
 #include <gtest/gtest.h>
 #include "../test_default.h"
-#include "Collections/IntegerHelper.h"
+#include "Collections/Integer/IntegerHelper.h"
 
 #include "Collections.h"
 

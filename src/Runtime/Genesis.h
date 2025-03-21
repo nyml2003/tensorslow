@@ -1,7 +1,7 @@
 #ifndef TORCHLIGHT_RUNTIME_GENESIS_H
 #define TORCHLIGHT_RUNTIME_GENESIS_H
 
-#include "Object/PyObject.h"
+#include "Object/Core/PyObject.h"
 
 namespace torchlight::Runtime {
 

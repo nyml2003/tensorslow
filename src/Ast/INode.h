@@ -1,9 +1,9 @@
 #ifndef TORCHLIGHT_AST_AST_NODE_BASE_H
 #define TORCHLIGHT_AST_AST_NODE_BASE_H
 
-#include "ByteCode/PyCode.h"
-#include "Object/Klass.h"
-#include "Object/PyObject.h"
+#include "Object/Core/Klass.h"
+#include "Object/Core/PyObject.h"
+#include "Object/Runtime/PyCode.h"
 namespace torchlight::Ast {
 
 enum class STOREORLOAD {
@@ -55,7 +55,8 @@ class INode : public Object::PyObject {
   INodePtr parent;  // 保存父结点在codeList中的索引
 };
 
-Object::PyCodePtr GetCodeFromList(const Object::PyObjPtr& codeList, const INodePtr& node);
+Object::PyCodePtr
+GetCodeFromList(const Object::PyObjPtr& codeList, const INodePtr& node);
 
 }  // namespace torchlight::Ast
 

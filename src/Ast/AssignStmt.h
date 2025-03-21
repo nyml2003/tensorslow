@@ -2,7 +2,7 @@
 #define TORCHLIGHT_AST_ASSIGN_STATEMENT_H
 
 #include "Ast/INode.h"
-#include "Object/ObjectHelper.h"
+#include "Function/ObjectHelper.h"
 
 namespace torchlight::Ast {
 

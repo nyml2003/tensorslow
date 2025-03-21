@@ -1,13 +1,13 @@
 #include <memory>
 #include "../test_default.h"
 
-#include "Object/ObjectHelper.h"
-#include "Object/PyBytes.h"
-#include "Object/PyDictionary.h"
-#include "Object/PyFloat.h"
-#include "Object/PyInteger.h"
-#include "Object/PyList.h"
-#include "Object/PyString.h"
+#include "Function/ObjectHelper.h"
+#include "Object/Container/PyDictionary.h"
+#include "Object/Container/PyList.h"
+#include "Object/Number/PyFloat.h"
+#include "Object/Number/PyInteger.h"
+#include "Object/String/PyBytes.h"
+#include "Object/String/PyString.h"
 #include "Runtime/Genesis.h"
 
 namespace torchlight {

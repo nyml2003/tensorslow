@@ -1,6 +1,6 @@
-#include "../test_default.h"
 #include "Collections/Matrix.h"
-#include "Collections/StringHelper.h"
+#include "../test_default.h"
+#include "Collections/String/StringHelper.h"
 
 using namespace torchlight::Collections;
 using torchlight::Index;
@@ -42,7 +42,7 @@ TEST(Matrix, ToString) {
   String expected = CreateStringWithCString(
     "[[1.000000,2.000000,3.000000][4.000000,5.000000,6.000000]]"
   );
-    ASSERT_EQ(mat.ToString(), expected);
+  ASSERT_EQ(mat.ToString(), expected);
 }
 
 TEST(Matrix, Transpose) {

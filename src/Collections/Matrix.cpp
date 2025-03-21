@@ -1,6 +1,6 @@
 
 #include "Collections/Matrix.h"
-#include "Collections/StringHelper.h"
+#include "Collections/String/StringHelper.h"
 
 namespace torchlight::Collections {
 

@@ -1,18 +1,19 @@
 #include "Runtime/Genesis.h"
-#include "Function/PyFunction.h"
-#include "Function/PyNativeFunction.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyBoolean.h"
-#include "Object/PyDictionary.h"
-#include "Object/PyFloat.h"
-#include "Object/PyList.h"
+#include "Function/ObjectHelper.h"
+#include "Object/Container/PyDictionary.h"
+#include "Object/Container/PyList.h"
+#include "Object/Core/CoreHelper.h"
+#include "Object/Core/PyBoolean.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Core/PyObject.h"
+#include "Object/Core/PyType.h"
+#include "Object/Function/PyFunction.h"
+#include "Object/Function/PyNativeFunction.h"
+#include "Object/Number/PyFloat.h"
 #include "Object/PyMatrix.h"
-#include "Object/PyNone.h"
-#include "Object/PyObject.h"
-#include "Object/PyString.h"
-#include "Object/PyType.h"
+#include "Object/Runtime/PyFrame.h"
+#include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
-#include "Runtime/PyFrame.h"
 
 namespace torchlight::Runtime {
 
@@ -28,13 +29,13 @@ Object::PyDictPtr Genesis() {
 
   // 注册内置函数
   builtins->Put(
-    Object::CreatePyString("print"), CreatePyNativeFunction(Object::Print)
+    Object::CreatePyString("print"), CreatePyNativeFunction(Function::Print)
   );
   builtins->Put(
-    Object::CreatePyString("len"), CreatePyNativeFunction(Object::Len)
+    Object::CreatePyString("len"), CreatePyNativeFunction(Function::Len)
   );
   builtins->Put(
-    Object::CreatePyString("next"), CreatePyNativeFunction(Object::Next)
+    Object::CreatePyString("next"), CreatePyNativeFunction(Function::Next)
   );
   builtins->Put(
     Object::CreatePyString("str"), CreatePyNativeFunction(Object::Str)
@@ -46,7 +47,7 @@ Object::PyDictPtr Genesis() {
     Object::CreatePyString("bool"), CreatePyNativeFunction(Object::Bool)
   );
   builtins->Put(
-    Object::CreatePyString("id"), CreatePyNativeFunction(Object::Identity)
+    Object::CreatePyString("id"), CreatePyNativeFunction(Function::Identity)
   );
   builtins->Put(
     Object::CreatePyString("__build_class__"),
@@ -99,22 +100,22 @@ Object::PyDictPtr Genesis() {
   );
   builtins->Put(
     Object::CreatePyString("Normal"),
-    Object::CreatePyNativeFunction(Object::Normal)
+    Object::CreatePyNativeFunction(Function::Normal)
   );
   builtins->Put(
     Object::CreatePyString("Shuffle"),
-    Object::CreatePyNativeFunction(Object::Shuffle)
+    Object::CreatePyNativeFunction(Function::Shuffle)
   );
 
   // 系统相关函数
   builtins->Put(
-    Object::CreatePyString("input"), CreatePyNativeFunction(Object::Input)
+    Object::CreatePyString("input"), CreatePyNativeFunction(Function::Input)
   );
   builtins->Put(
-    Object::CreatePyString("sleep"), CreatePyNativeFunction(Object::Sleep)
+    Object::CreatePyString("sleep"), CreatePyNativeFunction(Function::Sleep)
   );
   builtins->Put(
-    Object::CreatePyString("randint"), CreatePyNativeFunction(Object::RandInt)
+    Object::CreatePyString("randint"), CreatePyNativeFunction(Function::RandInt)
   );
 
   // 注册切片类型
@@ -159,7 +160,7 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
   auto _name_ = globals->getitem(Object::CreatePyString("__name__"));
   // 保存当前帧
   // 创建新帧并执行类定义函数
-  auto frame = Runtime::CreateFrameWithPyFunction(
+  auto frame = Object::CreateFrameWithPyFunction(
     function, Object::CreatePyList({})->as<Object::PyList>()
   );
   auto result = frame->Eval();
@@ -239,11 +240,11 @@ Object::PyObjPtr BuiltinMatrix() {
   );
   matrixModuleKlass->AddAttribute(
     Object::CreatePyString("normal")->as<Object::PyString>(),
-    Object::CreatePyNativeFunction(Object::Normal)
+    Object::CreatePyNativeFunction(Function::Normal)
   );
   matrixModuleKlass->AddAttribute(
     Object::CreatePyString("shuffle")->as<Object::PyString>(),
-    Object::CreatePyNativeFunction(Object::Shuffle)
+    Object::CreatePyNativeFunction(Function::Shuffle)
   );
   auto matrixModule = std::make_shared<Object::PyObject>(matrixModuleKlass);
   return matrixModule;

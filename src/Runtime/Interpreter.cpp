@@ -1,15 +1,15 @@
 #include "Runtime/Interpreter.h"
-#include "ByteCode/PyCode.h"
-#include "Function/PyFunction.h"
-#include "Function/PyMethod.h"
-#include "Function/PyNativeFunction.h"
+#include "Object/Container/PyDictionary.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Core/PyObject.h"
+#include "Object/Core/PyType.h"
+#include "Object/Function/PyFunction.h"
+#include "Object/Function/PyMethod.h"
+#include "Object/Function/PyNativeFunction.h"
 #include "Object/Object.h"
-#include "Object/PyDictionary.h"
-#include "Object/PyNone.h"
-#include "Object/PyObject.h"
-#include "Object/PyType.h"
+#include "Object/Runtime/PyCode.h"
+#include "Object/Runtime/PyFrame.h"
 #include "Runtime/Genesis.h"
-#include "Runtime/PyFrame.h"
 
 namespace torchlight::Runtime {
 
@@ -23,11 +23,11 @@ Interpreter& Interpreter::Instance() {
   return instance;
 }
 
-PyFramePtr Interpreter::CurrentFrame() const {
+Object::PyFramePtr Interpreter::CurrentFrame() const {
   return frame;
 }
 
-void Interpreter::SetFrame(const PyFramePtr& child) {
+void Interpreter::SetFrame(const Object::PyFramePtr& child) {
   frame = child;
 }
 
@@ -96,10 +96,10 @@ Object::PyDictPtr Interpreter::Builtins() const {
 }
 
 void Interpreter::BackToParentFrame() {
-  if (!frame->is<PyFrame>()) {
+  if (!frame->is<Object::PyFrame>()) {
     throw std::runtime_error("Cannot destroy non-frame object");
   }
-  frame = frame->as<PyFrame>()->Caller();
+  frame = frame->as<Object::PyFrame>()->Caller();
 }
 
 }  // namespace torchlight::Runtime

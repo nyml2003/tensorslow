@@ -1,10 +1,11 @@
 #include "Ast/Statement/IfStmt.h"
 #include "Ast/INode.h"
-#include "ByteCode/PyInst.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyInteger.h"
-#include "Object/PyNone.h"
-#include "Object/PyString.h"
+#include "Function/ObjectHelper.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Iterator/IteratorHelper.h"
+#include "Object/Number/PyInteger.h"
+#include "Object/Runtime/PyInst.h"
+#include "Object/String/PyString.h"
 
 namespace torchlight::Ast {
 

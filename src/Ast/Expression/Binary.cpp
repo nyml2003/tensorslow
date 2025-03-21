@@ -1,6 +1,6 @@
 #include "Ast/Expression/Binary.h"
-#include "ByteCode/PyInst.h"
-#include "Object/PyNone.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Runtime/PyInst.h"
 
 namespace torchlight::Ast {
 

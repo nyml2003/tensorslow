@@ -2,8 +2,8 @@
 #include "Ast/Expression/Binary.h"
 #include "Ast/Identifier.h"
 #include "Ast/MemberAccess.h"
-#include "Object/PyNone.h"
-#include "Object/PyObject.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Core/PyObject.h"
 
 namespace torchlight::Ast {
 
@@ -50,7 +50,9 @@ Object::PyObjPtr AssignStmtKlass::visit(
     auto binary = target->as<Binary>();
     auto oprt = binary->Oprt();
     if (oprt != Binary::Operator::SUBSCR) {
-      throw std::runtime_error("When assigning, only support subscript operation");
+      throw std::runtime_error(
+        "When assigning, only support subscript operation"
+      );
     }
     binary->SetOprt(Binary::Operator::STORE_SUBSCR);
     binary->visit(codeList);

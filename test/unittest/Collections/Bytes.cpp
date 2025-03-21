@@ -1,7 +1,7 @@
 #include "../test_default.h"
 
 #include "Collections.h"
-#include "Collections/BytesHelper.h"
+#include "Collections/String/BytesHelper.h"
 
 using namespace torchlight::Collections;
 

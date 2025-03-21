@@ -1,11 +1,11 @@
 #include "Ast/Module.h"
 #include "Ast/INode.h"
-#include "ByteCode/PyCode.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyList.h"
-#include "Object/PyNone.h"
-#include "Object/PyObject.h"
-
+#include "Function/ObjectHelper.h"
+#include "Object/Container/PyList.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Core/PyObject.h"
+#include "Object/Iterator/IteratorHelper.h"
+#include "Object/Runtime/PyCode.h"
 namespace torchlight::Ast {
 
 Object::PyObjPtr ModuleKlass::visit(

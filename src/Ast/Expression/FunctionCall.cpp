@@ -1,5 +1,6 @@
 #include "Ast/Expression/FunctionCall.h"
-#include "Object/PyNone.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Iterator/IteratorHelper.h"
 namespace torchlight::Ast {
 
 Object::PyObjPtr FunctionCallKlass::emit(

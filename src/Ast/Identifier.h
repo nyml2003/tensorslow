@@ -2,8 +2,8 @@
 #define TORCHLIGHT_AST_IDENTIFIER_H
 
 #include "Ast/INode.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyString.h"
+#include "Function/ObjectHelper.h"
+#include "Object/String/PyString.h"
 
 namespace torchlight::Ast {
 

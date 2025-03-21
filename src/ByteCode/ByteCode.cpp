@@ -1,6 +1,6 @@
 #include "ByteCode/ByteCode.h"
-#include "Collections/Bytes.h"
-#include "Collections/StringHelper.h"
+#include "Collections/String/Bytes.h"
+#include "Collections/String/StringHelper.h"
 
 namespace torchlight::Collections {
 

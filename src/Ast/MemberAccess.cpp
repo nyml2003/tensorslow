@@ -1,5 +1,5 @@
 #include "Ast/MemberAccess.h"
-#include "Object/PyNone.h"
+#include "Object/Core/PyNone.h"
 
 namespace torchlight::Ast {
 

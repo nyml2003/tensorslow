@@ -1,6 +1,6 @@
 #include "Ast/Statement/WhileStmt.h"
-#include "Object/PyNone.h"
-
+#include "Object/Core/PyNone.h"
+#include "Object/Iterator/IteratorHelper.h"
 namespace torchlight::Ast {
 
 Object::PyObjPtr WhileStmtKlass::visit(

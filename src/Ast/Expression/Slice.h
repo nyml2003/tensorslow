@@ -2,7 +2,7 @@
 #define TORCHLIGHT_AST_SLICE_H
 
 #include "Ast/INode.h"
-#include "Object/ObjectHelper.h"
+#include "Function/ObjectHelper.h"
 
 namespace torchlight::Ast {
 
@@ -19,15 +19,11 @@ class SliceKlass : public INodeKlass {
     return instance;
   }
 
-  Object::PyObjPtr visit(
-    const Object::PyObjPtr& obj,
-    const Object::PyObjPtr& codeList
-  ) override;
+  Object::PyObjPtr
+  visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
 
-  Object::PyObjPtr emit(
-    const Object::PyObjPtr& obj,
-    const Object::PyObjPtr& codeList
-  ) override;
+  Object::PyObjPtr
+  emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
 };
 
 // 作为右值的list

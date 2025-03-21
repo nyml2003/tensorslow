@@ -2,8 +2,8 @@
 #define TORCHLIGHT_AST_CLASSDEF_H
 
 #include "Ast/INode.h"
+#include "Function/ObjectHelper.h"
 #include "Object/Object.h"
-#include "Object/ObjectHelper.h"
 
 namespace torchlight::Ast {
 

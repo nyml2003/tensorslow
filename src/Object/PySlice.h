@@ -1,11 +1,11 @@
 #ifndef TORCHLIGHT_OBJECT_PYSLICE_H
 #define TORCHLIGHT_OBJECT_PYSLICE_H
 
+#include "Function/ObjectHelper.h"
+#include "Object/Core/CoreHelper.h"
+#include "Object/Core/PyObject.h"
 #include "Object/Object.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyObject.h"
-#include "Object/PyString.h"
-
+#include "Object/String/PyString.h"
 namespace torchlight::Object {
 
 class SliceKlass : public Klass {

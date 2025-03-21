@@ -1,10 +1,10 @@
 
-#include "ByteCode/PyCode.h"
-#include "Collections/BytesHelper.h"
-#include "Collections/StringHelper.h"
+#include "Collections/String/BytesHelper.h"
+#include "Collections/String/StringHelper.h"
+#include "Function/ObjectHelper.h"
 #include "Generation/Generator.h"
-#include "Object/ObjectHelper.h"
-#include "Object/PyString.h"
+#include "Object/Runtime/PyCode.h"
+#include "Object/String/PyString.h"
 #include "Python3Lexer.h"
 #include "Python3Parser.h"
 #include "Tools/Tools.h"
@@ -18,8 +18,12 @@
 namespace fs = std::filesystem;
 using antlr4::ANTLRInputStream;
 using antlr4::CommonTokenStream;
+
+using torchlight::ArgsHelper;
+using torchlight::Parameter;
+using torchlight::Schema;
 using torchlight::Generation::Generator;
-using namespace torchlight;
+
 void DefineOption() {
   Schema schema;
   schema.Add(Parameter(
@@ -67,7 +71,7 @@ void DefineOption() {
 }
 
 void InitPyObj() {
-  Object::BasicKlassLoad();
+  torchlight::Object::BasicKlassLoad();
 }
 
 // 使用ANTLR解析文件
@@ -91,20 +95,20 @@ void ParseAndGenerate(const fs::path& filePath) {
     std::cout << tree->toStringTree(&parser) << std::endl;
   }
 
-  Generator visitor(
-    Object::CreatePyString(filePath.string())->as<Object::PyString>()
-  );
+  Generator visitor(torchlight::Object::CreatePyString(filePath.string())
+                      ->as<torchlight::Object::PyString>());
   visitor.visit(tree);
   visitor.Visit();
   visitor.Emit();
   auto code = visitor.Code();
   if (ArgsHelper::Instance().Has("show_code")) {
-    Object::PrintCode(code);
+    torchlight::Object::PrintCode(code);
   }
-  Collections::Bytes data = code->_serialize_()->as<Object::PyBytes>()->Value();
+  torchlight::Collections::Bytes data =
+    code->_serialize_()->as<torchlight::Object::PyBytes>()->Value();
   auto writePath = fs::path(filePath).replace_extension(".pyc");
-  Collections::Write(
-    data, Collections::CreateStringWithCString(writePath.c_str())
+  torchlight::Collections::Write(
+    data, torchlight::Collections::CreateStringWithCString(writePath.c_str())
   );
 }
 
@@ -126,7 +130,7 @@ int main(int argc, char** argv) {
       }
     }
     for (const auto& subdir : subdirs) {
-      auto files = GetFilesInDirectory(subdir.string(), ".py");
+      auto files = torchlight::GetFilesInDirectory(subdir.string(), ".py");
       std::cout << "测试用例:" << subdir.filename().string() << std::endl;
       for (const auto& file : files) {
         ParseAndGenerate(file);

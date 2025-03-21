@@ -1,7 +1,7 @@
 #ifndef TORCHLIGHT_RUNTIME_BINARYFILEPARSER_H
 #define TORCHLIGHT_RUNTIME_BINARYFILEPARSER_H
 
-#include "ByteCode/PyCode.h"
+#include "Object/Runtime/PyCode.h"
 #include "Runtime/BufferedInputStream.h"
 
 namespace torchlight::Runtime {

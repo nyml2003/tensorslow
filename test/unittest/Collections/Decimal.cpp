@@ -1,7 +1,7 @@
 #include "../test_default.h"
 
 #include "Collections.h"
-#include "Collections/StringHelper.h"
+#include "Collections/String/StringHelper.h"
 
 using namespace torchlight::Collections;
 

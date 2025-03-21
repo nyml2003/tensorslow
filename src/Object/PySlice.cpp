@@ -1,9 +1,9 @@
 #include "Object/PySlice.h"
+#include "Object/Container/PyList.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Core/PyType.h"
+#include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
-#include "Object/PyInteger.h"
-#include "Object/PyList.h"
-#include "Object/PyNone.h"
-#include "Object/PyType.h"
 namespace torchlight::Object {
 
 void PySlice::BindLength(Index length) {
