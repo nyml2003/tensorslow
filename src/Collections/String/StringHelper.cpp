@@ -73,7 +73,7 @@ String CreateStringWithBytes(const Bytes& bytes) {
   size_t index = 0;
   while (index < length) {
     Unicode codePoint = GetUnicode(
-      index, [bytes](Index index) -> Byte { return bytes[index]; },
+      index, [&bytes](Index index) -> Byte { return bytes[index]; },
       [length](Index index) -> bool { return index < length; }
     );
     codePoints.Push(codePoint);

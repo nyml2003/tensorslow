@@ -5,12 +5,13 @@
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyObject.h"
+#include "Object/Iterator/IteratorHelper.h"
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "Object/Runtime/PyInst.h"
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
-#include "Object/Iterator/IteratorHelper.h"
+
 
 namespace torchlight::Object {
 
@@ -24,12 +25,12 @@ PyCode::PyCode(
 )
   : PyObject(CodeKlass::Self()),
     byteCode(std::move(byteCodes)),
+    instructions(CreatePyList(0)->as<PyList>()),
     consts(std::move(consts)),
     names(std::move(names)),
     varNames(std::move(varNames)),
     name(std::move(name)),
-    nLocals(nLocals),
-    instructions(CreatePyList(0)->as<PyList>()) {}
+    nLocals(nLocals) {}
 
 PyListPtr PyCode::Instructions() {
   return instructions;

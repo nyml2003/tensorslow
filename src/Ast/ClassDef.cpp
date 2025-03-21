@@ -18,8 +18,9 @@ ClassDef::ClassDef(
 )
   : INode(ClassDefKlass::Self(), parent),
     name(std::move(name)),
-    bases(std::move(bases)),
+
     body(Object::CreatePyList({})->as<Object::PyList>()),
+    bases(std::move(bases)),
     codeIndex(0) {
   if (parent->is<Module>()) {
     parents = Object::CreatePyList({parent})->as<Object::PyList>();

@@ -206,6 +206,10 @@ void ParseByteCode(const PyCodePtr& code) {
         insts.Push(CreateBuildSlice());
         break;
       }
+      case ByteCode::BUILD_MAP: {
+        insts.Push(CreateBuildMap(Runtime::ReadU64(iter)));
+        break;
+      }
       case ByteCode::BINARY_MATRIX_MULTIPLY: {
         insts.Push(CreateBinaryMatrixMultiply());
         break;
@@ -803,14 +807,21 @@ PyObjPtr PyFrame::Eval() {
         SetProgramCounter(programCounter + std::get<Index>(inst->Operand()));
         break;
       }
-      case ByteCode::ERROR: {
-        throw std::runtime_error("Unknown byte code");
+      case ByteCode::BUILD_MAP: {
+        auto size = std::get<Index>(inst->Operand());
+        auto map = CreatePyDict();
+        for (Index i = 0; i < size; i++) {
+          auto value = stack.Pop();
+          auto key = stack.Pop();
+          map->setitem(key, value);
+        }
+        stack.Push(map);
+        NextProgramCounter();
         break;
       }
-        throw std::runtime_error("Unknown byte code");
     }
   }
-  throw std::runtime_error("Module code did not return None");
+  return CreatePyNone();
 }
 
 PyObjPtr PyFrame::EvalWithDestory() {

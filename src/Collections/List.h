@@ -224,10 +224,11 @@ List<T>::List(std::initializer_list<T> list)
   std::copy(list.begin(), list.end(), elements.get());
 }
 template <typename T>
-List<T>::List(const List<T>& other)
-  : size(other.size),
-    capacity(other.size),
-    elements(std::make_unique<T[]>(other.size)) {
+List<T>::List(const List<T>& other) : size(other.size), capacity(other.size) {
+  if (size == 0) {
+    return;
+  }
+  elements = std::make_unique<T[]>(size);
   std::copy(other.elements.get(), other.elements.get() + size, elements.get());
 }
 template <typename T>

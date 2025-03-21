@@ -106,7 +106,7 @@ class PyCode : public PyObject {
 
   void BuildList(Index size) { instructions->Append(CreateBuildList(size)); }
   void BuildSlice() { instructions->Append(CreateBuildSlice()); }
-
+  void BuildMap(Index size) { instructions->Append(CreateBuildMap(size)); }
   void CallFunction(Index nArgs);
 
   void MakeFunction();

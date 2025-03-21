@@ -84,6 +84,10 @@ inline PyInstPtr CreateBuildSlice() {
   return std::make_shared<PyInst>(ByteCode::BUILD_SLICE);
 }
 
+inline PyInstPtr CreateBuildMap(Index size) {
+  return std::make_shared<PyInst>(ByteCode::BUILD_MAP, size);
+}
+
 PyInstPtr CreateBinaryMatrixMultiply();
 
 PyInstPtr CreateJumpAbsolute(Index index);

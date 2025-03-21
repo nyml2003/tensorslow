@@ -1,8 +1,9 @@
 #ifndef TORCHLIGHT_BYTECODE_H
 #define TORCHLIGHT_BYTECODE_H
 
-#include "Collections/String/String.h"
 #include "Collections/String/Bytes.h"
+#include "Collections/String/String.h"
+
 
 #include <map>
 #include <variant>
@@ -55,8 +56,6 @@ enum class ByteCode {
   MAKE_FUNCTION = 132,
   BUILD_SLICE = 133,
   CALL_FUNCTION = 142,
-
-  ERROR = 0xFF
 };
 
 enum class CompareOp {
@@ -133,7 +132,6 @@ static const std::map<ByteCode, const char*> ByteCodeNames = {
   {ByteCode::BUILD_SLICE, "BUILD_SLICE"},
   {ByteCode::CALL_FUNCTION, "CALL_FUNCTION"},
   {ByteCode::YIELD_VALUE, "YIELD_VALUE"},
-  {ByteCode::ERROR, "ERROR"},
 };
 
 }  // namespace torchlight::Object

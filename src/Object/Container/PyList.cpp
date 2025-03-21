@@ -354,7 +354,7 @@ PyObjPtr PyList::GetSlice(const PySlicePtr& slice) const {
   auto subList = CreatePyList({})->as<PyList>();
   if (step > 0) {
     for (int64_t i = start; i < stop; i += step) {
-      if (i >= Length()) {
+      if (i >= static_cast<int64_t>(Length())) {
         break;
       }
       subList->Append(GetItem(i));
@@ -362,7 +362,7 @@ PyObjPtr PyList::GetSlice(const PySlicePtr& slice) const {
     return subList;
   }
   for (int64_t i = start; i > stop; i += step) {
-    if (i >= Length()) {
+    if (i >= static_cast<int64_t>(Length())) {
       break;
     }
     subList->Append(GetItem(i));

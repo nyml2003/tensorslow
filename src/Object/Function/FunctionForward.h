@@ -13,7 +13,7 @@ void assign_indices(Tuple& params, const ArgList& arg_list, std::index_sequence<
 
 // 外部辅助函数：展开索引序列
 template <typename F, typename... Args, size_t... I>
-void expand_indices(std::index_sequence<I...>, F&& func, Args&&... args) {
+void expand_indices(std::index_sequence<I...>, F&& func, Args&&... ) {
   std::forward<F>(func)(std::integral_constant<size_t, I>{}...);
 }
 

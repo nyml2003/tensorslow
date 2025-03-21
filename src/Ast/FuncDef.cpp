@@ -18,8 +18,9 @@ FuncDef::FuncDef(
 )
   : INode(FuncDefKlass::Self(), parent),
     name(std::move(name)),
-    parameters(std::move(parameters)),
     body(std::move(body)),
+    parameters(std::move(parameters)),
+
     parents(Object::CreatePyList({})->as<Object::PyList>()),
     codeIndex(0) {
   if (parent->is<Module>()) {

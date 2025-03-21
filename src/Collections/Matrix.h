@@ -12,7 +12,6 @@ class Matrix {
   Index rows{};
   Index cols{};
   List<double> data;
-  BroadcastType broadcastType = 0b1111;
 
   [[nodiscard]] uint8_t CheckBroadcast(const Matrix& other) const;
 
