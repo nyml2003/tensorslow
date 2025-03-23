@@ -166,4 +166,10 @@ Object::PyObjPtr Input(const Object::PyObjPtr& args) {
   return Object::CreatePyString(input);
 }
 
+Object::PyObjPtr Iter(const Object::PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
+  auto obj = args->as<Object::PyList>()->GetItem(0);
+  return obj->iter();
+}
+
 }  // namespace torchlight::Function

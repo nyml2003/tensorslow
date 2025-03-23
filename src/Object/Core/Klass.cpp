@@ -12,7 +12,6 @@
 #include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
 
-
 namespace torchlight::Object {
 
 void Klass::SetName(const PyObjPtr& name) {
@@ -296,13 +295,17 @@ PyObjPtr Klass::next(const PyObjPtr& obj) {
   );
 }
 
+PyObjPtr Klass::reversed(const PyObjPtr& obj) {
+  return Invoke(
+    obj, CreatePyString("__reversed__"), CreatePyList({})->as<PyList>()
+  );
+}
+
 PyObjPtr Klass::_serialize_(const PyObjPtr& obj) {
   return Invoke(
     obj, CreatePyString("_serialize_"), CreatePyList({})->as<PyList>()
   );
 }
-
-
 
 void Klass::AddAttribute(const PyStrPtr& key, const PyObjPtr& value) {
   attributes->Put(key, value);

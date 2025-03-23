@@ -9,7 +9,7 @@ MapKlass::emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) {
   auto values = map->Values();
   Index size = keys->Length();
   auto code = GetCodeFromList(codeList, map);
-  for (Index i = 0; i < size; ++i) {
+  for (Index i = size - 1; ~i; --i) {
     keys->GetItem(i)->as<INode>()->emit(codeList);
     values->GetItem(i)->as<INode>()->emit(codeList);
   }

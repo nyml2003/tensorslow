@@ -107,6 +107,7 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   }
   PyObjPtr iter() { return klass->iter(shared_from_this()); }
   PyObjPtr next() { return klass->next(shared_from_this()); }
+  PyObjPtr reversed() { return klass->reversed(shared_from_this()); }
   // TODO
   PyObjPtr _serialize_() { return klass->_serialize_(shared_from_this()); }
   template <typename T>

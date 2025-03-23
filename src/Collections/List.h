@@ -95,6 +95,12 @@ class List {
    */
   T Pop();
   /**
+   * @brief 移除列表末尾 k 个元素
+   * @param k 要移除的元素个数
+   * @return 被移除的元素组成的列表
+   */
+  List<T> Pop(Index k);
+  /**
    * @brief 合并列表
    * @details 本身列表不会改变，返回一个新的列表
    * @param list 要合并的列表
@@ -135,7 +141,12 @@ class List {
    * @param list 要插入的元素列表
    */
   void InsertAndReplace(Index start, Index end, const List<T>& list);
-
+  /**
+   * @brief 在指定位置插入元素
+   * @param index 要插入的位置
+   * @param element 要插入的元素
+   */
+  void Insert(Index index, T element);
   /**
    * @brief 反转列表
    */
@@ -282,7 +293,7 @@ T List<T>::Shift() {
   if (Empty()) {
     throw std::runtime_error("List::Shift: List is empty");
   }
-  T element = elements[0];
+  T element = std::move(elements[0]);
   std::move(elements.get() + 1, elements.get() + size, elements.get());
   size--;
   return element;
@@ -320,6 +331,22 @@ T List<T>::Pop() {
   return elements[size];
 }
 template <typename T>
+List<T> List<T>::Pop(Index k) {
+  if (k > size) {
+    throw std::runtime_error("List::Pop: k is greater than size");
+  }
+  if (k == 0) {
+    return List<T>();
+  }
+  List<T> list(k);
+  std::copy(
+    elements.get() + size - k, elements.get() + size, list.elements.get()
+  );
+  list.size = k;
+  size -= k;
+  return list;
+}
+template <typename T>
 List<T> List<T>::Add(const List<T>& list) {
   List<T> newList(size + list.size);
   std::copy(elements.get(), elements.get() + size, newList.elements.get());
@@ -353,6 +380,21 @@ List<T> List<T>::Slice(Index start, Index end) const {
   std::copy(elements.get() + start, elements.get() + end, list.elements.get());
   list.size = end - start;
   return list;
+}
+template <typename T>
+void List<T>::Insert(Index index, T element) {
+  if (index > size) {
+    throw std::runtime_error("List::Insert::Index out of range");
+  }
+  if (Full()) {
+    Expand();
+  }
+  auto rawElements = elements.get();
+  std::copy_backward(
+    rawElements + index, rawElements + size, rawElements + size + 1
+  );
+  elements[index] = element;
+  size++;
 }
 template <typename T>
 void List<T>::RemoveAt(Index index) {

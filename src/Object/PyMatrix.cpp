@@ -450,4 +450,30 @@ PyObjPtr Concatenate(const PyObjPtr& args) {
   return CreatePyMatrix(Collections::Matrix(rows, cols, data));
 }
 
+PyObjPtr MatrixKlass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyMatrix>()) {
+    throw std::runtime_error("MatrixKlass::pow(): lhs is not a matrix");
+  }
+  if (!rhs->is<PyInteger>()) {
+    throw std::runtime_error("MatrixKlass::pow(): rhs is not an integer");
+  }
+  // 快速幂
+  auto matrix = lhs->as<PyMatrix>();
+  auto n = rhs->as<PyInteger>()->ToI64();
+  if (n < 0) {
+    throw std::runtime_error("MatrixKlass::pow(): n is less than 0");
+  }
+  auto result = Eye(CreatePyList({lhs->as<PyMatrix>()->Shape()->GetItem(0)}))
+                  ->as<PyMatrix>();
+  // 快速幂算法
+  while (n) {
+    if (n & 1) {
+      result = result->MatrixMultiply(matrix);
+    }
+    matrix = matrix->MatrixMultiply(matrix);
+    n >>= 1;
+  }
+  return result;
+}
+
 }  // namespace torchlight::Object

@@ -6,8 +6,14 @@ param (
 # 根据传参判断是build还是release
 if ($buildType -eq "release") {
     $build_dir = "D:\code\project\torchlight\release"
-} else {
+}
+if ($buildType -eq "debug") {
     $build_dir = "D:\code\project\torchlight\build"
+}
+# 如果传参不是release或debug，则报错
+if ($buildType -ne "release" -and $buildType -ne "debug") {
+    Write-Host "Invalid build type: $buildType"
+    exit 1
 }
 
 Write-Host "Build directory: $build_dir"

@@ -63,6 +63,7 @@ class Identifier : public INode {
                                       Object::CreatePyString("Normal"),
                                       Object::CreatePyString("Shuffle"),
                                       Object::CreatePyString("id"),
+                                      Object::CreatePyString("iter")
                                     })
                  ->as<Object::PyList>();
   }

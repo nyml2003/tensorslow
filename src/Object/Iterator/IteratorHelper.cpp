@@ -36,4 +36,5 @@ PyObjPtr Map(
   }
   return CreatePyList(result)->as<PyList>();
 }
-}
+
+}  // namespace torchlight::Object

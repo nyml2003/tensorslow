@@ -38,6 +38,9 @@ Object::PyDictPtr Genesis() {
     Object::CreatePyString("next"), CreatePyNativeFunction(Function::Next)
   );
   builtins->Put(
+    Object::CreatePyString("iter"), CreatePyNativeFunction(Function::Iter)
+  );
+  builtins->Put(
     Object::CreatePyString("str"), CreatePyNativeFunction(Object::Str)
   );
   builtins->Put(

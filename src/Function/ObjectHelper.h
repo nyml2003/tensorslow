@@ -17,6 +17,7 @@ void DebugPrint(const Object::PyObjPtr& obj);
 Object::PyObjPtr Print(const Object::PyObjPtr& args);
 Object::PyObjPtr Len(const Object::PyObjPtr& args);
 Object::PyObjPtr Next(const Object::PyObjPtr& args);
+Object::PyObjPtr Iter(const Object::PyObjPtr& args);
 }  // namespace torchlight::Object
 
 #endif

@@ -5,6 +5,7 @@
 #include "Ast/Expression/Binary.h"
 #include "Ast/Expression/FunctionCall.h"
 #include "Ast/Expression/List.h"
+#include "Ast/Expression/Map.h"
 #include "Ast/Expression/Slice.h"
 #include "Ast/Expression/Unary.h"
 #include "Ast/FuncDef.h"
@@ -131,11 +132,27 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
     std::cerr << "visitAtom: testlist_comp is not a List" << std::endl;
 
   } else if (ctx->OPEN_BRACE() != nullptr) {
-    // 情况 3: '{' dictorsetmaker? '}'
-    std::cout << "atom: '{' dictorsetmaker? '}'" << std::endl;
-    // if (ctx->dictorsetmaker()) {
-    //   visitDictorsetmaker(ctx->dictorsetmaker());
-    // }
+    auto dictorsetmaker = ctx->dictorsetmaker();
+    if (dictorsetmaker == nullptr) {
+      return Ast::CreateMap(
+        Object::CreatePyList({})->as<Object::PyList>(),
+          Object::CreatePyList({})->as<Object::PyList>(),
+          context
+      );
+    }
+        auto dictorset = ctx->dictorsetmaker();
+        auto tests = dictorset->test();
+        Collections::List<Object::PyObjPtr> keys(static_cast<uint64_t>(tests.size() / 2));
+        Collections::List<Object::PyObjPtr> values(static_cast<uint64_t>(tests.size()) /2);
+        for (Index i = 0; i < tests.size(); i += 2) {
+          keys.Push(std::any_cast<Ast::INodePtr>(visitTest(tests[i])));
+          values.Push(std::any_cast<Ast::INodePtr>(visitTest(tests[i + 1])));
+        }
+        return Ast::CreateMap(
+          Object::CreatePyList(keys)->as<Object::PyList>(),
+          Object::CreatePyList(values)->as<Object::PyList>(),
+          context
+        );
   } else if (ctx->name() != nullptr) {
     // 情况 4: name
     return Ast::CreateIdentifier(

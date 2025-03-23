@@ -1,11 +1,5 @@
-b = []
 n = 20
-
-while len(b) <= n:
-    b.append(None)
-
-b[1] = 1
-b[2] = 1
+b = [1, 1] + [None] * n
 
 
 def f(x):

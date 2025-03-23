@@ -2,7 +2,6 @@
 #include "ByteCode/ByteCode.h"
 #include "Collections/Integer/Integer.h"
 #include "Collections/String/BytesHelper.h"
-#include "Function/ObjectHelper.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
@@ -25,7 +24,7 @@ PyObjPtr CreatePyList(Index capacity) {
     return std::make_shared<PyList>(Collections::List<PyObjPtr>());
   }
   Collections::List<PyObjPtr> list(capacity);
-  list.Fill(PyNone::Instance());
+  list.Fill(CreatePyNone());
   return std::make_shared<PyList>(list);
 }
 
@@ -41,6 +40,28 @@ void ListKlass::Initialize() {
   );
   Self()->AddAttribute(
     CreatePyString("index")->as<PyString>(), CreatePyNativeFunction(ListIndex)
+  );
+  Self()->AddAttribute(
+    CreatePyString("pop")->as<PyString>(), CreatePyNativeFunction(ListPop)
+  );
+  Self()->AddAttribute(
+    CreatePyString("remove")->as<PyString>(), CreatePyNativeFunction(ListRemove)
+  );
+  Self()->AddAttribute(
+    CreatePyString("reverse")->as<PyString>(),
+    CreatePyNativeFunction(ListReverse)
+  );
+  Self()->AddAttribute(
+    CreatePyString("clear")->as<PyString>(), CreatePyNativeFunction(ListClear)
+  );
+  Self()->AddAttribute(
+    CreatePyString("copy")->as<PyString>(), CreatePyNativeFunction(ListCopy)
+  );
+  Self()->AddAttribute(
+    CreatePyString("count")->as<PyString>(), CreatePyNativeFunction(ListCount)
+  );
+  Self()->AddAttribute(
+    CreatePyString("insert")->as<PyString>(), CreatePyNativeFunction(ListInsert)
   );
   // 注册重载函数
   Self()->AddAttribute(
@@ -333,11 +354,90 @@ PyObjPtr ListIndex(const PyObjPtr& args) {
   return CreatePyInteger(list->IndexOf(obj));
 }
 
+PyObjPtr ListPop(const PyObjPtr& args) {
+  CheckNativeFunctionArguments(args);
+  auto argList = args->as<PyList>();
+  auto list = argList->GetItem(0)->as<PyList>();
+  auto index = list->Length() - 1;
+  if (args->as<PyList>()->Length() == 2) {
+    auto argIndex = args->as<PyList>()->GetItem(1)->as<PyInteger>()->ToI64();
+    if (argIndex < 0) {
+      index = list->Length() + argIndex;
+    }
+  }
+  list->Pop(index);
+  return CreatePyNone();
+}
+
+PyObjPtr ListClear(const PyObjPtr& args) {
+  CheckNativeFunctionArguments(args);
+  auto list = args->as<PyList>()->GetItem(0)->as<PyList>();
+  list->Clear();
+  return CreatePyNone();
+}
+
+PyObjPtr ListRemove(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 2);
+  auto argList = args->as<PyList>();
+  auto obj = argList->GetItem(1);
+  auto list = argList->GetItem(0)->as<PyList>();
+  if (!list->Contains(obj)) {
+    throw std::runtime_error("List does not contain the object");
+  }
+  list->RemoveAt(list->IndexOf(obj));
+  return CreatePyNone();
+}
+
+PyObjPtr ListCount(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 2);
+  auto argList = args->as<PyList>();
+  auto obj = argList->GetItem(1);
+  auto list = argList->GetItem(0)->as<PyList>();
+  Index count = 0;
+  for (Index i = 0; i < list->Length(); i++) {
+    if (list->GetItem(i) == obj) {
+      count++;
+    }
+  }
+  return CreatePyInteger(count);
+}
+
+PyObjPtr ListReverse(const PyObjPtr& args) {
+  CheckNativeFunctionArguments(args);
+  auto list = args->as<PyList>()->GetItem(0)->as<PyList>();
+  list->Reverse();
+  return CreatePyNone();
+}
+
+PyObjPtr ListCopy(const PyObjPtr& args) {
+  CheckNativeFunctionArguments(args);
+  auto list = args->as<PyList>()->GetItem(0)->as<PyList>();
+  return list->Copy();
+}
+
+PyObjPtr ListInsert(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 3);
+  auto argList = args->as<PyList>();
+  auto index = argList->GetItem(1)->as<PyInteger>()->ToI64();
+  auto list = argList->GetItem(0)->as<PyList>();
+  auto actualIndex = (index < 0) ? list->Length() + index : index;
+  auto obj = argList->GetItem(2);
+  list->Insert(actualIndex, obj);
+  return CreatePyNone();
+}
+
 PyObjPtr ListKlass::iter(const PyObjPtr& obj) {
   if (!obj->is<PyList>()) {
     throw std::runtime_error("List does not support iter operation");
   }
   return CreateListIterator(obj);
+}
+
+PyObjPtr ListKlass::reversed(const torchlight::Object::PyObjPtr& obj) {
+  if (!obj->is<PyList>()) {
+    throw std::runtime_error("List does not support reversed operation");
+  }
+  return CreateListReverseIterator(obj);
 }
 
 PyObjPtr PyList::GetSlice(const PySlicePtr& slice) const {

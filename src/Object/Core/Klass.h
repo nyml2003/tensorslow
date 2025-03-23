@@ -76,6 +76,7 @@ class Klass : public std::enable_shared_from_this<Klass> {
   setattr(const PyObjPtr& obj, const PyObjPtr& key, const PyObjPtr& value);
   virtual PyObjPtr iter(const PyObjPtr& obj);
   virtual PyObjPtr next(const PyObjPtr& obj);
+  virtual PyObjPtr reversed(const PyObjPtr& obj);
   virtual PyObjPtr _serialize_(const PyObjPtr& obj);
 };
 }  // namespace torchlight::Object

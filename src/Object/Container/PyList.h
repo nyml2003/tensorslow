@@ -30,6 +30,7 @@ class ListKlass : public Klass {
   PyObjPtr init(const PyObjPtr& type, const PyObjPtr& args) override;
   PyObjPtr iter(const PyObjPtr& obj) override;
   PyObjPtr boolean(const PyObjPtr& obj) override;
+  PyObjPtr reversed(const PyObjPtr& obj) override;
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
   static void Initialize();
 };
@@ -58,12 +59,6 @@ class PyList : public PyObject {
   PyObjPtr GetItem(Index index) const { return value[index]; }
   PyObjPtr GetSlice(const PySlicePtr& slice) const;
   void SetItem(Index index, const PyObjPtr& obj) { value.Set(index, obj); }
-  void SetList(Index start, Index stop, const PyObjPtr& obj) {
-    auto list = obj->as<PyList>();
-    for (Index i = start; i < stop; ++i) {
-      value[i] = list->GetItem(i - start);
-    }
-  }
   PyObjPtr Prepend(const PyObjPtr& obj) {
     return CreatePyList({obj})->as<PyList>()->Add(shared_from_this());
   }
@@ -71,11 +66,30 @@ class PyList : public PyObject {
   void InsertAndReplace(Index start, Index end, const PyListPtr& list) {
     value.InsertAndReplace(start, end, list->value);
   }
+  void Pop(Index index) { value.RemoveAt(index); }
+  void Clear() { value.Clear(); }
+  void Reverse() { value.Reverse(); }
+  PyListPtr Copy() { return CreatePyList(value.Copy())->as<PyList>(); }
+  void Insert(Index index, const PyObjPtr& obj) { value.Insert(index, obj); };
 };
+
+PyObjPtr ListIndex(const PyObjPtr& args);
 
 PyObjPtr ListAppend(const PyObjPtr& args);
 
-PyObjPtr ListIndex(const PyObjPtr& args);
+PyObjPtr ListCount(const PyObjPtr& args);
+
+PyObjPtr ListPop(const PyObjPtr& args);
+
+PyObjPtr ListInsert(const PyObjPtr& args);
+
+PyObjPtr ListRemove(const PyObjPtr& args);
+
+PyObjPtr ListReverse(const PyObjPtr& args);
+
+PyObjPtr ListClear(const PyObjPtr& args);
+
+PyObjPtr ListCopy(const PyObjPtr& args);
 
 PyListPtr CreatePyListFromIterable(const PyObjPtr& iterator);
 }  // namespace torchlight::Object

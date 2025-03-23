@@ -46,6 +46,25 @@ class ListIteratorKlass : public Klass {
   }
 };
 
+class ListReverseIteratorKlass : public Klass {
+ public:
+  explicit ListReverseIteratorKlass() = default;
+  static KlassPtr Self() {
+    static KlassPtr instance = std::make_shared<ListReverseIteratorKlass>();
+    return instance;
+  }
+
+  PyObjPtr iter(const PyObjPtr& obj) override { return obj; }
+  PyObjPtr next(const PyObjPtr& obj) override;
+  PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
+  PyObjPtr repr(const PyObjPtr& obj) override;
+
+  static void Initialize() {
+    LoadClass(CreatePyString("ListReverseIterator")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+  }
+};
+
 inline PyObjPtr CreateIterDone() {
   return std::make_shared<IterDone>();
 }
@@ -80,6 +99,22 @@ inline PyObjPtr CreateListIterator(const PyObjPtr& list) {
   return std::make_shared<ListIterator>(list);
 }
 
+class ListReverseIterator : public PyObject, public IIterator {
+ private:
+  PyListPtr list;
+  Index index{};
+
+ public:
+  explicit ListReverseIterator(const PyObjPtr& list)
+    : PyObject(ListReverseIteratorKlass::Self()) {
+    this->list = list->as<PyList>();
+    index = this->list->Length() - 1;
+  }
+  [[nodiscard]] PyListPtr List() const { return list; }
+  [[nodiscard]] Index CurrentIndex() const override { return index; }
+  void Next() { index--; }
+};
+
 class StringIteratorKlass : public Klass {
  public:
   explicit StringIteratorKlass() = default;
@@ -93,6 +128,10 @@ class StringIteratorKlass : public Klass {
   PyObjPtr next(const PyObjPtr& obj) override;
   PyObjPtr str(const PyObjPtr& obj) override;
 };
+
+inline PyObjPtr CreateListReverseIterator(const PyObjPtr& list) {
+  return std::make_shared<ListReverseIterator>(list);
+}
 
 class StringIterator : public PyObject, public IIterator {
  private:

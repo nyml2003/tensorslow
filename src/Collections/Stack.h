@@ -12,6 +12,7 @@ class Stack {
   T Pop() { return content.Pop(); }
   List<T> GetContent() const { return content; }
   T Top() const { return content.Last(); }
+  List<T> Top(Index k) { return content.Pop(k); }
   [[nodiscard]] bool Empty() const { return content.Empty(); }
   [[nodiscard]] Index Size() const { return content.Size(); }
 };

@@ -31,6 +31,7 @@ class DictionaryKlass : public Klass {
   PyObjPtr repr(const PyObjPtr& obj) override;
   PyObjPtr str(const PyObjPtr& obj) override;
   PyObjPtr iter(const PyObjPtr& obj) override;
+  PyObjPtr len(const PyObjPtr& obj) override;
   static void Initialize();
 };
 

@@ -10,7 +10,6 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/String/PyString.h"
 
-
 namespace torchlight::Object {
 
 PyObjPtr CreatePyDict() {
@@ -105,9 +104,7 @@ PyObjPtr DictionaryKlass::repr(const PyObjPtr& obj) {
     auto key = item->as<PyList>()->GetItem(0);
     auto value = item->as<PyList>()->GetItem(1);
     return StringConcat(CreatePyList(
-      {CreatePyString("(")->as<PyString>(), key->repr(),
-       CreatePyString(": ")->as<PyString>(), value->repr(),
-       CreatePyString(")")->as<PyString>()}
+      {key->repr()->repr(), CreatePyString(": ")->as<PyString>(), value->repr()}
     ));
   });
   auto repr = CreatePyString(", ")->as<PyString>()->Join(dictItemReprList);
@@ -125,9 +122,7 @@ PyObjPtr DictionaryKlass::str(const PyObjPtr& obj) {
     auto key = item->as<PyList>()->GetItem(0);
     auto value = item->as<PyList>()->GetItem(1);
     return StringConcat(CreatePyList(
-      {CreatePyString("(")->as<PyString>(), key->str(),
-       CreatePyString(": ")->as<PyString>(), value->str(),
-       CreatePyString(")")->as<PyString>()}
+      {key->str()->repr(), CreatePyString(": ")->as<PyString>(), value->str()}
     ));
   });
   auto repr = CreatePyString(", ")->as<PyString>()->Join(dictItemStrList);
@@ -135,6 +130,14 @@ PyObjPtr DictionaryKlass::str(const PyObjPtr& obj) {
     {CreatePyString("{")->as<PyString>(), repr,
      CreatePyString("}")->as<PyString>()}
   ));
+}
+
+PyObjPtr DictionaryKlass::len(const PyObjPtr& obj) {
+  if (!obj->is<PyDictionary>()) {
+    throw std::runtime_error("PyDictionary::len(): obj is not a dict");
+  }
+  auto dict = obj->as<PyDictionary>();
+  return CreatePyInteger(dict->Size());
 }
 
 PyObjPtr DictionaryKlass::contains(const PyObjPtr& obj, const PyObjPtr& key) {

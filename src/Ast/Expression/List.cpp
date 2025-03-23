@@ -7,7 +7,7 @@ ListKlass::emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) {
   auto list = obj->as<List>();
   auto elements = list->Elements();
   Object::ForEach(
-    elements,
+    elements->reversed(),
     [&codeList](const Object::PyObjPtr& element, Index, const Object::PyObjPtr&) {
       element->as<INode>()->emit(codeList);
     }

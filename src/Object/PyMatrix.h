@@ -81,6 +81,7 @@ class MatrixKlass : public Klass {
   ) override;
 
   PyObjPtr getitem(const PyObjPtr& obj, const PyObjPtr& key) override;
+  PyObjPtr pow(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 };
 
 class PyMatrix;

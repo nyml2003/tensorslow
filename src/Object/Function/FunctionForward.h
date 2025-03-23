@@ -19,7 +19,7 @@ void expand_indices(std::index_sequence<I...>, F&& func, Args&&... ) {
 
 template <typename T, typename... Args>
 PyObjPtr ForwardFunction(const PyObjPtr& args, PyObjPtr (T::*func)(Args...)) {
-  static_assert(std::is_base_of<Klass, T>::value, "T must inherit from Klass");
+  static_assert(std::is_base_of<Klass, T>::value, "T must core_class_inherit from Klass");
 
   if (!args->is<PyList>()) {
     throw std::runtime_error("ForwardFunction expects a list as input");

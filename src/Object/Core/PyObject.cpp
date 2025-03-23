@@ -9,7 +9,7 @@
 #include "Object/Function/PyNativeFunction.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
-
+#include "Runtime/Interpreter.h"
 
 namespace torchlight::Object {
 
@@ -75,6 +75,16 @@ bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 
 bool operator!=(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return !(lhs == rhs);
+}
+
+bool operator<(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  auto ltFunc = lhs->getattr(CreatePyString("__lt__")->as<PyString>());
+  if (ltFunc != nullptr) {
+    return Runtime::Interpreter::Eval(ltFunc, CreatePyList({rhs})->as<PyList>())
+      ->as<PyBoolean>()
+      ->Value();
+  }
+  throw std::runtime_error("TypeError: '<' not supported between instances");
 }
 
 }  // namespace torchlight::Object

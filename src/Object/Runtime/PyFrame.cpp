@@ -24,9 +24,9 @@ namespace torchlight::Object {
 
 PyFrame::PyFrame(
   PyCodePtr code,
-  PyDictPtr locals,      // 传入的是 PyObjPtr
-  PyDictPtr globals,     // 传入的是 PyObjPtr
-  PyListPtr fastLocals,  // 传入的是 PyObjPtr
+  PyDictPtr locals,
+  PyDictPtr globals,
+  PyListPtr fastLocals,
   PyFramePtr caller
 )
   : PyObject(FrameKlass::Self()),
@@ -627,15 +627,9 @@ PyObjPtr PyFrame::Eval() {
       }
       case ByteCode::CALL_FUNCTION: {
         auto argumentCount = std::get<Index>(inst->Operand());
-        Collections::List<PyObjPtr> arguments(argumentCount);
-        for (Index i = 0; i < argumentCount; i++) {
-          arguments.Push(stack.Pop());
-        }
-        arguments.Reverse();
+        auto argList = CreatePyList(stack.Top(argumentCount))->as<PyList>();
         auto func = stack.Pop();
-        auto result = Runtime::Interpreter::Eval(
-          func, CreatePyList(arguments)->as<PyList>()
-        );
+        auto result = Runtime::Interpreter::Eval(func, argList);
         stack.Push(result);
         NextProgramCounter();
         break;
@@ -649,9 +643,7 @@ PyObjPtr PyFrame::Eval() {
           found = true;
           value = globals->getitem(key);
         }
-        if (!found &&
-            IsTrue(Runtime::Interpreter::Instance().Builtins()->contains(key)
-            )) {
+        if (!found && IsTrue(Runtime::Interpreter::Instance().Builtins()->contains(key))) {
           found = true;
           value = Runtime::Interpreter::Instance().Builtins()->getitem(key);
         }
@@ -689,9 +681,7 @@ PyObjPtr PyFrame::Eval() {
           found = true;
           value = globals->getitem(key);
         }
-        if (!found &&
-            IsTrue(Runtime::Interpreter::Instance().Builtins()->contains(key)
-            )) {
+        if (!found && IsTrue(Runtime::Interpreter::Instance().Builtins()->contains(key))) {
           found = true;
           value = Runtime::Interpreter::Instance().Builtins()->getitem(key);
         }
@@ -730,7 +720,6 @@ PyObjPtr PyFrame::Eval() {
         for (Index i = 0; i < size; i++) {
           elements.Push(stack.Pop());
         }
-        elements.Reverse();
         auto list = CreatePyList(elements);
         stack.Push(list);
         NextProgramCounter();
