@@ -7,7 +7,7 @@
 
 
 #include <mutex>
-
+#include <unordered_map>
 namespace torchlight::Object {
 
 class StringKlass : public Klass {

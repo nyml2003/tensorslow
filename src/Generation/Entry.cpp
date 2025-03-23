@@ -14,7 +14,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-
+#include <Windows.h>
 namespace fs = std::filesystem;
 using antlr4::ANTLRInputStream;
 using antlr4::CommonTokenStream;
@@ -36,7 +36,7 @@ void DefineOption() {
       bool is_regular = std::filesystem::is_regular_file(value);
       return file_exists && is_py && is_regular;
     },
-    "/app/test/dev/dev.py", "单文件模式，指定要解析的文件"
+    "D:\\code\\project\\torchlight\\test\\dev\\dev.py", "单文件模式，指定要解析的文件"
   ));
   schema.Add(Parameter(
     "dir",
@@ -47,7 +47,7 @@ void DefineOption() {
       bool is_dir = std::filesystem::is_directory(value);
       return dir_exists && is_dir;
     },
-    "/app/test/integration",
+    "D:\\code\\project\\torchlight\\test\\integration",
     "目录模式，指定要解析的目录, "
     "认为目录下有且仅有包，将每个包下的所有.py文件都解析"
   ));
@@ -69,7 +69,15 @@ void DefineOption() {
   ));
   ArgsHelper::SetSchema(schema);
 }
+void print_stack_trace() {
+  const int max_frames = 64;
+  void* array[max_frames];
+  int count = CaptureStackBackTrace(1, max_frames, array, nullptr);
 
+  for (int i = 0; i < count; i++) {
+    std::cerr << "  0x" << std::hex << array[i] << std::endl;
+  }
+}
 void InitPyObj() {
   torchlight::Object::BasicKlassLoad();
 }
@@ -97,7 +105,13 @@ void ParseAndGenerate(const fs::path& filePath) {
 
   Generator visitor(torchlight::Object::CreatePyString(filePath.string())
                       ->as<torchlight::Object::PyString>());
-  visitor.visit(tree);
+  try {
+    visitor.visit(tree);
+  } catch (const std::bad_any_cast&) {
+    std::cerr << "Bad any_cast occurred!" << std::endl;
+    print_stack_trace();
+    return ;
+  }
   visitor.Visit();
   visitor.Emit();
   auto code = visitor.Code();
@@ -108,7 +122,7 @@ void ParseAndGenerate(const fs::path& filePath) {
     code->_serialize_()->as<torchlight::Object::PyBytes>()->Value();
   auto writePath = fs::path(filePath).replace_extension(".pyc");
   torchlight::Collections::Write(
-    data, torchlight::Collections::CreateStringWithCString(writePath.c_str())
+    data, torchlight::Collections::CreateStringWithCString(writePath.string().c_str())
   );
 }
 
@@ -116,7 +130,7 @@ int main(int argc, char** argv) {
   DefineOption();
   ArgsHelper::Instance().Accept(argc, argv);
   InitPyObj();
-
+  
   if (ArgsHelper::Instance().Has("file")) {
     ParseAndGenerate(ArgsHelper::Instance().Get("file"));
     return 0;

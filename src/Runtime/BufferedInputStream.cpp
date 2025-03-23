@@ -1,12 +1,13 @@
 #include "Runtime/BufferedInputStream.h"
 #include <optional>
 #include <stdexcept>
-
+#include <iostream>
 
 namespace torchlight::Runtime {
 
 BufferedInputStream::BufferedInputStream(const char* filename) {
   file.open(filename, std::ios::binary);
+
   if (!file.is_open()) {
     throw std::runtime_error("Error opening file");
   }

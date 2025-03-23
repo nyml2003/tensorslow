@@ -21,7 +21,7 @@ void DefineOption() {
       bool is_regular = std::filesystem::is_regular_file(value);
       return file_exists && is_py && is_regular;
     },
-    "/app/test/dev/dev.pyc", "单文件模式，指定要解析的文件"
+    "D:\\code\\project\\torchlight\\test\\dev\\dev.pyc", "单文件模式，指定要解析的文件"
   ));
   schema.Add(Parameter(
     "dir",

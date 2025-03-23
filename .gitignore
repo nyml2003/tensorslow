@@ -1,6 +1,7 @@
 /cmake-*
 /.idea
 /build
+/release
 /.cache
 /lib/*.so
 /bin

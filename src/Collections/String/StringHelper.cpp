@@ -103,7 +103,7 @@ String ToString(uint64_t value) {
 }
 String ToString(int64_t value) {
   char buffer[32];
-  snprintf(buffer, sizeof(buffer), "%ld", value);
+  snprintf(buffer, sizeof(buffer), "%lld", value);
   return CreateStringWithCString(buffer);
 }
 String ToString(uint32_t value) {

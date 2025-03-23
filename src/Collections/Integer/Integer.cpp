@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include "Collections/Integer/Decimal.h"
 #include "Collections/Integer/DecimalHelper.h"
+#include <array>
 #include "Collections/Integer/IntegerHelper.h"
 #include "Collections/Iterator.h"
 #include "Collections/String/StringHelper.h"
@@ -28,7 +29,7 @@ String Integer::ToHexString() const {
   List<Unicode> str;
   for (Index i = 0; i < parts.Size(); i++) {
     uint32_t item = parts.Get(i);
-    std::array<uint8_t, 4> buffer = {0};
+    std::array<uint8_t, 4> buffer = {0,0,0,0};
     buffer[0] = (item & 0x0000F000) >> 12;
     buffer[1] = (item & 0x00000F00) >> 8;
     buffer[2] = (item & 0x000000F0) >> 4;
