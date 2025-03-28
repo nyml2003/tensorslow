@@ -9,7 +9,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # 把warning当作error
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
-
 # 设置编译器选项以生成覆盖率数据
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
 # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
@@ -17,8 +16,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
 
 # 设置调试选项
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -pg")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
 set(CMAKE_CXX_FLAGS_MINSIZEREL "-O3 -DNDEBUG")
-set(CMAKE_CXX_FLAGS_DEBUG "-gdwarf-4")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -gdwarf-4 -DNDEBUG")
 
 # 生成 compile_commands.json 文件

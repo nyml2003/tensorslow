@@ -31,40 +31,39 @@ class Identifier : public INode {
   explicit Identifier(const Object::PyObjPtr& _name, const INodePtr& parent)
     : INode(IdentifierKlass::Self(), parent),
       name(_name->as<Object::PyString>()) {
-    builtins = Object::CreatePyList({
-                                      Object::CreatePyString("print"),
-                                      Object::CreatePyString("reshape"),
-                                      Object::CreatePyString("len"),
-                                      Object::CreatePyString("__name__"),
-                                      Object::CreatePyString("randint"),
-                                      Object::CreatePyString("sleep"),
-                                      Object::CreatePyString("input"),
-                                      Object::CreatePyString("next"),
-                                      Object::CreatePyString("int"),
-                                      Object::CreatePyString("float"),
-                                      Object::CreatePyString("str"),
-                                      Object::CreatePyString("list"),
-                                      Object::CreatePyString("object"),
-                                      Object::CreatePyString("type"),
-                                      Object::CreatePyString("dict"),
-                                      Object::CreatePyString("slice"),
-                                      Object::CreatePyString("repr"),
-                                      Object::CreatePyString("bool"),
-                                      Object::CreatePyString("Array"),
-                                      Object::CreatePyString("Eye"),
-                                      Object::CreatePyString("Zeros"),
-                                      Object::CreatePyString("Ones"),
-                                      Object::CreatePyString("Diag"),
-                                      Object::CreatePyString("Transpose"),
-                                      Object::CreatePyString("Shape"),
-                                      Object::CreatePyString("Where"),
-                                      Object::CreatePyString("Concatenate"),
-                                      Object::CreatePyString("Ravel"),
-                                      Object::CreatePyString("Normal"),
-                                      Object::CreatePyString("Shuffle"),
-                                      Object::CreatePyString("id"),
-                                      Object::CreatePyString("iter")
-                                    })
+    builtins = Object::CreatePyList({Object::CreatePyString("print"),
+                                     Object::CreatePyString("reshape"),
+                                     Object::CreatePyString("Reshape"),
+                                     Object::CreatePyString("len"),
+                                     Object::CreatePyString("__name__"),
+                                     Object::CreatePyString("randint"),
+                                     Object::CreatePyString("sleep"),
+                                     Object::CreatePyString("input"),
+                                     Object::CreatePyString("next"),
+                                     Object::CreatePyString("int"),
+                                     Object::CreatePyString("float"),
+                                     Object::CreatePyString("str"),
+                                     Object::CreatePyString("list"),
+                                     Object::CreatePyString("object"),
+                                     Object::CreatePyString("type"),
+                                     Object::CreatePyString("dict"),
+                                     Object::CreatePyString("slice"),
+                                     Object::CreatePyString("repr"),
+                                     Object::CreatePyString("bool"),
+                                     Object::CreatePyString("Array"),
+                                     Object::CreatePyString("Eye"),
+                                     Object::CreatePyString("Zeros"),
+                                     Object::CreatePyString("Ones"),
+                                     Object::CreatePyString("Diag"),
+                                     Object::CreatePyString("Transpose"),
+                                     Object::CreatePyString("Shape"),
+                                     Object::CreatePyString("Where"),
+                                     Object::CreatePyString("Concatenate"),
+                                     Object::CreatePyString("Ravel"),
+                                     Object::CreatePyString("Normal"),
+                                     Object::CreatePyString("Shuffle"),
+                                     Object::CreatePyString("id"),
+                                     Object::CreatePyString("iter")})
                  ->as<Object::PyList>();
   }
 
@@ -85,6 +84,22 @@ inline INodePtr
 CreateIdentifier(const Object::PyObjPtr& name, INodePtr parent) {
   return std::make_shared<Identifier>(name, parent);
 }
+
+enum class IdentifierRegistry {
+  UNREGISTERED,
+  LOCAL_VARNAME,
+  LOCAL_NAME,
+  GLOBAL_NAME,
+  BUILTIN
+};
+
+IdentifierRegistry GetIdentifierRegistry(
+  const Object::PyStrPtr& name,
+  const Object::PyCodePtr& current,
+  const Object::PyCodePtr& global,
+  const Object::PyListPtr& builtins
+);
+
 }  // namespace torchlight::Ast
 
 #endif

@@ -137,7 +137,9 @@ PyObjPtr Klass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 PyObjPtr Klass::repr(const PyObjPtr& self) {
   auto reprFunc = GetAttr(self, CreatePyString("__repr__")->as<PyString>());
   if (reprFunc != nullptr) {
-    return Runtime::Interpreter::Eval(reprFunc, CreatePyList({})->as<PyList>());
+    return Runtime::Interpreter::Eval(
+      reprFunc, CreatePyList({self})->as<PyList>()
+    );
   }
   return StringConcat(CreatePyList(
     {CreatePyString("<"),
@@ -158,9 +160,7 @@ PyObjPtr Klass::hash(const PyObjPtr& obj) {
 }
 
 PyObjPtr Klass::gt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  return Invoke(
-    lhs, CreatePyString("__gt__"), CreatePyList({rhs})->as<PyList>()
-  );
+  return Not(lhs->le(rhs));
 }
 
 PyObjPtr Klass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -170,15 +170,17 @@ PyObjPtr Klass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr Klass::lt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  return Not(lhs->ge(rhs));
+  return Invoke(
+    lhs, CreatePyString("__lt__"), CreatePyList({rhs})->as<PyList>()
+  );
 }
 
 PyObjPtr Klass::ge(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  return Or(lhs->gt(rhs), lhs->eq(rhs));
+  return Not(lhs->lt(rhs));
 }
 
 PyObjPtr Klass::le(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  return Not(lhs->gt(rhs));
+  return Or(lhs->lt(rhs), lhs->eq(rhs));
 }
 
 PyObjPtr Klass::ne(const PyObjPtr& lhs, const PyObjPtr& rhs) {

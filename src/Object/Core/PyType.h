@@ -19,6 +19,8 @@ class TypeKlass : public Klass {
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
   PyObjPtr repr(const PyObjPtr& obj) override;
+
+  PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
 };
 
 class PyType : public PyObject {

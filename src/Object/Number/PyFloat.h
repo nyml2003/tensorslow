@@ -32,6 +32,7 @@ class FloatKlass : public Klass {
   PyObjPtr hash(const PyObjPtr& obj) override;
   PyObjPtr neg(const PyObjPtr& obj) override;
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr lt(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr boolean(const PyObjPtr& obj) override;
 
   PyObjPtr _serialize_(const PyObjPtr& obj) override;

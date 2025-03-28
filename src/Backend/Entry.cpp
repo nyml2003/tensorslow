@@ -21,7 +21,8 @@ void DefineOption() {
       bool is_regular = std::filesystem::is_regular_file(value);
       return file_exists && is_py && is_regular;
     },
-    "D:\\code\\project\\torchlight\\test\\dev\\dev.pyc", "单文件模式，指定要解析的文件"
+    "D:\\code\\project\\torchlight\\test\\dev\\dev.pyc",
+    "单文件模式，指定要解析的文件"
   ));
   schema.Add(Parameter(
     "dir",
@@ -86,11 +87,11 @@ void HandleResultBegin(fs::path filename) {
   if (debug) {
     std::cout << "本次测试模式：调试模式" << std::endl;
     std::cout << "输出结果到:"
-              << (fs::path("/app/log") /
+              << (fs::path("../log") /
                   (filename.stem().replace_extension(".log")).filename())
               << std::endl;
     redirectCout.redirectToFile(
-      (fs::path("/app/log") /
+      (fs::path("../log") /
        (filename.stem().replace_extension(".log")).filename())
         .string()
     );

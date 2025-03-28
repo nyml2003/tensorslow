@@ -1,4 +1,5 @@
 #include "Ast/Identifier.h"
+#include <iostream>
 #include "Ast/ClassDef.h"
 #include "Ast/FuncDef.h"
 #include "Ast/INode.h"
@@ -16,54 +17,77 @@ Object::PyObjPtr IdentifierKlass::visit(
   auto identifier = obj->as<Identifier>();
   auto code = GetCodeFromList(codeList, identifier);
   auto name = identifier->Name();
-  // 如果当前变量是内置变量, 注册到names
-  if (identifier->Builtins()->Contains(name)) {
-    code->RegisterName(name);
-    return Object::CreatePyNone();
+  auto scope = code->Scope();
+  auto registry = IdentifierRegistry::UNREGISTERED;
+  auto mode = identifier->Mode();
+  if (scope == Object::Scope::GLOBAL) {
+    bool found = false;
+    if (code->Names()->Contains(name)) {
+      registry = IdentifierRegistry::GLOBAL_NAME;
+      found = true;
+    }
+    if (!found && identifier->Builtins()->Contains(name)) {
+      registry = IdentifierRegistry::BUILTIN;
+    }
+  } else {
+    auto context = identifier->Parent();
+    INodePtr module = nullptr;
+    if (context->is<ClassDef>()) {
+      module = context->as<ClassDef>()->Parents()->GetItem(0)->as<INode>();
+    }
+    if (context->is<FuncDef>()) {
+      module = context->as<FuncDef>()->Parents()->GetItem(0)->as<INode>();
+    }
+    auto moduleCode = GetCodeFromList(codeList, module);
+    registry =
+      GetIdentifierRegistry(name, code, moduleCode, identifier->Builtins());
   }
-  // 如果当前变量在module内，注册到names
-  if (code->Scope() == Object::Scope::GLOBAL) {
-    code->RegisterName(name);
-    return Object::CreatePyNone();
-  }
-  // 如果当前变量在类定义和函数定义内，注册需要分类讨论
-  if (code->Scope() == Object::Scope::LOCAL) {
-    if (identifier->Mode() == STOREORLOAD::STORE) {
-      // 当前是STORE模式，一定是varName，当前不支持global, nolocal, 闭包
-      if (!code->VarNames()->Contains(name)) {
-        code->RegisterVarName(name);
-      }
+  if (mode == STOREORLOAD::STORE && registry == IdentifierRegistry::UNREGISTERED) {
+    if (scope == Object::Scope::GLOBAL) {
+      code->RegisterName(name);
+      return Object::CreatePyNone();
+    } else if (scope == Object::Scope::LOCAL) {
+      code->RegisterVarName(name);
       return Object::CreatePyNone();
     }
-    if (identifier->Mode() == STOREORLOAD::LOAD) {
-      // 当前是LOAD模式，注册到name吧，可能是外部变量
-      if (code->VarNames()->Contains(name)) {
-        return Object::CreatePyNone();
-      }
-      if (code->Names()->Contains(name)) {
-        return Object::CreatePyNone();
-      }
-      // 获取module, 一般是parents的第一个
-      auto scope = identifier->Parent();
-      INodePtr module = nullptr;
-      if (scope->is<ClassDef>()) {
-        module = scope->as<ClassDef>()->Parents()->GetItem(0)->as<INode>();
-      }
-      if (scope->is<FuncDef>()) {
-        module = scope->as<FuncDef>()->Parents()->GetItem(0)->as<INode>();
-      }
-      auto moduleCode = GetCodeFromList(codeList, module);
-      if (!moduleCode->Names()->Contains(name)) {
-        throw std::runtime_error(
-          "NameError: name '" + name->ToCppString() + "' is not defined"
-        );
-      }
-      // 说明module内有这个名字，注册到code的names
-      if (!code->Names()->Contains(name)) {
-        code->RegisterName(name);
-      }
-    }
   }
+  if (mode == STOREORLOAD::STORE && registry == IdentifierRegistry::BUILTIN) {
+    throw std::runtime_error(
+      "Cannot store builtin variable" + name->ToCppString()
+    );
+  }
+  if (mode == STOREORLOAD::STORE && registry == IdentifierRegistry::GLOBAL_NAME) {
+    code->RegisterName(name);
+    return Object::CreatePyNone();
+  }
+  if (mode == STOREORLOAD::STORE && registry == IdentifierRegistry::LOCAL_VARNAME) {
+    code->RegisterVarName(name);
+    return Object::CreatePyNone();
+  }
+  if (mode == STOREORLOAD::LOAD && registry == IdentifierRegistry::BUILTIN) {
+    code->RegisterName(name);
+    return Object::CreatePyNone();
+  }
+  if (mode == STOREORLOAD::LOAD && registry == IdentifierRegistry::GLOBAL_NAME) {
+    code->RegisterName(name);
+    return Object::CreatePyNone();
+  }
+  if (mode == STOREORLOAD::LOAD && registry == IdentifierRegistry::LOCAL_NAME) {
+    code->RegisterName(name);
+    return Object::CreatePyNone();
+  }
+  if (mode == STOREORLOAD::LOAD && registry == IdentifierRegistry::LOCAL_VARNAME) {
+    code->RegisterVarName(name);
+    return Object::CreatePyNone();
+  }
+  if (mode == STOREORLOAD::LOAD && registry == IdentifierRegistry::UNREGISTERED) {
+    throw std::runtime_error(
+      "NameError: name '" + name->ToCppString() + "' is not defined"
+    );
+  }
+  throw std::runtime_error(
+    "NameError: name '" + name->ToCppString() + "' is not defined"
+  );
   return Object::CreatePyNone();
 }
 
@@ -74,81 +98,106 @@ Object::PyObjPtr IdentifierKlass::emit(
   auto identifier = obj->as<Identifier>();
   auto code = GetCodeFromList(codeList, identifier);
   auto name = identifier->Name();
-  if (code->Scope() == Object::Scope::GLOBAL) {
+  auto scope = code->Scope();
+  auto mode = identifier->Mode();
+  if (scope == Object::Scope::GLOBAL) {
     // 当前是GLOBAL
-    if (identifier->Mode() == STOREORLOAD::STORE) {
+    if (mode == STOREORLOAD::STORE) {
       code->StoreName(name);
     }
-    if (identifier->Mode() == STOREORLOAD::LOAD) {
+    if (mode == STOREORLOAD::LOAD) {
       code->LoadName(name);
     }
     return Object::CreatePyNone();
   }
-  if (code->Scope() == Object::Scope::LOCAL) {
-    auto scope = identifier->Parent();
-    // 获取module, 一般是parents的第一个
+
+  if (scope == Object::Scope::LOCAL) {
+    auto context = identifier->Parent();
     INodePtr module = nullptr;
-    if (scope->is<ClassDef>()) {
-      module = scope->as<ClassDef>()->Parents()->GetItem(0)->as<INode>();
+    if (context->is<ClassDef>()) {
+      module = context->as<ClassDef>()->Parents()->GetItem(0)->as<INode>();
     }
-    if (scope->is<FuncDef>()) {
-      module = scope->as<FuncDef>()->Parents()->GetItem(0)->as<INode>();
+    if (context->is<FuncDef>()) {
+      module = context->as<FuncDef>()->Parents()->GetItem(0)->as<INode>();
     }
     auto moduleCode = GetCodeFromList(codeList, module);
-    auto name = identifier->Name();
-    try {
-      if (identifier->Builtins()->Contains(name)) {
-        if (identifier->Mode() == STOREORLOAD::STORE) {
-          throw std::runtime_error("Cannot store global variable");
-        }
-        if (identifier->Mode() == STOREORLOAD::LOAD) {
-          code->LoadGlobal(name);
-          return Object::CreatePyNone();
-        }
-      }
-      // LEGB
-      if (Object::IsTrue(code->VarNames()->contains(name))) {
-        // 如果是varname
-        if (identifier->Mode() == STOREORLOAD::STORE) {
-          code->StoreFast(name);
-        }
-        if (identifier->Mode() == STOREORLOAD::LOAD) {
-          code->LoadFast(name);
-        }
-        return Object::CreatePyNone();
-      }
-      if (Object::IsTrue(moduleCode->Names()->contains(name))) {
-        // 如果是module
-        if (identifier->Mode() == STOREORLOAD::STORE) {
-          throw std::runtime_error("Cannot store global variable");
-        }
-        if (identifier->Mode() == STOREORLOAD::LOAD) {
-          code->LoadGlobal(name);
-        }
-        return Object::CreatePyNone();
-      }
-      if (Object::IsTrue(code->Names()->contains(name))) {
-        // 如果是names
-        if (identifier->Mode() == STOREORLOAD::STORE) {
-          code->StoreName(name);
-        }
-        if (identifier->Mode() == STOREORLOAD::LOAD) {
-          code->LoadName(name);
-        }
-        return Object::CreatePyNone();
-      }
+    auto registry =
+      GetIdentifierRegistry(name, code, moduleCode, identifier->Builtins());
 
-    } catch (const std::exception& e) {
-      auto name = identifier->Name();
-      Function::DebugPrint(name);
-      Function::DebugPrint(moduleCode->Names());
-      Function::DebugPrint(moduleCode->VarNames());
-      Function::DebugPrint(code->Names());
-      Function::DebugPrint(code->VarNames());
-      throw(e);
+    if (registry == IdentifierRegistry::LOCAL_VARNAME &&
+            mode == STOREORLOAD::STORE && code->VarNames()->Contains(name)) {
+      code->StoreFast(name);
+      return Object::CreatePyNone();
     }
+    if (registry == IdentifierRegistry::LOCAL_NAME &&
+            mode == STOREORLOAD::STORE && code->Names()->Contains(name)) {
+      code->StoreName(name);
+      return Object::CreatePyNone();
+    }
+    if (registry == IdentifierRegistry::GLOBAL_NAME &&
+                mode == STOREORLOAD::STORE && code->Names()->Contains(name)) {
+      code->StoreName(name);
+      return Object::CreatePyNone();
+    }
+    if (registry == IdentifierRegistry::BUILTIN && mode == STOREORLOAD::LOAD) {
+      code->LoadName(name);
+      return Object::CreatePyNone();
+    }
+    if (registry == IdentifierRegistry::LOCAL_VARNAME &&
+                mode == STOREORLOAD::LOAD && code->VarNames()->Contains(name)) {
+      code->LoadFast(name);
+      return Object::CreatePyNone();
+    }
+    if (registry == IdentifierRegistry::LOCAL_NAME &&
+                        mode == STOREORLOAD::LOAD && code->Names()->Contains(name)) {
+      code->LoadName(name);
+      return Object::CreatePyNone();
+    }
+    if (registry == IdentifierRegistry::GLOBAL_NAME &&
+                    mode == STOREORLOAD::LOAD && moduleCode->Names()->Contains(name)) {
+      code->LoadName(name);
+      return Object::CreatePyNone();
+    }
+    std::cout << "Registry: " << static_cast<int>(registry) << std::endl;
+    std::cout << "Name: " << name->ToCppString() << std::endl;
+    std::cout << "Builtins: " << std::flush;
+    identifier->Builtins()->str()->as<Object::PyString>()->PrintLine();
+    std::cout << "Scope: " << std::flush;
+    Object::PrintCode(code);
+    std::cout << "Module: " << std::flush;
+    Object::PrintCode(
+      codeList->as<Object::PyList>()->GetItem(0)->as<Object::PyCode>()
+    );
+
+    throw std::runtime_error(
+      "NameError: name '" + name->ToCppString() + "' is not defined"
+    );
   }
   return Object::CreatePyNone();
+}
+
+IdentifierRegistry GetIdentifierRegistry(
+  const Object::PyStrPtr& name,
+  const Object::PyCodePtr& current,
+  const Object::PyCodePtr& global,
+  const Object::PyListPtr& builtins
+) {
+  if (current->VarNames()->Contains(name)) {
+    return IdentifierRegistry::
+      LOCAL_VARNAME;  // 说明已经在local的varname里面注册了，说明是fast变量
+  }
+  if (current->Names()->Contains(name)) {
+    return IdentifierRegistry::
+      LOCAL_NAME;  // 说明已经在local的names里面注册了，说明是name变量
+  }
+  if (global->Names()->Contains(name)) {
+    return IdentifierRegistry::
+      GLOBAL_NAME;  // 说明已经在global的names里面注册了，说明是name变量
+  }
+  if (builtins->Contains(name)) {
+    return IdentifierRegistry::BUILTIN;
+  }
+  return IdentifierRegistry::UNREGISTERED;
 }
 
 }  // namespace torchlight::Ast

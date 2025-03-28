@@ -1,4 +1,5 @@
 #include "Object/PyMatrix.h"
+#include <iostream>
 #include "Collections/Matrix.h"
 #include "Function/ObjectHelper.h"
 #include "Object/Container/PyList.h"
@@ -173,9 +174,7 @@ PyObjPtr MatrixKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
       if (col->GetSign() == Collections::Integer::IntSign::Negative) {
         colValue = matrixCol + col->ToI64();
       }
-      return CreatePyMatrix(
-        Collections::Matrix(1, 1, {matrix->At(rowValue, colValue)})
-      );
+      return CreatePyFloat(matrix->At(rowValue, colValue));
     }
     if (keyList->GetItem(0)->is<PySlice>()) {
       // a[rowStart:rowEnd,colStart:colEnd]
@@ -215,26 +214,34 @@ PyObjPtr MatrixKlass::setitem(
   if (!obj->is<PyMatrix>()) {
     throw std::runtime_error("MatrixKlass::setitem(): obj is not a matrix");
   }
-  // a[rowStart:rowStop,colStart:colStop] = matrix
   if (!key->is<PyList>()) {
     throw std::runtime_error("MatrixKlass::setitem(): key is not a list");
   }
-  // TODO a[0,0] = 0的情况
-  if (!value->is<PyMatrix>()) {
-    throw std::runtime_error("MatrixKlass::setitem(): value is not a matrix");
-  }
   auto matrix = obj->as<PyMatrix>();
   auto keyList = key->as<PyList>();
-  auto other = value->as<PyMatrix>();
-  auto rowSlice = keyList->GetItem(0)->as<PySlice>();
-  rowSlice->BindLength(matrix->Shape()->GetItem(0)->as<PyInteger>()->ToU64());
-  auto colSlice = keyList->GetItem(1)->as<PySlice>();
-  colSlice->BindLength(matrix->Shape()->GetItem(1)->as<PyInteger>()->ToU64());
-  auto rowStart = rowSlice->GetStart()->as<PyInteger>()->ToU64();
-  auto rowStop = rowSlice->GetStop()->as<PyInteger>()->ToU64();
-  auto colStart = colSlice->GetStart()->as<PyInteger>()->ToU64();
-  auto colStop = colSlice->GetStop()->as<PyInteger>()->ToU64();
-  matrix->SetSlice(rowStart, colStart, rowStop, colStop, other);
+  // a[rowStart:rowStop,colStart:colStop] = matrix
+  if (value->is<PyMatrix>()) {
+    auto other = value->as<PyMatrix>();
+    auto rowSlice = keyList->GetItem(0)->as<PySlice>();
+    rowSlice->BindLength(matrix->Shape()->GetItem(0)->as<PyInteger>()->ToU64());
+    auto colSlice = keyList->GetItem(1)->as<PySlice>();
+    colSlice->BindLength(matrix->Shape()->GetItem(1)->as<PyInteger>()->ToU64());
+    auto rowStart = rowSlice->GetStart()->as<PyInteger>()->ToU64();
+    auto rowStop = rowSlice->GetStop()->as<PyInteger>()->ToU64();
+    auto colStart = colSlice->GetStart()->as<PyInteger>()->ToU64();
+    auto colStop = colSlice->GetStop()->as<PyInteger>()->ToU64();
+    matrix->SetSlice(rowStart, colStart, rowStop, colStop, other);
+    return CreatePyNone();
+  }
+  // a[row,col] = float
+  if (value->is<PyFloat>()) {
+    auto row = keyList->GetItem(0)->as<PyInteger>()->ToU64();
+    auto col = keyList->GetItem(1)->as<PyInteger>()->ToU64();
+    matrix->Set(row, col, value->as<PyFloat>()->Value());
+    return CreatePyNone();
+  }
+  throw std::runtime_error("MatrixKlass::setitem(): value type is not supported"
+  );
   return CreatePyNone();
 }
 

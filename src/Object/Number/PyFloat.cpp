@@ -10,7 +10,6 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
-
 namespace torchlight::Object {
 
 PyObjPtr FloatKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {
@@ -135,6 +134,15 @@ PyObjPtr FloatKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   }
   return CreatePyBoolean(
     lhs->as<PyFloat>()->Value() == rhs->as<PyFloat>()->Value()
+  );
+}
+
+PyObjPtr FloatKlass::lt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+    throw std::runtime_error("PyFloat::lt(): lhs or rhs is not a float");
+  }
+  return CreatePyBoolean(
+    lhs->as<PyFloat>()->Value() < rhs->as<PyFloat>()->Value()
   );
 }
 

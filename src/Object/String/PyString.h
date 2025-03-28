@@ -5,7 +5,6 @@
 #include "Object/Core/PyObject.h"
 #include "Object/Object.h"
 
-
 #include <mutex>
 #include <unordered_map>
 namespace torchlight::Object {

@@ -36,7 +36,7 @@ class IntegerKlass : public Klass {
   PyObjPtr lshift(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr rshift(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr mod(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-  PyObjPtr gt(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+  PyObjPtr lt(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr repr(const PyObjPtr& obj) override;
   PyObjPtr str(const PyObjPtr& obj) override;

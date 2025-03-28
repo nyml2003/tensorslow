@@ -8,6 +8,7 @@
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"
+#include "Object/Core/PyType.h"
 #include "Object/Function/PyFunction.h"
 #include "Object/Iterator/Iterator.h"
 #include "Object/Iterator/PyGenerator.h"
@@ -710,6 +711,25 @@ PyObjPtr PyFrame::Eval() {
         auto key = Code()->Names()->GetItem(index);
         auto obj = stack.Pop();
         auto value = obj->getattr(key);
+        if (key == nullptr) {
+          std::cout << "object attributes: " << std::endl;
+          obj->Attributes()->str()->as<PyString>()->PrintLine();
+          std::cout << "class attributes: " << std::endl;
+          obj->Klass()->Attributes()->str()->as<PyString>()->PrintLine();
+          std::cout << "mro: " << std::endl;
+          obj->Klass()->Mro()->str()->as<PyString>()->PrintLine();
+          for (Index i = 0; i < obj->Klass()->Mro()->Length(); i++) {
+            auto mro = obj->Klass()->Mro()->GetItem(i)->as<PyType>();
+            mro->Owner()->Name()->str()->as<PyString>()->PrintLine();
+            mro->str()->as<PyString>()->PrintLine();
+          }
+          throw std::runtime_error(
+            "AttributeError: '" +
+            obj->Klass()->Name()->as<PyString>()->ToCppString() +
+            "' object has no attribute '" + key->as<PyString>()->ToCppString() +
+            "'"
+          );
+        }
         stack.Push(value);
         NextProgramCounter();
         break;

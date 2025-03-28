@@ -163,6 +163,7 @@ class PyMatrix : public PyObject {
     );
   }
   double At(Index row, Index col) const { return matrix.At(row, col); }
+  void Set(Index row, Index col, double value) { matrix.Set(row, col, value); }
 
   Collections::List<double> Ravel() const { return matrix.Data(); }
 };

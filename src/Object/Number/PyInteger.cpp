@@ -92,7 +92,7 @@ PyObjPtr IntegerKlass::truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   }
   auto left = static_cast<double>(lhs->as<PyInteger>()->ToU64());
   auto right = static_cast<double>(rhs->as<PyInteger>()->ToU64());
-  return CreatePyFloat(left / right);
+  return CreatePyFloat(static_cast<double>(left) / static_cast<double>(right));
 }
 
 PyObjPtr IntegerKlass::mod(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -204,13 +204,13 @@ PyObjPtr IntegerKlass::str(const PyObjPtr& obj) {
   return repr(obj);
 }
 
-PyObjPtr IntegerKlass::gt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+PyObjPtr IntegerKlass::lt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (!lhs->is<PyInteger>() || !rhs->is<PyInteger>()) {
     throw std::runtime_error("PyInteger::gt(): lhs or rhs is not an integer");
   }
   auto left = lhs->as<PyInteger>();
   auto right = rhs->as<PyInteger>();
-  return CreatePyBoolean(left->value.GreaterThan(right->value));
+  return CreatePyBoolean(left->value.LessThan(right->value));
 }
 
 PyObjPtr IntegerKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
