@@ -9,12 +9,12 @@
 #include "Python3Parser.h"
 #include "Tools/Tools.h"
 
-#include <antlr4-runtime.h>
+#include <Windows.h>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <Windows.h>
+#include "antlr4-runtime.h"
 namespace fs = std::filesystem;
 using antlr4::ANTLRInputStream;
 using antlr4::CommonTokenStream;
@@ -36,7 +36,8 @@ void DefineOption() {
       bool is_regular = std::filesystem::is_regular_file(value);
       return file_exists && is_py && is_regular;
     },
-    "D:\\code\\project\\torchlight\\test\\dev\\dev.py", "单文件模式，指定要解析的文件"
+    "D:\\code\\project\\torchlight\\test\\dev\\dev.py",
+    "单文件模式，指定要解析的文件"
   ));
   schema.Add(Parameter(
     "dir",
@@ -110,7 +111,7 @@ void ParseAndGenerate(const fs::path& filePath) {
   } catch (const std::bad_any_cast&) {
     std::cerr << "Bad any_cast occurred!" << std::endl;
     print_stack_trace();
-    return ;
+    return;
   }
   visitor.Visit();
   visitor.Emit();
@@ -122,7 +123,8 @@ void ParseAndGenerate(const fs::path& filePath) {
     code->_serialize_()->as<torchlight::Object::PyBytes>()->Value();
   auto writePath = fs::path(filePath).replace_extension(".pyc");
   torchlight::Collections::Write(
-    data, torchlight::Collections::CreateStringWithCString(writePath.string().c_str())
+    data,
+    torchlight::Collections::CreateStringWithCString(writePath.string().c_str())
   );
 }
 
@@ -130,7 +132,7 @@ int main(int argc, char** argv) {
   DefineOption();
   ArgsHelper::Instance().Accept(argc, argv);
   InitPyObj();
-  
+
   if (ArgsHelper::Instance().Has("file")) {
     ParseAndGenerate(ArgsHelper::Instance().Get("file"));
     return 0;

@@ -4,7 +4,7 @@
 #include "Ast/INode.h"
 #include "Python3ParserBaseVisitor.h"
 
-#include <antlr4-runtime.h>
+#include "antlr4-runtime.h"
 
 namespace torchlight::Generation {
 

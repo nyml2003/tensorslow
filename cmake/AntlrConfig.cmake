@@ -1,0 +1,8 @@
+set(torchlight_antlr4_grammar_dir ${torchlight_dir}/grammar)
+set(torchlight_antlr4_generated_dir ${torchlight_dir}/generated)
+set(ANTLR_SOURCE_DIR ${torchlight_dir}/antlr-runtime)
+add_subdirectory(${ANTLR_SOURCE_DIR} ${CMAKE_BINARY_DIR}/antlr4_build)
+include_directories(${torchlight_antlr4_generated_dir})
+include_directories(${ANTLR_SOURCE_DIR}/src)
+file(GLOB_RECURSE torchlight_antlr4_generated_files ${torchlight_antlr4_generated_dir}/*.cpp ${torchlight_antlr4_generated_dir}/*.h)
+set(torchlight_frontend_files ${torchlight_frontend_files} ${torchlight_antlr4_generated_files})
