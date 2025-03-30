@@ -18,6 +18,8 @@ class PyDictionary;
 using PyDictPtr = std::shared_ptr<PyDictionary>;
 class PyType;
 using PyTypePtr = std::shared_ptr<PyType>;
+class PyInteger;
+using PyIntPtr = std::shared_ptr<PyInteger>;
 
 }  // namespace torchlight::Object
 

@@ -149,9 +149,9 @@ PyObjPtr DictionaryKlass::contains(const PyObjPtr& obj, const PyObjPtr& key) {
 }
 
 bool KeyCompare(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  auto leftHash = lhs->hash()->as<PyInteger>();
-  auto rightHash = rhs->hash()->as<PyInteger>();
-  return leftHash->LessThan(rightHash);
+  auto leftHash = lhs->hash()->as<PyInteger>()->ToU64();
+  auto rightHash = rhs->hash()->as<PyInteger>()->ToU64();
+  return leftHash < rightHash;
 }
 
 }  // namespace torchlight::Object

@@ -144,6 +144,9 @@ PyObjPtr StringKlass::hash(const PyObjPtr& obj) {
     throw std::runtime_error("StringKlass::hash(): obj is not a string");
   }
   auto string = obj->as<PyString>();
+  if (string->hashValue != nullptr) {
+    return string->hashValue;
+  }
   return CreatePyInteger(std::hash<std::string>{}(string->ToCppString()));
 }
 
@@ -169,7 +172,7 @@ PyStrPtr PyString::GetItem(Index index) const {
     throw std::runtime_error("PyString::GetItem(): index out of range");
   }
   return CreatePyString(
-           Collections::String(Collections::List<Unicode>(1, value[index]))
+    Collections::String(Collections::List<Unicode>(1, value[index]))
   )
     ->as<PyString>();
 }
@@ -181,7 +184,7 @@ PyStrPtr PyString::Join(const PyObjPtr& iterable) {
       result = result->Add(item->as<PyString>());
     } else {
       result = result->Add(CreatePyString(value)->as<PyString>())
-                 ->Add(item->as<PyString>());
+        ->Add(item->as<PyString>());
     }
   });
   return result;

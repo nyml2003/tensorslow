@@ -37,6 +37,7 @@ class PyString : public PyObject {
 
  private:
   Collections::String value;
+  PyIntPtr hashValue = nullptr;
   // 缩进深度
   static Index indent;
   static std::unordered_map<Collections::String, PyObjPtr> stringPool;
