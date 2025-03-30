@@ -17,7 +17,7 @@ Object::PyObjPtr IdentifierKlass::visit(
   auto identifier = obj->as<Identifier>();
   auto code = GetCodeFromList(codeList, identifier);
   auto name = identifier->Name();
-  auto scope = code->Scope();
+  auto scope = code->GetScope();
   auto registry = IdentifierRegistry::UNREGISTERED;
   auto mode = identifier->Mode();
   if (scope == Object::Scope::GLOBAL) {
@@ -98,7 +98,7 @@ Object::PyObjPtr IdentifierKlass::emit(
   auto identifier = obj->as<Identifier>();
   auto code = GetCodeFromList(codeList, identifier);
   auto name = identifier->Name();
-  auto scope = code->Scope();
+  auto scope = code->GetScope();
   auto mode = identifier->Mode();
   if (scope == Object::Scope::GLOBAL) {
     // 当前是GLOBAL

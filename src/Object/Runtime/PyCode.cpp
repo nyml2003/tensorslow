@@ -52,7 +52,7 @@ void PyCode::SetScope(enum Scope scope) {
   this->scope = scope;
 }
 
-Scope PyCode::Scope() const {
+Scope PyCode::GetScope() const {
   return scope;
 }
 

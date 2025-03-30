@@ -1,6 +1,7 @@
 #!/bin/bash
-build_dir=/app/build
-test_dir=/app/test/integration
+root_dir=/home/test/Desktop/torchlight
+build_dir=$root_dir/build
+test_dir=$root_dir/test/integration
 frontend_exe=$build_dir/torchlight_frontend
 backend_exe=$build_dir/torchlight_backend
 

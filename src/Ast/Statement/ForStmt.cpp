@@ -21,10 +21,10 @@ Object::PyObjPtr ForStmtKlass::emit(
   if (target->is<Identifier>()) {
     auto identifier = target->as<Identifier>();
     auto name = identifier->Name();
-    if (code->Scope() == Object::Scope::GLOBAL) {
+    if (code->GetScope() == Object::Scope::GLOBAL) {
       code->StoreName(name);
     }
-    if (code->Scope() == Object::Scope::LOCAL) {
+    if (code->GetScope() == Object::Scope::LOCAL) {
       code->StoreFast(name);
     }
   } else {
@@ -58,10 +58,10 @@ Object::PyObjPtr ForStmtKlass::visit(
     auto identifier = target->as<Identifier>();
     auto code = GetCodeFromList(codeList, stmt);
     auto name = identifier->Name();
-    if (code->Scope() == Object::Scope::GLOBAL) {
+    if (code->GetScope() == Object::Scope::GLOBAL) {
       code->RegisterName(name);
     }
-    if (code->Scope() == Object::Scope::LOCAL) {
+    if (code->GetScope() == Object::Scope::LOCAL) {
       code->RegisterVarName(name);
     }
   } else {

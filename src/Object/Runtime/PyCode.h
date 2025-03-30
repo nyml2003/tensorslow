@@ -52,7 +52,7 @@ class PyCode : public PyObject {
 
   [[nodiscard]] Index NLocals() const;
 
-  [[nodiscard]] Scope Scope() const;
+  [[nodiscard]] Scope GetScope() const;
 
   Index IndexOfConst(const PyObjPtr& obj);
 

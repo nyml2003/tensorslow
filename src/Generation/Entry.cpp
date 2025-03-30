@@ -71,15 +71,6 @@ void DefineOption() {
   ));
   ArgsHelper::SetSchema(schema);
 }
-void print_stack_trace() {
-  const int max_frames = 64;
-  void* array[max_frames];
-  int count = CaptureStackBackTrace(1, max_frames, array, nullptr);
-
-  for (int i = 0; i < count; i++) {
-    std::cerr << "  0x" << std::hex << array[i] << std::endl;
-  }
-}
 void InitPyObj() {
   torchlight::Object::BasicKlassLoad();
 }
@@ -111,7 +102,6 @@ void ParseAndGenerate(const fs::path& filePath) {
     visitor.visit(tree);
   } catch (const std::bad_any_cast&) {
     std::cerr << "Bad any_cast occurred!" << std::endl;
-    print_stack_trace();
     return;
   }
   visitor.Visit();
