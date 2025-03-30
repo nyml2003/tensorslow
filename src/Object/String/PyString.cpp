@@ -144,10 +144,12 @@ PyObjPtr StringKlass::hash(const PyObjPtr& obj) {
     throw std::runtime_error("StringKlass::hash(): obj is not a string");
   }
   auto string = obj->as<PyString>();
-  if (string->hashValue != nullptr) {
-    return string->hashValue;
+  if (string->hashValue == nullptr) {
+    string->hashValue =
+      CreatePyInteger(std::hash<std::string>{}(string->ToCppString()))
+        ->as<PyInteger>();
   }
-  return CreatePyInteger(std::hash<std::string>{}(string->ToCppString()));
+  return string->hashValue;
 }
 
 PyObjPtr StringKlass::boolean(const PyObjPtr& obj) {
