@@ -1,6 +1,6 @@
 include_directories(${torchlight_dir}/src)
 message(STATUS "torchlight_frontend_files: " ${torchlight_frontend_files})
-include(${torchlight_dir}/src/generation/generation.cmake)
+include(${torchlight_dir}/src/Generation/Generation.cmake)
 include(${torchlight_dir}/src/Collections/Collections.cmake)
 include(${torchlight_dir}/src/Object/Object.cmake)
 include(${torchlight_dir}/src/Runtime/Runtime.cmake)
