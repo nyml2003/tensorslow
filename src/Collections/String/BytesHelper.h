@@ -6,7 +6,7 @@
 #include "Collections/String/String.h"
 namespace torchlight::Collections {
 Bytes CreateBytesWithCString(const char* str);
-Bytes ToBytes(const String& str);
+Bytes ToBytes(const String& str) noexcept;
 void Write(const Bytes& bytes, const String& filename);
 std::string ToCppString(const Bytes& bytes);
 String ReprByte(Byte byte);

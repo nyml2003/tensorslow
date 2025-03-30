@@ -40,8 +40,8 @@ void Write(const Bytes& bytes, const String& filename) {
   }
   file.close();
 }
-Bytes ToBytes(const String& str) {
-  List<Byte> bytes;
+Bytes ToBytes(const String& str) noexcept {
+  List<Byte> bytes(str.Size());
   for (Index i = 0; i < str.Size(); i++) {
     Unicode codePoint = str[i];
     if (codePoint < 0x80) {
@@ -58,8 +58,6 @@ Bytes ToBytes(const String& str) {
       bytes.Push(static_cast<Byte>(0x80 | ((codePoint >> 12) & 0x3F)));
       bytes.Push(static_cast<Byte>(0x80 | ((codePoint >> 6) & 0x3F)));
       bytes.Push(static_cast<Byte>(0x80 | (codePoint & 0x3F)));
-    } else {
-      throw std::runtime_error("Invalid Unicode code point");
     }
   }
   return Bytes(bytes);
