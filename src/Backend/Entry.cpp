@@ -7,6 +7,10 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 using namespace torchlight;
 RedirectCout redirectCout;
 void DefineOption() {
@@ -143,6 +147,9 @@ void AddOptionWhenDebug(int& argc, char** argv) {
 }
 
 int main(int argc, char** argv) {
+#ifdef _WIN32
+  SetConsoleOutputCP(CP_UTF8);  // 在Windows平台上设置控制台输出为UTF-8编码
+#endif
   DefineOption();
   ArgsHelper::Instance().Accept(argc, argv);
   if (ArgsHelper::Instance().Has("dir")) {

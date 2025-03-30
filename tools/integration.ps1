@@ -16,10 +16,11 @@ if ($buildType -ne "release" -and $buildType -ne "debug") {
     exit 1
 }
 
+
 Write-Host "Build directory: $build_dir"
-$test_dir = "D:\code\project\torchlight\test/integration"
-$frontend_exe = "$build_dir/torchlight_frontend"
-$backend_exe = "$build_dir/torchlight_backend"
+$test_dir = "D:\code\project\torchlight\test\integration"
+$frontend_exe = "$build_dir\torchlight_frontend.exe"
+$backend_exe = "$build_dir\torchlight_backend.exe"
 
 # 获取测试目录下的所有子目录
 $subdirs = Get-ChildItem -Path $test_dir -Directory | Select-Object -ExpandProperty Name

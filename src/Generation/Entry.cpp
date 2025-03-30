@@ -8,8 +8,9 @@
 #include "Python3Lexer.h"
 #include "Python3Parser.h"
 #include "Tools/Tools.h"
-
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -129,6 +130,9 @@ void ParseAndGenerate(const fs::path& filePath) {
 }
 
 int main(int argc, char** argv) {
+#ifdef _WIN32
+  SetConsoleOutputCP(CP_UTF8);  // 在Windows平台上设置控制台输出为UTF-8编码
+#endif
   DefineOption();
   ArgsHelper::Instance().Accept(argc, argv);
   InitPyObj();
