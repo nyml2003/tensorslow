@@ -159,9 +159,16 @@ class CodeKlass : public Klass {
 
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<CodeKlass>();
-    LoadClass(CreatePyString("code")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    LoadClass(CreatePyString("code")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
 
   PyObjPtr repr(const PyObjPtr& self) override;

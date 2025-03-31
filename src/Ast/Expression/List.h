@@ -12,12 +12,18 @@ class ListKlass : public INodeKlass {
  public:
   ListKlass() = default;
 
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_list")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
+  }
+
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<ListKlass>();
-    Object::LoadClass(
-      Object::CreatePyString("List")->as<Object::PyString>(), instance
-    );
-    Object::ConfigureBasicAttributes(instance);
     return instance;
   }
 

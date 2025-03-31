@@ -10,12 +10,18 @@ class BinaryKlass : public INodeKlass {
  public:
   explicit BinaryKlass() = default;
 
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_binary")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
+  }
+
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<BinaryKlass>();
-    Object::LoadClass(
-      Object::CreatePyString("Binary")->as<Object::PyString>(), instance
-    );
-    Object::ConfigureBasicAttributes(instance);
     return instance;
   }
 
@@ -29,13 +35,13 @@ class BinaryKlass : public INodeKlass {
 class Binary : public Ast::INode {
  public:
   enum class Operator {
+    IN_OP,         // in
     LT,            // <
     GT,            // >
     EQ,            // ==
     GE,            // >=
     LE,            // <=
     NE,            // "!="
-    IN,            // in
     NOT_IN,        // not in
     IS,            // is
     IS_NOT,        // is not

@@ -67,14 +67,12 @@ antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
   );
   for (auto* stmtItertor : stmts) {
     auto stmt = visitStmt(stmtItertor);
-    if (stmt.type() == typeid(Ast::INodePtr)){
-      statements.Push(
-        std::any_cast<Ast::INodePtr>(stmt)
-      );
+    if (stmt.type() == typeid(Ast::INodePtr)) {
+      statements.Push(std::any_cast<Ast::INodePtr>(stmt));
       continue;
     }
     if (stmt.type() == typeid(Object::PyObjPtr)) {
-        auto list = std::any_cast<Object::PyObjPtr>(stmt)->as<Object::PyList>();
+      auto list = std::any_cast<Object::PyObjPtr>(stmt)->as<Object::PyList>();
       for (Index i = 0; i < list->Length(); i++) {
         statements.Push(list->GetItem(i));
       }
@@ -132,23 +130,25 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
     if (dictorsetmaker == nullptr) {
       return Ast::CreateMap(
         Object::CreatePyList({})->as<Object::PyList>(),
-          Object::CreatePyList({})->as<Object::PyList>(),
-          context
+        Object::CreatePyList({})->as<Object::PyList>(), context
       );
     }
-        auto dictorset = ctx->dictorsetmaker();
-        auto tests = dictorset->test();
-        Collections::List<Object::PyObjPtr> keys(static_cast<uint64_t>(tests.size() / 2));
-        Collections::List<Object::PyObjPtr> values(static_cast<uint64_t>(tests.size()) /2);
-        for (Index i = 0; i < tests.size(); i += 2) {
-          keys.Push(std::any_cast<Ast::INodePtr>(visitTest(tests[i])));
-          values.Push(std::any_cast<Ast::INodePtr>(visitTest(tests[i + 1])));
-        }
-        return Ast::CreateMap(
-          Object::CreatePyList(keys)->as<Object::PyList>(),
-          Object::CreatePyList(values)->as<Object::PyList>(),
-          context
-        );
+    auto dictorset = ctx->dictorsetmaker();
+    auto tests = dictorset->test();
+    Collections::List<Object::PyObjPtr> keys(
+      static_cast<uint64_t>(tests.size() / 2)
+    );
+    Collections::List<Object::PyObjPtr> values(
+      static_cast<uint64_t>(tests.size()) / 2
+    );
+    for (Index i = 0; i < tests.size(); i += 2) {
+      keys.Push(std::any_cast<Ast::INodePtr>(visitTest(tests[i])));
+      values.Push(std::any_cast<Ast::INodePtr>(visitTest(tests[i + 1])));
+    }
+    return Ast::CreateMap(
+      Object::CreatePyList(keys)->as<Object::PyList>(),
+      Object::CreatePyList(values)->as<Object::PyList>(), context
+    );
   } else if (ctx->name() != nullptr) {
     // 情况 4: name
     return Ast::CreateIdentifier(
@@ -300,9 +300,11 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
   // 处理增强赋值 (augassign)
   if (ctx->augassign() != nullptr) {
     auto target = std::any_cast<Ast::INodePtr>(
-      visitTestlist_star_expr(ctx->testlist_star_expr(0)));
-    auto targetCopy =std::any_cast<Ast::INodePtr>(
-      visitTestlist_star_expr(ctx->testlist_star_expr(0)));
+      visitTestlist_star_expr(ctx->testlist_star_expr(0))
+    );
+    auto targetCopy = std::any_cast<Ast::INodePtr>(
+      visitTestlist_star_expr(ctx->testlist_star_expr(0))
+    );
     auto source = std::any_cast<Ast::INodePtr>(visitTestlist(ctx->testlist()));
     if (ctx->augassign()->ADD_ASSIGN() != nullptr) {
       return Ast::CreateAssignStmt(
@@ -425,17 +427,22 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
 
   // 处理普通赋值或多重赋值
   if (!ctx->ASSIGN().empty()) {
-    auto source =
-      std::any_cast<Ast::INodePtr>(visitTestlist_star_expr(ctx->testlist_star_expr(1)));
-    auto target =
-      std::any_cast<Ast::INodePtr>(visitTestlist_star_expr(ctx->testlist_star_expr(0)));
+    auto source = std::any_cast<Ast::INodePtr>(
+      visitTestlist_star_expr(ctx->testlist_star_expr(1))
+    );
+    auto target = std::any_cast<Ast::INodePtr>(
+      visitTestlist_star_expr(ctx->testlist_star_expr(0))
+    );
     return Ast::CreateAssignStmt(target, source, context);
   }
 
   // 处理只有 testlist_star_expr 的情况
   if (ctx->ASSIGN().empty()) {
-    return Ast::CreateExprStmt(std::any_cast<Ast::INodePtr>(
-      visitTestlist_star_expr(ctx->testlist_star_expr(0))), context
+    return Ast::CreateExprStmt(
+      std::any_cast<Ast::INodePtr>(
+        visitTestlist_star_expr(ctx->testlist_star_expr(0))
+      ),
+      context
     );
   }
 
@@ -476,11 +483,14 @@ antlrcpp::Any Generator::visitAtom_expr(Python3Parser::Atom_exprContext* ctx) {
           result, Object::CreatePyList({})->as<Object::PyList>(), context
         );
       } else {
-        auto args = std::any_cast<Object::PyListPtr>(visitArglist(trailer->arglist()));
+        auto args =
+          std::any_cast<Object::PyListPtr>(visitArglist(trailer->arglist()));
         result = Ast::CreateFunctionCall(result, args, context);
       }
     } else if (trailer->OPEN_BRACK() != nullptr) {  // '['
-      auto args = std::any_cast<Ast::INodePtr>(visitSubscriptlist(trailer->subscriptlist()));
+      auto args =
+        std::any_cast<Ast::INodePtr>(visitSubscriptlist(trailer->subscriptlist()
+        ));
       result =
         Ast::CreateBinary(Ast::Binary::Operator::SUBSCR, result, args, context);
     } else if (trailer->DOT() != nullptr) {  // '.'
@@ -556,8 +566,7 @@ antlrcpp::Any Generator::visitComparison(Python3Parser::ComparisonContext* ctx
   if (ctx->comp_op(0)->EQUALS() != nullptr) {
     return CreateBinary(Ast::Binary::Operator::EQ, left, right, context);
   }
-  if ((ctx->comp_op(0)->NOT_EQ_1() != nullptr) ||
-      (ctx->comp_op(0)->NOT_EQ_2() != nullptr)) {
+  if ((ctx->comp_op(0)->NOT_EQ_1() != nullptr) || (ctx->comp_op(0)->NOT_EQ_2() != nullptr)) {
     return CreateBinary(Ast::Binary::Operator::NE, left, right, context);
   }
   if (ctx->comp_op(0)->LESS_THAN() != nullptr) {
@@ -567,7 +576,7 @@ antlrcpp::Any Generator::visitComparison(Python3Parser::ComparisonContext* ctx
     return CreateBinary(Ast::Binary::Operator::GT, left, right, context);
   }
   if (ctx->comp_op(0)->getText() == "in") {
-    return CreateBinary(Ast::Binary::Operator::IN, left, right, context);
+    return CreateBinary(Ast::Binary::Operator::IN_OP, left, right, context);
   }
   if (ctx->comp_op(0)->getText() == "notin") {
     return CreateBinary(Ast::Binary::Operator::NOT_IN, left, right, context);
@@ -635,7 +644,8 @@ antlrcpp::Any Generator::visitFuncdef(Python3Parser::FuncdefContext* ctx) {
   // 1. 获取函数名
   auto funcName = Object::CreatePyString(ctx->name()->getText().c_str());
   // 2. 获取函数参数列表
-  auto parameters = std::any_cast<Object::PyObjPtr>(visitParameters(ctx->parameters()));
+  auto parameters =
+    std::any_cast<Object::PyObjPtr>(visitParameters(ctx->parameters()));
   // 3. 创建函数对象
   auto funcDef =
     Ast::CreateFuncDef(
@@ -664,13 +674,13 @@ antlrcpp::Any Generator::visitBlock(Python3Parser::BlockContext* ctx) {
         stmts.Push(std::any_cast<Ast::INodePtr>(stmt));
         continue;
       }
-        if (stmt.type() == typeid(Object::PyObjPtr)) {
-          auto list = std::any_cast<Object::PyObjPtr>(stmt)->as<Object::PyList>();
-          for (Index i = 0; i < list->Length(); i++) {
-            stmts.Push(list->GetItem(i));
-          }
-          continue;
+      if (stmt.type() == typeid(Object::PyObjPtr)) {
+        auto list = std::any_cast<Object::PyObjPtr>(stmt)->as<Object::PyList>();
+        for (Index i = 0; i < list->Length(); i++) {
+          stmts.Push(list->GetItem(i));
         }
+        continue;
+      }
     }
     return Object::CreatePyList(stmts);
   }
@@ -704,8 +714,8 @@ antlrcpp::Any Generator::visitReturn_stmt(Python3Parser::Return_stmtContext* ctx
       CreateAtom(Object::CreatePyNone(), context), context
     );
   }
-  return Ast::CreateReturnStmt(std::any_cast<Ast::INodePtr>(
-    visitTestlist(ctx->testlist())), context
+  return Ast::CreateReturnStmt(
+    std::any_cast<Ast::INodePtr>(visitTestlist(ctx->testlist())), context
   );
 }
 
@@ -750,16 +760,19 @@ antlrcpp::Any Generator::visitIf_stmt(Python3Parser::If_stmtContext* ctx) {
   bool hasElse = ctx->ELSE() != nullptr;
   if (elseifCount > 0) {
     for (size_t i = 0; i < elseifCount; ++i) {
-      auto elseIfCondition = std::any_cast<Ast::INodePtr>(visitTest(ctx->test(i + 1)));
+      auto elseIfCondition =
+        std::any_cast<Ast::INodePtr>(visitTest(ctx->test(i + 1)));
       elseIfConditions->Append(elseIfCondition);
-      auto block = std::any_cast<Object::PyObjPtr>(visitBlock(ctx->block(i + 1)))
-                     ->as<Object::PyList>();
+      auto block =
+        std::any_cast<Object::PyObjPtr>(visitBlock(ctx->block(i + 1)))
+          ->as<Object::PyList>();
       elseIfStmts->Append(block);
     }
   }
   if (hasElse) {
-    elseStmts = std::any_cast<Object::PyObjPtr>(visitBlock(ctx->block(elseifCount + 1)))
-                  ->as<Object::PyList>();
+    elseStmts =
+      std::any_cast<Object::PyObjPtr>(visitBlock(ctx->block(elseifCount + 1)))
+        ->as<Object::PyList>();
   }
 
   auto ifStmt = Ast::CreateIfStmt(
@@ -771,9 +784,7 @@ antlrcpp::Any Generator::visitIf_stmt(Python3Parser::If_stmtContext* ctx) {
 antlrcpp::Any Generator::visitWhile_stmt(Python3Parser::While_stmtContext* ctx
 ) {
   auto condition = std::any_cast<Ast::INodePtr>(visitTest(ctx->test()));
-  auto body = std::any_cast<Object::PyObjPtr>(
-    visitBlock(ctx->block(0))
-  );
+  auto body = std::any_cast<Object::PyObjPtr>(visitBlock(ctx->block(0)));
   return Ast::CreateWhileStmt(condition, body, context);
 }
 
@@ -812,8 +823,7 @@ antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx
     auto* test = ctx->test(0);
     auto* colon = ctx->COLON();
     auto value = std::any_cast<Ast::INodePtr>(visitTest(test));
-    if (colon->getSymbol()->getTokenIndex() <
-        test->getStart()->getTokenIndex()) {
+    if (colon->getSymbol()->getTokenIndex() < test->getStart()->getTokenIndex()) {
       return Ast::CreateSlice(
         Object::CreatePyList({none, value, step})->as<Object::PyList>(), context
       );
@@ -823,7 +833,7 @@ antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx
     );
   }
   if (ctx->test().size() == 2) {
-    auto start =std::any_cast<Ast::INodePtr>(visitTest(ctx->test(0)));
+    auto start = std::any_cast<Ast::INodePtr>(visitTest(ctx->test(0)));
     auto stop = std::any_cast<Ast::INodePtr>(visitTest(ctx->test(1)));
     return Ast::CreateSlice(
       Object::CreatePyList({start, stop, step})->as<Object::PyList>(), context
@@ -888,7 +898,9 @@ antlrcpp::Any Generator::visitImport_stmt(
 
 antlrcpp::Any Generator::visitYield_stmt(Python3Parser::Yield_stmtContext* ctx
 ) {
-  return Ast::CreateYieldStmt(std::any_cast<Ast::INodePtr>(visitYield_expr(ctx->yield_expr())), context);
+  return Ast::CreateYieldStmt(
+    std::any_cast<Ast::INodePtr>(visitYield_expr(ctx->yield_expr())), context
+  );
 }
 
 antlrcpp::Any Generator::visitYield_expr(Python3Parser::Yield_exprContext* ctx

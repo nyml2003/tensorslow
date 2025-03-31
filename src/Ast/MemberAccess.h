@@ -12,11 +12,17 @@ class MemberAccessKlass : public INodeKlass {
 
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<MemberAccessKlass>();
-    Object::LoadClass(
-      Object::CreatePyString("MemberAccess")->as<Object::PyString>(), instance
-    );
-    Object::ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_memberaccess")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
   }
 
   Object::PyObjPtr

@@ -1,13 +1,16 @@
 #include "Object/Function/PyIife.h"
 #include "Function/ObjectHelper.h"
-#include "Object/String/PyString.h"
 #include "Object/Core/CoreHelper.h"
+#include "Object/String/PyString.h"
 namespace torchlight::Object {
 
 void IifeKlass::Initialize() {
-  auto klass = Self();
-  LoadClass(CreatePyString("iife")->as<PyString>(), klass);
-  ConfigureBasicAttributes(klass);
+  if (this->isInitialized) {
+    return;
+  }
+  InitKlass(CreatePyString("iife")->as<PyString>(), IifeKlass::Self());
+  ConfigureBasicAttributes(IifeKlass::Self());
+  this->isInitialized = true;
 }
 
 PyObjPtr IifeKlass::str(const PyObjPtr& /*self*/) {

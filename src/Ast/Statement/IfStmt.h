@@ -11,12 +11,18 @@ class IfStmtKlass : public INodeKlass {
  public:
   explicit IfStmtKlass() = default;
 
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_ifstmt")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
+  }
+
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<IfStmtKlass>();
-    LoadClass(
-      Object::CreatePyString("IfStmt")->as<Object::PyString>(), instance
-    );
-    ConfigureBasicAttributes(instance);
     return instance;
   }
 

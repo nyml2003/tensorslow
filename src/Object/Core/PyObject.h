@@ -128,6 +128,7 @@ class ObjectKlass : public Klass {
  public:
   explicit ObjectKlass() = default;
   static KlassPtr Self();
+  void Initialize() override;
 };
 
 bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs);

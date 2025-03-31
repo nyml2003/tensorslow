@@ -18,7 +18,7 @@ class NativeFunctionKlass : public Klass {
   }
 
   PyObjPtr repr(const PyObjPtr& obj) override;
-  static void Initialize();
+  void Initialize() override;
 };
 
 class PyNativeFunction : public PyObject {

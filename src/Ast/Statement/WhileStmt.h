@@ -9,12 +9,18 @@ class WhileStmtKlass : public INodeKlass {
  public:
   explicit WhileStmtKlass() = default;
 
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_whilestmt")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
+  }
+
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<WhileStmtKlass>();
-    LoadClass(
-      Object::CreatePyString("WhileStmt")->as<Object::PyString>(), instance
-    );
-    ConfigureBasicAttributes(instance);
     return instance;
   }
 

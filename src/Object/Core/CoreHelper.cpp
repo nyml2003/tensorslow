@@ -6,7 +6,10 @@
 #include "Object/Core/PyType.h"
 #include "Object/Function/PyIife.h"
 #include "Object/Iterator/Iterator.h"
+#include "Object/Iterator/PyGenerator.h"
+#include "Object/Number/PyFloat.h"
 #include "Object/Number/PyInteger.h"
+#include "Object/PyMatrix.h"
 #include "Runtime/Interpreter.h"
 
 namespace torchlight::Object {
@@ -39,6 +42,11 @@ void ConfigureBasicAttributes(const KlassPtr& klass) {
   );
 }
 
+void InitKlass(const Object::PyStrPtr& name, const Object::KlassPtr& klass) {
+  LoadClass(name, klass);
+  ConfigureBasicAttributes(klass);
+}
+
 PyObjPtr
 Invoke(const PyObjPtr& obj, const PyObjPtr& methodName, const PyListPtr& args) {
   auto func = obj->getattr(methodName);
@@ -57,8 +65,7 @@ PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept {
   if (obj->Klass()->Attributes()->Contains(attrName)) {
     return obj->Klass()->Attributes()->Get(attrName);
   }
-  if (obj->Klass()->Super()->Length() == 0 &&
-      obj->Klass() == ObjectKlass::Self()) {
+  if (obj->Klass()->Super()->Length() == 0 && obj->Klass() == ObjectKlass::Self()) {
     return nullptr;
   }
   for (Index i = 0; i < obj->Klass()->Mro()->Length(); i++) {
@@ -287,16 +294,35 @@ PyObjPtr Str(const PyObjPtr& args) {
 }
 
 void BasicKlassLoad() {
-  StringKlass::Initialize();
-  IntegerKlass::Initialize();
-  ListKlass::Initialize();
-  DictionaryKlass::Initialize();
-  TypeKlass::Initialize();
-  BooleanKlass::Initialize();
-  NativeFunctionKlass::Initialize();
-  IifeKlass::Initialize();
-  ListIteratorKlass::Initialize();
-  IterDoneKlass::Initialize();
+  StringKlass::Self()->Initialize();
+  IntegerKlass::Self()->Initialize();
+  ListKlass::Self()->Initialize();
+  DictionaryKlass::Self()->Initialize();
+  TypeKlass::Self()->Initialize();
+  BooleanKlass::Self()->Initialize();
+
+  NativeFunctionKlass::Self()->Initialize();
+  IifeKlass::Self()->Initialize();
+  ListIteratorKlass::Self()->Initialize();
+  IterDoneKlass::Self()->Initialize();
+}
+
+void NativeClassLoad() {
+  NoneKlass::Self()->Initialize();
+  ObjectKlass::Self()->Initialize();
+  FunctionKlass::Self()->Initialize();
+  MethodKlass::Self()->Initialize();
+  ListReverseIteratorKlass::Self()->Initialize();
+  StringIteratorKlass::Self()->Initialize();
+  DictItemIteratorKlass::Self()->Initialize();
+  GeneratorKlass::Self()->Initialize();
+  FloatKlass::Self()->Initialize();
+  CodeKlass::Self()->Initialize();
+  FrameKlass::Self()->Initialize();
+  InstKlass::Self()->Initialize();
+  BytesKlass::Self()->Initialize();
+  MatrixKlass::Self()->Initialize();
+  SliceKlass::Self()->Initialize();
 }
 
 }  // namespace torchlight::Object

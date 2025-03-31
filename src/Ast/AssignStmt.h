@@ -10,12 +10,18 @@ class AssignStmtKlass : public INodeKlass {
  public:
   explicit AssignStmtKlass() = default;
 
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_assignstmt")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
+  }
+
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<AssignStmtKlass>();
-    LoadClass(
-      Object::CreatePyString("AssignStmt")->as<Object::PyString>(), instance
-    );
-    ConfigureBasicAttributes(instance);
     return instance;
   }
 

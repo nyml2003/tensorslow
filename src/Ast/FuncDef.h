@@ -12,11 +12,17 @@ class FuncDefKlass : public INodeKlass {
 
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<FuncDefKlass>();
-    LoadClass(
-      Object::CreatePyString("FuncDef")->as<Object::PyString>(), instance
-    );
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_funcdef")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
   }
 
   Object::PyObjPtr

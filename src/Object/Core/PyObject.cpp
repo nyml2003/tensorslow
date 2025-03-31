@@ -32,6 +32,14 @@ PyObjPtr ObjectInit(const PyObjPtr& args) {
 
 KlassPtr ObjectKlass::Self() {
   static KlassPtr instance = std::make_shared<ObjectKlass>();
+  return instance;
+}
+
+void ObjectKlass::Initialize() {
+  if (this->isInitialized) {
+    return;
+  }
+  auto instance = Self();
   instance->SetName(CreatePyString("object")->as<PyString>());
   instance->SetAttributes(CreatePyDict());
   instance->AddAttribute(
@@ -54,7 +62,7 @@ KlassPtr ObjectKlass::Self() {
   instance->SetMro(CreatePyList({CreatePyType(instance)->as<PyType>()}));
   instance->SetNative();
   ConfigureBasicAttributes(instance);
-  return instance;
+  this->isInitialized = true;
 }
 
 PyObjPtr PyObject::Instance() {

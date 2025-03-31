@@ -13,11 +13,17 @@ class IdentifierKlass : public INodeKlass {
 
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<IdentifierKlass>();
-    Object::LoadClass(
-      Object::CreatePyString("Identifier")->as<Object::PyString>(), instance
-    );
-    Object::ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_identifier")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
   }
 
   Object::PyObjPtr

@@ -14,9 +14,16 @@ class NoneKlass : public Klass {
 
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<NoneKlass>();
-    LoadClass(CreatePyString("None")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    LoadClass(CreatePyString("NoneType")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
 
   PyObjPtr repr(const PyObjPtr& obj) override;

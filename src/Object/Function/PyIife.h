@@ -17,7 +17,7 @@ class IifeKlass : public Klass {
     return instance;
   }
 
-  static void Initialize();
+  void Initialize() override;
 
   PyObjPtr str(const PyObjPtr& self) override;
 };

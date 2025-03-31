@@ -12,7 +12,6 @@
 #include "Object/Runtime/PyCode.h"
 #include "Object/Runtime/PyInst.h"
 
-
 namespace torchlight::Object {
 class PyFrame;
 using PyFramePtr = std::shared_ptr<PyFrame>;
@@ -83,9 +82,16 @@ class FrameKlass : public Klass {
   explicit FrameKlass() = default;
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<FrameKlass>();
-    LoadClass(CreatePyString("frame")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    LoadClass(CreatePyString("frame")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
 
   PyObjPtr repr(const PyObjPtr& obj) override;

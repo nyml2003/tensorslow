@@ -9,7 +9,7 @@ $source_code = "../test/dev/dev.py"
 
 # 显示源代码内容
 Write-Host "源代码:"
-Get-Content $source_code
+# Get-Content $source_code
 Write-Host
 
 # 编译到字节码

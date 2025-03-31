@@ -10,12 +10,18 @@ class FunctionCallKlass : public INodeKlass {
  public:
   FunctionCallKlass() = default;
 
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_functioncall")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
+  }
+
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<FunctionCallKlass>();
-    Object::LoadClass(
-      Object::CreatePyString("FunctionCall")->as<Object::PyString>(), instance
-    );
-    Object::ConfigureBasicAttributes(instance);
     return instance;
   }
 

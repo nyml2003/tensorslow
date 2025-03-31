@@ -39,10 +39,12 @@ PyObjPtr Ravel(const PyObjPtr& args);
 class MatrixKlass : public Klass {
  public:
   explicit MatrixKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<MatrixKlass>();
-    LoadClass(CreatePyString("matrix")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    auto instance = Self();
+    InitKlass(CreatePyString("matrix")->as<PyString>(), instance);
     instance->AddAttribute(
       CreatePyString("T")->as<PyString>(), CreatePyIife(Transpose)
     );
@@ -55,6 +57,10 @@ class MatrixKlass : public Klass {
     instance->AddAttribute(
       CreatePyString("ravel")->as<PyString>(), CreatePyNativeFunction(Ravel)
     );
+    this->isInitialized = true;
+  }
+  static KlassPtr Self() {
+    static KlassPtr instance = std::make_shared<MatrixKlass>();
     return instance;
   }
   PyObjPtr repr(const PyObjPtr& obj) override;

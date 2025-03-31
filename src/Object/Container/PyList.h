@@ -32,7 +32,7 @@ class ListKlass : public Klass {
   PyObjPtr boolean(const PyObjPtr& obj) override;
   PyObjPtr reversed(const PyObjPtr& obj) override;
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
-  static void Initialize();
+  void Initialize() override;
 };
 
 PyObjPtr CreatePyList(Index capacity);

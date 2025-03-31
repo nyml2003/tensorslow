@@ -17,9 +17,13 @@ class BooleanKlass : public Klass {
     static KlassPtr instance = std::make_shared<BooleanKlass>();
     return instance;
   }
-  static void Initialize() {
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
     LoadClass(CreatePyString("bool")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
 
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;

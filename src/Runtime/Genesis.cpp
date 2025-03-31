@@ -19,6 +19,7 @@ namespace torchlight::Runtime {
 
 Object::PyDictPtr Genesis() {
   Object::BasicKlassLoad();
+  Object::NativeClassLoad();
   auto builtins = Object::CreatePyDict()->as<Object::PyDictionary>();
   // 注册内置函数和类型
   builtins->Put(Object::CreatePyString("None"), Object::CreatePyNone());

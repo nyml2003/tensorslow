@@ -543,7 +543,7 @@ T& List<T>::operator[](Index index) {
 template <typename T>
 const T& List<T>::operator[](Index index) const {
   if (!ValidIndex(index)) {
-    throw std::out_of_range("List::operator[]: Index out of range");
+    throw std::out_of_range("List::const operator[]: Index out of range");
   }
   return elements[index];
 }

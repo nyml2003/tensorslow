@@ -11,9 +11,9 @@ Unicode GetUnicode(
   Index& index,
   const std::function<Byte(Index)>& GetByte,
   const std::function<bool(Index)>& IsValid
-);
-String CreateStringWithCString(const char* str);
-String CreateStringWithBytes(const Bytes& bytes);
+) noexcept;
+String CreateStringWithCString(const char* str) noexcept;
+String CreateStringWithBytes(const Bytes& bytes) noexcept;
 String ToString(double value);
 String ToString(uint64_t value);
 String ToString(uint32_t value);

@@ -14,9 +14,16 @@ class FloatKlass : public Klass {
 
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<FloatKlass>();
-    LoadClass(CreatePyString("float")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    LoadClass(CreatePyString("float")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
 
   PyObjPtr init(const PyObjPtr& klass, const PyObjPtr& args) override;

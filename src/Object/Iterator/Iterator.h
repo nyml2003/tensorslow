@@ -17,9 +17,13 @@ class IterDoneKlass : public Klass {
     return instance;
   }
 
-  static void Initialize() {
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
     LoadClass(CreatePyString("StopIteration")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
 };
 
@@ -40,9 +44,13 @@ class ListIteratorKlass : public Klass {
   PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
   PyObjPtr repr(const PyObjPtr& obj) override;
 
-  static void Initialize() {
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
     LoadClass(CreatePyString("ListIterator")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
 };
 
@@ -59,9 +67,13 @@ class ListReverseIteratorKlass : public Klass {
   PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
   PyObjPtr repr(const PyObjPtr& obj) override;
 
-  static void Initialize() {
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
     LoadClass(CreatePyString("ListReverseIterator")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
 };
 
@@ -120,9 +132,15 @@ class StringIteratorKlass : public Klass {
   explicit StringIteratorKlass() = default;
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<StringIteratorKlass>();
-    LoadClass(CreatePyString("StringIterator")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    LoadClass(CreatePyString("StringIterator")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
   PyObjPtr iter(const PyObjPtr& obj) override { return obj; }
   PyObjPtr next(const PyObjPtr& obj) override;
@@ -157,9 +175,15 @@ class DictItemIteratorKlass : public Klass {
   explicit DictItemIteratorKlass() = default;
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<DictItemIteratorKlass>();
-    LoadClass(CreatePyString("DictItemIterator")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    LoadClass(CreatePyString("DictItemIterator")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
   PyObjPtr iter(const PyObjPtr& obj) override { return obj; }
   PyObjPtr next(const PyObjPtr& obj) override;
@@ -184,102 +208,6 @@ class DictItemIterator : public PyObject, public IIterator {
 inline PyObjPtr CreateDictItemIterator(const PyObjPtr& dict) {
   return std::make_shared<DictItemIterator>(dict);
 }
-
-// class StringIterator : public PyObject {
-//  private:
-//   PyStrPtr string;
-//   Index index;
-
-//  public:
-//   explicit StringIterator(const PyObjPtr& string);
-//   [[nodiscard]] PyStrPtr String() const;
-//   [[nodiscard]] Index Index() const;
-//   void Next();
-// };
-
-// class StringIteratorKlass : public Klass {
-//  public:
-//   explicit StringIteratorKlass();
-//   static KlassPtr Self();
-//   void Initialize() override;
-//   PyObjPtr iter(const PyObjPtr& obj) override;
-//   PyObjPtr next(const PyObjPtr& obj) override;
-//   PyObjPtr str(const PyObjPtr& obj) override;
-// };
-
-// PyObjPtr CreateStringIterator(const PyObjPtr& string);
-
-// class DictValueIterator : public PyObject {
-//  private:
-//   PyDictPtr dict;
-//   Index index;
-
-//  public:
-//   explicit DictValueIterator(const PyObjPtr& dict);
-//   [[nodiscard]] PyDictPtr Dict() const;
-//   [[nodiscard]] Index Index() const;
-//   void Next();
-// };
-
-// class DictValueIteratorKlass : public Klass {
-//  public:
-//   explicit DictValueIteratorKlass();
-//   static KlassPtr Self();
-//   void Initialize() override;
-//   PyObjPtr iter(const PyObjPtr& obj) override;
-//   PyObjPtr next(const PyObjPtr& obj) override;
-//   PyObjPtr str(const PyObjPtr& obj) override;
-// };
-
-// PyObjPtr CreateDictValueIterator(const PyObjPtr& dict);
-
-// class DictKeyIterator : public PyObject {
-//  private:
-//   PyDictPtr dict;
-//   Index index;
-
-//  public:
-//   explicit DictKeyIterator(const PyObjPtr& dict);
-//   [[nodiscard]] PyDictPtr Dict() const;
-//   [[nodiscard]] Index Index() const;
-//   void Next();
-// };
-
-// class DictKeyIteratorKlass : public Klass {
-//  public:
-//   explicit DictKeyIteratorKlass();
-//   static KlassPtr Self();
-//   void Initialize() override;
-//   PyObjPtr iter(const PyObjPtr& obj) override;
-//   PyObjPtr next(const PyObjPtr& obj) override;
-//   PyObjPtr str(const PyObjPtr& obj) override;
-// };
-
-// PyObjPtr CreateDictKeyIterator(const PyObjPtr& dict);
-
-// class DictItemIterator : public PyObject {
-//  private:
-//   PyDictPtr dict;
-//   Index index;
-
-//  public:
-//   explicit DictItemIterator(const PyObjPtr& dict);
-//   [[nodiscard]] PyDictPtr Dict() const;
-//   [[nodiscard]] Index Index() const;
-//   void Next();
-// };
-
-// class DictItemIteratorKlass : public Klass {
-//  public:
-//   explicit DictItemIteratorKlass();
-//   static KlassPtr Self();
-//   void Initialize() override;
-//   PyObjPtr iter(const PyObjPtr& obj) override;
-//   PyObjPtr next(const PyObjPtr& obj) override;
-//   PyObjPtr str(const PyObjPtr& obj) override;
-// };
-
-// PyObjPtr CreateDictItemIterator(const PyObjPtr& dict);
 
 }  // namespace torchlight::Object
 

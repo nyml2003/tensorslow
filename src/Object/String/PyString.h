@@ -18,7 +18,7 @@ class StringKlass : public Klass {
     return instance;
   }
 
-  static void Initialize();
+  void Initialize() override;
 
   PyObjPtr init(const PyObjPtr& klass, const PyObjPtr& args) override;
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;

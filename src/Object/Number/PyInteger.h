@@ -17,7 +17,7 @@ class IntegerKlass : public Klass {
     static KlassPtr instance = std::make_shared<IntegerKlass>();
     return instance;
   }
-  static void Initialize();
+  void Initialize() override;
   PyObjPtr init(const PyObjPtr& klass, const PyObjPtr& args) override;
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs) override;

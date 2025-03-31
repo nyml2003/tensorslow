@@ -13,9 +13,15 @@ class SliceKlass : public Klass {
   explicit SliceKlass() = default;
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<SliceKlass>();
-    LoadClass(CreatePyString("slice")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    LoadClass(CreatePyString("slice")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
   PyObjPtr init(const PyObjPtr& type, const PyObjPtr& args) override;
   PyObjPtr str(const PyObjPtr& obj) override;

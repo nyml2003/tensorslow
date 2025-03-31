@@ -45,8 +45,11 @@ Index PyDictionary::Size() const {
 }
 
 void DictionaryKlass::Initialize() {
-  LoadClass(CreatePyString("dict")->as<PyString>(), Self());
-  ConfigureBasicAttributes(Self());
+  if (this->isInitialized) {
+    return;
+  }
+  InitKlass(CreatePyString("dict")->as<PyString>(), Self());
+  this->isInitialized = true;
 }
 
 PyObjPtr DictionaryKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {

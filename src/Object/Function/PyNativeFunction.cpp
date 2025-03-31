@@ -68,14 +68,18 @@ void CheckNativeFunctionArgumentWithType(
 }
 
 void NativeFunctionKlass::Initialize() {
-  LoadClass(CreatePyString("native_function")->as<PyString>(), Self());
-  ConfigureBasicAttributes(Self());
+  if (this->isInitialized) {
+    return;
+  }
+  InitKlass(CreatePyString("native_function")->as<PyString>(), Self());
+  this->isInitialized = true;
 }
 
 PyObjPtr NativeFunctionKlass::repr(const PyObjPtr& obj) {
   return StringConcat(CreatePyList(
     {CreatePyString("<built-in function at "),
-     Function::Identity(CreatePyList({obj}))->as<PyString>(), CreatePyString(">")}
+     Function::Identity(CreatePyList({obj}))->as<PyString>(),
+     CreatePyString(">")}
   ));
 }
 

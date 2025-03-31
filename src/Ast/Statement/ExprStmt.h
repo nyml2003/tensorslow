@@ -8,12 +8,20 @@ namespace torchlight::Ast {
 
 class ExprStmtKlass : public INodeKlass {
  public:
+  explicit ExprStmtKlass() = default;
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_exprstmt")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
+  }
+
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<ExprStmtKlass>();
-    LoadClass(
-      Object::CreatePyString("ExprStmt")->as<Object::PyString>(), instance
-    );
-    ConfigureBasicAttributes(instance);
     return instance;
   }
 

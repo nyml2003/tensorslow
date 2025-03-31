@@ -14,7 +14,7 @@ class TypeKlass : public Klass {
     return instance;
   }
 
-  static void Initialize();
+  void Initialize() override;
 
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 

@@ -9,12 +9,20 @@ namespace torchlight::Ast {
 
 class PassStmtKlass : public INodeKlass {
  public:
+  explicit PassStmtKlass() = default;
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_passstmt")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
+  }
+
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<PassStmtKlass>();
-    LoadClass(
-      Object::CreatePyString("PassStmt")->as<Object::PyString>(), instance
-    );
-    ConfigureBasicAttributes(instance);
     return instance;
   }
 

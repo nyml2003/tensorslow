@@ -10,12 +10,18 @@ class SliceKlass : public INodeKlass {
  public:
   SliceKlass() = default;
 
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_slice")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
+  }
+
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<SliceKlass>();
-    Object::LoadClass(
-      Object::CreatePyString("Slice")->as<Object::PyString>(), instance
-    );
-    Object::ConfigureBasicAttributes(instance);
     return instance;
   }
 

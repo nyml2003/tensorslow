@@ -10,15 +10,20 @@ class UnaryKlass : public INodeKlass {
  public:
   explicit UnaryKlass() = default;
 
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<UnaryKlass>();
-    Object::LoadClass(
-      Object::CreatePyString("Unary")->as<Object::PyString>(), instance
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_unary")->as<Object::PyString>(), Self()
     );
-    Object::ConfigureBasicAttributes(instance);
-    return instance;
+    this->isInitialized = true;
   }
 
+  static Object::KlassPtr Self() {
+    static auto instance = std::make_shared<UnaryKlass>();
+    return instance;
+  }
   Object::PyObjPtr
   visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
 

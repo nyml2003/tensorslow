@@ -5,8 +5,11 @@
 namespace torchlight::Object {
 
 void TypeKlass::Initialize() {
-  LoadClass(CreatePyString("type")->as<PyString>(), Self());
-  ConfigureBasicAttributes(Self());
+  if (this->isInitialized) {
+    return;
+  }
+  InitKlass(CreatePyString("type")->as<PyString>(), Self());
+  this->isInitialized = true;
 }
 
 PyObjPtr TypeKlass::repr(const PyObjPtr& obj) {

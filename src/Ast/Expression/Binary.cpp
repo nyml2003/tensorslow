@@ -62,7 +62,7 @@ Object::PyObjPtr BinaryKlass::emit(
     case Binary::Operator::IS_NOT:
       inst = Object::CreateCompareOp(Object::CompareOp::IS_NOT);
       break;
-    case Binary::Operator::IN:
+    case Binary::Operator::IN_OP:
       inst = Object::CreateCompareOp(Object::CompareOp::IN);
       break;
     case Binary::Operator::NOT_IN:

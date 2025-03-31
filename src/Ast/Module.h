@@ -12,11 +12,17 @@ class ModuleKlass : public INodeKlass {
 
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<ModuleKlass>();
-    Object::LoadClass(
-      Object::CreatePyString("Module")->as<Object::PyString>(), instance
-    );
-    Object::ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_module")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
   }
   Object::PyObjPtr
   visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;

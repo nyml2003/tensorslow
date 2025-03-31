@@ -20,8 +20,7 @@ PyObjPtr CreatePyInteger(uint64_t value) {
 }
 
 void IntegerKlass::Initialize() {
-  LoadClass(CreatePyString("int")->as<PyString>(), Self());
-  ConfigureBasicAttributes(Self());
+  InitKlass(CreatePyString("int")->as<PyString>(), Self());
 }
 
 PyObjPtr IntegerKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {

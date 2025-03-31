@@ -10,10 +10,18 @@ class AtomKlass : public INodeKlass {
  public:
   explicit AtomKlass() = default;
 
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_atom")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
+  }
+
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<AtomKlass>();
-    LoadClass(Object::CreatePyString("Atom")->as<Object::PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
   }
 

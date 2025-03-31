@@ -1,7 +1,6 @@
 {
     "clang-format.style": "file",
     "clang-format.assumeFilename": "${workspaceFolder}/.clang-format",
-    "clang-format.executable": "/usr/bin/clang-format",
     "clang-format.fallbackStyle": "Chromium",
     "files.associations": {
         "*.cu": "cpp",
@@ -123,7 +122,7 @@
         "--enable-config"
     ],
     "[cpp]": {
-        "editor.defaultFormatter": "llvm-vs-code-extensions.vscode-clangd",
+        "editor.defaultFormatter": "xaver.clang-format",
     },
     "[jsonc]": {
         "editor.defaultFormatter": "vscode.json-language-features"

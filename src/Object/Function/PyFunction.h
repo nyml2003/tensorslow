@@ -7,7 +7,6 @@
 #include "Object/Runtime/PyCode.h"
 #include "Object/String/PyString.h"
 
-
 namespace torchlight::Object {
 
 class FunctionKlass : public Klass {
@@ -15,9 +14,16 @@ class FunctionKlass : public Klass {
   FunctionKlass() = default;
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<FunctionKlass>();
-    LoadClass(CreatePyString("function")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    LoadClass(CreatePyString("function")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
 
   PyObjPtr repr(const PyObjPtr& obj) override;

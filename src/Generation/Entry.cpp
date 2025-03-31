@@ -15,6 +15,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+#include "Ast/AstHelper.h"
 #include "antlr4-runtime.h"
 namespace fs = std::filesystem;
 using antlr4::ANTLRInputStream;
@@ -73,6 +74,8 @@ void DefineOption() {
 }
 void InitPyObj() {
   torchlight::Object::BasicKlassLoad();
+  torchlight::Object::NativeClassLoad();
+  torchlight::Ast::RegisterAstKlass();
 }
 
 // 使用ANTLR解析文件

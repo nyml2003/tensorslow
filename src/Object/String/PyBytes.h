@@ -1,6 +1,7 @@
 #ifndef TORCHLIGHT_OBJECT_PYBYTES_H
 #define TORCHLIGHT_OBJECT_PYBYTES_H
 
+#include <iostream>
 #include "Collections/String/Bytes.h"
 #include "Function/ObjectHelper.h"
 #include "Object/Core/CoreHelper.h"
@@ -14,9 +15,16 @@ class BytesKlass : public Klass {
 
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<BytesKlass>();
-    LoadClass(CreatePyString("bytes")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    LoadClass(CreatePyString("bytes")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
 
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;

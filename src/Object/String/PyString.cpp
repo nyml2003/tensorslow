@@ -22,8 +22,7 @@ Index PyString::indent = 0;
 std::unordered_map<Collections::String, PyObjPtr> PyString::stringPool;
 std::mutex PyString::poolMutex;
 void StringKlass::Initialize() {
-  LoadClass(CreatePyString("str")->as<PyString>(), Self());
-  ConfigureBasicAttributes(Self());
+  InitKlass(CreatePyString("str")->as<PyString>(), Self());
   Self()->AddAttribute(
     CreatePyString("join")->as<PyString>(), CreatePyNativeFunction(StringJoin)
   );

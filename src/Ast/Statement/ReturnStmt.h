@@ -9,12 +9,18 @@ class ReturnStmtKlass : public INodeKlass {
  public:
   explicit ReturnStmtKlass() = default;
 
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_returnstmt")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
+  }
+
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<ReturnStmtKlass>();
-    LoadClass(
-      Object::CreatePyString("ReturnStmt")->as<Object::PyString>(), instance
-    );
-    ConfigureBasicAttributes(instance);
     return instance;
   }
 

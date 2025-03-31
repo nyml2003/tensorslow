@@ -1,11 +1,12 @@
 #ifndef TORCHLIGHT_OBJECT_CORE_HELPER_H
 #define TORCHLIGHT_OBJECT_CORE_HELPER_H
-#include "Object/String/PyString.h"
 #include "Object/Core/Klass.h"
+#include "Object/String/PyString.h"
 namespace torchlight::Object {
 
 void LoadClass(const Object::PyStrPtr& name, const Object::KlassPtr& klass);
 void ConfigureBasicAttributes(const Object::KlassPtr& klass);
+void InitKlass(const Object::PyStrPtr& name, const Object::KlassPtr& klass);
 Object::PyObjPtr Invoke(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& methodName,
@@ -30,8 +31,9 @@ Object::PyObjPtr KlassRepr(const Object::PyObjPtr& args);
 Object::PyObjPtr Bool(const Object::PyObjPtr& args);
 // object.__bool__
 Object::PyObjPtr KlassBool(const Object::PyObjPtr& args);
-void BasicKlassLoad();
 
+void BasicKlassLoad();
+void NativeClassLoad();
 Object::PyListPtr MergeMro(const Object::PyListPtr& mros);
 Object::PyListPtr ComputeMro(const Object::PyTypePtr& type);
 bool FirstOrNotInMro(
@@ -50,7 +52,5 @@ Object::KlassPtr CreatePyKlass(
   const Object::PyListPtr& super
 );
 }  // namespace torchlight::Object
-
-
 
 #endif

@@ -11,11 +11,17 @@ class ClassDefKlass : public INodeKlass {
  public:
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<ClassDefKlass>();
-    LoadClass(
-      Object::CreatePyString("ClassDef")->as<Object::PyString>(), instance
-    );
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_classdef")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
   }
 
   Object::PyObjPtr

@@ -30,9 +30,16 @@ class InstKlass : public Klass {
 
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<InstKlass>();
-    LoadClass(CreatePyString("Instruction")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    LoadClass(CreatePyString("inst")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
 
   PyObjPtr _serialize_(const PyObjPtr& obj) override;

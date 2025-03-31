@@ -32,7 +32,7 @@ class DictionaryKlass : public Klass {
   PyObjPtr str(const PyObjPtr& obj) override;
   PyObjPtr iter(const PyObjPtr& obj) override;
   PyObjPtr len(const PyObjPtr& obj) override;
-  static void Initialize();
+  void Initialize() override;
 };
 
 bool KeyCompare(const PyObjPtr& lhs, const PyObjPtr& rhs);

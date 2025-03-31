@@ -12,9 +12,16 @@ class GeneratorKlass : public Klass {
   explicit GeneratorKlass() = default;
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<GeneratorKlass>();
-    LoadClass(CreatePyString("generator")->as<PyString>(), instance);
-    ConfigureBasicAttributes(instance);
     return instance;
+  }
+
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    LoadClass(CreatePyString("generator")->as<PyString>(), Self());
+    ConfigureBasicAttributes(Self());
+    this->isInitialized = true;
   }
 
   PyObjPtr iter(const PyObjPtr& obj) override { return obj; }

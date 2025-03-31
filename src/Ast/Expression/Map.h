@@ -10,12 +10,18 @@ class MapKlass : public INodeKlass {
  public:
   MapKlass() = default;
 
+  void Initialize() override {
+    if (this->isInitialized) {
+      return;
+    }
+    InitKlass(
+      Object::CreatePyString("ast_map")->as<Object::PyString>(), Self()
+    );
+    this->isInitialized = true;
+  }
+
   static Object::KlassPtr Self() {
     static auto instance = std::make_shared<MapKlass>();
-    Object::LoadClass(
-      Object::CreatePyString("Map")->as<Object::PyString>(), instance
-    );
-    Object::ConfigureBasicAttributes(instance);
     return instance;
   }
 
