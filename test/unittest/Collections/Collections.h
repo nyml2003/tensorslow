@@ -7,7 +7,6 @@
 #include "Collections/Integer/IntegerHelper.h"
 #include "Collections/Iterator.h"
 #include "Collections/List.h"
-#include "Collections/Map.h"
 #include "Collections/String/Bytes.h"
 #include "Collections/String/BytesHelper.h"
 #include "Collections/String/String.h"
