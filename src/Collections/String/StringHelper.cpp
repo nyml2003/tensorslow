@@ -22,7 +22,7 @@ Unicode GetUnicode(
     sequenceLength = 3;
   } else if ((leadByte & 0xF8) == 0xF0) {
     sequenceLength = 4;
-  }
+  } 
   Unicode codePoint = 0;
   switch (sequenceLength) {
     case 1:
