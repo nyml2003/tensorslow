@@ -37,13 +37,12 @@ class Parameter {
 class Schema {
  public:
   void Add(const Parameter& param);
-  void Check(std::string option, std::string value) const;
-  Parameter Find(std::string option);
+  void Check(const std::string& option, const std::string& value) const;
+  Parameter Find(const std::string& option);
   void PrintUsage() const;  // 打印使用说明
  private:
   std::map<std::string, Parameter> parameters;  // 参数存储
 };
-
 
 class ArgsHelper {
  public:
@@ -51,8 +50,9 @@ class ArgsHelper {
   static void SetSchema(const Schema& schema);
   void Accept(int argc, char** argv);
 
-  [[nodiscard]] std::string Get(const std::string& option) const;
-  [[nodiscard]] bool Has(const std::string& option) const;
+  [[nodiscard]] static std::string Get(const std::string& option);
+  [[nodiscard]] static bool Has(const std::string& option);
+  static void PrintUsage();
 
  private:
   ArgsHelper() = default;                         // 私有构造函数

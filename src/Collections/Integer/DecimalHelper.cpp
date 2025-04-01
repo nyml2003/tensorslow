@@ -27,7 +27,7 @@ int32_t UnicodeToDec(Unicode unicode) noexcept {
   return -1;
 }
 Byte DecToByte(int32_t dec) noexcept {
-  return static_cast<Byte>(dec + Unicode_0);
+  return static_cast<Byte>(static_cast<Byte>(dec) + Unicode_0);
 }
 Decimal CreateDecimalWithString(const String& str) {
   Index index = 0;

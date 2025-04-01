@@ -114,12 +114,13 @@ uint8_t Matrix::CheckBroadcast(const Matrix& other) const {
   if (rows == other.rows && cols == other.cols) {
     return 0b1111;
   }
-  uint8_t t1 = cols ^ 0b01;
-  uint8_t t2 = other.cols ^ 0b01;
-  uint8_t t3 = rows ^ 0b01;
-  uint8_t t4 = other.rows ^ 0b01;
-  return ((!t1 && t2) << 3) | ((!t3 && t4) << 2) | ((!t2 && t1) << 1) |
-         (!t4 && t3);
+  uint8_t t1 = static_cast<uint8_t>(cols != 1);
+  uint8_t t2 = static_cast<uint8_t>(other.cols != 1);
+  uint8_t t3 = static_cast<uint8_t>(rows != 1);
+  uint8_t t4 = static_cast<uint8_t>(other.rows != 1);
+  return ((!t1 && t2) << static_cast<uint8_t>(3)) |
+         ((!t3 && t4) << static_cast<uint8_t>(2)) |
+         ((!t2 && t1) << static_cast<uint8_t>(1)) | (!t4 && t3);
 }
 
 double Matrix::BroadcastAt(Index row, Index col, uint8_t broadcast_type) const {
@@ -209,11 +210,11 @@ double Matrix::At(Index row, Index col) const {
   return data.Get(row * cols + col);
 }
 
-Matrix Matrix::Reshape(Index rows, Index cols) const {
-  if (rows * cols != this->rows * this->cols) {
+Matrix Matrix::Reshape(Index newRows, Index newCols) const {
+  if (newRows * newCols != rows * cols) {
     throw std::invalid_argument("Matrix dimensions must be equal");
   }
-  return Matrix(rows, cols, data);
+  return Matrix(newRows, newCols, data);
 }
 
 Matrix Matrix::MatrixMultiply(const Matrix& other) const {
@@ -239,7 +240,7 @@ Matrix Matrix::Eye(Index n) {
 }
 
 Matrix Matrix::GetRows(Index start, Index stop) const {
-  if (start < 0 || stop > rows) {
+  if (stop > rows) {
     throw std::out_of_range("Index out of range");
   }
   // 行优先，行完整，可以copy
@@ -247,7 +248,7 @@ Matrix Matrix::GetRows(Index start, Index stop) const {
 }
 
 Matrix Matrix::GetCols(Index start, Index stop) const {
-  if (start < 0 || stop > cols) {
+  if (stop > cols) {
     throw std::out_of_range("Index out of range");
   }
   List<double> newData;
@@ -263,7 +264,7 @@ Matrix Matrix::GetSlice(
   Index rowStop,
   Index colStop
 ) const {
-  if (rowStart < 0 || rowStop > rows || colStart < 0 || colStop > cols) {
+  if (rowStop > rows || colStop > cols) {
     throw std::out_of_range("Index out of range");
   }
   List<double> newData;
@@ -274,7 +275,7 @@ Matrix Matrix::GetSlice(
 }
 
 void Matrix::SetRows(Index start, Index stop, const Matrix& other) {
-  if (start < 0 || stop > rows || start > stop) {
+  if (stop > rows || start > stop) {
     throw std::out_of_range("Index out of range");
   }
   if (other.rows != stop - start || other.cols != cols) {
@@ -285,7 +286,7 @@ void Matrix::SetRows(Index start, Index stop, const Matrix& other) {
   std::copy(sourceData, sourceData + (stop - start) * cols, targetData);
 }
 void Matrix::SetCols(Index start, Index stop, const Matrix& other) {
-  if (start < 0 || stop > cols - 1 || start > stop) {
+  if (stop > cols - 1 || start > stop) {
     throw std::out_of_range("Index out of range");
   }
   if (other.rows != rows || other.cols != stop - start) {
@@ -310,7 +311,7 @@ void Matrix::SetSlice(
   const Matrix& other
 ) {
   // 检查边界是否合法
-  if (rowStart < 0 || colStart < 0 || rowStop > rows || colStop > cols) {
+  if (rowStop > rows || colStop > cols) {
     throw std::out_of_range("Index out of range");
   }
   if (rowStart > rowStop || colStart > colStop) {

@@ -24,12 +24,12 @@ class Klass : public std::enable_shared_from_this<Klass> {
       type(nullptr),
       super(nullptr),
       mro(nullptr) {}
-  void SetName(const PyObjPtr& name);
-  void SetAttributes(const PyObjPtr& attributes);
-  void SetType(const PyTypePtr& type);
+  void SetName(const PyStrPtr& _name);
+  void SetAttributes(const PyDictPtr& _attributes);
+  void SetType(const PyTypePtr& _type);
   void SetNative() { this->isNative = true; }
-  void SetSuper(const PyObjPtr& super);
-  void SetMro(const PyObjPtr& mro);
+  void SetSuper(const PyListPtr& _super);
+  void SetMro(const PyListPtr& _mro);
   virtual void Initialize() { throw std::runtime_error("not implemented"); }
 
   [[nodiscard]] bool IsNative() const { return isNative; }
@@ -44,7 +44,7 @@ class Klass : public std::enable_shared_from_this<Klass> {
   [[nodiscard]] PyDictPtr Attributes() const { return attributes; }
   [[nodiscard]] PyListPtr Super() const { return super; }
   [[nodiscard]] PyListPtr Mro() const { return mro; }
-  virtual PyObjPtr init(const PyObjPtr& type, const PyObjPtr& args);
+  virtual PyObjPtr init(const PyObjPtr& typeObj, const PyObjPtr& args);
   virtual PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs);
   virtual PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs);
   virtual PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs);

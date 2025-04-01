@@ -38,7 +38,7 @@ class Matrix {
   [[nodiscard]] List<double> Data() const;
   [[nodiscard]] List<Index> Shape() const;
   [[nodiscard]] double At(Index row, Index col) const;
-  [[nodiscard]] Matrix Reshape(Index rows, Index cols) const;
+  [[nodiscard]] Matrix Reshape(Index newRows, Index newCols) const;
 
   [[nodiscard]] Matrix MatrixMultiply(const Matrix& other) const;
 

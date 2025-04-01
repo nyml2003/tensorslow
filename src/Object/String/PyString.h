@@ -45,8 +45,8 @@ class PyString : public PyObject {
   static std::mutex poolMutex;
 
  public:
-  explicit PyString(Collections::String value)
-    : PyObject(StringKlass::Self()), value(std::move(value)) {}
+  explicit PyString(Collections::String _value)
+    : PyObject(StringKlass::Self()), value(std::move(_value)) {}
   static void IncreaseIndent() { indent++; }
   static void DecreaseIndent() { indent--; }
 

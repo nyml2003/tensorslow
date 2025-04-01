@@ -15,12 +15,12 @@
 namespace torchlight::Object {
 void LoadClass(const PyStrPtr& name, const KlassPtr& klass) {
   klass->SetName(name);
-  klass->SetAttributes(CreatePyDict());
+  klass->SetAttributes(CreatePyDict()->as<PyDictionary>());
   klass->SetType(CreatePyType(klass)->as<PyType>());
-  klass->SetSuper(CreatePyList({PyObject::Instance()}));
-  klass->SetMro(
-    CreatePyList({CreatePyType(klass), CreatePyType(ObjectKlass::Self())})
-  );
+  klass->SetSuper(CreatePyList({PyObject::Instance()})->as<PyList>());
+  klass->SetMro(CreatePyList({CreatePyType(klass),
+                              CreatePyType(ObjectKlass::Self())})
+                  ->as<PyList>());
   klass->SetNative();
 }
 

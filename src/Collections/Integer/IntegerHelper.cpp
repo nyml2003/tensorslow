@@ -21,7 +21,7 @@ int8_t UnicodeToHex(Unicode unicode) noexcept {
   return -1;
 }
 Unicode HexToUnicode(uint8_t hex) noexcept {
-  if (hex >= 0 && hex <= 9) {
+  if (hex <= 9) {
     return static_cast<Unicode>(hex + Unicode_0);
   }
   if (hex >= 10 && hex <= 15) {
@@ -30,8 +30,7 @@ Unicode HexToUnicode(uint8_t hex) noexcept {
   return 0;
 }
 Integer CreateIntegerWithString(const String& str) {
-  if (str.Size() > 2 && str.Get(0) == Unicode_0 &&
-      (str.Get(1) == Unicode_X || str.Get(1) == Unicode_x)) {
+  if (str.Size() > 2 && str.Get(0) == Unicode_0 && (str.Get(1) == Unicode_X || str.Get(1) == Unicode_x)) {
     List<uint32_t> parts;
     uint32_t buffer = 0;
     uint32_t count = 0;
@@ -40,7 +39,7 @@ Integer CreateIntegerWithString(const String& str) {
       if (value == -1) {
         throw std::runtime_error("Invalid character in Hexadecimal");
       }
-      buffer = (value << (count * 4)) | buffer;
+      buffer = (static_cast<uint32_t>(value) << (count * 4)) | buffer;
       count++;
       if (count == 4) {
         parts.Push(buffer);
@@ -80,7 +79,7 @@ Integer CreateIntegerWithDecimal(const Decimal& decimal) {
     for (Index i = 0; i < remainder.Data().Size(); i++) {
       value = value * 10 + remainder.Data().Get(i);
     }
-    parts.Push(value);
+    parts.Push(static_cast<uint32_t>(value));
   }
   parts.Reverse();
   Integer result(parts, decimal.Sign());
@@ -135,14 +134,14 @@ uint64_t ToU64(const Integer& integer) {
   }
   return result;
 }
-Integer CreateIntegerWithU64(uint64_t value) {
+Integer CreateIntegerWithU64(uint64_t value, bool sign) {
   List<uint32_t> parts;
   while (value != 0) {
     parts.Push(value & 0x0000FFFF);
     value >>= 16;
   }
   parts.Reverse();
-  return Integer(parts, false);
+  return Integer(parts, sign);
 }
 
 bool IsBigNumber(const Integer& integer) {
@@ -154,9 +153,9 @@ Integer CreateIntegerWithI64(int64_t value) {
     return CreateIntegerZero();
   }
   if (value < 0) {
-    return CreateIntegerWithU64(-value).Negate();
+    return CreateIntegerWithU64(static_cast<uint64_t>(-value), true);
   }
-  return CreateIntegerWithU64(value);
+  return CreateIntegerWithU64(static_cast<uint64_t>(value), false);
 }
 int64_t ToI64(const Integer& integer) {
   if (integer.IsZero()) {
@@ -171,18 +170,5 @@ int64_t ToI64(const Integer& integer) {
   }
   return integer.Sign() ? -static_cast<int64_t>(result) : result;
 }
-uint64_t safe_add(uint64_t lhs, int64_t rhs) {
-  if (rhs >= 0) {
-    // b 是正数或零，直接相加
-    if (lhs > std::numeric_limits<uint64_t>::max() - rhs) {
-      throw std::overflow_error("Addition overflow");
-    }
-    return lhs + static_cast<uint64_t>(rhs);
-  }
-  // b 是负数，转换为补码并相减
-  if (lhs < static_cast<uint64_t>(-rhs)) {
-    throw std::underflow_error("Subtraction underflow");
-  }
-  return lhs - static_cast<uint64_t>(-rhs);
-}
+
 }  // namespace torchlight::Collections

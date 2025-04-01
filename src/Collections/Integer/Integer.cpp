@@ -1,8 +1,8 @@
 #include "Collections/Integer/Integer.h"
+#include <array>
 #include <stdexcept>
 #include "Collections/Integer/Decimal.h"
 #include "Collections/Integer/DecimalHelper.h"
-#include <array>
 #include "Collections/Integer/IntegerHelper.h"
 #include "Collections/Iterator.h"
 #include "Collections/String/StringHelper.h"
@@ -29,7 +29,7 @@ String Integer::ToHexString() const {
   List<Unicode> str;
   for (Index i = 0; i < parts.Size(); i++) {
     uint32_t item = parts.Get(i);
-    std::array<uint8_t, 4> buffer = {0,0,0,0};
+    std::array<uint8_t, 4> buffer = {0, 0, 0, 0};
     buffer[0] = (item & 0x0000F000) >> 12;
     buffer[1] = (item & 0x00000F00) >> 8;
     buffer[2] = (item & 0x000000F0) >> 4;
@@ -130,10 +130,14 @@ Integer Integer::Subtract(const Integer& rhs) const {
     List<uint32_t> _rhs = rhs.parts.Copy();
     _rhs.Reverse();
     if (_lhs.Size() > _rhs.Size()) {
-      _rhs.Concat(List<uint32_t>(_lhs.Size() - _rhs.Size(), (uint32_t)0));
+      _rhs.Concat(
+        List<uint32_t>(_lhs.Size() - _rhs.Size(), static_cast<uint32_t>(0))
+      );
       size = _lhs.Size();
     } else if (_lhs.Size() < _rhs.Size()) {
-      _lhs.Concat(List<uint32_t>(_rhs.Size() - _lhs.Size(), (uint32_t)0));
+      _lhs.Concat(
+        List<uint32_t>(_rhs.Size() - _lhs.Size(), static_cast<uint32_t>(0))
+      );
       size = _rhs.Size();
       _sign = true;
       std::swap(_lhs, _rhs);

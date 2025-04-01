@@ -1,6 +1,6 @@
 #include "Collections/String/Bytes.h"
 namespace torchlight::Collections {
-Bytes::Bytes(const List<Byte>& value) : value(value) {}
+Bytes::Bytes(const List<Byte>& _value) : value(_value) {}
 Bytes::Bytes() = default;
 [[nodiscard]] Bytes Bytes::Add(const Bytes& rhs) const {
   List<Byte> bytes(value.Copy());

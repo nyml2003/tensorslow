@@ -15,7 +15,7 @@ String Decimal::ToString() const {
     str.Push(UnicodeMinus);
   }
   for (Index i = 0; i < parts.Size(); i++) {
-    str.Push(parts.Get(i) + UnicodeDigitZero);
+    str.Push(static_cast<uint32_t>(parts.Get(i)) + UnicodeDigitZero);
   }
   return String(str);
 }
@@ -86,13 +86,12 @@ bool Decimal::GreaterThan(const Decimal& rhs) const {
     return sign ^ (parts.Size() > rhs.parts.Size());
   }
   // 此时左值和右值的位数相等，正负号相同
-  for (auto it = Iterator<int32_t>::Begin(parts),
-            it2 = Iterator<int32_t>::Begin(rhs.parts);
-       !it.End() && !it2.End(); it.Next(), it2.Next()) {
-    if (it.Get() == it2.Get()) {
+  for (auto lhsIndex = 0, rhsIndex = 0; lhsIndex < parts.Size();
+       lhsIndex++, rhsIndex++) {
+    if (parts.Get(lhsIndex) == rhs.parts.Get(rhsIndex)) {
       continue;
     }
-    return sign ^ (it.Get() > it2.Get());
+    return sign ^ (parts.Get(lhsIndex) > rhs.parts.Get(rhsIndex));
   }
   return false;
 }
@@ -100,7 +99,7 @@ Decimal Decimal::Subtract(const Decimal& rhs) const {
   // 正负号相同
   if (sign == rhs.sign) {
     // 假定左值大于右值
-    bool sign = false;
+    bool newSign = false;
     Index size = 0;
     List<int32_t> _lhs = parts.Copy();
     List<int32_t> _rhs = rhs.parts.Copy();
@@ -112,7 +111,7 @@ Decimal Decimal::Subtract(const Decimal& rhs) const {
     } else if (_lhs.Size() < _rhs.Size()) {
       _lhs.Concat(List<int32_t>(_rhs.Size() - _lhs.Size(), 0));
       size = _rhs.Size();
-      sign = true;
+      newSign = true;
       std::swap(_lhs, _rhs);
     } else {
       size = _lhs.Size();
@@ -123,7 +122,7 @@ Decimal Decimal::Subtract(const Decimal& rhs) const {
           break;
         }
         if (it.Get() < it2.Get()) {
-          sign = true;
+          newSign = true;
           std::swap(_lhs, _rhs);
           break;
         }
@@ -146,7 +145,7 @@ Decimal Decimal::Subtract(const Decimal& rhs) const {
     }
     TrimTrailingZero(result);
     result.Reverse();
-    Decimal ans(result, this->sign ^ sign);
+    Decimal ans(result, sign ^ newSign);
     return ans;
   }
   return Add(rhs.Copy().Negate());

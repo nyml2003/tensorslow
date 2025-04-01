@@ -459,8 +459,9 @@ PyObjPtr PyFrame::Eval() {
       case ByteCode::POP_JUMP_IF_FALSE: {
         auto needJump = stack.Pop();
         if (!IsTrue(needJump)) {
-          SetProgramCounter(Collections::safe_add(
-            ProgramCounter(), std::get<int64_t>(inst->Operand())
+          SetProgramCounter(static_cast<Index>(
+            static_cast<int64_t>(ProgramCounter()) +
+            std::get<int64_t>(inst->Operand())
           ));
         } else {
           NextProgramCounter();
@@ -470,8 +471,9 @@ PyObjPtr PyFrame::Eval() {
       case ByteCode::POP_JUMP_IF_TRUE: {
         auto needJump = stack.Pop();
         if (IsTrue(needJump)) {
-          SetProgramCounter(Collections::safe_add(
-            ProgramCounter(), std::get<int64_t>(inst->Operand())
+          SetProgramCounter(static_cast<Index>(
+            static_cast<int64_t>(ProgramCounter()) +
+            std::get<int64_t>(inst->Operand())
           ));
         } else {
           NextProgramCounter();
@@ -777,8 +779,9 @@ PyObjPtr PyFrame::Eval() {
         auto iter = stack.Pop();
         auto value = iter->next();
         if (value->is<IterDone>()) {
-          SetProgramCounter(Collections::safe_add(
-            ProgramCounter(), std::get<int64_t>(inst->Operand())
+          SetProgramCounter(static_cast<Index>(
+            static_cast<int64_t>(ProgramCounter()) +
+            std::get<int64_t>(inst->Operand())
           ));
         } else {
           stack.Push(iter);

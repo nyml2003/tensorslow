@@ -14,28 +14,28 @@
 
 namespace torchlight::Object {
 
-void Klass::SetName(const PyObjPtr& name) {
-  this->name = name->as<PyString>();
+void Klass::SetName(const PyStrPtr& _name) {
+  this->name = _name;
 }
 
-void Klass::SetAttributes(const PyObjPtr& attributes) {
-  this->attributes = attributes->as<PyDictionary>();
+void Klass::SetAttributes(const PyDictPtr& _attributes) {
+  this->attributes = _attributes;
 }
 
-void Klass::SetType(const PyTypePtr& type) {
-  this->type = type;
+void Klass::SetType(const PyTypePtr& _type) {
+  this->type = _type;
 }
 
-void Klass::SetSuper(const PyObjPtr& super) {
-  this->super = super->as<PyList>();
+void Klass::SetSuper(const PyListPtr& _super) {
+  this->super = _super;
 }
 
-void Klass::SetMro(const PyObjPtr& mro) {
-  this->mro = mro->as<PyList>();
+void Klass::SetMro(const PyListPtr& _mro) {
+  this->mro = _mro;
 }
 
-PyObjPtr Klass::init(const PyObjPtr& type, const PyObjPtr& args) {
-  auto klass = type->as<PyType>()->Owner();
+PyObjPtr Klass::init(const PyObjPtr& typeObj, const PyObjPtr& args) {
+  auto klass = typeObj->as<PyType>()->Owner();
   auto instance = std::make_shared<PyObject>(klass);
   if (klass->IsNative()) {
     return instance;

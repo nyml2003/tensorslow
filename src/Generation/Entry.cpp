@@ -31,6 +31,9 @@ void DefineOption() {
   schema.Add(Parameter(
     "file",
     [](const std::string& value) {
+      if (value.empty()) {
+        return false;
+      }
       // 文件系统里有没有这个文件
       bool file_exists = std::filesystem::exists(value);
       // 后缀名是.py 且文件是一个普通文件
@@ -38,19 +41,21 @@ void DefineOption() {
       bool is_regular = std::filesystem::is_regular_file(value);
       return file_exists && is_py && is_regular;
     },
-    "D:\\code\\project\\torchlight\\test\\dev\\dev.py",
-    "单文件模式，指定要解析的文件"
+    "", "单文件模式，指定要解析的文件"
   ));
   schema.Add(Parameter(
     "dir",
     [](const std::string& value) {
+      if (value.empty()) {
+        return false;
+      }
       // 文件系统里有没有这个文件夹
       bool dir_exists = std::filesystem::exists(value);
       // 文件是一个目录
       bool is_dir = std::filesystem::is_directory(value);
       return dir_exists && is_dir;
     },
-    "D:\\code\\project\\torchlight\\test\\integration",
+    "",
     "目录模式，指定要解析的目录, "
     "认为目录下有且仅有包，将每个包下的所有.py文件都解析"
   ));
@@ -58,7 +63,7 @@ void DefineOption() {
     "show_ast",
     [](const std::string& value) {
       // value 是 "true" 或 "false"
-      return value == "true" || value == "";
+      return value == "true" || value.empty();
     },
     "true", "是否显示AST树"
   ));
@@ -66,7 +71,7 @@ void DefineOption() {
     "show_code",
     [](const std::string& value) {
       // value 是 "true" 或 "false"
-      return value == "true" || value == "";
+      return value == "true" || value.empty();
     },
     "true", "是否显示生成的code object"
   ));
@@ -94,7 +99,7 @@ void ParseAndGenerate(const fs::path& filePath) {
 
   antlr4::tree::ParseTree* tree = parser.file_input();
 
-  if (ArgsHelper::Instance().Has("show_ast")) {
+  if (ArgsHelper::Has("show_ast")) {
     std::cout << "AST tree: " << std::endl;
     std::cout << tree->toStringTree(&parser) << std::endl;
   }
@@ -110,7 +115,7 @@ void ParseAndGenerate(const fs::path& filePath) {
   visitor.Visit();
   visitor.Emit();
   auto code = visitor.Code();
-  if (ArgsHelper::Instance().Has("show_code")) {
+  if (ArgsHelper::Has("show_code")) {
     torchlight::Object::PrintCode(code);
   }
   torchlight::Collections::Bytes data =
@@ -130,12 +135,12 @@ int main(int argc, char** argv) {
   ArgsHelper::Instance().Accept(argc, argv);
   InitPyObj();
 
-  if (ArgsHelper::Instance().Has("file")) {
-    ParseAndGenerate(ArgsHelper::Instance().Get("file"));
+  if (ArgsHelper::Has("file")) {
+    ParseAndGenerate(ArgsHelper::Get("file"));
     return 0;
   }
-  if (ArgsHelper::Instance().Has("dir")) {
-    auto dir = ArgsHelper::Instance().Get("dir");
+  if (ArgsHelper::Has("dir")) {
+    auto dir = ArgsHelper::Get("dir");
     std::vector<fs::path> subdirs;
     for (const auto& entry : fs::directory_iterator(dir)) {
       if (entry.is_directory()) {
@@ -151,8 +156,12 @@ int main(int argc, char** argv) {
     }
     return 0;
   }
-  auto file = ArgsHelper::Instance().Get("file");
-  ParseAndGenerate(file);
+  auto file = ArgsHelper::Get("file");
+  if (file.empty()) {
+    ArgsHelper::PrintUsage();
+  } else {
+    ParseAndGenerate(file);
+  }
 
   return 0;
 }

@@ -204,9 +204,9 @@ class List {
 template <typename T>
 List<T>::~List() = default;
 template <typename T>
-List<T>::List(Index capacity) : size(0), capacity(capacity) {
-  if (capacity > 0) {
-    elements = std::make_unique<T[]>(capacity);
+List<T>::List(Index _capacity) : size(0), capacity(_capacity) {
+  if (_capacity > 0) {
+    elements = std::make_unique<T[]>(_capacity);
   }
 }
 template <typename T>
@@ -408,7 +408,7 @@ void List<T>::RemoveAt(Index index) {
 }
 template <typename T>
 void List<T>::RemoveRange(Index start, Index length) {
-  if (start >= size || start + length > size || length < 0) {
+  if (start >= size || start + length > size) {
     throw std::runtime_error("List::RemoveRange::Index out of range");
   }
   if (length == 0) {

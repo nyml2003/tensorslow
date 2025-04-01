@@ -37,7 +37,7 @@ void Schema::Add(const Parameter& param) {
   parameters.insert_or_assign(param.Name(), param);
 }
 
-Parameter Schema::Find(std::string option) {
+Parameter Schema::Find(const std::string& option) {
   auto parameter = parameters.find(option);
   if (parameter == parameters.end()) {
     PrintUsage();
@@ -46,7 +46,7 @@ Parameter Schema::Find(std::string option) {
   return parameter->second;
 }
 
-void Schema::Check(std::string option, std::string value) const {
+void Schema::Check(const std::string& option, const std::string& value) const {
   auto parameter = parameters.find(option);
   if (parameter == parameters.end()) {
     PrintUsage();
@@ -115,7 +115,7 @@ void ArgsHelper::HandleDefaultParameters(const std::string& option) const {
   }
 }
 
-std::string ArgsHelper::Get(const std::string& option) const {
+std::string ArgsHelper::Get(const std::string& option) {
   auto& instance = ArgsHelper::Instance();
   auto it = instance.parameters.find(option);
   if (it == instance.parameters.end()) {
@@ -128,9 +128,13 @@ std::string ArgsHelper::Get(const std::string& option) const {
   return it->second;
 }
 
-bool ArgsHelper::Has(const std::string& option) const {
+bool ArgsHelper::Has(const std::string& option) {
   return ArgsHelper::Instance().parameters.find(option) !=
          ArgsHelper::Instance().parameters.end();
+}
+
+void ArgsHelper::PrintUsage() {
+  ArgsHelper::Instance().schema.PrintUsage();
 }
 
 std::vector<fs::path> GetFilesInDirectory(
@@ -140,8 +144,7 @@ std::vector<fs::path> GetFilesInDirectory(
   std::vector<fs::path> fileNames;
   if (fs::exists(directoryPath) && fs::is_directory(directoryPath)) {
     for (const auto& entry : fs::directory_iterator(directoryPath)) {
-      if (fs::is_regular_file(entry.status()) &&
-          entry.path().extension() == extension) {
+      if (fs::is_regular_file(entry.status()) && entry.path().extension() == extension) {
         fileNames.push_back(entry.path());
       }
     }

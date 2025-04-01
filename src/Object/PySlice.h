@@ -34,11 +34,11 @@ class PySlice : public PyObject {
   PyObjPtr step;
 
  public:
-  PySlice(PyObjPtr start, PyObjPtr stop, PyObjPtr step)
+  PySlice(PyObjPtr _start, PyObjPtr _stop, PyObjPtr _step)
     : PyObject(SliceKlass::Self()),
-      start(std::move(start)),
-      stop(std::move(stop)),
-      step(std::move(step)) {}
+      start(std::move(_start)),
+      stop(std::move(_stop)),
+      step(std::move(_step)) {}
 
   PyObjPtr GetStart() const { return start; }
   PyObjPtr GetStop() const { return stop; }

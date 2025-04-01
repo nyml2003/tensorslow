@@ -222,7 +222,13 @@ PyObjPtr ListKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
       return list->GetItem(index->ToU64());
     }
     if (index->GetSign() == Collections::Integer::IntSign::Negative) {
-      return list->GetItem(list->Length() + index->ToI64());
+      //      return list->GetItem(list->Length() + index->ToI64());
+      // warning: implicit conversion changes signedness: 'int64_t' (aka 'long
+      // long') to 'Index' (aka 'unsigned long long')
+      // [clang-diagnostic-sign-conversion]
+      return list->GetItem(static_cast<Index>(
+        static_cast<int64_t>(list->Length()) + index->ToI64()
+      ));
     }
   }
   if (key->is<PySlice>()) {

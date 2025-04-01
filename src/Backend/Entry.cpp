@@ -18,6 +18,9 @@ void DefineOption() {
   schema.Add(Parameter(
     "file",
     [](const std::string& value) {
+      if (value.empty()) {
+        return false;
+      }
       // 文件系统里有没有这个文件
       bool file_exists = std::filesystem::exists(value);
       // 后缀名是.py 且文件是一个普通文件
@@ -25,47 +28,49 @@ void DefineOption() {
       bool is_regular = std::filesystem::is_regular_file(value);
       return file_exists && is_py && is_regular;
     },
-    "D:\\code\\project\\torchlight\\test\\dev\\dev.pyc",
-    "单文件模式，指定要解析的文件"
+    "", "单文件模式，指定要解析的文件"
   ));
   schema.Add(Parameter(
     "dir",
     [](const std::string& value) {
+      if (value.empty()) {
+        return false;
+      }
       // 文件系统里有没有这个文件夹
       bool dir_exists = std::filesystem::exists(value);
       // 文件是一个目录
       bool is_dir = std::filesystem::is_directory(value);
       return dir_exists && is_dir;
     },
-    "/app/test/integration",
+    "",
     "目录模式，指定要解析的目录, "
     "认为目录下有且仅有包，将每个包下的所有.py文件都解析"
   ));
   schema.Add(Parameter(
     "debug",
-    [](const std::string& value) { return value == "true" || value == ""; },
+    [](const std::string& value) { return value == "true" || value.empty(); },
     "true", "是否开启调试模式"
   ));
   schema.Add(Parameter(
     "compare_result",
-    [](const std::string& value) { return value == "true" || value == ""; },
+    [](const std::string& value) { return value == "true" || value.empty(); },
     "true", "是否和预期结果比较"
   ));
   schema.Add(Parameter(
     "show_result",
     [](const std::string& value) {
       // value 是 "true" 或 "false"
-      return value == "true" || value == "";
+      return value == "true" || value.empty();
     },
     "true", "是否直接输出结果"
   ));
   ArgsHelper::SetSchema(schema);
 }
 
-void HandleResultBegin(fs::path filename) {
-  bool compare_result = ArgsHelper::Instance().Has("compare_result");
-  bool show_result = ArgsHelper::Instance().Has("show_result");
-  bool debug = ArgsHelper::Instance().Has("debug");
+void HandleResultBegin(const fs::path& filename) {
+  bool compare_result = ArgsHelper::Has("compare_result");
+  bool show_result = ArgsHelper::Has("show_result");
+  bool debug = ArgsHelper::Has("debug");
   if (compare_result && show_result) {
     throw std::runtime_error("compare_result 和 show_result 不能同时为 true");
   }
@@ -103,9 +108,9 @@ void HandleResultBegin(fs::path filename) {
   }
 }
 
-void HandleResultEnd(fs::path filename) {
+void HandleResultEnd(const fs::path& filename) {
   redirectCout.restore();
-  bool compare_result = ArgsHelper::Instance().Has("compare_result");
+  bool compare_result = ArgsHelper::Has("compare_result");
   if (compare_result) {
     auto filename_dir = filename.parent_path();
     auto write_filename =
@@ -122,7 +127,6 @@ void HandleResultEnd(fs::path filename) {
       if (write_line != expected_line) {
         std::cout << "❌ 测试失败" << std::endl;
         exit(1);
-        return;
       }
     }
     std::cout << "✅ 测试通过" << std::endl << std::endl;
@@ -137,13 +141,8 @@ void RunTest(const fs::path& filename) {
   auto code = parser.Parse();
 
   HandleResultBegin(filename);
-  Runtime::Interpreter::Instance().Run(code);
+  Runtime::Interpreter::Run(code);
   HandleResultEnd(filename);
-}
-
-void AddOptionWhenDebug(int& argc, char** argv) {
-  argc++;
-  argv[argc - 1] = "--debug";
 }
 
 int main(int argc, char** argv) {
@@ -152,8 +151,8 @@ int main(int argc, char** argv) {
 #endif
   DefineOption();
   ArgsHelper::Instance().Accept(argc, argv);
-  if (ArgsHelper::Instance().Has("dir")) {
-    auto dir = ArgsHelper::Instance().Get("dir");
+  if (ArgsHelper::Has("dir")) {
+    auto dir = ArgsHelper::Get("dir");
     std::vector<fs::path> subdirs;
     for (const auto& entry : fs::directory_iterator(dir)) {
       if (entry.is_directory()) {
@@ -170,16 +169,18 @@ int main(int argc, char** argv) {
     }
     return 0;
   }
-  if (ArgsHelper::Instance().Has("file")) {
-    auto file = ArgsHelper::Instance().Get("file");
+  if (ArgsHelper::Has("file")) {
+    auto file = ArgsHelper::Get("file");
 
     RunTest(file);
 
     return 0;
   }
-  auto file = ArgsHelper::Instance().Get("file");
-
-  RunTest(file);
-
+  auto file = ArgsHelper::Get("file");
+  if (!file.empty()) {
+    RunTest(file);
+  } else {
+    ArgsHelper::PrintUsage();
+  }
   return 0;
 }

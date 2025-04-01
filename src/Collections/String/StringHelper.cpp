@@ -4,14 +4,10 @@
 #include "Collections/String/String.h"
 
 #include <cstring>
-#include <iostream>
 #include <stdexcept>
 namespace torchlight::Collections {
-Unicode GetUnicode(
-  Index& index,
-  const std::function<Byte(Index)>& GetByte,
-  const std::function<bool(Index)>& IsValid
-) noexcept {
+Unicode
+GetUnicode(Index& index, const std::function<Byte(Index)>& GetByte) noexcept {
   Byte leadByte = GetByte(index);
   int sequenceLength = 0;
   if ((leadByte & 0x80) == 0) {
@@ -22,14 +18,14 @@ Unicode GetUnicode(
     sequenceLength = 3;
   } else if ((leadByte & 0xF8) == 0xF0) {
     sequenceLength = 4;
-  } 
+  }
   Unicode codePoint = 0;
   switch (sequenceLength) {
     case 1:
       codePoint = leadByte;
       break;
     case 2:
-      codePoint = (leadByte & 0x1F) << 6;
+      codePoint = (leadByte & 0x1F) << static_cast<Unicode>(6);
       codePoint |= GetByte(index + 1) & 0x3F;
       break;
     case 3:
@@ -43,6 +39,8 @@ Unicode GetUnicode(
       codePoint |= (GetByte(index + 2) & 0x3F) << 6;
       codePoint |= GetByte(index + 3) & 0x3F;
       break;
+    default:
+      break;
   }
   index += sequenceLength;
   return codePoint;
@@ -52,11 +50,9 @@ String CreateStringWithCString(const char* str) noexcept {
   size_t length = strlen(str);
   size_t index = 0;
   while (index < length) {
-    Unicode codePoint = GetUnicode(
-      index,
-      [str](Index index) -> Byte { return static_cast<Byte>(str[index]); },
-      [length](Index index) -> bool { return index < length; }
-    );
+    Unicode codePoint = GetUnicode(index, [str](Index index) -> Byte {
+      return static_cast<Byte>(str[index]);
+    });
     codePoints.Push(codePoint);
   }
   return String(codePoints);
@@ -66,10 +62,8 @@ String CreateStringWithBytes(const Bytes& bytes) noexcept {
   size_t length = bytes.Size();
   size_t index = 0;
   while (index < length) {
-    Unicode codePoint = GetUnicode(
-      index, [&bytes](Index index) -> Byte { return bytes[index]; },
-      [length](Index index) -> bool { return index < length; }
-    );
+    Unicode codePoint =
+      GetUnicode(index, [&bytes](Index index) -> Byte { return bytes[index]; });
     codePoints.Push(codePoint);
   }
   return String(codePoints);

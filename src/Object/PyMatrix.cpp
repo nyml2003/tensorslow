@@ -1,7 +1,6 @@
 #include "Object/PyMatrix.h"
 #include <iostream>
 #include "Collections/Matrix.h"
-#include "Function/ObjectHelper.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"

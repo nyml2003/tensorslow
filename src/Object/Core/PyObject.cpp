@@ -41,7 +41,7 @@ void ObjectKlass::Initialize() {
   }
   auto instance = Self();
   instance->SetName(CreatePyString("object")->as<PyString>());
-  instance->SetAttributes(CreatePyDict());
+  instance->SetAttributes(CreatePyDict()->as<PyDictionary>());
   instance->AddAttribute(
     CreatePyString("__init__")->as<PyString>(),
     CreatePyNativeFunction(ObjectInit)
@@ -58,8 +58,10 @@ void ObjectKlass::Initialize() {
     CreatePyNativeFunction(KlassBool)
   );
   instance->SetType(CreatePyType(instance)->as<PyType>());
-  instance->SetSuper(CreatePyList({}));
-  instance->SetMro(CreatePyList({CreatePyType(instance)->as<PyType>()}));
+  instance->SetSuper(CreatePyList({})->as<PyList>());
+  instance->SetMro(
+    CreatePyList({CreatePyType(instance)->as<PyType>()})->as<PyList>()
+  );
   instance->SetNative();
   ConfigureBasicAttributes(instance);
   this->isInitialized = true;
