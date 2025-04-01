@@ -17,6 +17,7 @@ class MROTest : public ::testing::Test {
   void SetUp() override {
     // 初始化操作，如创建测试对象等
     BasicKlassLoad();
+    NativeClassLoad();
   }
 };
 
@@ -67,5 +68,44 @@ TEST_F(MROTest, Init) {
                               CreatePyList({typeE, typeF})->as<PyList>()
                             ))
                  ->as<PyType>();
-  DebugPrint(ComputeMro(typeG));
+  auto mroOfG = ComputeMro(typeG);
+  /**
+   * MRO of G: ['G', 'E', 'A', 'F', 'B', 'C', 'O', 'object']
+MRO of E: ['E', 'A', 'B', 'O', 'object']
+MRO of F: ['F', 'B', 'C', 'O', 'object']
+
+
+   */
+  EXPECT_STREQ(
+    mroOfG->GetItem(0)->str()->as<PyString>()->ToCppString().c_str(),
+    "<class 'G'>"
+  );
+  EXPECT_STREQ(
+    mroOfG->GetItem(1)->str()->as<PyString>()->ToCppString().c_str(),
+    "<class 'E'>"
+  );
+  EXPECT_STREQ(
+    mroOfG->GetItem(2)->str()->as<PyString>()->ToCppString().c_str(),
+    "<class 'A'>"
+  );
+  EXPECT_STREQ(
+    mroOfG->GetItem(3)->str()->as<PyString>()->ToCppString().c_str(),
+    "<class 'F'>"
+  );
+  EXPECT_STREQ(
+    mroOfG->GetItem(4)->str()->as<PyString>()->ToCppString().c_str(),
+    "<class 'B'>"
+  );
+  EXPECT_STREQ(
+    mroOfG->GetItem(5)->str()->as<PyString>()->ToCppString().c_str(),
+    "<class 'C'>"
+  );
+  EXPECT_STREQ(
+    mroOfG->GetItem(6)->str()->as<PyString>()->ToCppString().c_str(),
+    "<class 'O'>"
+  );
+  EXPECT_STREQ(
+    mroOfG->GetItem(7)->str()->as<PyString>()->ToCppString().c_str(),
+    "<class 'object'>"
+  );
 }

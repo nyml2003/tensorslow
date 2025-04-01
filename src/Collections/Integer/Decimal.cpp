@@ -115,13 +115,12 @@ Decimal Decimal::Subtract(const Decimal& rhs) const {
       std::swap(_lhs, _rhs);
     } else {
       size = _lhs.Size();
-      for (auto it = Iterator<int32_t>::RBegin(_lhs),
-                it2 = Iterator<int32_t>::RBegin(_rhs);
-           !it.End() && !it2.End(); it.Next(), it2.Next()) {
-        if (it.Get() > it2.Get()) {
+      for (Index lhsIndex = _lhs.Size() - 1, rhsIndex = _rhs.Size() - 1;
+           ~lhsIndex && ~rhsIndex; lhsIndex--, rhsIndex--) {
+        if (_lhs.Get(lhsIndex) > _rhs.Get(rhsIndex)) {
           break;
         }
-        if (it.Get() < it2.Get()) {
+        if (_lhs.Get(lhsIndex) < _rhs.Get(rhsIndex)) {
           newSign = true;
           std::swap(_lhs, _rhs);
           break;
@@ -130,17 +129,16 @@ Decimal Decimal::Subtract(const Decimal& rhs) const {
     }
     List<int32_t> result(size);
     int32_t borrow = 0;
-    for (auto it = Iterator<int32_t>::Begin(_lhs),
-              it2 = Iterator<int32_t>::Begin(_rhs);
-         !it.End() || !it2.End(); it.Next(), it2.Next()) {
-      int32_t diff = borrow + it.Get();
-      if (diff < it2.Get()) {
+    for (Index lhsIndex = 0, rhsIndex = 0; lhsIndex < size;
+         lhsIndex++, rhsIndex++) {
+      int32_t diff = borrow + _lhs.Get(lhsIndex);
+      if (diff < _rhs.Get(rhsIndex)) {
         diff += 10;
         borrow = -1;
       } else {
         borrow = 0;
       }
-      diff -= it2.Get();
+      diff -= _rhs.Get(rhsIndex);
       result.Push(diff);
     }
     TrimTrailingZero(result);

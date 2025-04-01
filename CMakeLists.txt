@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
 project(torchlight)
 include(cmake/GlobalSettings.cmake)
 include(cmake/AntlrConfig.cmake)

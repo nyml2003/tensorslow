@@ -6,6 +6,7 @@
 #include "Object/Core/PyType.h"
 #include "Object/Function/PyIife.h"
 #include "Object/Iterator/Iterator.h"
+#include "Object/Iterator/IteratorHelper.h"
 #include "Object/Iterator/PyGenerator.h"
 #include "Object/Number/PyFloat.h"
 #include "Object/Number/PyInteger.h"
@@ -108,35 +109,45 @@ PyObjPtr GetDict(const PyObjPtr& args) {
   return obj->Attributes();
 }
 PyListPtr ComputeMro(const PyTypePtr& type) {
-  if (type->Owner()->Mro() != nullptr) {
-    // DebugPrint(StringConcat(CreatePyList(
-    //   {CreatePyString("Mro for "), type->Owner()->Name(),
-    //    CreatePyString(" already computed: "), type->Owner()->Mro()->str()}
-    // )));
-    return type->Owner()->Mro();
+  auto oldMro = type->Owner()->Mro();
+  if (oldMro) {
+    //    Function::DebugPrint(StringConcat(CreatePyList(
+    //      {CreatePyString("Mro for "), type->Owner()->Name(),
+    //       CreatePyString(" already computed: "), oldMro->str()}
+    //    )));
+    return oldMro;
   }
-  // DebugPrint(StringConcat(CreatePyList(
-  //   {CreatePyString("Computing Mro for "), type->Owner()->Name(),
-  //    CreatePyString(" with super: "), type->Owner()->Super()->str()}
-  // )));
+  //  Function::DebugPrint(StringConcat(CreatePyList(
+  //    {CreatePyString("Computing Mro for "), type->Owner()->Name(),
+  //     CreatePyString(" with super: "), type->Owner()->Super()->str()}
+  //  )));
   auto bases = type->Owner()->Super();
   PyListPtr mros = CreatePyList({})->as<PyList>();
   for (Index i = 0; i < bases->Length(); i++) {
     auto base = bases->GetItem(i)->as<PyType>();
-    mros->Append(ComputeMro(base));
+    auto mro = base->Owner()->Mro();
+    mros->Append(mro->Copy());
   }
-  // DebugPrint(StringConcat(
-  //   CreatePyList({CreatePyString("Mros needed to merge: "), mros->str()})
-  // ));
+  //  Function::DebugPrint(StringConcat(
+  //    CreatePyList({CreatePyString("Mros needed to merge: "), mros->str()})
+  //  ));
+  //  ForEach(mros, [&](const PyObjPtr& mro, Index, const PyObjPtr&) {
+  //    mro->str()->as<PyString>()->Print();
+  //  });
+  //  CreatePyString("")->as<PyString>()->PrintLine();
   auto mro = MergeMro(mros);
-  // DebugPrint(
-  //   StringConcat(CreatePyList({CreatePyString("Merged Mro: "), mro->str()}))
-  // );
+  //  Function::DebugPrint(
+  //    StringConcat(CreatePyList({CreatePyString("Merged Mro: "), mro->str()}))
+  //  );
+  //  ForEach(mros, [&](const PyObjPtr& mro, Index, const PyObjPtr&) {
+  //    mro->str()->as<PyString>()->Print();
+  //  });
+  //  CreatePyString("")->as<PyString>()->PrintLine();
   mro = CreatePyList({type})->as<PyList>()->Add(mro)->as<PyList>();
-  // DebugPrint(StringConcat(CreatePyList(
-  //   {CreatePyString("Mro for "), type->Owner()->Name(), CreatePyString(": "),
-  //    mro->str()}
-  // )));
+  //  Function::DebugPrint(StringConcat(CreatePyList(
+  //    {CreatePyString("Mro for "), type->Owner()->Name(), CreatePyString(":"),
+  //     mro->str()}
+  //  )));
   return mro;
 }
 
@@ -157,9 +168,9 @@ PyListPtr MergeMro(const PyListPtr& mros) {
   PyListPtr result = CreatePyList({})->as<PyList>();
   CleanMros(mros);
   while (mros->Length() > 1) {
-    // DebugPrint(StringConcat(
-    //   CreatePyList({CreatePyString("Mros to merge: "), mros->str()})
-    // ));
+    //    Function::DebugPrint(StringConcat(
+    //      CreatePyList({CreatePyString("Mros to merge: "), mros->str()})
+    //    ));
     bool notFindBase = true;
     for (Index i = 0; i < mros->Length() && notFindBase; i++) {
       auto head = mros->GetItem(i)->as<PyList>()->GetItem(0)->as<PyType>();
@@ -169,13 +180,13 @@ PyListPtr MergeMro(const PyListPtr& mros) {
       }
       notFindBase = false;
       result->Append(head);
-      // DebugPrint(StringConcat(
-      //   CreatePyList({CreatePyString("choose base: "),
-      //   head->Owner()->Name()})
-      // ));
-      // DebugPrint(StringConcat(
-      //   CreatePyList({CreatePyString("Mros merging: "), mros->str()})
-      // ));
+      //      Function::DebugPrint(StringConcat(
+      //        CreatePyList({CreatePyString("choose base: "),
+      //        head->Owner()->Name()})
+      //      ));
+      //      Function::DebugPrint(StringConcat(
+      //        CreatePyList({CreatePyString("Mros merging: "), mros->str()})
+      //      ));
       for (Index j = 0; j < mros->Length(); j++) {
         if (i == j) {
           continue;
@@ -192,9 +203,9 @@ PyListPtr MergeMro(const PyListPtr& mros) {
         mros->RemoveAt(i);
       }
     }
-    // DebugPrint(StringConcat(
-    //   CreatePyList({CreatePyString("Mros after merge: "), mros->str()})
-    // ));
+    //    Function::DebugPrint(StringConcat(
+    //      CreatePyList({CreatePyString("Mros after merge: "), mros->str()})
+    //    ));
   }
   if (mros->Length() == 0) {
     return result;
@@ -272,11 +283,12 @@ KlassPtr CreatePyKlass(
   const PyListPtr& super
 ) {
   auto klass = std::make_shared<Klass>();
+  auto type = CreatePyType(klass)->as<PyType>();
   klass->SetName(name);
   klass->SetAttributes(attributes);
-  klass->SetType(CreatePyType(klass)->as<PyType>());
+  klass->SetType(type);
   klass->SetSuper(super);
-  klass->SetMro(ComputeMro(klass->Type()));
+  klass->SetMro(ComputeMro(type));
   ConfigureBasicAttributes(klass);
   return klass;
 }

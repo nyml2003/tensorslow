@@ -50,8 +50,8 @@ TEST_F(PyIntegerTest, TestMul) {
   ));
 }
 
-TEST_F(PyIntegerTest, TestDiv) {
-  auto result = IntegerKlass::Self()->div(integer2, integer1);
+TEST_F(PyIntegerTest, TestFloorDiv) {
+  auto result = IntegerKlass::Self()->floordiv(integer2, integer1);
   EXPECT_TRUE(std::dynamic_pointer_cast<PyInteger>(result)->value.Equal(
     CreateIntegerWithCString("2")
   ));

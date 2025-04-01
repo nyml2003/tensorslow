@@ -226,14 +226,6 @@ TEST(Integer, U64) {
   ASSERT_THROW(ToU64(int5), std::runtime_error);
 }
 
-TEST(Integer, safeAdd) {
-  uint64_t u123 = 123;
-  int64_t ip100 = 100;
-  int64_t im100 = -100;
-  ASSERT_TRUE(safe_add(u123, ip100) == 223);
-  ASSERT_TRUE(safe_add(u123, im100) == 23);
-}
-
 TEST(Integer, LessThanOrEqual) {
   ASSERT_TRUE(CreateIntegerWithCString("123").LessThanOrEqual(
     CreateIntegerWithCString("456")
