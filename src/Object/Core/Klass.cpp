@@ -35,9 +35,9 @@ void Klass::SetMro(const PyListPtr& _mro) {
 }
 
 PyObjPtr Klass::init(const PyObjPtr& typeObj, const PyObjPtr& args) {
-  auto klass = typeObj->as<PyType>()->Owner();
-  auto instance = std::make_shared<PyObject>(klass);
-  if (klass->IsNative()) {
+  auto instanceType = typeObj->as<PyType>()->Owner();
+  auto instance = std::make_shared<PyObject>(instanceType);
+  if (instanceType->IsNative()) {
     return instance;
   }
   Invoke(instance, CreatePyString("__init__"), args->as<PyList>());

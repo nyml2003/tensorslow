@@ -31,9 +31,9 @@ class PyFrame : public PyObject {
  public:
   explicit PyFrame(
     PyCodePtr code,
-    PyDictPtr locals,      // 传入的是 PyObjPtr
-    PyDictPtr globals,     // 传入的是 PyObjPtr
-    PyListPtr fastLocals,  // 传入的是 PyObjPtr
+    PyDictPtr locals,
+    PyDictPtr globals,
+    PyListPtr fastLocals,
     PyFramePtr caller
   );
 

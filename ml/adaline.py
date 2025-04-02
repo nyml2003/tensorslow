@@ -27,7 +27,7 @@ class Graph:
 
     def reset_value(self):
         for node in self.nodes:
-            node.reset_value(False)
+            node.reset_value()
 
 
 graph = Graph()
@@ -191,29 +191,51 @@ class PerceptionLoss(LossFunction):
 
 print('class loaded')
 
-sample_num = 50
 
-male_heights = Normal(171.0, 6.0, sample_num)
-female_heights = Normal(158.0, 5.0, sample_num)
+def generateSample(num):
+    male_heights = Normal(171.0, 6.0, num)
+    male_weights = Normal(70.0, 10.0, num)
+    male_bfrs = Normal(16.0, 2.0, num)
+    female_weights = Normal(57.0, 8.0, num)
+    female_heights = Normal(158.0, 5.0, num)
+    female_bfrs = Normal(22.0, 2.0, num)
+    male_labels = [1.0] * num
+    female_labels = [-1.0] * num
+    train_set = Concatenate(
+        [Array([male_heights + female_heights]),
+         Array([male_weights + female_weights]),
+         Array([male_bfrs + female_bfrs]),
+         Array([male_labels + female_labels])
+         ]).T
+    Shuffle(train_set)
+    return train_set
 
-male_weights = Normal(70.0, 10.0, sample_num)
-female_weights = Normal(57.0, 8.0, sample_num)
 
-male_bfrs = Normal(16.0, 2.0, sample_num)
-female_bfrs = Normal(22.0, 2.0, sample_num)
+def predict_and_evaluate(sample_set, predict, input):
+    pred = []
+    for i in range(len(sample_set)):
+        features = sample_set[i:i + 1, 0:-1].T.reshape([3, 1])
+        input.set_value(features)
+        predict.forward()
+        pred.append(predict.value[0, 0])
 
-male_labels = [1.0] * sample_num
-female_labels = [-1.0] * sample_num
+    for i in range(len(pred)):
+        pred[i] *= 2.0
+        pred[i] -= 1.0
+    total = 0
+    predicted = sample_set.T.ravel()[-len(sample_set)::1]
+    for i in range(len(pred)):
+        if pred[i] == predicted[i]:
+            total += 1
+    accuracy = total / len(sample_set)
+    return accuracy
 
-train_set = Concatenate(
-    [Array([male_heights + female_heights]),
-     Array([male_weights + female_weights]),
-     Array([male_bfrs + female_bfrs]),
-     Array([male_labels + female_labels])
-     ]).T
-Shuffle(train_set)
 
-print('data loaded', train_set)
+sample_num = 64
+
+train_set = generateSample(sample_num)
+
+print('data loaded')
 
 # 构造计算图：输入向量，是一个3x1矩阵，不需要初始化，不参与训练
 x = Variable([3, 1], False)
@@ -240,7 +262,7 @@ learning_rate = 0.0001
 print('model loaded')
 
 # 训练执行50个epoch
-for epoch in range(50):
+for epoch in range(20):
 
     # 遍历训练集中的样本
     for i in range(len(train_set)):
@@ -265,26 +287,12 @@ for epoch in range(50):
         # default_graph对象保存了所有节点，调用clear_jacobi方法清除所有节点的雅可比矩阵
         graph.clear_jacobi()
 
-    # 每个epoch结束后评价模型的正确率
-    pred = []
-
-    # 遍历训练集，计算当前模型对每个样本的预测值
-    for i in range(len(train_set)):
-        features = train_set[i:i + 1, 0:-1].T.reshape([3, 1])
-        x.set_value(features)
-        # 在模型的predict节点上执行前向传播
-        predict.forward()
-        pred.append(predict.value[0, 0])  # 模型的预测结果：1男，0女
-
-    for i in range(len(pred)):
-        pred[i] *= 2.0
-        pred[i] -= 1.0
-    total = 0
-    predicted = train_set.T.ravel()[-sample_num * 2::1]
-    for i in range(len(pred)):
-        if pred[i] == predicted[i]:
-            total += 1
-    accuracy = total / len(train_set)
+    accuracy = predict_and_evaluate(train_set, predict, x)
 
     # 打印当前epoch数和模型在训练集上的正确率
     print("epoch: ", epoch + 1, " accuracy: ", accuracy)
+
+test_set = generateSample(32)
+
+accuracy = predict_and_evaluate(test_set, predict, x)
+print("test accuracy: ", accuracy)

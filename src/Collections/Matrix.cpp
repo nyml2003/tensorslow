@@ -218,16 +218,32 @@ Matrix Matrix::Reshape(Index newRows, Index newCols) const {
 }
 
 Matrix Matrix::MatrixMultiply(const Matrix& other) const {
-  Matrix result(rows, other.cols);
-  for (Index i = 0; i < rows; i++) {
-    for (Index j = 0; j < other.cols; j++) {
-      double sum = 0;
-      for (Index k = 0; k < cols; k++) {
-        sum += At(i, k) * other.At(k, j);
+  const Index M = rows;
+  const Index N = other.cols;
+  const Index K = cols;
+  const Index tile_size = 64;  // 根据缓存大小调整（如 L1 缓存 32KB
+                               // 时，tile_size=64 对于 double 类型）
+
+  Matrix result(M, N);
+
+  // 分块循环
+  for (Index ii = 0; ii < M; ii += tile_size) {
+    for (Index jj = 0; jj < N; jj += tile_size) {
+      for (Index kk = 0; kk < K; kk += tile_size) {
+        // 处理分块矩阵：A[ii..ii+tile_size][kk..kk+tile_size]
+        // 与 B[kk..kk+tile_size][jj..jj+tile_size]
+        for (Index i = ii; i < std::min(ii + tile_size, M); ++i) {
+          for (Index k = kk; k < std::min(kk + tile_size, K); ++k) {
+            // 内层循环 j 连续访问 B[k][j]
+            for (Index j = jj; j < std::min(jj + tile_size, N); ++j) {
+              result.Set(i, j, result.At(i, j) + At(i, k) * other.At(k, j));
+            }
+          }
+        }
       }
-      result.data.Set(i * other.cols + j, sum);
     }
   }
+
   return result;
 }
 

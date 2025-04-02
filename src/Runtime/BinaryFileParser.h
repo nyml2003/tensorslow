@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_RUNTIME_BINARYFILEPARSER_H
-#define TORCHLIGHT_RUNTIME_BINARYFILEPARSER_H
+#ifndef TORCHLIGHT_RUNTIME_BINARY_FILEPARSER_H
+#define TORCHLIGHT_RUNTIME_BINARY_FILEPARSER_H
 
 #include "Object/Runtime/PyCode.h"
 #include "Runtime/BufferedInputStream.h"
@@ -20,4 +20,4 @@ class BinaryFileParser {
 
 }  // namespace torchlight::Runtime
 
-#endif  // TORCHLIGHT_BINARYFILEPARSER_H
+#endif  // TORCHLIGHT_RUNTIME_BINARY_FILEPARSER_H

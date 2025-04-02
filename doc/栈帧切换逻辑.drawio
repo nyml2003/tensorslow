@@ -1,0 +1,60 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.1.1 Chrome/132.0.6834.210 Electron/34.3.3 Safari/537.36" version="26.1.1">
+  <diagram name="第 1 页" id="EmEJvg6VlkXlUYVOdsaL">
+    <mxGraphModel dx="1562" dy="917" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="c_3cDs-TgBqAgG5FIHv5-48" value="栈帧对象" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+          <mxGeometry x="390" y="770" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="c_3cDs-TgBqAgG5FIHv5-49" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="c_3cDs-TgBqAgG5FIHv5-50" target="c_3cDs-TgBqAgG5FIHv5-48" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="c_3cDs-TgBqAgG5FIHv5-54" value="管理" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="c_3cDs-TgBqAgG5FIHv5-49" vertex="1" connectable="0">
+          <mxGeometry x="0.2067" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c_3cDs-TgBqAgG5FIHv5-50" value="Python生成器对象" style="html=1;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="149" y="865" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c_3cDs-TgBqAgG5FIHv5-63" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="c_3cDs-TgBqAgG5FIHv5-48" target="c_3cDs-TgBqAgG5FIHv5-68" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="560" y="950" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c_3cDs-TgBqAgG5FIHv5-64" value="eval" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="c_3cDs-TgBqAgG5FIHv5-63" vertex="1" connectable="0">
+          <mxGeometry x="-0.1238" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c_3cDs-TgBqAgG5FIHv5-66" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" parent="1" source="c_3cDs-TgBqAgG5FIHv5-68" target="c_3cDs-TgBqAgG5FIHv5-50" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="145" y="1035" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c_3cDs-TgBqAgG5FIHv5-67" value="如果是yield, 重新创建" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="c_3cDs-TgBqAgG5FIHv5-66" vertex="1" connectable="0">
+          <mxGeometry x="-0.118" y="-3" relative="1" as="geometry">
+            <mxPoint x="-1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c_3cDs-TgBqAgG5FIHv5-70" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="c_3cDs-TgBqAgG5FIHv5-68" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="450" y="1080" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c_3cDs-TgBqAgG5FIHv5-71" value="如果运行结束或者return" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="c_3cDs-TgBqAgG5FIHv5-70" vertex="1" connectable="0">
+          <mxGeometry x="-0.0808" y="-4" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="c_3cDs-TgBqAgG5FIHv5-68" value="执行结果" style="html=1;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="395" y="950" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c_3cDs-TgBqAgG5FIHv5-73" value="IterDone对象" style="html=1;whiteSpace=wrap;" parent="1" vertex="1">
+          <mxGeometry x="395" y="1080" width="110" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

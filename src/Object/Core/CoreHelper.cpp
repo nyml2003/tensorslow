@@ -70,9 +70,9 @@ PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept {
     return nullptr;
   }
   for (Index i = 0; i < obj->Klass()->Mro()->Length(); i++) {
-    auto klass = obj->Klass()->Mro()->GetItem(i)->as<PyType>()->Owner();
-    if (klass->Attributes()->Contains(attrName)) {
-      return klass->Attributes()->Get(attrName);
+    auto klass = obj->Klass()->Mro()->GetItem(i)->as<PyType>();
+    if (klass->Owner()->Attributes()->Contains(attrName)) {
+      return klass->Owner()->Attributes()->Get(attrName);
     }
   }
   return nullptr;
@@ -98,7 +98,7 @@ PyObjPtr GetBases(const PyObjPtr& args) {
 }
 PyObjPtr GetMro(const PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
-  return args->as<PyList>()->GetItem(0)->Klass()->Type()->Owner()->Mro();
+  return args->as<PyList>()->GetItem(0)->as<PyType>()->Owner()->Mro();
 }
 PyObjPtr GetDict(const PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);

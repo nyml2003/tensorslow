@@ -1,0 +1,83 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.1.1 Chrome/132.0.6834.210 Electron/34.3.3 Safari/537.36" version="26.1.1">
+  <diagram name="第 1 页" id="Mdz092ybCGRmyysTETZ2">
+    <mxGraphModel dx="1562" dy="917" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="lb0W_pnPvxd-Yv1rqBkz-10" target="lb0W_pnPvxd-Yv1rqBkz-32">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-10" value="初始化核心类型" style="html=1;whiteSpace=wrap;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="297.5" y="545" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=default;" edge="1" parent="1" source="lb0W_pnPvxd-Yv1rqBkz-13" target="lb0W_pnPvxd-Yv1rqBkz-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-12" value="需要执行的文件、&lt;div&gt;运行模式选择&lt;/div&gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];strokeColor=default;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=default;" vertex="1" connectable="0" parent="lb0W_pnPvxd-Yv1rqBkz-11">
+          <mxGeometry x="-0.0025" y="4" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-13" value="参数解析器" style="html=1;whiteSpace=wrap;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="312.5" y="420" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-14" value="int argc, char** argv" style="text;align=center;fontStyle=1;verticalAlign=middle;spacingLeft=3;spacingRight=3;strokeColor=none;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;html=1;fontFamily=Helvetica;fontSize=12;fontColor=default;" vertex="1" parent="1">
+          <mxGeometry x="305" y="350" width="125" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-15" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.495;exitY=1.01;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Helvetica;fontSize=12;fontColor=default;exitPerimeter=0;" edge="1" parent="1" source="lb0W_pnPvxd-Yv1rqBkz-14" target="lb0W_pnPvxd-Yv1rqBkz-13">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="lb0W_pnPvxd-Yv1rqBkz-32" target="lb0W_pnPvxd-Yv1rqBkz-34">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-32" value="初始化其他内置类型" style="html=1;whiteSpace=wrap;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="297.5" y="630" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-50" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="lb0W_pnPvxd-Yv1rqBkz-34" target="lb0W_pnPvxd-Yv1rqBkz-37">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-34" value="初始化抽象语法树结点类型" style="html=1;whiteSpace=wrap;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=12;fontColor=default;fillColor=default;" vertex="1" parent="1">
+          <mxGeometry x="297.5" y="720" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-51" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="lb0W_pnPvxd-Yv1rqBkz-37" target="lb0W_pnPvxd-Yv1rqBkz-39">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-37" value="读取源代码内容" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="460" y="720" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-44" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="lb0W_pnPvxd-Yv1rqBkz-39" target="lb0W_pnPvxd-Yv1rqBkz-43">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-39" value="词法分析" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="460" y="630" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-46" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="lb0W_pnPvxd-Yv1rqBkz-43" target="lb0W_pnPvxd-Yv1rqBkz-45">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-43" value="语法分析" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="460" y="550" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-48" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="lb0W_pnPvxd-Yv1rqBkz-45" target="lb0W_pnPvxd-Yv1rqBkz-47">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-45" value="注册常量、变量名到代码对象" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="460" y="460" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-52" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="lb0W_pnPvxd-Yv1rqBkz-47" target="lb0W_pnPvxd-Yv1rqBkz-49">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-54" value="序列化" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="lb0W_pnPvxd-Yv1rqBkz-52">
+          <mxGeometry x="0.0222" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-47" value="生成字节码并加载到代码对象中" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="460" y="375" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="lb0W_pnPvxd-Yv1rqBkz-49" value="输出pyc文件" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="460" y="280" width="110" height="50" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

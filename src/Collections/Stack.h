@@ -17,4 +17,4 @@ class Stack {
   [[nodiscard]] Index Size() const { return content.Size(); }
 };
 }  // namespace torchlight::Collections
-#endif  // TORCHLIGHT_STACK_H
+#endif  // TORCHLIGHT_COLLECTIONS_STACK_H
