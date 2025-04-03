@@ -231,7 +231,7 @@ def predict_and_evaluate(sample_set, predict, input):
     return accuracy
 
 
-sample_num = 512
+sample_num = 64
 
 train_set = generateSample(sample_num)
 
@@ -257,7 +257,7 @@ predict = Step([output])
 loss = PerceptionLoss([MatrixMultiply([label, output])])
 
 # 学习率
-learning_rate = 0.00001
+learning_rate = 0.0001
 
 print('model loaded')
 
