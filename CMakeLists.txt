@@ -44,3 +44,4 @@ add_dependencies(torchlight_frontend antlr4_static)
 #add_dependencies(torchlight_compiler antlr4_static)
 
 include(cmake/tools.cmake)
+

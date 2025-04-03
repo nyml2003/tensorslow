@@ -1,8 +1,7 @@
-import os
 import glob
+import os
 import subprocess
 import sys
-import math
 
 # 定义路径和可执行文件
 build_type = sys.argv[1] if len(sys.argv) > 1 else "build"
@@ -26,6 +25,7 @@ subdirs = [d for d in os.listdir(test_dir) if os.path.isdir(os.path.join(test_di
 
 # 计算测试总数
 test_total = len(subdirs)
+print(f"测试用例总数: {test_total}")
 if test_total == 0:
     print("没有测试用例")
     sys.exit(0)
