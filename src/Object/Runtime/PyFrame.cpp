@@ -105,10 +105,11 @@ PyInstPtr PyFrame::Instruction() const {
   return insts->GetItem(programCounter)->as<PyInst>();
 }
 
-bool PyFrame::Finished() const {
+bool PyFrame::Finished() {
   if (!isParsed) {
     ParseByteCode(code);
   }
+  this->isParsed = true;
   auto size = code->Instructions()->Length();
   return programCounter >= size;
 }

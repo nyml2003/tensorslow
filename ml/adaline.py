@@ -231,7 +231,7 @@ def predict_and_evaluate(sample_set, predict, input):
     return accuracy
 
 
-sample_num = 64
+sample_num = 512
 
 train_set = generateSample(sample_num)
 
@@ -257,12 +257,12 @@ predict = Step([output])
 loss = PerceptionLoss([MatrixMultiply([label, output])])
 
 # 学习率
-learning_rate = 0.0001
+learning_rate = 0.00001
 
 print('model loaded')
 
 # 训练执行50个epoch
-for epoch in range(20):
+for epoch in range(50):
 
     # 遍历训练集中的样本
     for i in range(len(train_set)):

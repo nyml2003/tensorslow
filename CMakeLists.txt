@@ -12,6 +12,7 @@ message(STATUS "torchlight_common_files: ${torchlight_common_files}")
 
 add_executable(
         torchlight_frontend
+        ${torchlight_frontend_entry_files}
         ${torchlight_frontend_files}
         ${torchlight_common_files}
 )
@@ -28,5 +29,18 @@ target_link_libraries(
 )
 add_dependencies(torchlight_frontend antlr4_static)
 
+#add_executable(
+#        torchlight_compiler
+#        ${torchlight_Compiler_files}
+#        ${torchlight_common_files}
+#        ${torchlight_frontend_files}
+#)
+#
+#target_link_libraries(
+#        torchlight_compiler
+#        antlr4_static
+#)
+#
+#add_dependencies(torchlight_compiler antlr4_static)
 
 include(cmake/tools.cmake)

@@ -57,7 +57,7 @@ class PyFrame : public PyObject {
 
   PyListPtr CurrentFastLocals() const;
 
-  bool Finished() const;
+  bool Finished();
 
   void NextProgramCounter();
 

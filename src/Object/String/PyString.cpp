@@ -285,7 +285,6 @@ PyObjPtr PyString::Create(const Collections::String& value) {
       return result;
     }
   }
-
   // 如果没有找到或者弱指针已经失效，则创建新的实例
   auto result = std::make_shared<PyString>(value);
   stringPool[value] = result;
