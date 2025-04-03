@@ -42,6 +42,9 @@ void ListKlass::Initialize() {
     CreatePyString("append")->as<PyString>(), CreatePyNativeFunction(ListAppend)
   );
   instance->AddAttribute(
+    CreatePyString("extend")->as<PyString>(), CreatePyNativeFunction(ListExtend)
+  );
+  instance->AddAttribute(
     CreatePyString("index")->as<PyString>(), CreatePyNativeFunction(ListIndex)
   );
   instance->AddAttribute(
@@ -349,6 +352,17 @@ PyObjPtr ListAppend(const PyObjPtr& args) {
   auto obj = argList->GetItem(1);
   auto list = argList->GetItem(0)->as<PyList>();
   list->Append(obj);
+  return CreatePyNone();
+}
+
+PyObjPtr ListExtend(const PyObjPtr& args) {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 2);
+  auto argList = args->as<PyList>();
+  auto obj = argList->GetItem(1);
+  auto list = argList->GetItem(0)->as<PyList>();
+  ForEach(obj, [&list](const PyObjPtr& value, Index, const PyObjPtr&) {
+    list->Append(value);
+  });
   return CreatePyNone();
 }
 

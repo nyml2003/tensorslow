@@ -77,6 +77,8 @@ PyObjPtr ListIndex(const PyObjPtr& args);
 
 PyObjPtr ListAppend(const PyObjPtr& args);
 
+PyObjPtr ListExtend(const PyObjPtr& args);
+
 PyObjPtr ListCount(const PyObjPtr& args);
 
 PyObjPtr ListPop(const PyObjPtr& args);

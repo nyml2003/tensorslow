@@ -144,6 +144,32 @@ class MatrixMultiply(Operator):
             return jacobi
 
 
+class ScalarMultiply(Operator):
+    def compute(self):
+        self.value = self.parents[0].value * self.parents[1].value
+
+    def get_jacobi(self, parent):
+        parent0 = self.parents[0]
+        parent1 = self.parents[1]
+        if parent is parent0:
+            return Diag(parent1.value.ravel())
+        if parent is parent1:
+            return Eye(parent1.get_dimension()) * self.parents[0].value[0, 0]
+
+
+class Multiply(Operator):
+    def compute(self):
+        self.value = self.parents[0].value * self.parents[1].value
+
+    def get_jacobi(self, parent):
+        parent0 = self.parents[0]
+        parent1 = self.parents[1]
+        if parent is parent0:
+            return Diag(parent1.value.ravel())
+        if parent is parent1:
+            return Diag(parent0.value.ravel())
+
+
 class Step(Operator):
     def compute(self):
         parent0 = self.parents[0]
@@ -211,19 +237,19 @@ def generateSample(num):
     return train_set
 
 
-def predict_and_evaluate(sample_set, predict, input):
+def predict_and_evaluate(sample_set, predict, input, batch_size):
     pred = []
-    for i in range(len(sample_set)):
-        features = sample_set[i:i + 1, 0:-1].T.reshape([3, 1])
+    for i in range(0, len(sample_set), batch_size):
+        features = sample_set[i:i + batch_size, :-1].reshape([batch_size, 3])
         input.set_value(features)
         predict.forward()
-        pred.append(predict.value[0, 0])
+        pred.extend(predict.value.ravel())
 
     for i in range(len(pred)):
         pred[i] *= 2.0
         pred[i] -= 1.0
     total = 0
-    predicted = sample_set.T.ravel()[-len(sample_set)::1]
+    predicted = sample_set[:, -1].ravel()
     for i in range(len(pred)):
         if pred[i] == predicted[i]:
             total += 1
@@ -231,31 +257,37 @@ def predict_and_evaluate(sample_set, predict, input):
     return accuracy
 
 
-sample_num = 64
-
+sample_num = 512
+batch_size = 16
 train_set = generateSample(sample_num)
 
-print('data loaded', train_set)
+print('data loaded')
 
 # 构造计算图：输入向量，是一个3x1矩阵，不需要初始化，不参与训练
-x = Variable([3, 1], False)
+x = Variable([batch_size, 3], False)
 
 # 类别标签，1男，-1女
-label = Variable([1, 1], False)
+label = Variable([batch_size, 1], False)
 
 # 权重向量，是一个1x3矩阵，需要初始化，参与训练
-w = Variable([1, 3], True)
+w = Variable([3, 1], True)
 
 # 阈值，是一个1x1矩阵，需要初始化，参与训练
 b = Variable([1, 1], True)
 
+ones = Variable([batch_size, 1], False)
+ones.set_value(Ones([batch_size, 1]))
+bias = ScalarMultiply([b, ones])
 # ADALINE的预测输出
-output = Add([MatrixMultiply([w, x]), b])
+output = Add([MatrixMultiply([x, w]), bias])
 predict = Step([output])
 
 # 损失函数
-loss = PerceptionLoss([MatrixMultiply([label, output])])
+loss = PerceptionLoss([Multiply([label, output])])
 
+B = Variable([1, batch_size], False)
+B.set_value(Ones([1, batch_size]) * (1 / batch_size))
+mean_loss = MatrixMultiply([B, loss])
 # 学习率
 learning_rate = 0.0001
 
@@ -265,34 +297,33 @@ print('model loaded')
 for epoch in range(50):
 
     # 遍历训练集中的样本
-    for i in range(len(train_set)):
+    for i in range(0, len(train_set), batch_size):
         # 取第i个样本的前4列（除最后一列的所有列），构造3x1矩阵对象
-        features = train_set[i:i + 1, 0:-1].T.reshape([3, 1])
+        features = train_set[i:i + batch_size, :-1]
         # 取第i个样本的最后一列，是该样本的性别标签（1男，-1女），构造1x1矩阵对象
-        l = Array([[train_set[i, -1]]])
-
+        l = train_set[i:i + batch_size, -1].T.reshape([batch_size, 1])
         # 将特征赋给x节点，将标签赋给label节点
         x.set_value(features)
         label.set_value(l)
 
         # 在loss节点上执行前向传播，计算损失值
-        loss.forward()
+        mean_loss.forward()
 
         # 在w和b节点上执行反向传播，计算损失值对它们的雅可比矩阵
-        w.backward(loss)
-        b.backward(loss)
+        w.backward(mean_loss)
+        B.backward(mean_loss)
         w.set_value(w.value - w.jacobi.T.reshape(w.get_shape()) * learning_rate)
-        b.set_value(b.value - b.jacobi.T.reshape(b.get_shape()) * learning_rate)
+        B.set_value(B.value - B.jacobi.T.reshape(B.get_shape()) * learning_rate)
 
         # default_graph对象保存了所有节点，调用clear_jacobi方法清除所有节点的雅可比矩阵
         graph.clear_jacobi()
 
-    accuracy = predict_and_evaluate(train_set, predict, x)
+    accuracy = predict_and_evaluate(train_set, predict, x, batch_size)
 
     # 打印当前epoch数和模型在训练集上的正确率
     print("epoch: ", epoch + 1, " accuracy: ", accuracy)
 
 test_set = generateSample(32)
 
-accuracy = predict_and_evaluate(test_set, predict, x)
+accuracy = predict_and_evaluate(test_set, predict, x, batch_size)
 print("test accuracy: ", accuracy)

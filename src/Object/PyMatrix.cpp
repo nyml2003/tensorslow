@@ -116,7 +116,7 @@ PyObjPtr MatrixKlass::mul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (rhs->is<PyFloat>()) {
     return matrix->Multiply(rhs->as<PyFloat>()->Value());
   }
-  return lhs->as<PyMatrix>()->Multiply(rhs->as<PyMatrix>());
+  throw std::runtime_error("MatrixKlass::mul(): rhs is not a matrix or float");
 }
 
 PyObjPtr MatrixKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -149,11 +149,7 @@ PyObjPtr MatrixKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
   if (key->is<PyList>()) {
     // a[row,col] 或者 a[rowStart:rowEnd,colStart:colEnd]
     auto keyList = key->as<PyList>();
-    if (keyList->GetItem(0)->is<PyInteger>()) {
-      // a[row,col]
-      if (keyList->Length() != 2) {
-        throw std::runtime_error("MatrixKlass::getitem(): key length is not 2");
-      }
+    if (keyList->GetItem(0)->is<PyInteger>() && keyList->GetItem(1)->is<PyInteger>()) {
       auto shape = matrix->Shape();
       auto matrixRow = shape->GetItem(0)->as<PyInteger>()->ToU64();
       auto matrixCol = shape->GetItem(1)->as<PyInteger>()->ToU64();
@@ -175,7 +171,7 @@ PyObjPtr MatrixKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
       }
       return CreatePyFloat(matrix->At(rowValue, colValue));
     }
-    if (keyList->GetItem(0)->is<PySlice>()) {
+    if (keyList->GetItem(0)->is<PySlice>() && keyList->GetItem(1)->is<PySlice>()) {
       // a[rowStart:rowEnd,colStart:colEnd]
       if (keyList->Length() != 2) {
         throw std::runtime_error("MatrixKlass::getitem(): key length is not 2");
@@ -192,6 +188,25 @@ PyObjPtr MatrixKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
       auto colStart = colSlice->GetStart()->as<PyInteger>()->ToU64();
       auto colStop = colSlice->GetStop()->as<PyInteger>()->ToU64();
       return matrix->GetSlice(rowStart, colStart, rowStop, colStop);
+    }
+    if (keyList->GetItem(0)->is<PySlice>() && keyList->GetItem(1)->is<PyInteger>()) {
+      // a[rowStart:rowEnd,col]
+      auto rowSlice = keyList->GetItem(0)->as<PySlice>();
+      auto shape = matrix->Shape();
+      rowSlice->BindLength(matrix->Shape()->GetItem(0)->as<PyInteger>()->ToU64()
+      );
+      auto matrixCol = shape->GetItem(1)->as<PyInteger>()->ToU64();
+      auto col = keyList->GetItem(1)->as<PyInteger>();
+      Index colValue = 0;
+      if (col->GetSign() == Collections::Integer::IntSign::Positive) {
+        colValue = col->ToU64();
+      }
+      if (col->GetSign() == Collections::Integer::IntSign::Negative) {
+        colValue = matrixCol + col->ToI64();
+      }
+      auto rowStart = rowSlice->GetStart()->as<PyInteger>()->ToU64();
+      auto rowStop = rowSlice->GetStop()->as<PyInteger>()->ToU64();
+      return matrix->GetSlice(rowStart, colValue, rowStop, colValue + 1);
     }
   }
   if (key->is<PySlice>()) {

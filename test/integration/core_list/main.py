@@ -12,3 +12,6 @@ lst2 = lst.copy()
 print(lst2)
 lst.clear()
 print(lst)
+lst = [1, 4, 9, 16, 25]
+lst.extend(lst2)
+print(lst)
