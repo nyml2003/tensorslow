@@ -32,10 +32,10 @@ Object::PyObjPtr IdentifierKlass::visit(
   } else {
     auto context = identifier->Parent();
     INodePtr module = nullptr;
-    if (context->is<ClassDef>()) {
+    if (context->is(ClassDefKlass::Self())) {
       module = context->as<ClassDef>()->Parents()->GetItem(0)->as<INode>();
     }
-    if (context->is<FuncDef>()) {
+    if (context->is(FuncDefKlass::Self())) {
       module = context->as<FuncDef>()->Parents()->GetItem(0)->as<INode>();
     }
     auto moduleCode = GetCodeFromList(codeList, module);
@@ -114,10 +114,10 @@ Object::PyObjPtr IdentifierKlass::emit(
   if (scope == Object::Scope::LOCAL) {
     auto context = identifier->Parent();
     INodePtr module = nullptr;
-    if (context->is<ClassDef>()) {
+    if (context->is(ClassDefKlass::Self())) {
       module = context->as<ClassDef>()->Parents()->GetItem(0)->as<INode>();
     }
-    if (context->is<FuncDef>()) {
+    if (context->is(FuncDefKlass::Self())) {
       module = context->as<FuncDef>()->Parents()->GetItem(0)->as<INode>();
     }
     auto moduleCode = GetCodeFromList(codeList, module);

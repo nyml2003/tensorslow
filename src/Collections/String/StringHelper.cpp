@@ -57,7 +57,7 @@ String CreateStringWithCString(const char* str) noexcept {
   }
   return String(codePoints);
 }
-String CreateStringWithBytes(const Bytes& bytes) noexcept {
+String CreateStringWithBytes(const List<Byte>& bytes) noexcept {
   List<Unicode> codePoints;
   size_t length = bytes.Size();
   size_t index = 0;

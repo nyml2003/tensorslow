@@ -10,7 +10,7 @@
 namespace torchlight::Object {
 
 PyObjPtr BytesKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyBytes>() || !rhs->is<PyBytes>()) {
+  if (!lhs->is(BytesKlass::Self()) || !rhs->is(BytesKlass::Self())) {
     throw std::runtime_error("Bytes does not support add operation");
   }
   auto left = lhs->as<PyBytes>();
@@ -19,7 +19,7 @@ PyObjPtr BytesKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr BytesKlass::_serialize_(const PyObjPtr& obj) {
-  if (!obj->is<PyBytes>()) {
+  if (!obj->is(Self())) {
     throw std::runtime_error("PyBytes::_serialize_(): obj is not a bytes");
   }
   return CreatePyBytes(Collections::Serialize(Literal::BYTES)
@@ -27,7 +27,7 @@ PyObjPtr BytesKlass::_serialize_(const PyObjPtr& obj) {
 }
 
 PyObjPtr BytesKlass::repr(const PyObjPtr& obj) {
-  if (!obj->is<PyBytes>()) {
+  if (!obj->is(Self())) {
     throw std::runtime_error("PyBytes::repr(): obj is not a bytes");
   }
   auto bytes = obj->as<PyBytes>();
@@ -44,7 +44,7 @@ PyObjPtr BytesKlass::repr(const PyObjPtr& obj) {
 }
 
 PyObjPtr BytesKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyBytes>() || !rhs->is<PyBytes>()) {
+  if (!lhs->is(BytesKlass::Self()) || !rhs->is(BytesKlass::Self())) {
     throw std::runtime_error("Bytes does not support eq operation");
   }
   auto left = lhs->as<PyBytes>();

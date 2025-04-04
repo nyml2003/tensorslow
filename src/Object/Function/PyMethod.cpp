@@ -5,7 +5,7 @@
 namespace torchlight::Object {
 
 PyObjPtr MethodKlass::repr(const PyObjPtr& obj) {
-  if (!obj->is<PyMethod>()) {
+  if (!obj->is(MethodKlass::Self())) {
     auto errorMessage = StringConcat(CreatePyList(
       {CreatePyString("AttributeError: '")->as<PyString>(),
        obj->Klass()->Name(),

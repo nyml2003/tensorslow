@@ -11,12 +11,9 @@ Object::PyObjPtr FunctionCallKlass::emit(
   auto func = functionCall->Func();
   auto args = functionCall->Args();
   func->emit(codeList);
-  Object::ForEach(
-    args,
-    [&codeList](const Object::PyObjPtr& arg, Index, const Object::PyObjPtr&) {
-      arg->as<INode>()->emit(codeList);
-    }
-  );
+  Object::ForEach(args, [&codeList](const Object::PyObjPtr& arg) {
+    arg->as<INode>()->emit(codeList);
+  });
   auto code = GetCodeFromList(codeList, functionCall);
   code->CallFunction(args->Length());
   return Object::CreatePyNone();
@@ -30,12 +27,9 @@ Object::PyObjPtr FunctionCallKlass::visit(
   auto func = functionCall->Func();
   auto args = functionCall->Args();
   func->visit(codeList);
-  Object::ForEach(
-    args,
-    [&codeList](const Object::PyObjPtr& arg, Index, const Object::PyObjPtr&) {
-      arg->as<INode>()->visit(codeList);
-    }
-  );
+  Object::ForEach(args, [&codeList](const Object::PyObjPtr& arg) {
+    arg->as<INode>()->visit(codeList);
+  });
   return Object::CreatePyNone();
 }
 

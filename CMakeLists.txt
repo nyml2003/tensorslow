@@ -10,24 +10,32 @@ message(STATUS "torchlight_frontend_files: ${torchlight_frontend_files}")
 message(STATUS "torchlight_backend_files: ${torchlight_backend_files}")
 message(STATUS "torchlight_common_files: ${torchlight_common_files}")
 
+add_library(torchlight_common STATIC ${torchlight_common_files})
+
 add_executable(
         torchlight_frontend
         ${torchlight_frontend_entry_files}
         ${torchlight_frontend_files}
-        ${torchlight_common_files}
 )
 
-add_executable(
-        torchlight_backend
-        ${torchlight_backend_files}
-        ${torchlight_common_files}
-)
 
 target_link_libraries(
         torchlight_frontend
         antlr4_static
+        torchlight_common
 )
-add_dependencies(torchlight_frontend antlr4_static)
+add_dependencies(torchlight_frontend antlr4_static torchlight_common)
+
+add_executable(
+        torchlight_backend
+        ${torchlight_backend_files}
+)
+target_link_libraries(
+        torchlight_backend
+        torchlight_common
+)
+
+add_dependencies(torchlight_backend torchlight_common)
 
 #add_executable(
 #        torchlight_compiler

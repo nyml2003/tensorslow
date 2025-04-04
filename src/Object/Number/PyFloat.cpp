@@ -26,14 +26,14 @@ PyObjPtr FloatKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {
     );
   }
   auto value = argList->GetItem(0);
-  if (!value->is<PyFloat>()) {
+  if (!value->is(Self())) {
     throw std::runtime_error("PyFloat::init(): value is not a float");
   }
   return value;
 }
 
 PyObjPtr FloatKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+  if (!lhs->is(Self()) || !rhs->is(Self())) {
     throw std::runtime_error("PyFloat::add(): lhs or rhs is not a float");
   }
   return CreatePyFloat(
@@ -42,7 +42,7 @@ PyObjPtr FloatKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr FloatKlass::sub(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+  if (!lhs->is(Self()) || !rhs->is(Self())) {
     throw std::runtime_error("PyFloat::sub(): lhs or rhs is not a float");
   }
   return CreatePyFloat(
@@ -51,7 +51,7 @@ PyObjPtr FloatKlass::sub(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr FloatKlass::mul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+  if (!lhs->is(Self()) || !rhs->is(Self())) {
     throw std::runtime_error("PyFloat::mul(): lhs or rhs is not a float");
   }
   return CreatePyFloat(
@@ -60,7 +60,7 @@ PyObjPtr FloatKlass::mul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr FloatKlass::truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+  if (!lhs->is(Self()) || !rhs->is(Self())) {
     throw std::runtime_error("PyFloat::div(): lhs or rhs is not a float");
   }
   return CreatePyFloat(
@@ -69,7 +69,7 @@ PyObjPtr FloatKlass::truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr FloatKlass::floordiv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+  if (!lhs->is(Self()) || !rhs->is(Self())) {
     throw std::runtime_error("PyFloat::floordiv(): lhs or rhs is not a float");
   }
   return CreatePyFloat(
@@ -78,7 +78,7 @@ PyObjPtr FloatKlass::floordiv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr FloatKlass::mod(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+  if (!lhs->is(Self()) || !rhs->is(Self())) {
     throw std::runtime_error("PyFloat::mod(): lhs or rhs is not a float");
   }
   return CreatePyFloat(
@@ -87,7 +87,7 @@ PyObjPtr FloatKlass::mod(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr FloatKlass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+  if (!lhs->is(Self()) || !rhs->is(Self())) {
     throw std::runtime_error("PyFloat::pow(): lhs or rhs is not a float");
   }
   return CreatePyFloat(
@@ -96,7 +96,7 @@ PyObjPtr FloatKlass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr FloatKlass::hash(const PyObjPtr& obj) {
-  if (!obj->is<PyFloat>()) {
+  if (!obj->is(Self())) {
     throw std::runtime_error("PyFloat::hash(): obj is not a float");
   }
   return CreatePyInteger(Collections::CreateIntegerWithU64(
@@ -105,14 +105,14 @@ PyObjPtr FloatKlass::hash(const PyObjPtr& obj) {
 }
 
 PyObjPtr FloatKlass::neg(const PyObjPtr& obj) {
-  if (!obj->is<PyFloat>()) {
+  if (!obj->is(Self())) {
     throw std::runtime_error("PyFloat::neg(): obj is not a float");
   }
   return CreatePyFloat(-obj->as<PyFloat>()->Value());
 }
 
 PyObjPtr FloatKlass::repr(const PyObjPtr& obj) {
-  if (!obj->is<PyFloat>()) {
+  if (!obj->is(Self())) {
     throw std::runtime_error("PyFloat::repr(): obj is not a float");
   }
   auto floatObj = obj->as<PyFloat>();
@@ -120,7 +120,7 @@ PyObjPtr FloatKlass::repr(const PyObjPtr& obj) {
 }
 
 PyObjPtr FloatKlass::_serialize_(const PyObjPtr& obj) {
-  if (!obj->is<PyFloat>()) {
+  if (!obj->is(Self())) {
     throw std::runtime_error("PyFloat::_serialize_(): obj is not a float");
   }
   auto floatObj = obj->as<PyFloat>();
@@ -129,7 +129,7 @@ PyObjPtr FloatKlass::_serialize_(const PyObjPtr& obj) {
 }
 
 PyObjPtr FloatKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+  if (!lhs->is(Self()) || !rhs->is(Self())) {
     throw std::runtime_error("PyFloat::eq(): lhs or rhs is not a float");
   }
   return CreatePyBoolean(
@@ -138,7 +138,7 @@ PyObjPtr FloatKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr FloatKlass::lt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyFloat>() || !rhs->is<PyFloat>()) {
+  if (!lhs->is(Self()) || !rhs->is(Self())) {
     throw std::runtime_error("PyFloat::lt(): lhs or rhs is not a float");
   }
   return CreatePyBoolean(
@@ -147,7 +147,7 @@ PyObjPtr FloatKlass::lt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr FloatKlass::boolean(const PyObjPtr& obj) {
-  if (!obj->is<PyFloat>()) {
+  if (!obj->is(Self())) {
     throw std::runtime_error("PyFloat::boolean(): obj is not a float");
   }
   return CreatePyBoolean(obj->as<PyFloat>()->Value() != 0.0);

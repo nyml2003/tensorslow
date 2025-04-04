@@ -1,7 +1,4 @@
 #include "Object/Core/PyObject.h"
-
-#include <utility>
-#include "Function/ObjectHelper.h"
 #include "Object/Container/PyDictionary.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
@@ -13,13 +10,18 @@
 
 namespace torchlight::Object {
 
-PyObject::PyObject(KlassPtr klass) : klass(std::move(klass)) {}
-
-PyDictPtr PyObject::Attributes() {
+PyDictPtr PyObject::Attributes() noexcept {
   if (attributes == nullptr) {
     attributes = CreatePyDict()->as<PyDictionary>();
   }
   return attributes;
+}
+
+PyDictPtr PyObject::Methods() noexcept {
+  if (methods == nullptr) {
+    methods = CreatePyDict()->as<PyDictionary>();
+  }
+  return methods;
 }
 
 PyObjPtr ObjectInit(const PyObjPtr& args) {
@@ -65,11 +67,6 @@ void ObjectKlass::Initialize() {
   instance->SetNative();
   ConfigureBasicAttributes(instance);
   this->isInitialized = true;
-}
-
-PyObjPtr PyObject::Instance() {
-  static PyObjPtr instance = std::make_shared<PyObject>(ObjectKlass::Self());
-  return instance;
 }
 
 bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs) {

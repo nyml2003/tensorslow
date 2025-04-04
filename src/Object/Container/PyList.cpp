@@ -131,7 +131,7 @@ PyObjPtr ListKlass::init(const PyObjPtr& type, const PyObjPtr& args) {
   if (type->as<PyType>()->Owner() != Self()) {
     throw std::runtime_error("List does not support init operation");
   }
-  if (!args->is<PyList>()) {
+  if (!args->is(ListKlass::Self())) {
     throw std::runtime_error("List allocation argument must be a list");
   }
   auto argList = args->as<PyList>();
@@ -140,21 +140,21 @@ PyObjPtr ListKlass::init(const PyObjPtr& type, const PyObjPtr& args) {
   }
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   auto value = argList->GetItem(0);
-  if (!value->is<PyList>()) {
+  if (!value->is(ListKlass::Self())) {
     throw std::runtime_error("List allocation argument must be a list");
   }
   return value;
 }
 
 PyObjPtr ListKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyList>() || !rhs->is<PyList>()) {
+  if (!lhs->is(ListKlass::Self()) || !rhs->is(ListKlass::Self())) {
     throw std::runtime_error("List does not support add operation");
   }
   return lhs->as<PyList>()->Add(rhs->as<PyList>());
 }
 
 PyObjPtr ListKlass::mul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyList>() || !rhs->is<PyInteger>()) {
+  if (!lhs->is(ListKlass::Self()) || !rhs->is(IntegerKlass::Self())) {
     throw std::runtime_error("List does not support mul operation");
   }
   auto list = lhs->as<PyList>();
@@ -194,7 +194,7 @@ PyObjPtr ListKlass::repr(const PyObjPtr& obj) {
 }
 
 PyObjPtr ListKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyList>() || !rhs->is<PyList>()) {
+  if (!lhs->is(ListKlass::Self()) || !rhs->is(ListKlass::Self())) {
     return CreatePyBoolean(false);
   }
   auto left = lhs->as<PyList>();
@@ -211,7 +211,7 @@ PyObjPtr ListKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr ListKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
-  if (!obj->is<PyList>()) {
+  if (!obj->is(ListKlass::Self())) {
     auto errorMessage = StringConcat(CreatePyList(
       {CreatePyString("AttributeError: '"), obj->Klass()->Name(),
        CreatePyString("' object has no attribute '__getitem__'")}
@@ -219,7 +219,7 @@ PyObjPtr ListKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
     throw std::runtime_error(errorMessage->as<PyString>()->ToCppString());
   }
   auto list = obj->as<PyList>();
-  if (key->is<PyInteger>()) {
+  if (key->is(IntegerKlass::Self())) {
     auto index = key->as<PyInteger>();
     if (index->GetSign() == Collections::Integer::IntSign::Positive) {
       return list->GetItem(index->ToU64());
@@ -234,11 +234,11 @@ PyObjPtr ListKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
       ));
     }
   }
-  if (key->is<PySlice>()) {
+  if (key->is(SliceKlass::Self())) {
     auto slice = key->as<PySlice>();
     return list->GetSlice(slice);
   }
-  if (key->is<PyList>()) {
+  if (key->is(ListKlass::Self())) {
     auto indexList = key->as<PyList>();
     auto result = obj;
     for (Index i = 0; i < indexList->Length(); i++) {
@@ -259,7 +259,7 @@ PyObjPtr ListKlass::setitem(
   const PyObjPtr& key,
   const PyObjPtr& value
 ) {
-  if (!obj->is<PyList>()) {
+  if (!obj->is(ListKlass::Self())) {
     auto errorMessage = StringConcat(CreatePyList(
       {CreatePyString("AttributeError: '"), obj->Klass()->Name(),
        CreatePyString("' object has no attribute '__setitem__'")}
@@ -268,15 +268,15 @@ PyObjPtr ListKlass::setitem(
   }
   auto list = obj->as<PyList>();
   // list[key] = value
-  if (key->is<PyInteger>()) {
+  if (key->is(IntegerKlass::Self())) {
     auto index = key->as<PyInteger>()->ToU64();
     list->SetItem(index, value);
     return CreatePyNone();
   }
   // list[start:stop] = iterable
-  if (key->is<PySlice>()) {
+  if (key->is(SliceKlass::Self())) {
     auto slice = key->as<PySlice>();
-    if (!slice->GetStep()->is<PyNone>()) {
+    if (!slice->GetStep()->is(NoneKlass::Self())) {
       throw std::runtime_error("List does not support step in slice assignment"
       );
     }
@@ -287,7 +287,7 @@ PyObjPtr ListKlass::setitem(
     list->InsertAndReplace(start, stop, valueList);
     return CreatePyNone();
   }
-  if (key->is<PyList>()) {
+  if (key->is(ListKlass::Self())) {
     auto indexList = key->as<PyList>();
     auto result = obj;
     for (Index i = 0; i < indexList->Length() - 1; i++) {
@@ -305,7 +305,7 @@ PyObjPtr ListKlass::setitem(
 }
 
 PyObjPtr ListKlass::len(const PyObjPtr& obj) {
-  if (!obj->is<PyList>()) {
+  if (!obj->is(ListKlass::Self())) {
     auto errorMessage = StringConcat(CreatePyList(
       {CreatePyString("TypeError: unsupported operand type(s) for"),
        CreatePyString(" len(): '"), obj->Klass()->Name(), CreatePyString("'")}
@@ -316,21 +316,21 @@ PyObjPtr ListKlass::len(const PyObjPtr& obj) {
 }
 
 PyObjPtr ListKlass::contains(const PyObjPtr& obj, const PyObjPtr& key) {
-  if (!obj->is<PyList>()) {
+  if (!obj->is(ListKlass::Self())) {
     throw std::runtime_error("List does not support contains operation");
   }
   return CreatePyBoolean(obj->as<PyList>()->Contains(key));
 }
 
 PyObjPtr ListKlass::boolean(const PyObjPtr& obj) {
-  if (!obj->is<PyList>()) {
+  if (!obj->is(ListKlass::Self())) {
     throw std::runtime_error("List does not support boolean operation");
   }
   return CreatePyBoolean(obj->as<PyList>()->Length() > 0);
 }
 
 PyObjPtr ListKlass::_serialize_(const PyObjPtr& obj) {
-  if (!obj->is<PyList>()) {
+  if (!obj->is(ListKlass::Self())) {
     throw std::runtime_error("List does not support serialize operation");
   }
   auto list = obj->as<PyList>();
@@ -339,7 +339,7 @@ PyObjPtr ListKlass::_serialize_(const PyObjPtr& obj) {
                     .Add(Collections::Serialize(list->Length())));
   auto iter = CreateListIterator(obj);
   auto value = iter->next();
-  while (!value->is<IterDone>()) {
+  while (!value->is(IterDoneKlass::Self())) {
     bytes = bytes->add(value->_serialize_());
     value = iter->next();
   }
@@ -360,9 +360,7 @@ PyObjPtr ListExtend(const PyObjPtr& args) {
   auto argList = args->as<PyList>();
   auto obj = argList->GetItem(1);
   auto list = argList->GetItem(0)->as<PyList>();
-  ForEach(obj, [&list](const PyObjPtr& value, Index, const PyObjPtr&) {
-    list->Append(value);
-  });
+  ForEach(obj, [&list](const PyObjPtr& value) { list->Append(value); });
   return CreatePyNone();
 }
 
@@ -451,21 +449,21 @@ PyObjPtr ListInsert(const PyObjPtr& args) {
 }
 
 PyObjPtr ListKlass::iter(const PyObjPtr& obj) {
-  if (!obj->is<PyList>()) {
+  if (!obj->is(ListKlass::Self())) {
     throw std::runtime_error("List does not support iter operation");
   }
   return CreateListIterator(obj);
 }
 
 PyObjPtr ListKlass::reversed(const torchlight::Object::PyObjPtr& obj) {
-  if (!obj->is<PyList>()) {
+  if (!obj->is(ListKlass::Self())) {
     throw std::runtime_error("List does not support reversed operation");
   }
   return CreateListReverseIterator(obj);
 }
 
 PyObjPtr PyList::GetSlice(const PySlicePtr& slice) const {
-  if (slice->GetStep()->is<PyNone>()) {
+  if (slice->GetStep()->is(NoneKlass::Self())) {
     slice->BindLength(Length());
     int64_t start = slice->GetStart()->as<PyInteger>()->ToI64();
     int64_t stop = slice->GetStop()->as<PyInteger>()->ToI64();
@@ -496,13 +494,9 @@ PyObjPtr PyList::GetSlice(const PySlicePtr& slice) const {
 
 PyListPtr CreatePyListFromIterable(const PyObjPtr& iterator) {
   auto iter = iterator->iter();
-  auto iterable = std::dynamic_pointer_cast<IIterator>(iter);
-  if (!iterable) {
-    throw std::runtime_error("object is not iterable");
-  }
   auto value = iter->next();
   Collections::List<PyObjPtr> list;
-  while (!value->is<IterDone>()) {
+  while (!value->is(IterDoneKlass::Self())) {
     list.Push(value);
     value = iter->next();
   }

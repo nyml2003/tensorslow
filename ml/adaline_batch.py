@@ -1,17 +1,19 @@
-def range(start, end, step):
-    if step == 0 or step is None:
-        step = 1
-    if end is None:
-        end = start
-        start = 0
-    if step > 0:
-        while start < end:
-            yield start
-            start += step
-    else:
-        while start > end:
-            yield start
-            start += step
+# def range(start, end, step):
+#     if step == 0 or step is None:
+#         step = 1
+#     if end is None:
+#         end = start
+#         start = 0
+#     if step > 0:
+#         while start < end:
+#             yield start
+#             start += step
+#     else:
+#         while start > end:
+#             yield start
+#             start += step
+
+time()
 
 
 class Graph:
@@ -321,9 +323,10 @@ for epoch in range(50):
     accuracy = predict_and_evaluate(train_set, predict, x, batch_size)
 
     # 打印当前epoch数和模型在训练集上的正确率
-    print("epoch: ", epoch + 1, " accuracy: ", accuracy)
+    # print("epoch: ", epoch + 1, " accuracy: ", accuracy)
 
 test_set = generateSample(32)
 
 accuracy = predict_and_evaluate(test_set, predict, x, batch_size)
 print("test accuracy: ", accuracy)
+time()

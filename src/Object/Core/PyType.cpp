@@ -18,7 +18,7 @@ PyType::PyType(KlassPtr _owner)
 }
 
 PyObjPtr TypeKlass::repr(const PyObjPtr& obj) {
-  if (!obj->is<PyType>()) {
+  if (!obj->is(TypeKlass::Self())) {
     throw std::runtime_error("PyType::repr(): obj is not a type object");
   }
   auto type = obj->as<PyType>();
@@ -28,7 +28,7 @@ PyObjPtr TypeKlass::repr(const PyObjPtr& obj) {
 }
 
 PyObjPtr TypeKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyType>() || !rhs->is<PyType>()) {
+  if (!lhs->is(TypeKlass::Self()) || !rhs->is(TypeKlass::Self())) {
     throw std::runtime_error("PyType::eq(): lhs or rhs is not a type object");
   }
   auto lhsType = lhs->as<PyType>();

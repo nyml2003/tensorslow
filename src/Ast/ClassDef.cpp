@@ -22,14 +22,14 @@ ClassDef::ClassDef(
     body(Object::CreatePyList({})->as<Object::PyList>()),
     bases(std::move(bases)),
     codeIndex(0) {
-  if (parent->is<Module>()) {
+  if (parent->is(ModuleKlass::Self())) {
     parents = Object::CreatePyList({parent})->as<Object::PyList>();
   }
-  if (parent->is<FuncDef>()) {
+  if (parent->is(FuncDefKlass::Self())) {
     parents = parent->as<FuncDef>()->Parents();
     parents->Append(parent);
   }
-  if (parent->is<ClassDef>()) {
+  if (parent->is(ClassDefKlass::Self())) {
     parents = parent->as<ClassDef>()->Parents();
     parents->Append(parent);
   }
@@ -51,12 +51,9 @@ Object::PyObjPtr ClassDefKlass::visit(
   classDef->Bases()->visit(codeList);
   auto parent = GetCodeFromList(codeList, classDef->Parent());
   parent->RegisterName(classDef->Name());
-  Object::ForEach(
-    classDef->Body(),
-    [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      stmt->as<INode>()->visit(codeList);
-    }
-  );
+  Object::ForEach(classDef->Body(), [&codeList](const Object::PyObjPtr& stmt) {
+    stmt->as<INode>()->visit(codeList);
+  });
   code->RegisterConst(Object::CreatePyNone());
   parent->RegisterConst(code);
   parent->RegisterConst(classDef->Name());
@@ -73,12 +70,9 @@ Object::PyObjPtr ClassDefKlass::emit(
   selfCode->StoreName(Object::CreatePyString("__module__"));
   selfCode->LoadConst(classDef->Name());
   selfCode->StoreName(Object::CreatePyString("__qualname__"));
-  Object::ForEach(
-    classDef->Body(),
-    [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      stmt->as<INode>()->emit(codeList);
-    }
-  );
+  Object::ForEach(classDef->Body(), [&codeList](const Object::PyObjPtr& stmt) {
+    stmt->as<INode>()->emit(codeList);
+  });
   selfCode->LoadConst(Object::CreatePyNone());
   selfCode->ReturnValue();
   auto parent = GetCodeFromList(codeList, classDef->Parent());

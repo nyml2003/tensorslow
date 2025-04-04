@@ -18,7 +18,7 @@ PyInst::PyInst(ByteCode code, OperandKind operand)
 }
 
 PyObjPtr InstKlass::_serialize_(const PyObjPtr& obj) {
-  if (!obj->is<PyInst>()) {
+  if (!obj->is(Self())) {
     throw std::runtime_error("PyInst::_serialize_(): obj is not an inst object"
     );
   }
@@ -31,15 +31,14 @@ PyObjPtr InstKlass::_serialize_(const PyObjPtr& obj) {
       [&bytes](CompareOp compOp) {
         bytes.Concat(Collections::Serialize(compOp));
       },
-      [&bytes](int64_t index) { bytes.Concat(Collections::Serialize(index)); }
-    },
+      [&bytes](int64_t index) { bytes.Concat(Collections::Serialize(index)); }},
     inst->Operand()
   );
   return std::make_shared<PyBytes>(bytes);
 }
 
 PyObjPtr InstKlass::repr(const PyObjPtr& obj) {
-  if (!obj->is<PyInst>()) {
+  if (!obj->is(Self())) {
     throw std::runtime_error("PyInst::repr(): obj is not an inst object");
   }
   auto inst = obj->as<PyInst>();
@@ -53,8 +52,9 @@ PyObjPtr InstKlass::repr(const PyObjPtr& obj) {
       [&result](CompareOp compOp) {
         result.Concat(Collections::ToString(compOp));
       },
-      [&result](int64_t index) { result.Concat(Collections::ToString(index)); }
-    },
+      [&result](int64_t index) {
+        result.Concat(Collections::ToString(index));
+      }},
     inst->Operand()
   );
   return CreatePyString(result);

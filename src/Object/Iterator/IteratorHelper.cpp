@@ -4,17 +4,12 @@
 namespace torchlight::Object {
 void ForEach(
   const PyObjPtr& obj,
-  const std::function<
-    void(const PyObjPtr& value, Index index, const PyObjPtr& obj)>& func
+  const std::function<void(const PyObjPtr& value)>& func
 ) {
   auto iter = obj->iter();
-  auto iterable = iter->as<IIterator>();
-  if (!iterable) {
-    throw std::runtime_error("object is not iterable");
-  }
   auto value = iter->next();
-  while (!value->is<IterDone>()) {
-    func(value, iterable->CurrentIndex(), obj);
+  while (!value->is(IterDoneKlass::Self())) {
+    func(value);
     value = iter->next();
   }
 }
@@ -24,13 +19,9 @@ PyObjPtr Map(
   const std::function<PyObjPtr(const PyObjPtr& value)>& func
 ) {
   auto iter = iterable->iter();
-  auto iterableObj = iter->as<IIterator>();
-  if (!iterableObj) {
-    throw std::runtime_error("object is not iterable");
-  }
   auto value = iter->next();
   Collections::List<PyObjPtr> result;
-  while (!value->is<IterDone>()) {
+  while (!value->is(IterDoneKlass::Self())) {
     result.Push(func(value));
     value = iter->next();
   }

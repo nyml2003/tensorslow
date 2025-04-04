@@ -18,10 +18,9 @@ void LoadClass(const PyStrPtr& name, const KlassPtr& klass) {
   klass->SetName(name);
   klass->SetAttributes(CreatePyDict()->as<PyDictionary>());
   klass->SetType(CreatePyType(klass)->as<PyType>());
-  klass->SetSuper(CreatePyList({PyObject::Instance()})->as<PyList>());
-  klass->SetMro(CreatePyList({CreatePyType(klass),
-                              CreatePyType(ObjectKlass::Self())})
-                  ->as<PyList>());
+  auto objectType = CreatePyType(ObjectKlass::Self());
+  klass->SetSuper(CreatePyList({objectType})->as<PyList>());
+  klass->SetMro(CreatePyList({CreatePyType(klass), objectType})->as<PyList>());
   klass->SetNative();
 }
 
@@ -78,18 +77,37 @@ PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept {
   return nullptr;
 }
 
-PyObjPtr AttrWrapper(const PyObjPtr& obj, const PyObjPtr& attr) {
-  if (attr->is<PyNativeFunction>()) {
+PyObjPtr BindSelf(const PyObjPtr& obj, const PyObjPtr& attr) {
+  if (attr->is(NativeFunctionKlass::Self())) {
     return CreatePyMethod(obj, attr);
   }
-  if (attr->is<PyFunction>()) {
+  if (attr->is(FunctionKlass::Self())) {
     return CreatePyMethod(obj, attr);
   }
-  if (attr->is<PyIife>()) {
-    auto reuslt = attr->as<PyIife>()->Call(CreatePyList({obj}));
-    return reuslt;
+  if (attr->is(IifeKlass::Self())) {
+    return attr->as<PyIife>()->Call(CreatePyList({obj}));
   }
   return attr;
+}
+
+void CacheAttr(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& key,
+  const Object::PyObjPtr& attr
+) {
+  if (attr->is(FunctionKlass::Self())) {
+    obj->Methods()->Put(key, attr);
+    return;
+  }
+  if (attr->is(NativeFunctionKlass::Self())) {
+    obj->Methods()->Put(key, attr);
+    return;
+  }
+  if (attr->is(IifeKlass::Self())) {
+    obj->Attributes()->Put(key, attr);
+    return;
+  }
+  obj->Attributes()->Put(key, attr);
 }
 
 PyObjPtr GetBases(const PyObjPtr& args) {
@@ -103,7 +121,7 @@ PyObjPtr GetMro(const PyObjPtr& args) {
 PyObjPtr GetDict(const PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   auto obj = args->as<PyList>()->GetItem(0);
-  return obj->Attributes();
+  return obj->Attributes()->Add(obj->Methods())->as<PyDictionary>();
 }
 PyListPtr ComputeMro(const PyTypePtr& type) {
   auto oldMro = type->Owner()->Mro();
@@ -128,7 +146,7 @@ PyListPtr ComputeMro(const PyTypePtr& type) {
   //  Function::DebugPrint(StringConcat(
   //    CreatePyList({CreatePyString("Mros needed to merge: "), mros->str()})
   //  ));
-  //  ForEach(mros, [&](const PyObjPtr& mro, Index, const PyObjPtr&) {
+  //  ForEach(mros, [&](const PyObjPtr& mro) {
   //    mro->str()->as<PyString>()->Print();
   //  });
   //  CreatePyString("")->as<PyString>()->PrintLine();
@@ -136,7 +154,7 @@ PyListPtr ComputeMro(const PyTypePtr& type) {
   //  Function::DebugPrint(
   //    StringConcat(CreatePyList({CreatePyString("Merged Mro: "), mro->str()}))
   //  );
-  //  ForEach(mros, [&](const PyObjPtr& mro, Index, const PyObjPtr&) {
+  //  ForEach(mros, [&](const PyObjPtr& mro) {
   //    mro->str()->as<PyString>()->Print();
   //  });
   //  CreatePyString("")->as<PyString>()->PrintLine();

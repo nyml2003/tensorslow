@@ -94,41 +94,41 @@ Bytes Serialize(const String& value) {
 Bytes Serialize(const Bytes& value) {
   return Serialize(value.Size()).Add(value);
 }
-double DeserializeDouble(const Bytes& bytes) {
+double DeserializeDouble(const List<Byte>& bytes) {
   if (bytes.Size() != sizeof(double)) {
     throw std::runtime_error("Invalid byte size for double");
   }
-  return *reinterpret_cast<const double*>(bytes.Value().Data());
+  return *reinterpret_cast<const double*>(bytes.Data());
 }
-uint64_t DeserializeU64(const Bytes& bytes) {
+uint64_t DeserializeU64(const List<Byte>& bytes) {
   if (bytes.Size() != sizeof(uint64_t)) {
     throw std::runtime_error("Invalid byte size for uint64_t");
   }
-  return *reinterpret_cast<const uint64_t*>(bytes.Value().Data());
+  return *reinterpret_cast<const uint64_t*>(bytes.Data());
 }
-int64_t DeserializeI64(const Bytes& bytes) {
+int64_t DeserializeI64(const List<Byte>& bytes) {
   return static_cast<int64_t>(DeserializeU64(bytes));
 }
-uint32_t DeserializeU32(const Bytes& bytes) {
+uint32_t DeserializeU32(const List<Byte>& bytes) {
   if (bytes.Size() != sizeof(uint32_t)) {
     throw std::runtime_error("Invalid byte size for uint32_t");
   }
-  return *reinterpret_cast<const uint32_t*>(bytes.Value().Data());
+  return *reinterpret_cast<const uint32_t*>(bytes.Data());
 }
-int32_t DeserializeI32(const Bytes& bytes) {
+int32_t DeserializeI32(const List<Byte>& bytes) {
   return static_cast<int32_t>(DeserializeU32(bytes));
 }
-uint16_t DeserializeU16(const Bytes& bytes) {
+uint16_t DeserializeU16(const List<Byte>& bytes) {
   if (bytes.Size() != sizeof(uint16_t)) {
     throw std::runtime_error("Invalid byte size for uint16_t");
   }
-  return *reinterpret_cast<const uint16_t*>(bytes.Value().Data());
+  return *reinterpret_cast<const uint16_t*>(bytes.Data());
 }
-String DeserializeString(const Bytes& bytes) {
+String DeserializeString(const List<Byte>& bytes) {
   return CreateStringWithBytes(bytes.Slice(sizeof(uint64_t), bytes.Size()));
 }
-Bytes DeserializeBytes(const Bytes& bytes) {
-  return bytes.Slice(sizeof(uint64_t), bytes.Size());
+Bytes DeserializeBytes(const List<Byte>& bytes) {
+  return Bytes(bytes.Slice(sizeof(uint64_t), bytes.Size()));
 }
 Bytes Serialize(const Decimal& value) {
   if (value.IsZero()) {
@@ -145,7 +145,7 @@ Bytes Serialize(const Decimal& value) {
   }
   return result;
 }
-Decimal DeserializeDecimal(const Bytes& bytes) {
+Decimal DeserializeDecimal(const List<Byte>& bytes) {
   if (bytes.Size() == 0) {
     return CreateDecimalZero();
   }
@@ -185,7 +185,7 @@ Bytes Serialize(const Integer& value) {
   }
   return result;
 }
-Integer DeserializeInteger(const Bytes& bytes) {
+Integer DeserializeInteger(const List<Byte>& bytes) {
   if (bytes.Size() == 0) {
     return CreateIntegerZero();
   }

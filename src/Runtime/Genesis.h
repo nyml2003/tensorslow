@@ -7,10 +7,6 @@ namespace torchlight::Runtime {
 
 Object::PyDictPtr Genesis();
 
-Object::PyObjPtr BuildClass(const Object::PyObjPtr& args);
-Object::PyObjPtr Type(const Object::PyObjPtr& args);
-
-Object::PyObjPtr BuiltinMatrix();
 }  // namespace torchlight::Runtime
 
 #endif

@@ -99,9 +99,8 @@ TEST_F(PyIntegerTest, TestSerialize) {
   auto bytes = std::dynamic_pointer_cast<PyBytes>(result)->value;
   EXPECT_EQ(bytes.value.First(), static_cast<Byte>(Literal::INTEGER));
   Bytes content(bytes.value.Slice(1, bytes.Size()));
-  EXPECT_TRUE(Collections::DeserializeInteger(content).Equal(
-    CreateIntegerWithCString("10")
-  ));
+  EXPECT_TRUE(Collections::DeserializeInteger(content.value)
+                .Equal(CreateIntegerWithCString("10")));
 }
 
 }  // namespace torchlight::Object

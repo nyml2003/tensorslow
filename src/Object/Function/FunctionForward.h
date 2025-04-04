@@ -13,15 +13,17 @@ void assign_indices(Tuple& params, const ArgList& arg_list, std::index_sequence<
 
 // 外部辅助函数：展开索引序列
 template <typename F, typename... Args, size_t... I>
-void expand_indices(std::index_sequence<I...>, F&& func, Args&&... ) {
+void expand_indices(std::index_sequence<I...>, F&& func, Args&&...) {
   std::forward<F>(func)(std::integral_constant<size_t, I>{}...);
 }
 
 template <typename T, typename... Args>
 PyObjPtr ForwardFunction(const PyObjPtr& args, PyObjPtr (T::*func)(Args...)) {
-  static_assert(std::is_base_of<Klass, T>::value, "T must core_class_inherit from Klass");
+  static_assert(
+    std::is_base_of<Klass, T>::value, "T must core_class_inherit from Klass"
+  );
 
-  if (!args->is<PyList>()) {
+  if (!args->is(ListKlass::Self())) {
     throw std::runtime_error("ForwardFunction expects a list as input");
   }
   auto argList = args->as<PyList>();

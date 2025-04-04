@@ -79,13 +79,13 @@ antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
       continue;
     }
   }
-  if (context->is<Ast::Module>()) {
+  if (context->is(Ast::ModuleKlass::Self())) {
     context->as<Ast::Module>()->SetBody(
       Object::CreatePyList(statements)->as<Object::PyList>()
     );
     return nullptr;
   }
-  if (context->is<Ast::FuncDef>()) {
+  if (context->is(Ast::FuncDefKlass::Self())) {
     context->as<Ast::FuncDef>()->SetBody(
       Object::CreatePyList(statements)->as<Object::PyList>()
     );
@@ -120,7 +120,7 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
     }
     auto testlist_comp =
       std::any_cast<Object::PyObjPtr>(visitTestlist_comp(ctx->testlist_comp()));
-    if (testlist_comp->is<Object::PyList>()) {
+    if (testlist_comp->is(Object::ListKlass::Self())) {
       return Ast::CreateList(testlist_comp->as<Object::PyList>(), context);
     }
     std::cerr << "visitAtom: testlist_comp is not a List" << std::endl;

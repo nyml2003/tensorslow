@@ -12,7 +12,6 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
-
 namespace torchlight::Object {
 
 PyCode::PyCode(
@@ -81,7 +80,7 @@ Index PyCode::NLocals() const {
 }
 
 PyObjPtr CodeKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyCode>() || !rhs->is<PyCode>()) {
+  if (!lhs->is(CodeKlass::Self()) || !rhs->is(CodeKlass::Self())) {
     return CreatePyBoolean(false);
   }
   auto lhsc = lhs->as<PyCode>();
@@ -116,7 +115,7 @@ PyObjPtr CodeKlass::repr(const PyObjPtr& self) {
 }
 
 PyObjPtr CodeKlass::_serialize_(const PyObjPtr& self) {
-  if (!self->is<PyCode>()) {
+  if (!self->is(CodeKlass::Self())) {
     throw std::runtime_error("PyCode::_serialize_(): obj is not a code object");
   }
   auto code = self->as<PyCode>();
@@ -295,12 +294,9 @@ void PrintCode(const PyCodePtr& code) {
   codeObj->VarNames()->str()->as<PyString>()->PrintLine(false);
   CreatePyString("instructions:")->as<PyString>()->PrintLine();
   PyString::IncreaseIndent();
-  ForEach(
-    codeObj->Instructions(),
-    [](const PyObjPtr& inst, Index, const PyObjPtr&) {
-      inst->str()->as<PyString>()->PrintLine();
-    }
-  );
+  ForEach(codeObj->Instructions(), [](const PyObjPtr& inst) {
+    inst->str()->as<PyString>()->PrintLine();
+  });
   PyString::DecreaseIndent();
   CreatePyString("nLocals: ")->as<PyString>()->Print();
   CreatePyInteger(codeObj->NLocals())->str()->as<PyString>()->PrintLine(false);

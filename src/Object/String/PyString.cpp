@@ -89,7 +89,7 @@ PyObjPtr StringKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {
 }
 
 PyObjPtr StringKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyString>() || !rhs->is<PyString>()) {
+  if (!lhs->is(StringKlass::Self()) || !rhs->is(StringKlass::Self())) {
     throw std::runtime_error("StringKlass::add(): lhs or rhs is not a string");
   }
   auto left = lhs->as<PyString>();
@@ -98,7 +98,7 @@ PyObjPtr StringKlass::add(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr StringKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyString>() || !rhs->is<PyString>()) {
+  if (!lhs->is(StringKlass::Self()) || !rhs->is(StringKlass::Self())) {
     return CreatePyBoolean(false);
   }
   auto left = lhs->as<PyString>();
@@ -107,7 +107,7 @@ PyObjPtr StringKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr StringKlass::len(const PyObjPtr& obj) {
-  if (!obj->is<PyString>()) {
+  if (!obj->is(StringKlass::Self())) {
     throw std::runtime_error("StringKlass::len(): obj is not a string");
   }
   auto string = obj->as<PyString>();
@@ -115,14 +115,14 @@ PyObjPtr StringKlass::len(const PyObjPtr& obj) {
 }
 
 PyObjPtr StringKlass::str(const PyObjPtr& obj) {
-  if (!obj->is<PyString>()) {
+  if (!obj->is(StringKlass::Self())) {
     throw std::runtime_error("StringKlass::str(): obj is not a string");
   }
   return obj;
 }
 
 PyObjPtr StringKlass::repr(const PyObjPtr& obj) {
-  if (!obj->is<PyString>()) {
+  if (!obj->is(StringKlass::Self())) {
     throw std::runtime_error("StringKlass::repr(): obj is not a string");
   }
   auto string = obj->as<PyString>();
@@ -132,14 +132,14 @@ PyObjPtr StringKlass::repr(const PyObjPtr& obj) {
 }
 
 PyObjPtr StringKlass::iter(const PyObjPtr& obj) {
-  if (!obj->is<PyString>()) {
+  if (!obj->is(StringKlass::Self())) {
     throw std::runtime_error("StringKlass::iter(): obj is not a string");
   }
   return CreateStringIterator(obj);
 }
 
 PyObjPtr StringKlass::hash(const PyObjPtr& obj) {
-  if (!obj->is<PyString>()) {
+  if (!obj->is(StringKlass::Self())) {
     throw std::runtime_error("StringKlass::hash(): obj is not a string");
   }
   auto string = obj->as<PyString>();
@@ -151,7 +151,7 @@ PyObjPtr StringKlass::hash(const PyObjPtr& obj) {
 }
 
 PyObjPtr StringKlass::boolean(const PyObjPtr& obj) {
-  if (!obj->is<PyString>()) {
+  if (!obj->is(StringKlass::Self())) {
     throw std::runtime_error("StringKlass::boolean(): obj is not a string");
   }
   auto string = obj->as<PyString>();
@@ -159,7 +159,7 @@ PyObjPtr StringKlass::boolean(const PyObjPtr& obj) {
 }
 
 PyObjPtr StringKlass::_serialize_(const PyObjPtr& obj) {
-  if (!obj->is<PyString>()) {
+  if (!obj->is(StringKlass::Self())) {
     throw std::runtime_error("StringKlass::_serialize_(): obj is not a string");
   }
   return CreatePyBytes(Collections::Serialize(Literal::STRING)
@@ -179,14 +179,15 @@ PyStrPtr PyString::GetItem(Index index) const {
 
 PyStrPtr PyString::Join(const PyObjPtr& iterable) {
   auto result = CreatePyString("")->as<PyString>();
-  ForEach(iterable, [&](const PyObjPtr& item, Index index, const PyObjPtr&) {
-    if (index == 1) {
+  for (Index i = 0; i < iterable->as<PyList>()->Length(); i++) {
+    auto item = iterable->as<PyList>()->GetItem(i);
+    if (i == 0) {
       result = result->Add(item->as<PyString>());
     } else {
       result = result->Add(CreatePyString(value)->as<PyString>())
                  ->Add(item->as<PyString>());
     }
-  });
+  }
   return result;
 }
 

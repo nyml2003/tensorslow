@@ -13,7 +13,7 @@ Unicode GetUnicode(
   const std::function<bool(Index)>& IsValid
 ) noexcept;
 String CreateStringWithCString(const char* str) noexcept;
-String CreateStringWithBytes(const Bytes& bytes) noexcept;
+String CreateStringWithBytes(const List<Byte>& bytes) noexcept;
 String ToString(double value);
 String ToString(uint64_t value);
 String ToString(uint32_t value);

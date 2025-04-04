@@ -16,13 +16,13 @@ Object::PyObjPtr AssignStmtKlass::emit(
   source->emit(codeList);
   auto target = assignStmt->Target();
 
-  if (target->is<Identifier>()) {
+  if (target->is(IdentifierKlass::Self())) {
     auto targetIdentifier = target->as<Identifier>();
     targetIdentifier->emit(codeList);
-  } else if (target->is<MemberAccess>()) {
+  } else if (target->is(MemberAccessKlass::Self())) {
     auto memberAccess = target->as<MemberAccess>();
     memberAccess->emit(codeList);
-  } else if (target->is<Binary>()) {
+  } else if (target->is(BinaryKlass::Self())) {
     auto binary = target->as<Binary>();
     binary->emit(codeList);
     return Object::CreatePyNone();
@@ -38,15 +38,15 @@ Object::PyObjPtr AssignStmtKlass::visit(
   auto source = assignStmt->Source();
   source->visit(codeList);
   auto target = assignStmt->Target();
-  if (target->is<Identifier>()) {
+  if (target->is(IdentifierKlass::Self())) {
     auto targetIdentifier = target->as<Identifier>();
     targetIdentifier->SetStoreMode();
     targetIdentifier->visit(codeList);
-  } else if (target->is<MemberAccess>()) {
+  } else if (target->is(MemberAccessKlass::Self())) {
     auto memberAccess = target->as<MemberAccess>();
     memberAccess->SetStoreMode();
     memberAccess->visit(codeList);
-  } else if (target->is<Binary>()) {
+  } else if (target->is(BinaryKlass::Self())) {
     auto binary = target->as<Binary>();
     auto oprt = binary->Oprt();
     if (oprt != Binary::Operator::SUBSCR) {

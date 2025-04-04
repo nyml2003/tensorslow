@@ -1,12 +1,12 @@
 #include "Object/Core/Klass.h"
 #include "Function/ObjectHelper.h"
-#include "Object/Container/PyDictionary.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Core/PyType.h"
+#include "Object/Function/PyIife.h"
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
@@ -234,9 +234,17 @@ PyObjPtr Klass::len(const PyObjPtr& obj) {
 }
 
 PyObjPtr Klass::getattr(const PyObjPtr& obj, const PyObjPtr& key) {
+  auto keyStr = key->as<PyString>();
   // attr为nullptr说明没有重载，直接返回属性
-  if (obj->Attributes()->Contains(key->as<PyString>())) {
-    return AttrWrapper(obj, obj->Attributes()->Get(key->as<PyString>()));
+  if (obj->Attributes()->Contains(keyStr)) {
+    auto attr = obj->Attributes()->Get(keyStr);
+    if (attr->is(IifeKlass::Self())) {
+      return attr->as<PyIife>()->Call(CreatePyList({obj}));
+    }
+    return attr;
+  }
+  if (obj->Methods()->Contains(keyStr)) {
+    return BindSelf(obj, obj->Methods()->Get(keyStr));
   }
   // 如果getattr被重载，那么调用重载的函数
   auto attr = GetAttr(obj, CreatePyString("__getattr__")->as<PyString>());
@@ -244,10 +252,10 @@ PyObjPtr Klass::getattr(const PyObjPtr& obj, const PyObjPtr& key) {
     return Runtime::Interpreter::Eval(attr, CreatePyList({key})->as<PyList>());
   }
   // 对象属性内部没有找到，查找父类
-  attr = GetAttr(obj, key->as<PyString>());
-  obj->Attributes()->Put(key->as<PyString>(), attr);
+  attr = GetAttr(obj, keyStr);
   if (attr != nullptr) {
-    return AttrWrapper(obj, attr);
+    CacheAttr(obj, keyStr, attr);
+    return BindSelf(obj, attr);
   }
   return nullptr;
 }

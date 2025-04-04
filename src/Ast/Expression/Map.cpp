@@ -22,18 +22,12 @@ MapKlass::visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) {
   auto map = obj->as<Ast::Map>();
   auto keys = map->Keys();
   auto values = map->Values();
-  Object::ForEach(
-    keys,
-    [&codeList](const Object::PyObjPtr& element, Index, const Object::PyObjPtr&) {
-      element->as<INode>()->visit(codeList);
-    }
-  );
-  Object::ForEach(
-    values,
-    [&codeList](const Object::PyObjPtr& element, Index, const Object::PyObjPtr&) {
-      element->as<INode>()->visit(codeList);
-    }
-  );
+  Object::ForEach(keys, [&codeList](const Object::PyObjPtr& element) {
+    element->as<INode>()->visit(codeList);
+  });
+  Object::ForEach(values, [&codeList](const Object::PyObjPtr& element) {
+    element->as<INode>()->visit(codeList);
+  });
   return Object::CreatePyNone();
 }
 

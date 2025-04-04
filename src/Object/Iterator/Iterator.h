@@ -81,18 +81,7 @@ inline PyObjPtr CreateIterDone() {
   return std::make_shared<IterDone>();
 }
 
-class IIterator {
- public:
-  IIterator() = default;
-  virtual ~IIterator() = default;
-  IIterator(const IIterator&) = delete;
-  IIterator& operator=(const IIterator&) = delete;
-  IIterator(IIterator&&) noexcept = delete;
-  IIterator& operator=(IIterator&&) noexcept = delete;
-  [[nodiscard]] virtual Index CurrentIndex() const = 0;
-};
-
-class ListIterator : public PyObject, public IIterator {
+class ListIterator : public PyObject {
  private:
   PyListPtr list;
   Index index{};
@@ -103,7 +92,7 @@ class ListIterator : public PyObject, public IIterator {
     this->list = list->as<PyList>();
   }
   [[nodiscard]] PyListPtr List() const { return list; }
-  [[nodiscard]] Index CurrentIndex() const override { return index; }
+  [[nodiscard]] Index CurrentIndex() const { return index; }
   void Next() { index++; }
 };
 
@@ -111,7 +100,7 @@ inline PyObjPtr CreateListIterator(const PyObjPtr& list) {
   return std::make_shared<ListIterator>(list);
 }
 
-class ListReverseIterator : public PyObject, public IIterator {
+class ListReverseIterator : public PyObject {
  private:
   PyListPtr list;
   Index index{};
@@ -123,7 +112,7 @@ class ListReverseIterator : public PyObject, public IIterator {
     index = this->list->Length() - 1;
   }
   [[nodiscard]] PyListPtr List() const { return list; }
-  [[nodiscard]] Index CurrentIndex() const override { return index; }
+  [[nodiscard]] Index CurrentIndex() const { return index; }
   void Next() { index--; }
 };
 
@@ -151,7 +140,7 @@ inline PyObjPtr CreateListReverseIterator(const PyObjPtr& list) {
   return std::make_shared<ListReverseIterator>(list);
 }
 
-class StringIterator : public PyObject, public IIterator {
+class StringIterator : public PyObject {
  private:
   PyStrPtr string;
   Index index{};
@@ -162,7 +151,7 @@ class StringIterator : public PyObject, public IIterator {
     this->string = string->as<PyString>();
   }
   [[nodiscard]] PyStrPtr String() const { return string; }
-  [[nodiscard]] Index CurrentIndex() const override { return index; }
+  [[nodiscard]] Index CurrentIndex() const { return index; }
   void Next() { index++; }
 };
 
@@ -190,7 +179,7 @@ class DictItemIteratorKlass : public Klass {
   PyObjPtr str(const PyObjPtr& obj) override;
 };
 
-class DictItemIterator : public PyObject, public IIterator {
+class DictItemIterator : public PyObject {
  private:
   PyDictPtr dict;
   Index index{};
@@ -201,7 +190,7 @@ class DictItemIterator : public PyObject, public IIterator {
     this->dict = dict->as<PyDictionary>();
   }
   [[nodiscard]] PyDictPtr Dict() const { return dict; }
-  [[nodiscard]] Index CurrentIndex() const override { return index; }
+  [[nodiscard]] Index CurrentIndex() const { return index; }
   void Next() { index++; }
 };
 

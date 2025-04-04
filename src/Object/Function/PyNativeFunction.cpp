@@ -27,7 +27,7 @@ void CheckNativeFunctionArgumentsWithExpectedLength(
 }
 
 void CheckNativeFunctionArguments(const PyObjPtr& args) {
-  if (args->is<PyList>()) {
+  if (args->is(ListKlass::Self())) {
     return;
   }
   auto errorMessage = StringConcat(CreatePyList(
