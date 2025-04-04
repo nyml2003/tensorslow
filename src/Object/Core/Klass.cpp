@@ -234,14 +234,14 @@ PyObjPtr Klass::len(const PyObjPtr& obj) {
 }
 
 PyObjPtr Klass::getattr(const PyObjPtr& obj, const PyObjPtr& key) {
+  // attr为nullptr说明没有重载，直接返回属性
+  if (obj->Attributes()->Contains(key->as<PyString>())) {
+    return AttrWrapper(obj, obj->Attributes()->Get(key->as<PyString>()));
+  }
   // 如果getattr被重载，那么调用重载的函数
   auto attr = GetAttr(obj, CreatePyString("__getattr__")->as<PyString>());
   if (attr != nullptr) {
     return Runtime::Interpreter::Eval(attr, CreatePyList({key})->as<PyList>());
-  }
-  // attr为nullptr说明没有重载，直接返回属性
-  if (obj->Attributes()->Contains(key->as<PyString>())) {
-    return AttrWrapper(obj, obj->Attributes()->Get(key->as<PyString>()));
   }
   // 对象属性内部没有找到，查找父类
   attr = GetAttr(obj, key->as<PyString>());
