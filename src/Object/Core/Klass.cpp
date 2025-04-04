@@ -245,6 +245,7 @@ PyObjPtr Klass::getattr(const PyObjPtr& obj, const PyObjPtr& key) {
   }
   // 对象属性内部没有找到，查找父类
   attr = GetAttr(obj, key->as<PyString>());
+  obj->Attributes()->Put(key->as<PyString>(), attr);
   if (attr != nullptr) {
     return AttrWrapper(obj, attr);
   }

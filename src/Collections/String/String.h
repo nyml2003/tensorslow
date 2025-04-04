@@ -18,7 +18,7 @@ class String {
   ~String();
   /**
    * 用于将字符串分割成多个子串
-   * @param d
+   * @param delimiter 分隔符
    * @return
    */
   [[nodiscard]] List<String> Split(String& delimiter) const;
@@ -52,6 +52,6 @@ class String {
   Unicode operator[](Index index) const;
 };
 
- // namespace std
+// namespace std
 }  // namespace torchlight::Collections
 #endif  // TORCHLIGHT_COLLECTIONS_STRING_H

@@ -12,6 +12,11 @@ void TypeKlass::Initialize() {
   this->isInitialized = true;
 }
 
+PyType::PyType(KlassPtr _owner)
+  : PyObject(TypeKlass::Self()), owner(std::move(_owner)) {
+  this->SetAttributes(owner->Attributes());
+}
+
 PyObjPtr TypeKlass::repr(const PyObjPtr& obj) {
   if (!obj->is<PyType>()) {
     throw std::runtime_error("PyType::repr(): obj is not a type object");

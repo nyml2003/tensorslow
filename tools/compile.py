@@ -12,7 +12,7 @@ source_code = "../ml/adaline_batch.py"
 # source_code = "../test/dev/dev.py"
 # 显示源代码内容
 print("源代码:")
-with open(source_code, 'r') as file:
+with open(source_code, 'r', encoding='utf-8') as file:
     print(file.read())
 
 # 编译到字节码

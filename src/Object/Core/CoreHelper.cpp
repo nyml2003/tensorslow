@@ -103,9 +103,6 @@ PyObjPtr GetMro(const PyObjPtr& args) {
 PyObjPtr GetDict(const PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   auto obj = args->as<PyList>()->GetItem(0);
-  if (obj->is<PyType>()) {
-    return obj->as<PyType>()->Owner()->Attributes();
-  }
   return obj->Attributes();
 }
 PyListPtr ComputeMro(const PyTypePtr& type) {

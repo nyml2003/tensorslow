@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import glob
 import os
 import subprocess
@@ -52,16 +53,14 @@ for subdir in subdirs:
     for py_file in py_files:
         source_code = py_file
         print("源代码:")
-        with open(source_code, "r") as f:
+        with open(source_code, "r", encoding="utf-8") as f:
             print(f.read())
-        print()
         print("正在编译到字节码...")
 
         # 打印前端执行命令
         frontend_command = f'"{frontend_exe}" --file="{source_code}"'
         print(frontend_command)
         subprocess.run(frontend_command, shell=True)
-        print()
 
     # 选择执行的.pyc文件
     main_pyc = os.path.join(subdir_path, "main.pyc")

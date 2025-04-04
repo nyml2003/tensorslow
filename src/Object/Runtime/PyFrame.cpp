@@ -713,9 +713,7 @@ PyObjPtr PyFrame::Eval() {
         auto index = std::get<Index>(inst->Operand());
         auto key = Code()->Names()->GetItem(index);
         auto obj = stack.Pop();
-        auto value = obj->is<PyType>()
-                       ? obj->as<PyType>()->Owner()->Attributes()->getitem(key)
-                       : obj->getattr(key);
+        auto value = obj->getattr(key);
         if (value == nullptr) {
           std::cout << "object attributes: " << std::endl;
           obj->Attributes()->str()->as<PyString>()->PrintLine();
