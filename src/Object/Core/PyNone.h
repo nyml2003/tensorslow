@@ -33,14 +33,15 @@ class NoneKlass : public Klass {
 
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 };
-
+class PyNone;
+using PyNonePtr = std::shared_ptr<PyNone>;
 class PyNone : public PyObject {
  public:
   explicit PyNone();
-  static PyObjPtr Instance();
+  static PyNonePtr Instance();
 };
 
-inline PyObjPtr CreatePyNone() {
+inline PyNonePtr CreatePyNone() {
   return PyNone::Instance();
 }
 

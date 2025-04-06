@@ -14,9 +14,7 @@ class SliceKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_slice")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_slice"), Self());
     this->isInitialized = true;
   }
 

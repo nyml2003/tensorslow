@@ -14,9 +14,7 @@ class AssignStmtKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_assignstmt")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_assignstmt"), Self());
     this->isInitialized = true;
   }
 

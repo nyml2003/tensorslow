@@ -15,7 +15,6 @@ Object::PyObjPtr AssignStmtKlass::emit(
   auto source = assignStmt->Source();
   source->emit(codeList);
   auto target = assignStmt->Target();
-
   if (target->is(IdentifierKlass::Self())) {
     auto targetIdentifier = target->as<Identifier>();
     targetIdentifier->emit(codeList);

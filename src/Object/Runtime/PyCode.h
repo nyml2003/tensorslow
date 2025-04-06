@@ -178,7 +178,7 @@ class CodeKlass : public Klass {
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 };
 
-PyObjPtr CreatePyCode(const PyStrPtr& name);
+PyCodePtr CreatePyCode(const PyStrPtr& name);
 // 打印PyCode的详细信息
 void PrintCode(const PyCodePtr& code);
 inline PyObjPtr CreatePyCode(

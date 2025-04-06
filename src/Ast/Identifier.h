@@ -1,6 +1,8 @@
 #ifndef TORCHLIGHT_AST_IDENTIFIER_H
 #define TORCHLIGHT_AST_IDENTIFIER_H
 
+#include <utility>
+
 #include "Ast/INode.h"
 #include "Function/ObjectHelper.h"
 #include "Object/String/PyString.h"
@@ -20,9 +22,7 @@ class IdentifierKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_identifier")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_identifier"), Self());
     this->isInitialized = true;
   }
 
@@ -34,9 +34,8 @@ class IdentifierKlass : public INodeKlass {
 
 class Identifier : public INode {
  public:
-  explicit Identifier(const Object::PyObjPtr& _name, const INodePtr& parent)
-    : INode(IdentifierKlass::Self(), parent),
-      name(_name->as<Object::PyString>()) {
+  explicit Identifier(Object::PyStrPtr _name, INodePtr parent)
+    : INode(IdentifierKlass::Self(), parent), name(std::move(_name)) {
     builtins = Object::CreatePyList({Object::CreatePyString("print"),
                                      Object::CreatePyString("reshape"),
                                      Object::CreatePyString("Reshape"),
@@ -71,8 +70,7 @@ class Identifier : public INode {
                                      Object::CreatePyString("id"),
                                      Object::CreatePyString("time"),
                                      Object::CreatePyString("range"),
-                                     Object::CreatePyString("iter")})
-                 ->as<Object::PyList>();
+                                     Object::CreatePyString("iter")});
   }
 
   [[nodiscard]] Object::PyStrPtr Name() const { return name; }
@@ -89,7 +87,7 @@ class Identifier : public INode {
 using IdentifierPtr = std::shared_ptr<Identifier>;
 
 inline INodePtr
-CreateIdentifier(const Object::PyObjPtr& name, INodePtr parent) {
+CreateIdentifier(const Object::PyStrPtr& name, INodePtr parent) {
   return std::make_shared<Identifier>(name, parent);
 }
 

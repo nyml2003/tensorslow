@@ -14,9 +14,7 @@ class AtomKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_atom")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_atom"), Self());
     this->isInitialized = true;
   }
 

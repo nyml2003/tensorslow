@@ -15,9 +15,7 @@ class IfStmtKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_ifstmt")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_ifstmt"), Self());
     this->isInitialized = true;
   }
 

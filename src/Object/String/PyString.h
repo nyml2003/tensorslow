@@ -41,7 +41,7 @@ class PyString : public PyObject {
   bool hashed = false;
   // 缩进深度
   static Index indent;
-  static std::unordered_map<Collections::String, PyObjPtr> stringPool;
+  static std::unordered_map<Collections::String, PyStrPtr> stringPool;
   static std::mutex poolMutex;
 
  public:
@@ -74,7 +74,7 @@ class PyString : public PyObject {
   PyStrPtr Upper() const;
 
   Collections::String Value() const { return value; }
-  static PyObjPtr Create(const Collections::String& value);
+  static PyStrPtr Create(const Collections::String& value);
 };
 
 using PyStrPtr = std::shared_ptr<PyString>;
@@ -87,9 +87,9 @@ PyObjPtr StringSplit(const PyObjPtr& args);
 
 PyObjPtr StringConcat(const PyObjPtr& args);
 
-PyObjPtr CreatePyString(const Collections::String& value);
-PyObjPtr CreatePyString(const char* value);
-PyObjPtr CreatePyString(const std::string& value);
+PyStrPtr CreatePyString(const Collections::String& value);
+PyStrPtr CreatePyString(const char* value);
+PyStrPtr CreatePyString(const std::string& value);
 
 }  // namespace torchlight::Object
 

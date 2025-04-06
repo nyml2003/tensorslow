@@ -78,8 +78,8 @@ void DefineOption() {
   ArgsHelper::SetSchema(schema);
 }
 void InitPyObj() {
-  torchlight::Object::BasicKlassLoad();
-  torchlight::Object::NativeClassLoad();
+  torchlight::Object::LoadBootstrapClasses();
+  torchlight::Object::LoadRuntimeSupportClasses();
   torchlight::Ast::RegisterAstKlass();
 }
 
@@ -106,12 +106,9 @@ void ParseAndGenerate(const fs::path& filePath) {
 
   Generator visitor(torchlight::Object::CreatePyString(filePath.string())
                       ->as<torchlight::Object::PyString>());
-  try {
-    visitor.visit(tree);
-  } catch (const std::bad_any_cast&) {
-    std::cerr << "Bad any_cast occurred!" << std::endl;
-    return;
-  }
+
+  visitor.visit(tree);
+
   visitor.Visit();
   visitor.Emit();
   auto code = visitor.Code();

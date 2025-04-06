@@ -137,7 +137,7 @@ PyListPtr ComputeMro(const PyTypePtr& type) {
   //     CreatePyString(" with super: "), type->Owner()->Super()->str()}
   //  )));
   auto bases = type->Owner()->Super();
-  PyListPtr mros = CreatePyList({})->as<PyList>();
+  PyListPtr mros = CreatePyList()->as<PyList>();
   for (Index i = 0; i < bases->Length(); i++) {
     auto base = bases->GetItem(i)->as<PyType>();
     auto mro = base->Owner()->Mro();
@@ -178,14 +178,14 @@ void CleanMros(const PyListPtr& mros) {
 
 PyListPtr MergeMro(const PyListPtr& mros) {
   if (mros->Length() == 0) {
-    return CreatePyList({})->as<PyList>();
+    return CreatePyList()->as<PyList>();
   }
-  PyListPtr result = CreatePyList({})->as<PyList>();
-  CleanMros(mros);
+  PyListPtr result = CreatePyList()->as<PyList>();
   while (mros->Length() > 1) {
     //    Function::DebugPrint(StringConcat(
     //      CreatePyList({CreatePyString("Mros to merge: "), mros->str()})
     //    ));
+    CleanMros(mros);
     bool notFindBase = true;
     for (Index i = 0; i < mros->Length() && notFindBase; i++) {
       auto head = mros->GetItem(i)->as<PyList>()->GetItem(0)->as<PyType>();
@@ -206,9 +206,10 @@ PyListPtr MergeMro(const PyListPtr& mros) {
         if (i == j) {
           continue;
         }
-        if (IsTrue(mros->GetItem(j)->as<PyList>()->GetItem(0)->eq(head))) {
-          mros->GetItem(j)->as<PyList>()->RemoveAt(0);
-          if (mros->GetItem(j)->as<PyList>()->Length() == 0) {
+        auto list = mros->GetItem(j)->as<PyList>();
+        if (IsTrue(list->GetItem(0)->eq(head))) {
+          list->RemoveAt(0);
+          if (list->Length() == 0) {
             mros->RemoveAt(j);
           }
         }
@@ -320,7 +321,7 @@ PyObjPtr Str(const PyObjPtr& args) {
   return args->as<PyList>()->GetItem(0)->str();
 }
 
-void BasicKlassLoad() {
+void LoadBootstrapClasses() {
   StringKlass::Self()->Initialize();
   IntegerKlass::Self()->Initialize();
   ListKlass::Self()->Initialize();
@@ -334,7 +335,7 @@ void BasicKlassLoad() {
   IterDoneKlass::Self()->Initialize();
 }
 
-void NativeClassLoad() {
+void LoadRuntimeSupportClasses() {
   NoneKlass::Self()->Initialize();
   ObjectKlass::Self()->Initialize();
   FunctionKlass::Self()->Initialize();

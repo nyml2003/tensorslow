@@ -158,17 +158,7 @@ Object::PyObjPtr IdentifierKlass::emit(
       code->LoadName(name);
       return Object::CreatePyNone();
     }
-    std::cout << "Registry: " << static_cast<int>(registry) << std::endl;
-    std::cout << "Name: " << name->ToCppString() << std::endl;
-    std::cout << "Builtins: " << std::flush;
-    identifier->Builtins()->str()->as<Object::PyString>()->PrintLine();
-    std::cout << "Scope: " << std::flush;
-    Object::PrintCode(code);
-    std::cout << "Module: " << std::flush;
-    Object::PrintCode(
-      codeList->as<Object::PyList>()->GetItem(0)->as<Object::PyCode>()
-    );
-
+   
     throw std::runtime_error(
       "NameError: name '" + name->ToCppString() + "' is not defined"
     );

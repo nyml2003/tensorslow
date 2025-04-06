@@ -60,7 +60,7 @@ void ObjectKlass::Initialize() {
     CreatePyNativeFunction(KlassBool)
   );
   instance->SetType(CreatePyType(instance)->as<PyType>());
-  instance->SetSuper(CreatePyList({})->as<PyList>());
+  instance->SetSuper(CreatePyList()->as<PyList>());
   instance->SetMro(
     CreatePyList({CreatePyType(instance)->as<PyType>()})->as<PyList>()
   );

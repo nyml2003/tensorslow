@@ -274,11 +274,11 @@ void PyCode::BinaryOr() {
   instructions->Append(CreateBinaryOr());
 }
 
-PyObjPtr CreatePyCode(const PyStrPtr& name) {
+PyCodePtr CreatePyCode(const PyStrPtr& name) {
   auto byteCode = CreatePyBytes()->as<PyBytes>();
-  auto consts = CreatePyList({})->as<PyList>();
-  auto names = CreatePyList({})->as<PyList>();
-  auto varNames = CreatePyList({})->as<PyList>();
+  auto consts = CreatePyList()->as<PyList>();
+  auto names = CreatePyList()->as<PyList>();
+  auto varNames = CreatePyList()->as<PyList>();
   return std::make_shared<PyCode>(byteCode, consts, names, varNames, name, 0);
 }
 

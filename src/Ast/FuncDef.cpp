@@ -20,11 +20,10 @@ FuncDef::FuncDef(
     name(std::move(name)),
     body(std::move(body)),
     parameters(std::move(parameters)),
-
-    parents(Object::CreatePyList({})->as<Object::PyList>()),
+    parents(Object::CreatePyList()),
     codeIndex(0) {
   if (parent->is(ModuleKlass::Self())) {
-    parents = Object::CreatePyList({parent})->as<Object::PyList>();
+    parents = Object::CreatePyList({parent});
   }
   if (parent->is(FuncDefKlass::Self())) {
     parents = parent->as<FuncDef>()->Parents();
@@ -42,7 +41,7 @@ Object::PyObjPtr FuncDefKlass::visit(
 ) {
   auto funcDef = obj->as<FuncDef>();
   funcDef->SetCodeIndex(codeList->as<Object::PyList>()->Length());
-  auto code = Object::CreatePyCode(funcDef->Name())->as<Object::PyCode>();
+  auto code = Object::CreatePyCode(funcDef->Name());
   code->SetScope(Object::Scope::LOCAL);
   Object::ForEach(
     funcDef->Parameters(),

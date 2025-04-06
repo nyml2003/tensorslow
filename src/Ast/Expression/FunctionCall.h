@@ -14,9 +14,7 @@ class FunctionCallKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_functioncall")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_functioncall"), Self());
     this->isInitialized = true;
   }
 

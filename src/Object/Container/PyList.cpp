@@ -19,7 +19,7 @@
 
 namespace torchlight::Object {
 
-PyObjPtr CreatePyList(Index capacity) {
+PyListPtr CreatePyList(Index capacity) {
   if (capacity == 0) {
     return std::make_shared<PyList>(Collections::List<PyObjPtr>());
   }
@@ -28,7 +28,11 @@ PyObjPtr CreatePyList(Index capacity) {
   return std::make_shared<PyList>(list);
 }
 
-PyObjPtr CreatePyList(Collections::List<PyObjPtr> list) {
+PyListPtr CreatePyList() {
+  return std::make_shared<PyList>(Collections::List<PyObjPtr>());
+}
+
+PyListPtr CreatePyList(Collections::List<PyObjPtr> list) {
   return std::make_shared<PyList>(list);
 }
 
@@ -136,7 +140,7 @@ PyObjPtr ListKlass::init(const PyObjPtr& type, const PyObjPtr& args) {
   }
   auto argList = args->as<PyList>();
   if (argList->Length() == 0) {
-    return CreatePyList({});
+    return CreatePyList();
   }
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   auto value = argList->GetItem(0);
@@ -473,7 +477,7 @@ PyObjPtr PyList::GetSlice(const PySlicePtr& slice) const {
   int64_t start = slice->GetStart()->as<PyInteger>()->ToI64();
   int64_t stop = slice->GetStop()->as<PyInteger>()->ToI64();
   int64_t step = slice->GetStep()->as<PyInteger>()->ToI64();
-  auto subList = CreatePyList({})->as<PyList>();
+  auto subList = CreatePyList()->as<PyList>();
   if (step > 0) {
     for (int64_t i = start; i < stop; i += step) {
       if (i >= static_cast<int64_t>(Length())) {

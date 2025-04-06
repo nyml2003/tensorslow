@@ -13,9 +13,7 @@ class WhileStmtKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_whilestmt")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_whilestmt"), Self());
     this->isInitialized = true;
   }
 
@@ -53,11 +51,11 @@ class WhileStmt : public INode {
 
 inline INodePtr CreateWhileStmt(
   INodePtr condition,
-  const Object::PyObjPtr& body,
+  const Object::PyListPtr& body,
   INodePtr parent
 ) {
   return std::make_shared<WhileStmt>(
-    std::move(condition), body->as<Object::PyList>(), std::move(parent)
+    std::move(condition), body, std::move(parent)
   );
 }
 

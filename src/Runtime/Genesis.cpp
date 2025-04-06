@@ -18,8 +18,8 @@
 namespace torchlight::Runtime {
 
 Object::PyDictPtr Genesis() {
-  Object::BasicKlassLoad();
-  Object::NativeClassLoad();
+  Object::LoadBootstrapClasses();
+  Object::LoadRuntimeSupportClasses();
   auto builtins = Object::CreatePyDict()->as<Object::PyDictionary>();
   // 注册内置函数和类型
   builtins->Put(Object::CreatePyString("None"), Object::CreatePyNone());
@@ -163,51 +163,51 @@ Object::PyDictPtr Genesis() {
 //   auto matrix =
 //   std::make_shared<Object::PyObject>(Object::ObjectKlass::Self()); auto attr
 //   = matrix->Attributes(); attr->Put(
-//     Object::CreatePyString("array")->as<Object::PyString>(),
+//     Object::CreatePyString("array"),
 //     Object::CreatePyNativeFunction(Object::Matrix)
 //   );
 //   attr->Put(
-//     Object::CreatePyString("eye")->as<Object::PyString>(),
+//     Object::CreatePyString("eye"),
 //     Object::CreatePyNativeFunction(Object::Eye)
 //   );
 //   attr->Put(
-//     Object::CreatePyString("zeros")->as<Object::PyString>(),
+//     Object::CreatePyString("zeros"),
 //     Object::CreatePyNativeFunction(Object::Zeros)
 //   );
 //   attr->Put(
-//     Object::CreatePyString("ones")->as<Object::PyString>(),
+//     Object::CreatePyString("ones"),
 //     Object::CreatePyNativeFunction(Object::Ones)
 //   );
 //   attr->Put(
-//     Object::CreatePyString("diag")->as<Object::PyString>(),
+//     Object::CreatePyString("diag"),
 //     Object::CreatePyNativeFunction(Object::Diagnostic)
 //   );
 //   attr->Put(
-//     Object::CreatePyString("transpose")->as<Object::PyString>(),
+//     Object::CreatePyString("transpose"),
 //     Object::CreatePyNativeFunction(Object::Transpose)
 //   );
 //   attr->Put(
-//     Object::CreatePyString("reshape")->as<Object::PyString>(),
+//     Object::CreatePyString("reshape"),
 //     Object::CreatePyNativeFunction(Object::Reshape)
 //   );
 //   attr->Put(
-//     Object::CreatePyString("shape")->as<Object::PyString>(),
+//     Object::CreatePyString("shape"),
 //     Object::CreatePyNativeFunction(Object::Shape)
 //   );
 //   attr->Put(
-//     Object::CreatePyString("concatenate")->as<Object::PyString>(),
+//     Object::CreatePyString("concatenate"),
 //     Object::CreatePyNativeFunction(Object::Concatenate)
 //   );
 //   attr->Put(
-//     Object::CreatePyString("ravel")->as<Object::PyString>(),
+//     Object::CreatePyString("ravel"),
 //     Object::CreatePyNativeFunction(Object::Ravel)
 //   );
 //   attr->Put(
-//     Object::CreatePyString("normal")->as<Object::PyString>(),
+//     Object::CreatePyString("normal"),
 //     Object::CreatePyNativeFunction(Function::Normal)
 //   );
 //   attr->Put(
-//     Object::CreatePyString("shuffle")->as<Object::PyString>(),
+//     Object::CreatePyString("shuffle"),
 //     Object::CreatePyNativeFunction(Function::Shuffle)
 //   );
 //   return matrix;

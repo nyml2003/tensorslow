@@ -13,9 +13,7 @@ class ReturnStmtKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_returnstmt")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_returnstmt"), Self());
     this->isInitialized = true;
   }
 

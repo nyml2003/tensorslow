@@ -54,11 +54,11 @@ class PyFloat : public PyObject {
 
   [[nodiscard]] double Value() const { return value; }
 };
-
-inline PyObjPtr CreatePyFloat(double value) {
+using PyFloatPtr = std::shared_ptr<PyFloat>;
+inline PyFloatPtr CreatePyFloat(double value) {
   return std::make_shared<PyFloat>(value);
 }
-using PyFloatPtr = std::shared_ptr<PyFloat>;
+
 }  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_PYFLOAT_H

@@ -37,8 +37,8 @@ Object::PyObjPtr Bool(const Object::PyObjPtr& args);
 // object.__bool__
 Object::PyObjPtr KlassBool(const Object::PyObjPtr& args);
 
-void BasicKlassLoad();
-void NativeClassLoad();
+void LoadBootstrapClasses();
+void LoadRuntimeSupportClasses();
 Object::PyListPtr MergeMro(const Object::PyListPtr& mros);
 Object::PyListPtr ComputeMro(const Object::PyTypePtr& type);
 bool FirstOrNotInMro(

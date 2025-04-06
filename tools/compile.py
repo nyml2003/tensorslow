@@ -2,7 +2,7 @@ import os
 import subprocess
 
 # 定义路径和可执行文件
-build_dir = "../debug"
+build_dir = "../release"
 test_dir = "../test/integration"
 frontend_exe = os.path.join(build_dir, "torchlight_frontend")
 backend_exe = os.path.join(build_dir, "torchlight_backend")

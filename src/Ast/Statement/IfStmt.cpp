@@ -27,7 +27,7 @@ Object::PyObjPtr IfStmtKlass::visit(
     elif->as<INode>()->visit(codeList);
   });
   Object::ForEach(elifs, [&codeList](const Object::PyObjPtr& elif) {
-    auto elifStms = elif->as<Object::PyList>();
+    auto elifStms = elif;
     Object::ForEach(elifStms, [&codeList](const Object::PyObjPtr& stmt) {
       stmt->as<INode>()->visit(codeList);
     });
@@ -79,7 +79,7 @@ Object::PyObjPtr IfStmtKlass::emit(
     Index elfiConditionEnd = code->PopJumpIfFalse();
 
     // 生成 elif 块的字节码
-    auto elifStms = elifBlock->as<Object::PyList>();
+    auto elifStms = elifBlock;
     Object::ForEach(elifStms, [&codeList](const Object::PyObjPtr& stmt) {
       stmt->as<Ast::INode>()->emit(codeList);
     });

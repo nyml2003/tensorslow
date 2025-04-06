@@ -34,10 +34,9 @@ class ListKlass : public Klass {
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
   void Initialize() override;
 };
-
-PyObjPtr CreatePyList(Index capacity);
-
-PyObjPtr CreatePyList(Collections::List<PyObjPtr> list);
+PyListPtr CreatePyList();
+PyListPtr CreatePyList(Index capacity);
+PyListPtr CreatePyList(Collections::List<PyObjPtr> list);
 class PyList;
 using PyListPtr = std::shared_ptr<PyList>;
 class PyList : public PyObject {

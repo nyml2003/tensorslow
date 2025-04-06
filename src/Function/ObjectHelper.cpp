@@ -49,23 +49,21 @@ Object::PyObjPtr Print(const Object::PyObjPtr& args) {
     auto arg = argList->GetItem(i);
     arg->str()->as<Object::PyString>()->Print();
     if (i < argList->Length() - 1) {
-      Object::CreatePyString(" ")->as<Object::PyString>()->Print();
+      Object::CreatePyString(" ")->Print();
     }
   }
-  Object::CreatePyString("\n")->as<Object::PyString>()->Print();
+  Object::CreatePyString("\n")->Print();
   return Object::CreatePyNone();
 }
 
 Object::PyObjPtr Len(const Object::PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
-  auto value = args->as<Object::PyList>()->GetItem(0);
-  return value->len();
+  return args->as<Object::PyList>()->GetItem(0)->len();
 }
 
 Object::PyObjPtr Next(const Object::PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
-  auto value = args->as<Object::PyList>()->GetItem(0);
-  return value->next();
+  return args->as<Object::PyList>()->GetItem(0)->next();
 }
 
 Object::PyObjPtr RandInt(const Object::PyObjPtr& args) {
@@ -76,8 +74,6 @@ Object::PyObjPtr RandInt(const Object::PyObjPtr& args) {
   if (IsTrue(left->ge(Object::CreatePyInteger(0x7fffffff))) ||
       IsTrue(right->ge(Object::CreatePyInteger(0x7fffffff))) ||
       IsTrue(left->ge(right))) {
-    left->str()->as<Object::PyString>()->PrintLine();
-    right->str()->as<Object::PyString>()->PrintLine();
     throw std::runtime_error(
       "RandInt function need left argument less than right argument"
     );
@@ -119,7 +115,7 @@ Object::PyObjPtr Normal(const Object::PyObjPtr& args) {
   auto size = argList->GetItem(2);
   if (size->is(Object::IntegerKlass::Self())) {
     auto sizeValue = size->as<Object::PyInteger>()->ToU64();
-    auto result = Object::CreatePyList(sizeValue)->as<Object::PyList>();
+    auto result = Object::CreatePyList(sizeValue);
     for (Index i = 0; i < sizeValue; i++) {
       result->SetItem(i, Object::CreatePyFloat(dis(gen)));
     }
@@ -156,7 +152,7 @@ Object::PyObjPtr Shuffle(const Object::PyObjPtr& args) {
 
 Object::PyObjPtr Input(const Object::PyObjPtr& args) {
   CheckNativeFunctionArguments(args);
-  if (args->as<Object::PyList>()->Length() == 1) {
+  if (args->as<Object::PyList>()->Length() > 0) {
     auto prompt = args->as<Object::PyList>()
                     ->GetItem(0)
                     ->as<Object::PyString>()
@@ -170,8 +166,7 @@ Object::PyObjPtr Input(const Object::PyObjPtr& args) {
 
 Object::PyObjPtr Iter(const Object::PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
-  auto obj = args->as<Object::PyList>()->GetItem(0);
-  return obj->iter();
+  return args->as<Object::PyList>()->GetItem(0)->iter();
 }
 
 Object::PyObjPtr Time(const Object::PyObjPtr& args) {
@@ -241,18 +236,15 @@ Object::PyObjPtr Range(const Object::PyObjPtr& args) {
           }
           return value;
         }
-      } else {
-        while (start > end) {
-          auto value = Object::CreatePyInteger(start);
-          start += step;
-          if (start <= end) {
-            generator->SetExhausted();
-          }
-          return value;
-        }
       }
-      generator->SetExhausted();
-      return Object::CreatePyNone();
+      while (start > end) {
+        auto value = Object::CreatePyInteger(start);
+        start += step;
+        if (start <= end) {
+          generator->SetExhausted();
+        }
+        return value;
+      }
     }
   );
 }
@@ -267,7 +259,7 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
   auto argList = args->as<Object::PyList>();
   // 解析参数：函数、类名和基类
   auto function = argList->GetItem(0)->as<Object::PyFunction>();
-  auto name = argList->GetItem(1)->as<Object::PyString>();
+  auto name = argList->GetItem(1);
   auto bases = argList->GetItem(2)->as<Object::PyList>();
 
   // 创建执行环境
@@ -276,9 +268,8 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
   auto __name__ = globals->getitem(Object::CreatePyString("__name__"));
   // 保存当前帧
   // 创建新帧并执行类定义函数
-  auto frame = Object::CreateFrameWithPyFunction(
-    function, Object::CreatePyList({})->as<Object::PyList>()
-  );
+  auto frame =
+    Object::CreateFrameWithPyFunction(function, Object::CreatePyList());
   auto result = frame->Eval();
   Runtime::Interpreter::Instance().BackToParentFrame();
   if (!result->is(Object::NoneKlass::Self())) {

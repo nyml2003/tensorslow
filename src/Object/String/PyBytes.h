@@ -46,14 +46,14 @@ class PyBytes : public PyObject {
 
   [[nodiscard]] Collections::Bytes Value() const { return value; }
 };
-
-inline PyObjPtr CreatePyBytes(Collections::Bytes value) {
+using PyBytesPtr = std::shared_ptr<PyBytes>;
+inline PyBytesPtr CreatePyBytes(Collections::Bytes value) {
   return std::make_shared<PyBytes>(value);
 }
-inline PyObjPtr CreatePyBytes() {
+inline PyBytesPtr CreatePyBytes() {
   return std::make_shared<PyBytes>(Collections::Bytes());
 }
-using PyBytesPtr = std::shared_ptr<PyBytes>;
+
 }  // namespace torchlight::Object
 
 #endif  // TORCHLIGHT_OBJECT_PYSTRING_H

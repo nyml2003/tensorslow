@@ -18,12 +18,11 @@ ClassDef::ClassDef(
 )
   : INode(ClassDefKlass::Self(), parent),
     name(std::move(name)),
-
-    body(Object::CreatePyList({})->as<Object::PyList>()),
+    body(Object::CreatePyList()),
     bases(std::move(bases)),
     codeIndex(0) {
   if (parent->is(ModuleKlass::Self())) {
-    parents = Object::CreatePyList({parent})->as<Object::PyList>();
+    parents = Object::CreatePyList({parent});
   }
   if (parent->is(FuncDefKlass::Self())) {
     parents = parent->as<FuncDef>()->Parents();
@@ -41,7 +40,7 @@ Object::PyObjPtr ClassDefKlass::visit(
 ) {
   auto classDef = obj->as<ClassDef>();
   classDef->SetCodeIndex(codeList->as<Object::PyList>()->Length());
-  auto code = Object::CreatePyCode(classDef->Name())->as<Object::PyCode>();
+  auto code = Object::CreatePyCode(classDef->Name());
   code->RegisterName(Object::CreatePyString("__name__"));
   code->RegisterName(Object::CreatePyString("__module__"));
   code->RegisterName(Object::CreatePyString("__qualname__"));

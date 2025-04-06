@@ -11,11 +11,11 @@
 
 namespace torchlight::Object {
 
-PyObjPtr CreatePyInteger(Collections::Integer value) {
+PyIntPtr CreatePyInteger(Collections::Integer value) {
   return std::make_shared<PyInteger>(value);
 }
 
-PyObjPtr CreatePyInteger(uint64_t value) {
+PyIntPtr CreatePyInteger(uint64_t value) {
   return std::make_shared<PyInteger>(Collections::CreateIntegerWithU64(value));
 }
 

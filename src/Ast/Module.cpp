@@ -14,7 +14,7 @@ Object::PyObjPtr ModuleKlass::visit(
 ) {
   auto module = obj->as<Module>();
   module->SetCodeIndex(codeList->as<Object::PyList>()->Length());
-  auto code = Object::CreatePyCode(module->Name())->as<Object::PyCode>();
+  auto code = Object::CreatePyCode(module->Name());
   code->SetScope(Object::Scope::GLOBAL);
   codeList->as<Object::PyList>()->Append(code);
   Object::ForEach(module->Body(), [&codeList](const Object::PyObjPtr& stmt) {

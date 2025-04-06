@@ -18,9 +18,7 @@ class ClassDefKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_classdef")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_classdef"), Self());
     this->isInitialized = true;
   }
 

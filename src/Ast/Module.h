@@ -19,9 +19,7 @@ class ModuleKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_module")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_module"), Self());
     this->isInitialized = true;
   }
   Object::PyObjPtr

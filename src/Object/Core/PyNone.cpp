@@ -36,8 +36,8 @@ PyObjPtr NoneKlass::boolean(const PyObjPtr& obj) {
 
 PyNone::PyNone() : PyObject(NoneKlass::Self()) {}
 
-PyObjPtr PyNone::Instance() {
-  static PyObjPtr instance = std::make_shared<PyNone>();
+PyNonePtr PyNone::Instance() {
+  static PyNonePtr instance = std::make_shared<PyNone>();
   return instance;
 }
 

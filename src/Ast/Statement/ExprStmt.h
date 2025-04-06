@@ -14,9 +14,7 @@ class ExprStmtKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_exprstmt")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_exprstmt"), Self());
     this->isInitialized = true;
   }
 

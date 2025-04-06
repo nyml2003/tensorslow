@@ -19,7 +19,7 @@
 
 namespace torchlight::Object {
 Index PyString::indent = 0;
-std::unordered_map<Collections::String, PyObjPtr> PyString::stringPool;
+std::unordered_map<Collections::String, PyStrPtr> PyString::stringPool;
 std::mutex PyString::poolMutex;
 void StringKlass::Initialize() {
   InitKlass(CreatePyString("str")->as<PyString>(), Self());
@@ -277,7 +277,7 @@ PyObjPtr StringSplit(const PyObjPtr& args) {
   return value->Split(delimiter);
 }
 
-PyObjPtr PyString::Create(const Collections::String& value) {
+PyStrPtr PyString::Create(const Collections::String& value) {
   std::lock_guard<std::mutex> lock(poolMutex);
   auto iter = stringPool.find(value);
   if (iter != stringPool.end()) {
@@ -292,15 +292,15 @@ PyObjPtr PyString::Create(const Collections::String& value) {
   return result;
 }
 
-PyObjPtr CreatePyString(const Collections::String& value) {
+PyStrPtr CreatePyString(const Collections::String& value) {
   return PyString::Create(value);
 }
 
-PyObjPtr CreatePyString(const std::string& value) {
+PyStrPtr CreatePyString(const std::string& value) {
   return PyString::Create(Collections::CreateStringWithCString(value.c_str()));
 }
 
-PyObjPtr CreatePyString(const char* value) {
+PyStrPtr CreatePyString(const char* value) {
   return PyString::Create(Collections::CreateStringWithCString(value));
 }
 
