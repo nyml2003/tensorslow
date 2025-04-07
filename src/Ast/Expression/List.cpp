@@ -7,10 +7,8 @@ ListKlass::emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) {
   auto list = obj->as<List>();
   auto elements = list->Elements();
   Object::ForEach(
-    elements->reversed(),
-    [&codeList](const Object::PyObjPtr& element, Index, const Object::PyObjPtr&) {
-      element->as<INode>()->emit(codeList);
-    }
+    elements->reversed(), [&codeList](const Object::PyObjPtr& element
+                          ) { element->as<INode>()->emit(codeList); }
   );
   auto code = GetCodeFromList(codeList, list);
   code->BuildList(elements->Length());
@@ -23,12 +21,9 @@ Object::PyObjPtr ListKlass::visit(
 ) {
   auto list = obj->as<List>();
   auto elements = list->Elements();
-  Object::ForEach(
-    elements,
-    [&codeList](const Object::PyObjPtr& element, Index, const Object::PyObjPtr&) {
-      element->as<INode>()->visit(codeList);
-    }
-  );
+  Object::ForEach(elements, [&codeList](const Object::PyObjPtr& element) {
+    element->as<INode>()->visit(codeList);
+  });
   return Object::CreatePyNone();
 }
 

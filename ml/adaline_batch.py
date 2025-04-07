@@ -13,6 +13,8 @@
 #             yield start
 #             start += step
 
+time()
+
 
 class Graph:
     def __init__(self):
@@ -27,7 +29,7 @@ class Graph:
 
     def reset_value(self):
         for node in self.nodes:
-            node.reset_value(False)
+            node.reset_value()
 
 
 graph = Graph()
@@ -144,6 +146,32 @@ class MatrixMultiply(Operator):
             return jacobi
 
 
+class ScalarMultiply(Operator):
+    def compute(self):
+        self.value = self.parents[0].value * self.parents[1].value
+
+    def get_jacobi(self, parent):
+        parent0 = self.parents[0]
+        parent1 = self.parents[1]
+        if parent is parent0:
+            return Diag(parent1.value.ravel())
+        if parent is parent1:
+            return Eye(parent1.get_dimension()) * self.parents[0].value[0, 0]
+
+
+class Multiply(Operator):
+    def compute(self):
+        self.value = self.parents[0].value * self.parents[1].value
+
+    def get_jacobi(self, parent):
+        parent0 = self.parents[0]
+        parent1 = self.parents[1]
+        if parent is parent0:
+            return Diag(parent1.value.ravel())
+        if parent is parent1:
+            return Diag(parent0.value.ravel())
+
+
 class Step(Operator):
     def compute(self):
         parent0 = self.parents[0]
@@ -189,15 +217,116 @@ class PerceptionLoss(LossFunction):
         return Diag(diag.ravel())
 
 
-x = Variable([3, 1], True)  # 初始化一个 3x1 的随机值
-y = Variable([3, 1], True)  # 初始化一个 3x1 的随机值
-z = Add([x, y])
-x.set_value(Array([[1.0], [-2.0], [0.0]]))  # 设置具体值
-step_node = Step([x])
-loss_node = PerceptionLoss([step_node])
-loss_node.forward()
-print("组合 Step 和 PerceptionLoss 的正向传播结果 (损失值):")
-print(loss_node.value)
-jacobi = loss_node.backward(loss_node)
-print("组合 Step 和 PerceptionLoss 的反向传播结果 (雅可比矩阵):")
-print(jacobi)
+print('class loaded')
+
+
+def generateSample(num):
+    male_heights = Normal(171.0, 6.0, num)
+    male_weights = Normal(70.0, 10.0, num)
+    male_bfrs = Normal(16.0, 2.0, num)
+    female_weights = Normal(57.0, 8.0, num)
+    female_heights = Normal(158.0, 5.0, num)
+    female_bfrs = Normal(22.0, 2.0, num)
+    male_labels = [1.0] * num
+    female_labels = [-1.0] * num
+    train_set = Concatenate(
+        [Array([male_heights + female_heights]),
+         Array([male_weights + female_weights]),
+         Array([male_bfrs + female_bfrs]),
+         Array([male_labels + female_labels])
+         ]).T
+    Shuffle(train_set)
+    return train_set
+
+
+def predict_and_evaluate(sample_set, predict, input, batch_size):
+    pred = []
+    for i in range(0, len(sample_set), batch_size):
+        features = sample_set[i:i + batch_size, :-1].reshape([batch_size, 3])
+        input.set_value(features)
+        predict.forward()
+        pred.extend(predict.value.ravel())
+
+    for i in range(len(pred)):
+        pred[i] *= 2.0
+        pred[i] -= 1.0
+    total = 0
+    predicted = sample_set[:, -1].ravel()
+    for i in range(len(pred)):
+        if pred[i] == predicted[i]:
+            total += 1
+    accuracy = total / len(sample_set)
+    return accuracy
+
+
+sample_num = 512
+batch_size = 16
+train_set = generateSample(sample_num)
+
+print('data loaded')
+
+# 构造计算图：输入向量，是一个3x1矩阵，不需要初始化，不参与训练
+x = Variable([batch_size, 3], False)
+
+# 类别标签，1男，-1女
+label = Variable([batch_size, 1], False)
+
+# 权重向量，是一个1x3矩阵，需要初始化，参与训练
+w = Variable([3, 1], True)
+
+# 阈值，是一个1x1矩阵，需要初始化，参与训练
+b = Variable([1, 1], True)
+
+ones = Variable([batch_size, 1], False)
+ones.set_value(Ones([batch_size, 1]))
+bias = ScalarMultiply([b, ones])
+# ADALINE的预测输出
+output = Add([MatrixMultiply([x, w]), bias])
+predict = Step([output])
+
+# 损失函数
+loss = PerceptionLoss([Multiply([label, output])])
+
+B = Variable([1, batch_size], False)
+B.set_value(Ones([1, batch_size]) * (1 / batch_size))
+mean_loss = MatrixMultiply([B, loss])
+# 学习率
+learning_rate = 0.0001
+
+print('model loaded')
+
+# 训练执行50个epoch
+for epoch in range(50):
+
+    # 遍历训练集中的样本
+    for i in range(0, len(train_set), batch_size):
+        # 取第i个样本的前4列（除最后一列的所有列），构造3x1矩阵对象
+        features = train_set[i:i + batch_size, :-1]
+        # 取第i个样本的最后一列，是该样本的性别标签（1男，-1女），构造1x1矩阵对象
+        l = train_set[i:i + batch_size, -1].T.reshape([batch_size, 1])
+        # 将特征赋给x节点，将标签赋给label节点
+        x.set_value(features)
+        label.set_value(l)
+
+        # 在loss节点上执行前向传播，计算损失值
+        mean_loss.forward()
+
+        # 在w和b节点上执行反向传播，计算损失值对它们的雅可比矩阵
+        w.backward(mean_loss)
+        B.backward(mean_loss)
+        w.set_value(w.value - w.jacobi.T.reshape(w.get_shape()) * learning_rate)
+        B.set_value(B.value - B.jacobi.T.reshape(B.get_shape()) * learning_rate)
+
+        # default_graph对象保存了所有节点，调用clear_jacobi方法清除所有节点的雅可比矩阵
+        graph.clear_jacobi()
+
+    accuracy = predict_and_evaluate(train_set, predict, x, batch_size)
+
+    # 打印当前epoch数和模型在训练集上的正确率
+    print("epoch: ", epoch + 1, " accuracy: ", accuracy)
+
+test_set = generateSample(32)
+
+accuracy = predict_and_evaluate(test_set, predict, x, batch_size)
+print("test accuracy: ", accuracy)
+time()

@@ -14,9 +14,7 @@ class BinaryKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_binary")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_binary"), Self());
     this->isInitialized = true;
   }
 

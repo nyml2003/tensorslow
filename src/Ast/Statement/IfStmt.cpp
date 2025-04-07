@@ -20,36 +20,21 @@ Object::PyObjPtr IfStmtKlass::visit(
   auto elifs = stmt->Elifs();
   auto elifConditions = stmt->ElifConditions();
   condition->visit(codeList);
-  Object::ForEach(
-    thenStmts,
-    [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
+  Object::ForEach(thenStmts, [&codeList](const Object::PyObjPtr& stmt) {
+    stmt->as<INode>()->visit(codeList);
+  });
+  Object::ForEach(elifConditions, [&codeList](const Object::PyObjPtr& elif) {
+    elif->as<INode>()->visit(codeList);
+  });
+  Object::ForEach(elifs, [&codeList](const Object::PyObjPtr& elif) {
+    auto elifStms = elif;
+    Object::ForEach(elifStms, [&codeList](const Object::PyObjPtr& stmt) {
       stmt->as<INode>()->visit(codeList);
-    }
-  );
-  Object::ForEach(
-    elifConditions,
-    [&codeList](const Object::PyObjPtr& elif, Index, const Object::PyObjPtr&) {
-      elif->as<INode>()->visit(codeList);
-    }
-  );
-  Object::ForEach(
-    elifs,
-    [&codeList](const Object::PyObjPtr& elif, Index, const Object::PyObjPtr&) {
-      auto elifStms = elif->as<Object::PyList>();
-      Object::ForEach(
-        elifStms,
-        [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-          stmt->as<INode>()->visit(codeList);
-        }
-      );
-    }
-  );
-  Object::ForEach(
-    elseStmts,
-    [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      stmt->as<INode>()->visit(codeList);
-    }
-  );
+    });
+  });
+  Object::ForEach(elseStmts, [&codeList](const Object::PyObjPtr& stmt) {
+    stmt->as<INode>()->visit(codeList);
+  });
 
   return Object::CreatePyNone();
 }
@@ -72,12 +57,9 @@ Object::PyObjPtr IfStmtKlass::emit(
   Index thenConditionEnd = code->PopJumpIfFalse();
 
   // 生成 then 块的字节码
-  Object::ForEach(
-    thenStmts,
-    [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      stmt->as<INode>()->emit(codeList);
-    }
-  );
+  Object::ForEach(thenStmts, [&codeList](const Object::PyObjPtr& stmt) {
+    stmt->as<INode>()->emit(codeList);
+  });
   // then 块结束后，添加 JUMP_FORWARD 跳转到整个 if 结束的位置
   Index thenBlockEnd = code->JumpForward();
   code->Instructions()->SetItem(
@@ -97,13 +79,10 @@ Object::PyObjPtr IfStmtKlass::emit(
     Index elfiConditionEnd = code->PopJumpIfFalse();
 
     // 生成 elif 块的字节码
-    auto elifStms = elifBlock->as<Object::PyList>();
-    Object::ForEach(
-      elifStms,
-      [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-        stmt->as<Ast::INode>()->emit(codeList);
-      }
-    );
+    auto elifStms = elifBlock;
+    Object::ForEach(elifStms, [&codeList](const Object::PyObjPtr& stmt) {
+      stmt->as<Ast::INode>()->emit(codeList);
+    });
     // elif 块结束后，添加 JUMP_FORWARD 跳转到整个 if 结束的位置
     Index elifBlockEnd = code->JumpForward();
     code->Instructions()->SetItem(
@@ -117,12 +96,9 @@ Object::PyObjPtr IfStmtKlass::emit(
   // 处理 else 块
   if (elseStmts->Length() > 0) {
     // 生成 else 块的字节码
-    Object::ForEach(
-      elseStmts,
-      [&codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-        stmt->as<Ast::INode>()->emit(codeList);
-      }
-    );
+    Object::ForEach(elseStmts, [&codeList](const Object::PyObjPtr& stmt) {
+      stmt->as<Ast::INode>()->emit(codeList);
+    });
   }
 
   // 计算 then 块中 JUMP_FORWARD 的实际跳转偏移量

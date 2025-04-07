@@ -14,9 +14,7 @@ class ForStmtKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_forstmt")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_forstmt"), Self());
     this->isInitialized = true;
   }
 
@@ -37,13 +35,13 @@ class ForStmt : public INode {
   explicit ForStmt(
     INodePtr target,
     INodePtr iter,
-    const Object::PyObjPtr& body,
+    Object::PyListPtr body,
     INodePtr parent
   )
     : INode(ForStmtKlass::Self(), std::move(parent)),
       target(std::move(target)),
       iter(std::move(iter)),
-      body(body->as<Object::PyList>()) {}
+      body(std::move(body)) {}
 
   INodePtr Target() const { return target; }
 
@@ -58,14 +56,12 @@ class ForStmt : public INode {
 };
 
 inline INodePtr CreateForStmt(
-  INodePtr target,
-  INodePtr iter,
-  Object::PyObjPtr body,
-  INodePtr parent
+  const INodePtr& target,
+  const INodePtr& iter,
+  const Object::PyListPtr& body,
+  const INodePtr& parent
 ) {
-  return std::make_shared<ForStmt>(
-    std::move(target), std::move(iter), std::move(body), std::move(parent)
-  );
+  return std::make_shared<ForStmt>(target, iter, body, parent);
 }
 
 }  // namespace torchlight::Ast

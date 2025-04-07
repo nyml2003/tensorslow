@@ -8,8 +8,7 @@
 namespace torchlight::Object {
 void ForEach(
   const PyObjPtr& obj,
-  const std::function<
-    void(const PyObjPtr& value, Index index, const PyObjPtr& obj)>& func
+  const std::function<void(const PyObjPtr& value)>& func
 );
 PyObjPtr Map(
   const PyObjPtr& iterable,

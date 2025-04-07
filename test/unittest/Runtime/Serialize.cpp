@@ -22,8 +22,8 @@ class SerializeTest : public ::testing::Test {
   void SetUp() override {
     globals =
       std::dynamic_pointer_cast<Object::PyDictionary>(Runtime::Genesis());
-    Object::BasicKlassLoad();
-    Object::NativeClassLoad();
+    Object::LoadBootstrapClasses();
+    Object::LoadRuntimeSupportClasses();
     print = globals->getitem(Object::CreatePyString("print"))
               ->as<Object::PyNativeFunction>();
   }
@@ -55,16 +55,14 @@ TEST_F(SerializeTest, SerializeEtDeserialize) {
   dict->setitem(Object::CreatePyString("list"), list);
   emptyList->str()->as<Object::PyString>()->PrintLine();
   Object::Invoke(
-    emptyList, Object::CreatePyString("append"),
-    Object::CreatePyList({str})->as<Object::PyList>()
+    emptyList, Object::CreatePyString("append"), Object::CreatePyList({str})
+  );
+  Object::Invoke(
+    emptyList, Object::CreatePyString("append"), Object::CreatePyList({integer})
   );
   Object::Invoke(
     emptyList, Object::CreatePyString("append"),
-    Object::CreatePyList({integer})->as<Object::PyList>()
-  );
-  Object::Invoke(
-    emptyList, Object::CreatePyString("append"),
-    Object::CreatePyList({floating})->as<Object::PyList>()
+    Object::CreatePyList({floating})
   );
   emptyList->str()->as<Object::PyString>()->PrintLine();
   print->Call(Object::CreatePyList({str->repr()}));

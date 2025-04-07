@@ -43,13 +43,13 @@ class IntegerKlass : public Klass {
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 };
 
-PyObjPtr CreatePyInteger(Collections::Integer value);
-
-PyObjPtr CreatePyInteger(uint64_t value);
-
 class PyInteger;
 
 using PyIntPtr = std::shared_ptr<PyInteger>;
+
+PyIntPtr CreatePyInteger(Collections::Integer value);
+
+PyIntPtr CreatePyInteger(uint64_t value);
 
 class PyInteger : public PyObject {
   friend class IntegerKlass;

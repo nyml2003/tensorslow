@@ -1,6 +1,7 @@
 #ifndef TORCHLIGHT_OBJECT_PYOBJECT_H
 #define TORCHLIGHT_OBJECT_PYOBJECT_H
 
+#include <typeindex>
 #include "Object/Core/Klass.h"
 #include "Object/Object.h"
 
@@ -9,12 +10,14 @@ namespace torchlight::Object {
 class PyObject : public std::enable_shared_from_this<PyObject> {
  private:
   KlassPtr klass;
-  PyDictPtr attributes;
+  PyDictPtr attributes;  // 不需要bound的属性
+  PyDictPtr methods;     // 需要bound的属性
 
  public:
-  explicit PyObject(KlassPtr klass);
+  explicit PyObject(KlassPtr klass) : klass(std::move(klass)) {}
   [[nodiscard]] KlassPtr Klass() const { return klass; }
-  [[nodiscard]] PyDictPtr Attributes();
+  [[nodiscard]] PyDictPtr Attributes() noexcept;
+  [[nodiscard]] PyDictPtr Methods() noexcept;
   void SetAttributes(const PyDictPtr& _attributes) { attributes = _attributes; }
   void SetKlass(const KlassPtr& _klass) { klass = _klass; }
   virtual ~PyObject() = default;
@@ -110,16 +113,12 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   PyObjPtr reversed() { return klass->reversed(shared_from_this()); }
   // TODO
   PyObjPtr _serialize_() { return klass->_serialize_(shared_from_this()); }
+  bool is(KlassPtr _klass) { return klass == _klass; }
+
   template <typename T>
   std::shared_ptr<T> as() {
     return std::dynamic_pointer_cast<T>(shared_from_this());
   }
-
-  template <typename T>
-  bool is() {
-    return std::dynamic_pointer_cast<T>(shared_from_this()) != nullptr;
-  }
-  static PyObjPtr Instance();
 };
 
 using PyObjPtr = std::shared_ptr<PyObject>;

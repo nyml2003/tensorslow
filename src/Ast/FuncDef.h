@@ -19,9 +19,7 @@ class FuncDefKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_funcdef")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_funcdef"), Self());
     this->isInitialized = true;
   }
 

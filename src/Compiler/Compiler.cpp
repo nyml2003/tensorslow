@@ -63,8 +63,8 @@ void DefineOption() {
   ArgsHelper::SetSchema(schema);
 }
 void InitPyObj() {
-  torchlight::Object::BasicKlassLoad();
-  torchlight::Object::NativeClassLoad();
+  torchlight::Object::LoadBootstrapClasses();
+  torchlight::Object::LoadRuntimeSupportClasses();
   torchlight::Ast::RegisterAstKlass();
 }
 

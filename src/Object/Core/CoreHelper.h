@@ -15,7 +15,12 @@ Object::PyObjPtr Invoke(
 Object::PyObjPtr
 GetAttr(const Object::PyObjPtr& obj, const Object::PyStrPtr& attrName) noexcept;
 Object::PyObjPtr
-AttrWrapper(const Object::PyObjPtr& obj, const Object::PyObjPtr& attr);
+BindSelf(const Object::PyObjPtr& obj, const Object::PyObjPtr& attr);
+void CacheAttr(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& key,
+  const Object::PyObjPtr& attr
+);
 Object::PyObjPtr GetBases(const Object::PyObjPtr& args);
 Object::PyObjPtr GetMro(const Object::PyObjPtr& args);
 Object::PyObjPtr GetDict(const Object::PyObjPtr& args);
@@ -32,8 +37,8 @@ Object::PyObjPtr Bool(const Object::PyObjPtr& args);
 // object.__bool__
 Object::PyObjPtr KlassBool(const Object::PyObjPtr& args);
 
-void BasicKlassLoad();
-void NativeClassLoad();
+void LoadBootstrapClasses();
+void LoadRuntimeSupportClasses();
 Object::PyListPtr MergeMro(const Object::PyListPtr& mros);
 Object::PyListPtr ComputeMro(const Object::PyTypePtr& type);
 bool FirstOrNotInMro(

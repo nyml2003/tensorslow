@@ -12,10 +12,11 @@ void PySlice::BindLength(Index length) {
   int64_t stopValue = 0;
   int64_t stepValue = 0;
 
-  if (start->is<PyNone>()) {
-    startValue = step->is<PyNone>() || step->as<PyInteger>()->ToI64() > 0
-                   ? 0
-                   : length64 - 1;
+  if (start->is(NoneKlass::Self())) {
+    startValue =
+      step->is(NoneKlass::Self()) || step->as<PyInteger>()->ToI64() > 0
+        ? 0
+        : length64 - 1;
   } else {
     startValue = start->as<PyInteger>()->ToI64();
     startValue = startValue >= 0 ? startValue : length64 + startValue;
@@ -23,16 +24,18 @@ void PySlice::BindLength(Index length) {
       std::max<int64_t>(0, std::min<int64_t>(startValue, length64 - 1));
   }
 
-  if (stop->is<PyNone>()) {
+  if (stop->is(NoneKlass::Self())) {
     stopValue =
-      step->is<PyNone>() || step->as<PyInteger>()->ToI64() > 0 ? length64 : -1;
+      step->is(NoneKlass::Self()) || step->as<PyInteger>()->ToI64() > 0
+        ? length64
+        : -1;
   } else {
     stopValue = stop->as<PyInteger>()->ToI64();
     stopValue = stopValue >= 0 ? stopValue : length64 + stopValue;
     stopValue = std::max<int64_t>(0, std::min<int64_t>(stopValue, length64));
   }
 
-  if (step->is<PyNone>()) {
+  if (step->is(NoneKlass::Self())) {
     stepValue = 1;
   } else {
     stepValue = step->as<PyInteger>()->ToI64();
@@ -69,7 +72,7 @@ PyObjPtr SliceKlass::init(const PyObjPtr& type, const PyObjPtr& args) {
 }
 
 PyObjPtr SliceKlass::str(const PyObjPtr& obj) {
-  if (!obj->is<PySlice>()) {
+  if (!obj->is(SliceKlass::Self())) {
     throw std::runtime_error("PySlice::str(): obj is not a slice");
   }
   auto slice = obj->as<PySlice>();

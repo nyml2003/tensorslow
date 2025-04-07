@@ -14,9 +14,7 @@ class MapKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_map")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_map"), Self());
     this->isInitialized = true;
   }
 

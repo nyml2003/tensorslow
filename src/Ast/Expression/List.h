@@ -16,9 +16,7 @@ class ListKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_list")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_list"), Self());
     this->isInitialized = true;
   }
 

@@ -18,7 +18,7 @@ Object::PyObjPtr ForStmtKlass::emit(
   code->GetIter();
   Index start = code->ForIter(0);
   auto target = stmt->Target();
-  if (target->is<Identifier>()) {
+  if (target->is(IdentifierKlass::Self())) {
     auto identifier = target->as<Identifier>();
     auto name = identifier->Name();
     if (code->GetScope() == Object::Scope::GLOBAL) {
@@ -31,12 +31,9 @@ Object::PyObjPtr ForStmtKlass::emit(
     throw std::runtime_error("ForStmt::emit(): unsupported target type");
   }
   auto body = stmt->Body();
-  Object::ForEach(
-    body,
-    [codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      stmt->as<INode>()->emit(codeList);
-    }
-  );
+  Object::ForEach(body, [codeList](const Object::PyObjPtr& stmt) {
+    stmt->as<INode>()->emit(codeList);
+  });
   code->JumpAbsolute(start - 1);
   Index end = code->Instructions()->Length();
   code->Instructions()->SetItem(
@@ -54,7 +51,7 @@ Object::PyObjPtr ForStmtKlass::visit(
   auto iter = stmt->Iter();
   auto body = stmt->Body();
   iter->visit(codeList);
-  if (target->is<Identifier>()) {
+  if (target->is(IdentifierKlass::Self())) {
     auto identifier = target->as<Identifier>();
     auto code = GetCodeFromList(codeList, stmt);
     auto name = identifier->Name();
@@ -68,12 +65,9 @@ Object::PyObjPtr ForStmtKlass::visit(
     Function::DebugPrint(target);
     throw std::runtime_error("ForStmt::visit(): unsupported target type");
   }
-  Object::ForEach(
-    body,
-    [codeList](const Object::PyObjPtr& stmt, Index, const Object::PyObjPtr&) {
-      stmt->as<INode>()->visit(codeList);
-    }
-  );
+  Object::ForEach(body, [codeList](const Object::PyObjPtr& stmt) {
+    stmt->as<INode>()->visit(codeList);
+  });
   return Object::CreatePyNone();
 }
 

@@ -18,10 +18,9 @@ void LoadClass(const PyStrPtr& name, const KlassPtr& klass) {
   klass->SetName(name);
   klass->SetAttributes(CreatePyDict()->as<PyDictionary>());
   klass->SetType(CreatePyType(klass)->as<PyType>());
-  klass->SetSuper(CreatePyList({PyObject::Instance()})->as<PyList>());
-  klass->SetMro(CreatePyList({CreatePyType(klass),
-                              CreatePyType(ObjectKlass::Self())})
-                  ->as<PyList>());
+  auto objectType = CreatePyType(ObjectKlass::Self());
+  klass->SetSuper(CreatePyList({objectType})->as<PyList>());
+  klass->SetMro(CreatePyList({CreatePyType(klass), objectType})->as<PyList>());
   klass->SetNative();
 }
 
@@ -78,18 +77,37 @@ PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept {
   return nullptr;
 }
 
-PyObjPtr AttrWrapper(const PyObjPtr& obj, const PyObjPtr& attr) {
-  if (attr->is<PyNativeFunction>()) {
+PyObjPtr BindSelf(const PyObjPtr& obj, const PyObjPtr& attr) {
+  if (attr->is(NativeFunctionKlass::Self())) {
     return CreatePyMethod(obj, attr);
   }
-  if (attr->is<PyFunction>()) {
+  if (attr->is(FunctionKlass::Self())) {
     return CreatePyMethod(obj, attr);
   }
-  if (attr->is<PyIife>()) {
-    auto reuslt = attr->as<PyIife>()->Call(CreatePyList({obj}));
-    return reuslt;
+  if (attr->is(IifeKlass::Self())) {
+    return attr->as<PyIife>()->Call(CreatePyList({obj}));
   }
   return attr;
+}
+
+void CacheAttr(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& key,
+  const Object::PyObjPtr& attr
+) {
+  if (attr->is(FunctionKlass::Self())) {
+    obj->Methods()->Put(key, attr);
+    return;
+  }
+  if (attr->is(NativeFunctionKlass::Self())) {
+    obj->Methods()->Put(key, attr);
+    return;
+  }
+  if (attr->is(IifeKlass::Self())) {
+    obj->Attributes()->Put(key, attr);
+    return;
+  }
+  obj->Attributes()->Put(key, attr);
 }
 
 PyObjPtr GetBases(const PyObjPtr& args) {
@@ -103,10 +121,7 @@ PyObjPtr GetMro(const PyObjPtr& args) {
 PyObjPtr GetDict(const PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   auto obj = args->as<PyList>()->GetItem(0);
-  if (obj->is<PyType>()) {
-    return obj->as<PyType>()->Owner()->Attributes();
-  }
-  return obj->Attributes();
+  return obj->Attributes()->Add(obj->Methods())->as<PyDictionary>();
 }
 PyListPtr ComputeMro(const PyTypePtr& type) {
   auto oldMro = type->Owner()->Mro();
@@ -122,7 +137,7 @@ PyListPtr ComputeMro(const PyTypePtr& type) {
   //     CreatePyString(" with super: "), type->Owner()->Super()->str()}
   //  )));
   auto bases = type->Owner()->Super();
-  PyListPtr mros = CreatePyList({})->as<PyList>();
+  PyListPtr mros = CreatePyList()->as<PyList>();
   for (Index i = 0; i < bases->Length(); i++) {
     auto base = bases->GetItem(i)->as<PyType>();
     auto mro = base->Owner()->Mro();
@@ -131,7 +146,7 @@ PyListPtr ComputeMro(const PyTypePtr& type) {
   //  Function::DebugPrint(StringConcat(
   //    CreatePyList({CreatePyString("Mros needed to merge: "), mros->str()})
   //  ));
-  //  ForEach(mros, [&](const PyObjPtr& mro, Index, const PyObjPtr&) {
+  //  ForEach(mros, [&](const PyObjPtr& mro) {
   //    mro->str()->as<PyString>()->Print();
   //  });
   //  CreatePyString("")->as<PyString>()->PrintLine();
@@ -139,7 +154,7 @@ PyListPtr ComputeMro(const PyTypePtr& type) {
   //  Function::DebugPrint(
   //    StringConcat(CreatePyList({CreatePyString("Merged Mro: "), mro->str()}))
   //  );
-  //  ForEach(mros, [&](const PyObjPtr& mro, Index, const PyObjPtr&) {
+  //  ForEach(mros, [&](const PyObjPtr& mro) {
   //    mro->str()->as<PyString>()->Print();
   //  });
   //  CreatePyString("")->as<PyString>()->PrintLine();
@@ -163,14 +178,14 @@ void CleanMros(const PyListPtr& mros) {
 
 PyListPtr MergeMro(const PyListPtr& mros) {
   if (mros->Length() == 0) {
-    return CreatePyList({})->as<PyList>();
+    return CreatePyList()->as<PyList>();
   }
-  PyListPtr result = CreatePyList({})->as<PyList>();
-  CleanMros(mros);
+  PyListPtr result = CreatePyList()->as<PyList>();
   while (mros->Length() > 1) {
     //    Function::DebugPrint(StringConcat(
     //      CreatePyList({CreatePyString("Mros to merge: "), mros->str()})
     //    ));
+    CleanMros(mros);
     bool notFindBase = true;
     for (Index i = 0; i < mros->Length() && notFindBase; i++) {
       auto head = mros->GetItem(i)->as<PyList>()->GetItem(0)->as<PyType>();
@@ -191,9 +206,10 @@ PyListPtr MergeMro(const PyListPtr& mros) {
         if (i == j) {
           continue;
         }
-        if (IsTrue(mros->GetItem(j)->as<PyList>()->GetItem(0)->eq(head))) {
-          mros->GetItem(j)->as<PyList>()->RemoveAt(0);
-          if (mros->GetItem(j)->as<PyList>()->Length() == 0) {
+        auto list = mros->GetItem(j)->as<PyList>();
+        if (IsTrue(list->GetItem(0)->eq(head))) {
+          list->RemoveAt(0);
+          if (list->Length() == 0) {
             mros->RemoveAt(j);
           }
         }
@@ -305,7 +321,7 @@ PyObjPtr Str(const PyObjPtr& args) {
   return args->as<PyList>()->GetItem(0)->str();
 }
 
-void BasicKlassLoad() {
+void LoadBootstrapClasses() {
   StringKlass::Self()->Initialize();
   IntegerKlass::Self()->Initialize();
   ListKlass::Self()->Initialize();
@@ -319,7 +335,7 @@ void BasicKlassLoad() {
   IterDoneKlass::Self()->Initialize();
 }
 
-void NativeClassLoad() {
+void LoadRuntimeSupportClasses() {
   NoneKlass::Self()->Initialize();
   ObjectKlass::Self()->Initialize();
   FunctionKlass::Self()->Initialize();

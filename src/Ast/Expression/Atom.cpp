@@ -9,7 +9,7 @@ AtomKlass::emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) {
   auto atom = obj->as<Atom>();
   auto code = GetCodeFromList(codeList, atom);
   auto object = atom->Obj();
-  if (!object->is<INode>()) {
+  if (std::dynamic_pointer_cast<INode>(object) == nullptr) {
     code->LoadConst(object);
     return Object::CreatePyNone();
   }
@@ -23,7 +23,7 @@ Object::PyObjPtr AtomKlass::visit(
   auto atom = obj->as<Atom>();
   auto code = GetCodeFromList(codeList, atom);
   auto object = atom->Obj();
-  if (!object->is<INode>()) {
+  if (std::dynamic_pointer_cast<INode>(object) == nullptr) {
     code->RegisterConst(object);
     return Object::CreatePyNone();
   }

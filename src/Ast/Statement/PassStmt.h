@@ -15,9 +15,7 @@ class PassStmtKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_passstmt")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_passstmt"), Self());
     this->isInitialized = true;
   }
 

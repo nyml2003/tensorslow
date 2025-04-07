@@ -40,6 +40,17 @@ PyObjPtr PyDictionary::GetItem(Index index) const {
   return CreatePyList({entry.first, entry.second});
 }
 
+PyDictPtr PyDictionary::Add(const PyDictPtr& other) {
+  auto newDict = CreatePyDict()->as<PyDictionary>();
+  for (const auto& item : dict) {
+    newDict->Put(item.first, item.second);
+  }
+  for (const auto& item : other->dict) {
+    newDict->Put(item.first, item.second);
+  }
+  return newDict;
+}
+
 Index PyDictionary::Size() const {
   return dict.size();
 }
@@ -68,7 +79,7 @@ PyObjPtr DictionaryKlass::setitem(
   const PyObjPtr& key,
   const PyObjPtr& value
 ) {
-  if (!obj->is<PyDictionary>()) {
+  if (!obj->is(DictionaryKlass::Self())) {
     throw std::runtime_error("PyDictionary::setitem(): obj is not a dict");
   }
   auto dict = obj->as<PyDictionary>();
@@ -77,7 +88,7 @@ PyObjPtr DictionaryKlass::setitem(
 }
 
 PyObjPtr DictionaryKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
-  if (!obj->is<PyDictionary>()) {
+  if (!obj->is(DictionaryKlass::Self())) {
     throw std::runtime_error("PyDictionary::getitem(): obj is not a dict");
   }
   auto dict = obj->as<PyDictionary>();
@@ -85,7 +96,7 @@ PyObjPtr DictionaryKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
 }
 
 PyObjPtr DictionaryKlass::delitem(const PyObjPtr& obj, const PyObjPtr& key) {
-  if (!obj->is<PyDictionary>()) {
+  if (!obj->is(DictionaryKlass::Self())) {
     throw std::runtime_error("PyDictionary::delitem(): obj is not a dict");
   }
   auto dict = obj->as<PyDictionary>();
@@ -94,14 +105,14 @@ PyObjPtr DictionaryKlass::delitem(const PyObjPtr& obj, const PyObjPtr& key) {
 }
 
 PyObjPtr DictionaryKlass::iter(const PyObjPtr& obj) {
-  if (!obj->is<PyDictionary>()) {
+  if (!obj->is(DictionaryKlass::Self())) {
     throw std::runtime_error("PyDictionary::iter(): obj is not a dict");
   }
   return CreateDictItemIterator(obj);
 }
 
 PyObjPtr DictionaryKlass::repr(const PyObjPtr& obj) {
-  if (!obj->is<PyDictionary>()) {
+  if (!obj->is(DictionaryKlass::Self())) {
     throw std::runtime_error("PyDictionary::repr(): obj is not a dict");
   }
   auto dictItemReprList = Map(obj, [](const PyObjPtr& item) {
@@ -119,7 +130,7 @@ PyObjPtr DictionaryKlass::repr(const PyObjPtr& obj) {
 }
 
 PyObjPtr DictionaryKlass::str(const PyObjPtr& obj) {
-  if (!obj->is<PyDictionary>()) {
+  if (!obj->is(DictionaryKlass::Self())) {
     throw std::runtime_error("PyDictionary::str(): obj is not a dict");
   }
   auto dictItemStrList = Map(obj, [](const PyObjPtr& item) {
@@ -137,7 +148,7 @@ PyObjPtr DictionaryKlass::str(const PyObjPtr& obj) {
 }
 
 PyObjPtr DictionaryKlass::len(const PyObjPtr& obj) {
-  if (!obj->is<PyDictionary>()) {
+  if (!obj->is(DictionaryKlass::Self())) {
     throw std::runtime_error("PyDictionary::len(): obj is not a dict");
   }
   auto dict = obj->as<PyDictionary>();
@@ -145,7 +156,7 @@ PyObjPtr DictionaryKlass::len(const PyObjPtr& obj) {
 }
 
 PyObjPtr DictionaryKlass::contains(const PyObjPtr& obj, const PyObjPtr& key) {
-  if (!obj->is<PyDictionary>()) {
+  if (!obj->is(DictionaryKlass::Self())) {
     throw std::runtime_error("PyDictionary::contains(): obj is not a dict");
   }
   auto dict = obj->as<PyDictionary>();

@@ -13,9 +13,7 @@ class YieldStmtKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_yieldstmt")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_yieldstmt"), Self());
     this->isInitialized = true;
   }
 

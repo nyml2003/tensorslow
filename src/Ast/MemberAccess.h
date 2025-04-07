@@ -19,9 +19,7 @@ class MemberAccessKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_memberaccess")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_memberaccess"), Self());
     this->isInitialized = true;
   }
 
@@ -34,14 +32,10 @@ class MemberAccessKlass : public INodeKlass {
 
 class MemberAccess : public INode {
  public:
-  MemberAccess(
-    INodePtr obj,
-    const Object::PyObjPtr& member,
-    const INodePtr& parent
-  )
+  MemberAccess(INodePtr obj, Object::PyStrPtr member, const INodePtr& parent)
     : INode(MemberAccessKlass::Self(), parent),
       obj(std::move(obj)),
-      member(member->as<Object::PyString>()) {}
+      member(std::move(member)) {}
 
   [[nodiscard]] INodePtr Obj() const { return obj; }
 
@@ -61,7 +55,7 @@ using MemberAccessPtr = std::shared_ptr<MemberAccess>;
 
 inline INodePtr CreateMemberAccess(
   const INodePtr& obj,
-  const Object::PyObjPtr& member,
+  const Object::PyStrPtr& member,
   const INodePtr& parent
 ) {
   return std::make_shared<MemberAccess>(obj, member, parent);

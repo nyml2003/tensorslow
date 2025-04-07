@@ -16,8 +16,8 @@ class MROTest : public ::testing::Test {
  protected:
   void SetUp() override {
     // 初始化操作，如创建测试对象等
-    BasicKlassLoad();
-    NativeClassLoad();
+    LoadBootstrapClasses();
+    LoadRuntimeSupportClasses();
   }
 };
 

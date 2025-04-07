@@ -18,6 +18,10 @@ Object::PyObjPtr Print(const Object::PyObjPtr& args);
 Object::PyObjPtr Len(const Object::PyObjPtr& args);
 Object::PyObjPtr Next(const Object::PyObjPtr& args);
 Object::PyObjPtr Iter(const Object::PyObjPtr& args);
-}  // namespace torchlight::Object
+Object::PyObjPtr Time(const Object::PyObjPtr& args);
+Object::PyObjPtr Range(const Object::PyObjPtr& args);
+Object::PyObjPtr Type(const Object::PyObjPtr& args);
+Object::PyObjPtr BuildClass(const Object::PyObjPtr& args);
+}  // namespace torchlight::Function
 
 #endif

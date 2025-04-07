@@ -24,7 +24,7 @@ TEST(String, ComplexString) {
 
 TEST(String, CreateStringWithBytes) {
   torchlight::Collections::Bytes bytes = CreateBytesWithCString("Hello");
-  String str = CreateStringWithBytes(bytes);
+  String str = CreateStringWithBytes(bytes.Value());
   ASSERT_EQ(str.Size(), 5);
   ASSERT_EQ(str.Get(0), 'H');
   ASSERT_EQ(str.Get(1), 'e');

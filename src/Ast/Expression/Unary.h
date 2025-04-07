@@ -14,9 +14,7 @@ class UnaryKlass : public INodeKlass {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(
-      Object::CreatePyString("ast_unary")->as<Object::PyString>(), Self()
-    );
+    InitKlass(Object::CreatePyString("ast_unary"), Self());
     this->isInitialized = true;
   }
 

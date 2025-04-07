@@ -1,6 +1,5 @@
 #include "Object/Runtime/PyFrame.h"
 #include "ByteCode/ByteCode.h"
-#include "Collections/Integer/IntegerHelper.h"
 #include "Collections/Stack.h"
 #include "Function/ObjectHelper.h"
 #include "Object/Container/PyDictionary.h"
@@ -319,7 +318,7 @@ void ParseByteCode(const PyCodePtr& code) {
 }
 
 PyObjPtr FrameKlass::repr(const PyObjPtr& obj) {
-  if (!obj->is<PyFrame>()) {
+  if (!obj->is(FrameKlass::Self())) {
     throw std::runtime_error("repr(): klass is not a frame");
   }
   auto frame = obj->as<PyFrame>();
@@ -610,11 +609,11 @@ PyObjPtr PyFrame::Eval() {
       }
       case ByteCode::MAKE_FUNCTION: {
         auto name = stack.Pop();
-        if (!name->is<PyString>()) {
+        if (!name->is(StringKlass::Self())) {
           throw std::runtime_error("Function name must be string");
         }
         auto code = stack.Pop();
-        if (!code->is<PyCode>()) {
+        if (!code->is(CodeKlass::Self())) {
           throw std::runtime_error("Function code must be code object");
         }
         auto func = CreatePyFunction(code, globals);
@@ -713,9 +712,7 @@ PyObjPtr PyFrame::Eval() {
         auto index = std::get<Index>(inst->Operand());
         auto key = Code()->Names()->GetItem(index);
         auto obj = stack.Pop();
-        auto value = obj->is<PyType>()
-                       ? obj->as<PyType>()->Owner()->Attributes()->getitem(key)
-                       : obj->getattr(key);
+        auto value = obj->getattr(key);
         if (value == nullptr) {
           std::cout << "object attributes: " << std::endl;
           obj->Attributes()->str()->as<PyString>()->PrintLine();
@@ -781,7 +778,7 @@ PyObjPtr PyFrame::Eval() {
       case ByteCode::FOR_ITER: {
         auto iter = stack.Pop();
         auto value = iter->next();
-        if (value->is<IterDone>()) {
+        if (value->is(Object::IterDoneKlass::Self())) {
           SetProgramCounter(static_cast<Index>(
             static_cast<int64_t>(ProgramCounter()) +
             std::get<int64_t>(inst->Operand())

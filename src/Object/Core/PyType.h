@@ -28,8 +28,7 @@ class PyType : public PyObject {
   KlassPtr owner;
 
  public:
-  explicit PyType(KlassPtr owner)
-    : PyObject(TypeKlass::Self()), owner(std::move(owner)) {}
+  explicit PyType(KlassPtr _owner);
 
   [[nodiscard]] KlassPtr Owner() const { return owner; }
 };

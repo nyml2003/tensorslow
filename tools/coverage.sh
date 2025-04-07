@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /app
+cd ..
 
 # 初始化覆盖率数据
 lcov -d build -z
@@ -10,14 +10,7 @@ cmake -B build
 cmake --build build --config Debug
 
 # 运行测试
-./build/TEST_LIST
-./build/TEST_ITERATOR
-./build/TEST_STRING
-./build/TEST_BYTES
-./build/TEST_INTEGER
-./build/TEST_DECIMAL
-./build/TEST_MAP
-./build/TEST_PYINTEGER
+python3 integration.py debug
 
 
 # 生成最终覆盖率数据

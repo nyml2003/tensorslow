@@ -6,7 +6,7 @@
 namespace torchlight::Object {
 
 PyObjPtr BooleanKlass::repr(const PyObjPtr& obj) {
-  if (!obj->is<PyBoolean>()) {
+  if (!obj->is(BooleanKlass::Self())) {
     auto errorMessage = StringConcat(CreatePyList(
       {CreatePyString("AttributeError: '"), obj->Klass()->Name(),
        CreatePyString("' object has no attribute '__repr__'")}
@@ -23,7 +23,7 @@ PyObjPtr BooleanKlass::str(const PyObjPtr& obj) {
 }
 
 PyObjPtr BooleanKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyBoolean>() || !rhs->is<PyBoolean>()) {
+  if (!lhs->is(BooleanKlass::Self()) || !rhs->is(BooleanKlass::Self())) {
     throw std::runtime_error("Boolean does not support eq operation");
   }
   auto left = lhs->as<PyBoolean>();
@@ -32,7 +32,7 @@ PyObjPtr BooleanKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr BooleanKlass::_and_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyBoolean>()) {
+  if (!lhs->is(BooleanKlass::Self())) {
     throw std::runtime_error("Boolean does not support and operation");
   }
   auto left = lhs->as<PyBoolean>();
@@ -41,7 +41,7 @@ PyObjPtr BooleanKlass::_and_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr BooleanKlass::_or_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is<PyBoolean>()) {
+  if (!lhs->is(BooleanKlass::Self())) {
     throw std::runtime_error("Boolean does not support or operation");
   }
   auto left = lhs->as<PyBoolean>();
@@ -50,7 +50,7 @@ PyObjPtr BooleanKlass::_or_(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr BooleanKlass::_serialize_(const PyObjPtr& obj) {
-  if (!obj->is<PyBoolean>()) {
+  if (!obj->is(BooleanKlass::Self())) {
     throw std::runtime_error("PyBoolean::_serialize_(): obj is not a bool");
   }
   auto boolean = obj->as<PyBoolean>();

@@ -231,11 +231,11 @@ def predict_and_evaluate(sample_set, predict, input):
     return accuracy
 
 
-sample_num = 512
+sample_num = 64
 
 train_set = generateSample(sample_num)
 
-print('data loaded')
+print('data loaded', train_set)
 
 # 构造计算图：输入向量，是一个3x1矩阵，不需要初始化，不参与训练
 x = Variable([3, 1], False)
@@ -257,7 +257,7 @@ predict = Step([output])
 loss = PerceptionLoss([MatrixMultiply([label, output])])
 
 # 学习率
-learning_rate = 0.00001
+learning_rate = 0.0001
 
 print('model loaded')
 

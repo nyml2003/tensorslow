@@ -55,6 +55,8 @@ class PyDictionary : public PyObject {
   Index Size() const;
 
   PyObjPtr GetItem(Index index) const;
+
+  PyDictPtr Add(const PyDictPtr& other);
 };
 
 PyObjPtr CreatePyDict();

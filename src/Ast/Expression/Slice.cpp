@@ -8,12 +8,9 @@ Object::PyObjPtr SliceKlass::emit(
 ) {
   auto list = obj->as<Ast::Slice>();
   auto elements = list->Elements();
-  Object::ForEach(
-    elements,
-    [&codeList](const Object::PyObjPtr& element, Index, const Object::PyObjPtr&) {
-      element->as<INode>()->emit(codeList);
-    }
-  );
+  Object::ForEach(elements, [&codeList](const Object::PyObjPtr& element) {
+    element->as<INode>()->emit(codeList);
+  });
   auto code = GetCodeFromList(codeList, list);
   code->BuildSlice();
   return Object::CreatePyNone();
@@ -25,12 +22,9 @@ Object::PyObjPtr SliceKlass::visit(
 ) {
   auto list = obj->as<Ast::Slice>();
   auto elements = list->Elements();
-  Object::ForEach(
-    elements,
-    [&codeList](const Object::PyObjPtr& element, Index, const Object::PyObjPtr&) {
-      element->as<INode>()->visit(codeList);
-    }
-  );
+  Object::ForEach(elements, [&codeList](const Object::PyObjPtr& element) {
+    element->as<INode>()->visit(codeList);
+  });
   return Object::CreatePyNone();
 }
 

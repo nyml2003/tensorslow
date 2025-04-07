@@ -4,11 +4,11 @@
 #include "Common.h"
 
 #include <algorithm>
+#include <execution>
 #include <initializer_list>
 #include <memory>
 #include <random>
 #include <stdexcept>
-
 namespace torchlight::Collections {
 const Index INIT_CAPACITY = 10;
 template <typename T>
@@ -194,8 +194,8 @@ class List {
    */
   void Fill(T element);
   /**
-   * @brief 深拷贝当前列表
-   * @return 深拷贝后的列表
+   * @brief 浅拷贝当前列表
+   * @return 浅拷贝后的列表
    */
   [[nodiscard]] List<T> Copy() const;
 
@@ -216,7 +216,7 @@ List<T>::List(Index count, const T* stream) : size(count) {
   }
   capacity = count;
   elements = std::make_unique<T[]>(count);
-  std::copy(stream, stream + count, elements.get());
+  std::copy(std::execution::par, stream, stream + count, elements.get());
 }
 template <typename T>
 List<T>::List(Index count, T element) : size(count) {
@@ -232,7 +232,7 @@ List<T>::List(std::initializer_list<T> list)
   : size(list.size()),
     capacity(list.size()),
     elements(std::make_unique<T[]>(list.size())) {
-  std::copy(list.begin(), list.end(), elements.get());
+  std::copy(std::execution::par, list.begin(), list.end(), elements.get());
 }
 template <typename T>
 List<T>::List(const List<T>& other) : size(other.size), capacity(other.size) {
@@ -240,7 +240,10 @@ List<T>::List(const List<T>& other) : size(other.size), capacity(other.size) {
     return;
   }
   elements = std::make_unique<T[]>(size);
-  std::copy(other.elements.get(), other.elements.get() + size, elements.get());
+  std::copy(
+    std::execution::par, other.elements.get(), other.elements.get() + size,
+    elements.get()
+  );
 }
 template <typename T>
 List<T>::List(List<T>&& other) noexcept
@@ -268,7 +271,8 @@ List<T>& List<T>::operator=(const List<T>& other) {
     capacity = other.capacity;
     elements = std::make_unique<T[]>(other.capacity);
     std::copy(
-      other.elements.get(), other.elements.get() + size, elements.get()
+      std::execution::par, other.elements.get(), other.elements.get() + size,
+      elements.get()
     );
   }
   return *this;
@@ -340,7 +344,8 @@ List<T> List<T>::Pop(Index k) {
   }
   List<T> list(k);
   std::copy(
-    elements.get() + size - k, elements.get() + size, list.elements.get()
+    std::execution::par, elements.get() + size - k, elements.get() + size,
+    list.elements.get()
   );
   list.size = k;
   size -= k;
@@ -349,9 +354,12 @@ List<T> List<T>::Pop(Index k) {
 template <typename T>
 List<T> List<T>::Add(const List<T>& list) {
   List<T> newList(size + list.size);
-  std::copy(elements.get(), elements.get() + size, newList.elements.get());
   std::copy(
-    list.elements.get(), list.elements.get() + list.size,
+    std::execution::par, elements.get(), elements.get() + size,
+    newList.elements.get()
+  );
+  std::copy(
+    std::execution::par, list.elements.get(), list.elements.get() + list.size,
     newList.elements.get() + size
   );
   newList.size = size + list.size;
@@ -363,7 +371,8 @@ void List<T>::Concat(const List<T>& list) {
     Expand(size + list.size);
   }
   std::copy(
-    list.elements.get(), list.elements.get() + list.size, elements.get() + size
+    std::execution::par, list.elements.get(), list.elements.get() + list.size,
+    elements.get() + size
   );
   size += list.size;
 }
@@ -377,7 +386,10 @@ List<T> List<T>::Slice(Index start, Index end) const {
     throw std::runtime_error("List::Slice::Index out of range");
   }
   List<T> list(end - start);
-  std::copy(elements.get() + start, elements.get() + end, list.elements.get());
+  std::copy(
+    std::execution::par, elements.get() + start, elements.get() + end,
+    list.elements.get()
+  );
   list.size = end - start;
   return list;
 }
@@ -440,8 +452,8 @@ void List<T>::InsertAndReplace(Index start, Index end, const List<T>& list) {
     );
     // 将 list 的元素复制到 [start, start + insertLength - 1]
     std::copy(
-      list.elements.get(), list.elements.get() + insertLength,
-      elements.get() + start
+      std::execution::par, list.elements.get(),
+      list.elements.get() + insertLength, elements.get() + start
     );
     // 更新列表大小
     size = size - removeLength + insertLength;
@@ -462,8 +474,8 @@ void List<T>::InsertAndReplace(Index start, Index end, const List<T>& list) {
     );
     // 将 list 的元素复制到 [start, start + insertLength - 1]
     std::copy(
-      list.elements.get(), list.elements.get() + insertLength,
-      elements.get() + start
+      std::execution::par, list.elements.get(),
+      list.elements.get() + insertLength, elements.get() + start
     );
     // 更新列表大小
     size += insertLength - removeLength;
@@ -472,14 +484,16 @@ void List<T>::InsertAndReplace(Index start, Index end, const List<T>& list) {
   else {
     // 直接将 list 的元素复制到 [start, start + insertLength - 1]
     std::copy(
-      list.elements.get(), list.elements.get() + insertLength,
-      elements.get() + start
+      std::execution::par, list.elements.get(),
+      list.elements.get() + insertLength, elements.get() + start
     );
   }
 }
 template <typename T>
 void List<T>::Reverse() {
-  std::reverse(elements.get(), elements.get() + size);
+  if (size <= 1)
+    return;
+  std::reverse(std::execution::par, elements.get(), elements.get() + size);
 }
 template <typename T>
 void List<T>::TrimExcess() {
@@ -492,7 +506,10 @@ void List<T>::TrimExcess() {
     return;
   }
   std::unique_ptr<T[]> newElements = std::make_unique<T[]>(size);
-  std::copy(elements.get(), elements.get() + size, newElements.get());
+  std::copy(
+    std::execution::par, elements.get(), elements.get() + size,
+    newElements.get()
+  );
   elements = std::move(newElements);
   capacity = size;
 }
@@ -558,14 +575,20 @@ template <typename T>
 void List<T>::Expand() {
   Index newCapacity = std::max(capacity * 2, INIT_CAPACITY);
   std::unique_ptr<T[]> newElements = std::make_unique<T[]>(newCapacity);
-  std::copy(elements.get(), elements.get() + size, newElements.get());
+  std::copy(
+    std::execution::par, elements.get(), elements.get() + size,
+    newElements.get()
+  );
   elements = std::move(newElements);
   capacity = newCapacity;
 }
 template <typename T>
 void List<T>::Expand(Index newCapacity) {
   std::unique_ptr<T[]> newElements = std::make_unique<T[]>(newCapacity);
-  std::copy(elements.get(), elements.get() + size, newElements.get());
+  std::copy(
+    std::execution::par, elements.get(), elements.get() + size,
+    newElements.get()
+  );
   elements = std::move(newElements);
   capacity = newCapacity;
 }
@@ -573,7 +596,10 @@ template <typename T>
 void List<T>::ExpandWithElement(Index newCapacity, T element) {
   std::unique_ptr<T[]> newElements = std::make_unique<T[]>(newCapacity);
   std::fill(newElements.get(), newElements.get() + newCapacity, element);
-  std::copy(elements.get(), elements.get() + size, newElements.get());
+  std::copy(
+    std::execution::par, elements.get(), elements.get() + size,
+    newElements.get()
+  );
   elements = std::move(newElements);
   capacity = newCapacity;
   size = newCapacity;
@@ -589,7 +615,10 @@ void List<T>::Fill(T element) {
 template <typename T>
 List<T> List<T>::Copy() const {
   List<T> newList(size);
-  std::copy(elements.get(), elements.get() + size, newList.elements.get());
+  std::copy(
+    std::execution::par, elements.get(), elements.get() + size,
+    newList.elements.get()
+  );
   newList.size = size;
   return newList;
 }

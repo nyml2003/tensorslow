@@ -32,9 +32,8 @@
 namespace torchlight::Generation {
 
 Generator::Generator(const Object::PyStrPtr& filename)
-  : codeList(Object::CreatePyList({})->as<Object::PyList>()) {
-  context =
-    Ast::CreateModule(Object::CreatePyList({})->as<Object::PyList>(), filename);
+  : codeList(Object::CreatePyList()) {
+  context = Ast::CreateModule(Object::CreatePyList(), filename);
 }
 
 void Generator::Visit() {
@@ -71,24 +70,21 @@ antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
       statements.Push(std::any_cast<Ast::INodePtr>(stmt));
       continue;
     }
-    if (stmt.type() == typeid(Object::PyObjPtr)) {
-      auto list = std::any_cast<Object::PyObjPtr>(stmt)->as<Object::PyList>();
+    if (stmt.type() == typeid(Object::PyListPtr)) {
+      auto list = std::any_cast<Object::PyListPtr>(stmt);
       for (Index i = 0; i < list->Length(); i++) {
         statements.Push(list->GetItem(i));
       }
       continue;
     }
+    std::cerr << "visitFile_input: Unknown statement type" << std::endl;
   }
-  if (context->is<Ast::Module>()) {
-    context->as<Ast::Module>()->SetBody(
-      Object::CreatePyList(statements)->as<Object::PyList>()
-    );
+  if (context->is(Ast::ModuleKlass::Self())) {
+    context->as<Ast::Module>()->SetBody(Object::CreatePyList(statements));
     return nullptr;
   }
-  if (context->is<Ast::FuncDef>()) {
-    context->as<Ast::FuncDef>()->SetBody(
-      Object::CreatePyList(statements)->as<Object::PyList>()
-    );
+  if (context->is(Ast::FuncDefKlass::Self())) {
+    context->as<Ast::FuncDef>()->SetBody(Object::CreatePyList(statements));
     return nullptr;
   }
   std::cerr << "visitFile_input: Unknown context type" << std::endl;
@@ -114,23 +110,17 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
   if (ctx->OPEN_BRACK() != nullptr) {
     // 情况 2: '[' testlist_comp? ']'
     if (ctx->testlist_comp() == nullptr) {
-      return Ast::CreateList(
-        Object::CreatePyList({})->as<Object::PyList>(), context
-      );
+      return Ast::CreateList(Object::CreatePyList(), context);
     }
     auto testlist_comp =
-      std::any_cast<Object::PyObjPtr>(visitTestlist_comp(ctx->testlist_comp()));
-    if (testlist_comp->is<Object::PyList>()) {
-      return Ast::CreateList(testlist_comp->as<Object::PyList>(), context);
-    }
-    std::cerr << "visitAtom: testlist_comp is not a List" << std::endl;
-
+      std::any_cast<Object::PyListPtr>(visitTestlist_comp(ctx->testlist_comp())
+      );
+    return Ast::CreateList(testlist_comp, context);
   } else if (ctx->OPEN_BRACE() != nullptr) {
     auto dictorsetmaker = ctx->dictorsetmaker();
     if (dictorsetmaker == nullptr) {
       return Ast::CreateMap(
-        Object::CreatePyList({})->as<Object::PyList>(),
-        Object::CreatePyList({})->as<Object::PyList>(), context
+        Object::CreatePyList(), Object::CreatePyList(), context
       );
     }
     auto dictorset = ctx->dictorsetmaker();
@@ -146,8 +136,7 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
       values.Push(std::any_cast<Ast::INodePtr>(visitTest(tests[i + 1])));
     }
     return Ast::CreateMap(
-      Object::CreatePyList(keys)->as<Object::PyList>(),
-      Object::CreatePyList(values)->as<Object::PyList>(), context
+      Object::CreatePyList(keys), Object::CreatePyList(values), context
     );
   } else if (ctx->name() != nullptr) {
     // 情况 4: name
@@ -451,7 +440,7 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
 
 antlrcpp::Any Generator::visitArglist(Python3Parser::ArglistContext* ctx) {
   if (ctx->argument().empty()) {
-    return Object::CreatePyList({})->as<Object::PyList>();
+    return Object::CreatePyList();
   }
   auto arglist = ctx->argument();
   Collections::List<Object::PyObjPtr> args(static_cast<uint64_t>(arglist.size())
@@ -459,7 +448,7 @@ antlrcpp::Any Generator::visitArglist(Python3Parser::ArglistContext* ctx) {
   for (auto* arg : arglist) {
     args.Push(std::any_cast<Ast::INodePtr>(visitArgument(arg)));
   }
-  return Object::CreatePyList(args)->as<Object::PyList>();
+  return Object::CreatePyList(args);
 }
 
 antlrcpp::Any Generator::visitArgument(Python3Parser::ArgumentContext* ctx) {
@@ -479,9 +468,8 @@ antlrcpp::Any Generator::visitAtom_expr(Python3Parser::Atom_exprContext* ctx) {
   for (auto& trailer : trailers) {
     if (trailer->OPEN_PAREN() != nullptr) {  // '('
       if (trailer->arglist() == nullptr) {
-        result = Ast::CreateFunctionCall(
-          result, Object::CreatePyList({})->as<Object::PyList>(), context
-        );
+        result =
+          Ast::CreateFunctionCall(result, Object::CreatePyList(), context);
       } else {
         auto args =
           std::any_cast<Object::PyListPtr>(visitArglist(trailer->arglist()));
@@ -645,19 +633,16 @@ antlrcpp::Any Generator::visitFuncdef(Python3Parser::FuncdefContext* ctx) {
   auto funcName = Object::CreatePyString(ctx->name()->getText().c_str());
   // 2. 获取函数参数列表
   auto parameters =
-    std::any_cast<Object::PyObjPtr>(visitParameters(ctx->parameters()));
+    std::any_cast<Object::PyListPtr>(visitParameters(ctx->parameters()));
   // 3. 创建函数对象
   auto funcDef =
-    Ast::CreateFuncDef(
-      funcName->as<Object::PyString>(), parameters->as<Object::PyList>(),
-      Object::CreatePyList({})->as<Object::PyList>(), context
-    )
+    Ast::CreateFuncDef(funcName, parameters, Object::CreatePyList(), context)
       ->as<Ast::FuncDef>();
   auto oldContext = context;
   context = funcDef;
   // 4. 获取函数体
-  auto body = std::any_cast<Object::PyObjPtr>(visitBlock(ctx->block()));
-  funcDef->SetBody(body->as<Object::PyList>());
+  auto body = std::any_cast<Object::PyListPtr>(visitBlock(ctx->block()));
+  funcDef->SetBody(body);
   context = oldContext;
   return std::dynamic_pointer_cast<Ast::INode>(funcDef);
 }
@@ -674,13 +659,14 @@ antlrcpp::Any Generator::visitBlock(Python3Parser::BlockContext* ctx) {
         stmts.Push(std::any_cast<Ast::INodePtr>(stmt));
         continue;
       }
-      if (stmt.type() == typeid(Object::PyObjPtr)) {
-        auto list = std::any_cast<Object::PyObjPtr>(stmt)->as<Object::PyList>();
+      if (stmt.type() == typeid(Object::PyListPtr)) {
+        auto list = std::any_cast<Object::PyListPtr>(stmt);
         for (Index i = 0; i < list->Length(); i++) {
           stmts.Push(list->GetItem(i));
         }
         continue;
       }
+      std::cerr << "visitBlock: Unknown statement type" << std::endl;
     }
     return Object::CreatePyList(stmts);
   }
@@ -728,7 +714,7 @@ antlrcpp::Any Generator::visitParameters(Python3Parser::ParametersContext* ctx
   if (ctx->typedargslist() != nullptr) {
     return visitTypedargslist(ctx->typedargslist());
   }
-  return Object::CreatePyList({});
+  return Object::CreatePyList();
 }
 
 antlrcpp::Any Generator::visitTypedargslist(
@@ -749,13 +735,10 @@ antlrcpp::Any Generator::visitTfpdef(Python3Parser::TfpdefContext* ctx) {
 
 antlrcpp::Any Generator::visitIf_stmt(Python3Parser::If_stmtContext* ctx) {
   auto condition = std::any_cast<Ast::INodePtr>(visitTest(ctx->test(0)));
-  auto thenStmts = std::any_cast<Object::PyObjPtr>(visitBlock(ctx->block(0)))
-                     ->as<Object::PyList>();
-  Object::PyListPtr elseStmts = Object::CreatePyList({})->as<Object::PyList>();
-  Object::PyListPtr elseIfStmts =
-    Object::CreatePyList({})->as<Object::PyList>();
-  Object::PyListPtr elseIfConditions =
-    Object::CreatePyList({})->as<Object::PyList>();
+  auto thenStmts = std::any_cast<Object::PyListPtr>(visitBlock(ctx->block(0)));
+  Object::PyListPtr elseStmts = Object::CreatePyList();
+  Object::PyListPtr elseIfStmts = Object::CreatePyList();
+  Object::PyListPtr elseIfConditions = Object::CreatePyList();
   size_t elseifCount = ctx->ELIF().size();
   bool hasElse = ctx->ELSE() != nullptr;
   if (elseifCount > 0) {
@@ -764,15 +747,13 @@ antlrcpp::Any Generator::visitIf_stmt(Python3Parser::If_stmtContext* ctx) {
         std::any_cast<Ast::INodePtr>(visitTest(ctx->test(i + 1)));
       elseIfConditions->Append(elseIfCondition);
       auto block =
-        std::any_cast<Object::PyObjPtr>(visitBlock(ctx->block(i + 1)))
-          ->as<Object::PyList>();
+        std::any_cast<Object::PyListPtr>(visitBlock(ctx->block(i + 1)));
       elseIfStmts->Append(block);
     }
   }
   if (hasElse) {
     elseStmts =
-      std::any_cast<Object::PyObjPtr>(visitBlock(ctx->block(elseifCount + 1)))
-        ->as<Object::PyList>();
+      std::any_cast<Object::PyListPtr>(visitBlock(ctx->block(elseifCount + 1)));
   }
 
   auto ifStmt = Ast::CreateIfStmt(
@@ -784,7 +765,7 @@ antlrcpp::Any Generator::visitIf_stmt(Python3Parser::If_stmtContext* ctx) {
 antlrcpp::Any Generator::visitWhile_stmt(Python3Parser::While_stmtContext* ctx
 ) {
   auto condition = std::any_cast<Ast::INodePtr>(visitTest(ctx->test()));
-  auto body = std::any_cast<Object::PyObjPtr>(visitBlock(ctx->block(0)));
+  auto body = std::any_cast<Object::PyListPtr>(visitBlock(ctx->block(0)));
   return Ast::CreateWhileStmt(condition, body, context);
 }
 
@@ -801,9 +782,7 @@ antlrcpp::Any Generator::visitSubscriptlist(
   for (auto* subscript : ctx->subscript_()) {
     subscripts.Push(std::any_cast<Ast::INodePtr>(visitSubscript_(subscript)));
   }
-  return Ast::CreateList(
-    Object::CreatePyList(subscripts)->as<Object::PyList>(), context
-  );
+  return Ast::CreateList(Object::CreatePyList(subscripts), context);
 }
 
 antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx
@@ -825,34 +804,23 @@ antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx
     auto value = std::any_cast<Ast::INodePtr>(visitTest(test));
     if (colon->getSymbol()->getTokenIndex() < test->getStart()->getTokenIndex()) {
       return Ast::CreateSlice(
-        Object::CreatePyList({none, value, step})->as<Object::PyList>(), context
+        Object::CreatePyList({none, value, step}), context
       );
     }
-    return Ast::CreateSlice(
-      Object::CreatePyList({value, none, step})->as<Object::PyList>(), context
-    );
+    return Ast::CreateSlice(Object::CreatePyList({value, none, step}), context);
   }
   if (ctx->test().size() == 2) {
     auto start = std::any_cast<Ast::INodePtr>(visitTest(ctx->test(0)));
     auto stop = std::any_cast<Ast::INodePtr>(visitTest(ctx->test(1)));
-    return Ast::CreateSlice(
-      Object::CreatePyList({start, stop, step})->as<Object::PyList>(), context
-    );
+    return Ast::CreateSlice(Object::CreatePyList({start, stop, step}), context);
   }
-  return Ast::CreateSlice(
-    Object::CreatePyList({none, none, step})->as<Object::PyList>(), context
-  );
-
-  std::cerr << "visitSubscript_: Unknown type" << std::endl;
-  std::cout << ctx->getText() << std::endl;
-  return nullptr;
+  return Ast::CreateSlice(Object::CreatePyList({none, none, step}), context);
 }
 
 antlrcpp::Any Generator::visitFor_stmt(Python3Parser::For_stmtContext* ctx) {
   auto target = std::any_cast<Ast::INodePtr>(visitExprlist(ctx->exprlist()));
   auto iter = std::any_cast<Ast::INodePtr>(visitTestlist(ctx->testlist()));
-  auto body = std::any_cast<Object::PyObjPtr>(visitBlock(ctx->block(0)))
-                ->as<Object::PyList>();
+  auto body = std::any_cast<Object::PyListPtr>(visitBlock(ctx->block(0)));
   return Ast::CreateForStmt(target, iter, body, context);
 }
 
@@ -861,10 +829,9 @@ antlrcpp::Any Generator::visitExprlist(Python3Parser::ExprlistContext* ctx) {
 }
 
 antlrcpp::Any Generator::visitClassdef(Python3Parser::ClassdefContext* ctx) {
-  auto className = Object::CreatePyString(ctx->name()->getText().c_str())
-                     ->as<Object::PyString>();
+  auto className = Object::CreatePyString(ctx->name()->getText().c_str());
 
-  auto bases = Object::CreatePyList({})->as<Object::PyList>();
+  auto bases = Object::CreatePyList();
   if (ctx->arglist() != nullptr) {
     bases = std::any_cast<Object::PyListPtr>(visitArglist(ctx->arglist()));
   }
@@ -878,9 +845,8 @@ antlrcpp::Any Generator::visitClassdef(Python3Parser::ClassdefContext* ctx) {
       ->as<Ast::ClassDef>();
   auto oldContext = context;
   context = classDef;
-  auto body = std::any_cast<Object::PyObjPtr>(visitBlock(ctx->block()))
-                ->as<Object::PyList>();
-  classDef->SetBody(body->as<Object::PyList>());
+  auto body = std::any_cast<Object::PyListPtr>(visitBlock(ctx->block()));
+  classDef->SetBody(body);
   context = oldContext;
   return std::dynamic_pointer_cast<Ast::INode>(classDef);
 }
