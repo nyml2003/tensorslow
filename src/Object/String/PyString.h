@@ -41,7 +41,8 @@ class PyString : public PyObject {
   bool hashed = false;
   // 缩进深度
   static Index indent;
-  static std::unordered_map<Collections::String, PyStrPtr> stringPool;
+  static std::unordered_map<Collections::String, std::weak_ptr<PyString>>
+    stringPool;
   static std::mutex poolMutex;
 
  public:

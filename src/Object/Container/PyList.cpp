@@ -350,6 +350,20 @@ PyObjPtr ListKlass::_serialize_(const PyObjPtr& obj) {
   return bytes;
 }
 
+PyObjPtr ListKlass::iter(const PyObjPtr& obj) {
+  if (!obj->is(ListKlass::Self())) {
+    throw std::runtime_error("List does not support iter operation");
+  }
+  return CreateListIterator(obj);
+}
+
+PyObjPtr ListKlass::reversed(const torchlight::Object::PyObjPtr& obj) {
+  if (!obj->is(ListKlass::Self())) {
+    throw std::runtime_error("List does not support reversed operation");
+  }
+  return CreateListReverseIterator(obj);
+}
+
 PyObjPtr ListAppend(const PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 2);
   auto argList = args->as<PyList>();
@@ -450,20 +464,6 @@ PyObjPtr ListInsert(const PyObjPtr& args) {
   auto obj = argList->GetItem(2);
   list->Insert(actualIndex, obj);
   return CreatePyNone();
-}
-
-PyObjPtr ListKlass::iter(const PyObjPtr& obj) {
-  if (!obj->is(ListKlass::Self())) {
-    throw std::runtime_error("List does not support iter operation");
-  }
-  return CreateListIterator(obj);
-}
-
-PyObjPtr ListKlass::reversed(const torchlight::Object::PyObjPtr& obj) {
-  if (!obj->is(ListKlass::Self())) {
-    throw std::runtime_error("List does not support reversed operation");
-  }
-  return CreateListReverseIterator(obj);
 }
 
 PyObjPtr PyList::GetSlice(const PySlicePtr& slice) const {

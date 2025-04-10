@@ -68,7 +68,7 @@ PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept {
   if (obj->Klass()->Super()->Length() == 0 && obj->Klass() == ObjectKlass::Self()) {
     return nullptr;
   }
-  for (Index i = 0; i < obj->Klass()->Mro()->Length(); i++) {
+  for (Index i = 1; i < obj->Klass()->Mro()->Length(); i++) {
     auto klass = obj->Klass()->Mro()->GetItem(i)->as<PyType>();
     if (klass->Owner()->Attributes()->Contains(attrName)) {
       return klass->Owner()->Attributes()->Get(attrName);

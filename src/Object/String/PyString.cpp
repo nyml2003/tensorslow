@@ -19,7 +19,8 @@
 
 namespace torchlight::Object {
 Index PyString::indent = 0;
-std::unordered_map<Collections::String, PyStrPtr> PyString::stringPool;
+std::unordered_map<Collections::String, std::weak_ptr<PyString>>
+  PyString::stringPool;
 std::mutex PyString::poolMutex;
 void StringKlass::Initialize() {
   InitKlass(CreatePyString("str")->as<PyString>(), Self());
@@ -281,12 +282,11 @@ PyStrPtr PyString::Create(const Collections::String& value) {
   std::lock_guard<std::mutex> lock(poolMutex);
   auto iter = stringPool.find(value);
   if (iter != stringPool.end()) {
-    auto result = iter->second;
-    if (result != nullptr) {
-      return result;
+    auto weakPtr = iter->second;
+    if (auto strongPtr = weakPtr.lock()) {
+      return strongPtr;
     }
   }
-  // 如果没有找到或者弱指针已经失效，则创建新的实例
   auto result = std::make_shared<PyString>(value);
   stringPool[value] = result;
   return result;
