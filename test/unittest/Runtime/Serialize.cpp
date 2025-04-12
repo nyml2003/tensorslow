@@ -2,7 +2,7 @@
 #include "../test_default.h"
 
 #include "Collections/Iterator.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyDictionary.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"

@@ -2,7 +2,7 @@
 #define TORCHLIGHT_AST_BINARY_H
 
 #include "Ast/INode.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 
 namespace torchlight::Ast {
 

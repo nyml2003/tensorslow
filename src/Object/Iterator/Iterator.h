@@ -1,7 +1,7 @@
 #ifndef TORCHLIGHT_OBJECT_ITERATOR_H
 #define TORCHLIGHT_OBJECT_ITERATOR_H
 
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyDictionary.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/CoreHelper.h"

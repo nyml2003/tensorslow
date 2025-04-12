@@ -1,6 +1,6 @@
 #include "Ast/Statement/IfStmt.h"
 #include "Ast/INode.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Iterator/IteratorHelper.h"
 #include "Object/Number/PyInteger.h"

@@ -1,11 +1,12 @@
 #include "Object/Container/PyDictionary.h"
 #include <iostream>
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Core/PyType.h"
+#include "Object/Function/PyNativeFunction.h"
 #include "Object/Iterator/Iterator.h"
 #include "Object/Iterator/IteratorHelper.h"
 #include "Object/Number/PyInteger.h"
@@ -60,6 +61,12 @@ void DictionaryKlass::Initialize() {
     return;
   }
   InitKlass(CreatePyString("dict")->as<PyString>(), Self());
+  ConfigureBasicAttributes(Self());
+  Self()->AddAttribute(
+    CreatePyString("clear")->as<PyString>(),
+    CreatePyNativeFunction(DictClear)->as<PyNativeFunction>()
+  );
+
   this->isInitialized = true;
 }
 
@@ -83,7 +90,12 @@ PyObjPtr DictionaryKlass::setitem(
     throw std::runtime_error("PyDictionary::setitem(): obj is not a dict");
   }
   auto dict = obj->as<PyDictionary>();
-  dict->Put(key, value);
+  //  std::cout << "key: " << key->hash()->str()->as<PyString>()->ToCppString()
+  //            << std::endl;
+  //  std::cout << "value: " <<
+  //  value->hash()->str()->as<PyString>()->ToCppString()
+  //            << std::endl;
+  dict->Put(key->hash(), value);
   return CreatePyNone();
 }
 
@@ -92,7 +104,9 @@ PyObjPtr DictionaryKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
     throw std::runtime_error("PyDictionary::getitem(): obj is not a dict");
   }
   auto dict = obj->as<PyDictionary>();
-  return dict->Get(key);
+  //  std::cout << "key: " << key->hash()->str()->as<PyString>()->ToCppString()
+  //            << std::endl;
+  return dict->Get(key->hash());
 }
 
 PyObjPtr DictionaryKlass::delitem(const PyObjPtr& obj, const PyObjPtr& key) {
@@ -176,6 +190,13 @@ bool KeyCompare(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   auto leftHash = lhs->hash()->as<PyInteger>()->ToU64();
   auto rightHash = rhs->hash()->as<PyInteger>()->ToU64();
   return leftHash < rightHash;
+}
+
+auto DictClear(const PyObjPtr& obj) -> PyObjPtr {
+  auto argList = obj->as<PyList>();
+  auto dict = argList->GetItem(0)->as<PyDictionary>();
+  dict->Clear();
+  return CreatePyNone();
 }
 
 }  // namespace torchlight::Object

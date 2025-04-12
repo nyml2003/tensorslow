@@ -2,7 +2,7 @@
 #define TORCHLIGHT_AST_PASSSTMT_H
 
 #include "Ast/INode.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Core/PyNone.h"
 
 namespace torchlight::Ast {

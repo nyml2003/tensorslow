@@ -12,6 +12,8 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   KlassPtr klass;
   PyDictPtr attributes;  // 不需要bound的属性
   PyDictPtr methods;     // 需要bound的属性
+  Index hashValue;
+  bool hashed = false;
 
  public:
   explicit PyObject(KlassPtr klass) : klass(std::move(klass)) {}
@@ -25,6 +27,12 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   PyObject& operator=(const PyObject&) = default;
   PyObject(PyObject&&) = default;
   PyObject& operator=(PyObject&&) = default;
+  void SetHashValue(Index value) {
+    hashValue = value;
+    hashed = true;
+  }
+  [[nodiscard]] Index HashValue() const { return hashValue; }
+  [[nodiscard]] bool Hashed() const { return hashed; }
   PyObjPtr add(const PyObjPtr& other) {
     return klass->add(shared_from_this(), other);
   }

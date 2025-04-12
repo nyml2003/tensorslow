@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include "Collections/String/Bytes.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/String/PyString.h"
 

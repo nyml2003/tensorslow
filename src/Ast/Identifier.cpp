@@ -3,7 +3,7 @@
 #include "Ast/ClassDef.h"
 #include "Ast/FuncDef.h"
 #include "Ast/INode.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Runtime/PyCode.h"
@@ -61,6 +61,11 @@ Object::PyObjPtr IdentifierKlass::visit(
     return Object::CreatePyNone();
   }
   if (mode == STOREORLOAD::STORE && registry == IdentifierRegistry::LOCAL_VARNAME) {
+    code->RegisterVarName(name);
+    return Object::CreatePyNone();
+  }
+  if (mode == STOREORLOAD::STORE && registry == IdentifierRegistry::LOCAL_NAME &&
+      !code->VarNames()->Contains(name)) {
     code->RegisterVarName(name);
     return Object::CreatePyNone();
   }
@@ -139,6 +144,7 @@ Object::PyObjPtr IdentifierKlass::emit(
       code->StoreName(name);
       return Object::CreatePyNone();
     }
+
     if (registry == IdentifierRegistry::BUILTIN && mode == STOREORLOAD::LOAD) {
       code->LoadName(name);
       return Object::CreatePyNone();
@@ -158,7 +164,7 @@ Object::PyObjPtr IdentifierKlass::emit(
       code->LoadName(name);
       return Object::CreatePyNone();
     }
-   
+
     throw std::runtime_error(
       "NameError: name '" + name->ToCppString() + "' is not defined"
     );

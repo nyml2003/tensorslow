@@ -1,7 +1,7 @@
 #include "Ast/Statement/ForStmt.h"
 #include "Ast/INode.h"
 #include "Ast/Identifier.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Iterator/IteratorHelper.h"
 #include "Object/Runtime/PyInst.h"

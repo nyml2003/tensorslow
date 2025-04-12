@@ -1,7 +1,7 @@
 #ifndef TORCHLIGHT_AST_WHILE_STATEMENT_H
 #define TORCHLIGHT_AST_WHILE_STATEMENT_H
 #include "Ast/INode.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 
 namespace torchlight::Ast {
 

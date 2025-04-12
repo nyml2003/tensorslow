@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_FUNCTION_H
-#define TORCHLIGHT_FUNCTION_H
+#ifndef TORCHLIGHT_BUILTIN_FUNCTION_H
+#define TORCHLIGHT_BUILTIN_FUNCTION_H
 #include "Common.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Object.h"
@@ -22,6 +22,15 @@ Object::PyObjPtr Time(const Object::PyObjPtr& args);
 Object::PyObjPtr Range(const Object::PyObjPtr& args);
 Object::PyObjPtr Type(const Object::PyObjPtr& args);
 Object::PyObjPtr BuildClass(const Object::PyObjPtr& args);
+auto LogisticLoss(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
+auto LogisticLossDerivative(const Object::PyObjPtr& args) noexcept
+  -> Object::PyObjPtr;
+auto Sum(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
+auto Log(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
+auto SoftMax(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
+auto Max(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
+auto ArgMax(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
+auto Hash(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
 }  // namespace torchlight::Function
 
 #endif

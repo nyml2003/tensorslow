@@ -2,7 +2,7 @@
 #include "Ast/FuncDef.h"
 #include "Ast/INode.h"
 #include "Ast/Module.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Iterator/IteratorHelper.h"

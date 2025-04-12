@@ -32,10 +32,10 @@ class Matrix {
   [[nodiscard]] Matrix Add(const Matrix& other) const;
   [[nodiscard]] Matrix Multiply(const Matrix& other) const;
   [[nodiscard]] Matrix Multiply(double scalar) const;
-
+  [[nodiscard]] Matrix Divide(double scalar) const;
   [[nodiscard]] Index Rows() const;
   [[nodiscard]] Index Cols() const;
-  [[nodiscard]] List<double> Data() const;
+  [[nodiscard]] const List<double>& Data() const;
   [[nodiscard]] List<Index> Shape() const;
   [[nodiscard]] double At(Index row, Index col) const;
   [[nodiscard]] Matrix Reshape(Index newRows, Index newCols) const;

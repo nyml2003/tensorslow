@@ -1,5 +1,5 @@
 #include "Object/Function/PyNativeFunction.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Number/PyInteger.h"

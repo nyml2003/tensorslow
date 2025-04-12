@@ -1,7 +1,7 @@
 #ifndef TORCHLIGHT_OBJECT_PYSLICE_H
 #define TORCHLIGHT_OBJECT_PYSLICE_H
 
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Object.h"

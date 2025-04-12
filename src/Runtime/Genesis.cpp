@@ -1,5 +1,5 @@
 #include "Runtime/Genesis.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyDictionary.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/CoreHelper.h"
@@ -9,8 +9,9 @@
 #include "Object/Core/PyType.h"
 #include "Object/Function/PyFunction.h"
 #include "Object/Function/PyNativeFunction.h"
+#include "Object/Matrix/MatrixFunction.h"
+#include "Object/Matrix/PyMatrix.h"
 #include "Object/Number/PyFloat.h"
-#include "Object/PyMatrix.h"
 #include "Object/Runtime/PyFrame.h"
 #include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
@@ -54,6 +55,9 @@ Object::PyDictPtr Genesis() {
     Object::CreatePyString("id"), CreatePyNativeFunction(Function::Identity)
   );
   builtins->Put(
+    Object::CreatePyString("hash"), CreatePyNativeFunction(Function::Hash)
+  );
+  builtins->Put(
     Object::CreatePyString("time"), CreatePyNativeFunction(Function::Time)
   );
   builtins->Put(
@@ -70,7 +74,7 @@ Object::PyDictPtr Genesis() {
   // 内置全局对象
   builtins->Put(
     Object::CreatePyString("Array"),
-    Object::CreatePyNativeFunction(Object::Matrix)
+    Object::CreatePyNativeFunction(Object::Array)
   );
   builtins->Put(
     Object::CreatePyString("Eye"), Object::CreatePyNativeFunction(Object::Eye)
@@ -99,10 +103,6 @@ Object::PyDictPtr Genesis() {
     Object::CreatePyNativeFunction(Object::Shape)
   );
   builtins->Put(
-    Object::CreatePyString("Where"),
-    Object::CreatePyNativeFunction(Object::Where)
-  );
-  builtins->Put(
     Object::CreatePyString("Concatenate"),
     Object::CreatePyNativeFunction(Object::Concatenate)
   );
@@ -117,6 +117,31 @@ Object::PyDictPtr Genesis() {
   builtins->Put(
     Object::CreatePyString("Shuffle"),
     Object::CreatePyNativeFunction(Function::Shuffle)
+  );
+  builtins->Put(
+    Object::CreatePyString("LogisticLoss"),
+    Object::CreatePyNativeFunction(Function::LogisticLoss)
+  );
+  builtins->Put(
+    Object::CreatePyString("LogisticLossDerivative"),
+    Object::CreatePyNativeFunction(Function::LogisticLossDerivative)
+  );
+  builtins->Put(
+    Object::CreatePyString("Sum"), Object::CreatePyNativeFunction(Function::Sum)
+  );
+  builtins->Put(
+    Object::CreatePyString("Log"), Object::CreatePyNativeFunction(Function::Log)
+  );
+  builtins->Put(
+    Object::CreatePyString("SoftMax"),
+    Object::CreatePyNativeFunction(Function::SoftMax)
+  );
+  builtins->Put(
+    Object::CreatePyString("Max"), Object::CreatePyNativeFunction(Function::Max)
+  );
+  builtins->Put(
+    Object::CreatePyString("ArgMax"),
+    Object::CreatePyNativeFunction(Function::ArgMax)
   );
 
   // 系统相关函数

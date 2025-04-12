@@ -1,7 +1,7 @@
 #ifndef TORCHLIGHT_OBJECT_PYFUNCTION_H
 #define TORCHLIGHT_OBJECT_PYFUNCTION_H
 
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyDictionary.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Runtime/PyCode.h"

@@ -1,6 +1,7 @@
-#include "Object/PyMatrix.h"
+#include "PyMatrix.h"
 #include <iostream>
 #include "Collections/Matrix.h"
+#include "MatrixFunction.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
@@ -9,16 +10,9 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
-
+#include "Runtime/Interpreter.h"
+#include "Tools/Tools.h"
 namespace torchlight::Object {
-
-PyObjPtr Transpose(const PyObjPtr& args) {
-  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
-  CheckNativeFunctionArgumentsAtIndexWithType(
-    CreatePyString("Transpose")->as<PyString>(), args, 0, MatrixKlass::Self()
-  );
-  return args->as<PyList>()->GetItem(0)->as<PyMatrix>()->Transpose();
-}
 
 PyObjPtr MatrixKlass::repr(const PyObjPtr& obj) {
   if (!obj->is(Self())) {
@@ -133,6 +127,22 @@ PyObjPtr MatrixKlass::sub(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return lhs->as<PyMatrix>()->Subtract(rhs->as<PyMatrix>());
 }
 
+PyObjPtr MatrixKlass::truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+  if (!lhs->is(Self())) {
+    throw std::runtime_error("MatrixKlass::floordiv(): lhs is not a matrix");
+  }
+  auto matrix = lhs->as<PyMatrix>();
+  if (rhs->is(FloatKlass::Self())) {
+    return matrix->Divide(rhs->as<PyFloat>()->Value());
+  }
+  if (rhs->is(IntegerKlass::Self())) {
+    return matrix->Divide(static_cast<double>(rhs->as<PyInteger>()->ToI64()));
+  }
+  throw std::runtime_error(
+    "MatrixKlass::floordiv(): rhs is not a matrix or float"
+  );
+}
+
 PyObjPtr MatrixKlass::len(const PyObjPtr& obj) {
   if (!obj->is(Self())) {
     throw std::runtime_error("MatrixKlass::len(): obj is not a matrix");
@@ -217,6 +227,9 @@ PyObjPtr MatrixKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
     auto rowStop = rowSlice->GetStop()->as<PyInteger>()->ToU64();
     return matrix->GetRows(rowStart, rowStop);
   }
+  if (ArgsHelper::Instance().Has("debug")) {
+    PrintFrame(Runtime::Interpreter::Instance().CurrentFrame());
+  }
   throw std::runtime_error("MatrixKlass::getitem(): key type is not supported");
 }
 
@@ -259,218 +272,6 @@ PyObjPtr MatrixKlass::setitem(
   return CreatePyNone();
 }
 
-PyObjPtr Matrix(const PyObjPtr& args) {
-  if (!args->is(ListKlass::Self())) {
-    throw std::runtime_error("Matrix(): args is not a list");
-  }
-  auto argList = args->as<PyList>();
-
-  if (argList->Length() != 1) {
-    throw std::runtime_error("Matrix(): args length is not 1");
-  }
-  auto list = argList->GetItem(0)->as<PyList>();
-  auto rows = list->Length();
-  auto cols = list->GetItem(0)->as<PyList>()->Length();
-  Collections::List<double> data;
-  for (Index i = 0; i < rows; i++) {
-    auto row = list->GetItem(i)->as<PyList>();
-    if (row->Length() != cols) {
-      throw std::runtime_error("Matrix(): row length is not equal to cols");
-    }
-    for (Index j = 0; j < cols; j++) {
-      if (!row->GetItem(j)->is(FloatKlass::Self())) {
-        throw std::runtime_error("Matrix(): element is not a float");
-      }
-      auto element = row->GetItem(j)->as<PyFloat>();
-      data.Push(element->Value());
-    }
-  }
-  return CreatePyMatrix(Collections::Matrix(rows, cols, data));
-}
-
-PyObjPtr Eye(const PyObjPtr& args) {
-  if (!args->is(ListKlass::Self())) {
-    throw std::runtime_error("Eye(): args is not a list");
-  }
-  auto argList = args->as<PyList>();
-
-  if (argList->Length() != 1) {
-    throw std::runtime_error("Eye(): args length is not 1");
-  }
-  auto dim = argList->GetItem(0)->as<PyInteger>()->ToU64();
-  return CreatePyMatrix(Collections::Matrix::Eye(dim));
-}
-
-PyObjPtr Zeros(const PyObjPtr& args) {
-  if (!args->is(ListKlass::Self())) {
-    throw std::runtime_error("Zeros(): args is not a list");
-  }
-  auto argList = args->as<PyList>();
-
-  if (argList->Length() != 1) {
-    throw std::runtime_error("Zeros(): args length is not 1");
-  }
-  auto shape = argList->GetItem(0)->as<PyList>();
-  if (shape->Length() != 2) {
-    throw std::runtime_error("Zeros(): shape length is not 2");
-  }
-  auto rows = shape->GetItem(0)->as<PyInteger>()->ToU64();
-  auto cols = shape->GetItem(1)->as<PyInteger>()->ToU64();
-  Collections::List<double> data(rows * cols, 0.0);
-  return CreatePyMatrix(Collections::Matrix(rows, cols, data));
-}
-
-PyObjPtr Ones(const PyObjPtr& args) {
-  if (!args->is(ListKlass::Self())) {
-    throw std::runtime_error("Ones(): args is not a list");
-  }
-  auto argList = args->as<PyList>();
-
-  if (argList->Length() != 1) {
-    throw std::runtime_error("Ones(): args length is not 1");
-  }
-  auto shape = argList->GetItem(0)->as<PyList>();
-  if (shape->Length() != 2) {
-    throw std::runtime_error("Ones(): shape length is not 2");
-  }
-  auto rows = shape->GetItem(0)->as<PyInteger>()->ToU64();
-  auto cols = shape->GetItem(1)->as<PyInteger>()->ToU64();
-  Collections::List<double> data(rows * cols, 1.0);
-  return CreatePyMatrix(Collections::Matrix(rows, cols, data));
-}
-
-PyObjPtr Diagnostic(const PyObjPtr& args) {
-  if (!args->is(ListKlass::Self())) {
-    throw std::runtime_error("Diagnostic(): args is not a list");
-  }
-  auto argList = args->as<PyList>();
-
-  if (argList->Length() != 1) {
-    throw std::runtime_error("Diagnostic(): args length is not 1");
-  }
-  auto arg0 = argList->GetItem(0);
-  if (!arg0->is(ListKlass::Self())) {
-    throw std::runtime_error("Diagnostic(): arg0 is not a list");
-  }
-  auto list = arg0->as<PyList>();
-  auto dim = list->Length();
-  Collections::List<double> data(dim * dim, 0.0);
-  for (Index i = 0; i < dim; i++) {
-    auto element = list->GetItem(i);
-    if (!element->is(FloatKlass::Self())) {
-      throw std::runtime_error("Diagnostic(): element is not a float");
-    }
-    data[i * dim + i] = element->as<PyFloat>()->Value();
-  }
-  return CreatePyMatrix(Collections::Matrix(dim, dim, data));
-}
-
-PyObjPtr Shape(const PyObjPtr& args) {
-  if (!args->is(ListKlass::Self())) {
-    throw std::runtime_error("Shape(): args is not a list");
-  }
-  return args->as<PyList>()->GetItem(0)->as<PyMatrix>()->Shape();
-}
-
-PyObjPtr Reshape(const PyObjPtr& args) {
-  if (!args->is(ListKlass::Self())) {
-    throw std::runtime_error("Reshape(): args is not a list");
-  }
-  auto argList = args->as<PyList>();
-
-  if (argList->Length() != 2) {
-    throw std::runtime_error("Reshape(): args length is not 2");
-  }
-  auto matrix = argList->GetItem(0)->as<PyMatrix>();
-  auto list = argList->GetItem(1)->as<PyList>();
-  if (list->Length() != 2) {
-    throw std::runtime_error("Reshape(): list length is not 2");
-  }
-  auto rows = list->GetItem(0)->as<PyInteger>()->ToU64();
-  auto cols = list->GetItem(1)->as<PyInteger>()->ToU64();
-  return matrix->Reshape(rows, cols);
-}
-
-PyObjPtr Where(const PyObjPtr& args) {
-  CheckNativeFunctionArgumentsWithExpectedLength(args, 3);
-  CheckNativeFunctionArgumentsAtIndexWithType(
-    CreatePyString("Where")->as<PyString>(), args, 0, ListKlass::Self()
-  );
-  CheckNativeFunctionArgumentsAtIndexWithType(
-    CreatePyString("Where")->as<PyString>(), args, 1, FloatKlass::Self()
-  );
-  CheckNativeFunctionArgumentsAtIndexWithType(
-    CreatePyString("Where")->as<PyString>(), args, 2, FloatKlass::Self()
-  );
-  auto trueValue = args->as<PyList>()->GetItem(1)->as<PyFloat>()->Value();
-  auto falseValue = args->as<PyList>()->GetItem(2)->as<PyFloat>()->Value();
-  auto list = args->as<PyList>()->GetItem(0)->as<PyList>();
-  auto cols = list->GetItem(0)->as<PyList>()->Length();
-  auto rows = list->Length();
-  Collections::List<double> data(rows * cols, falseValue);
-  for (Index i = 0; i < rows; i++) {
-    auto row = list->GetItem(i)->as<PyList>();
-    for (Index j = 0; j < cols; j++) {
-      if (!row->GetItem(j)->is(BooleanKlass::Self())) {
-        throw std::runtime_error("Where(): element is not a boolean");
-      }
-      if (row->GetItem(j)->as<PyBoolean>()->Value()) {
-        data[i * cols + j] = trueValue;
-      }
-    }
-  }
-  return CreatePyMatrix(Collections::Matrix(rows, cols, data));
-}
-
-PyObjPtr Ravel(const PyObjPtr& args) {
-  if (!args->is(ListKlass::Self())) {
-    throw std::runtime_error("Ravel(): args is not a list");
-  }
-  auto argList = args->as<PyList>();
-
-  if (argList->Length() != 1) {
-    throw std::runtime_error("Ravel(): args length is not 1");
-  }
-  auto matrix = argList->GetItem(0)->as<PyMatrix>();
-  auto data = matrix->Ravel();
-  Collections::List<PyObjPtr> result(data.Size());
-  for (Index i = 0; i < data.Size(); i++) {
-    result.Push(CreatePyFloat(data[i]));
-  }
-  return CreatePyList(result);
-}
-
-PyObjPtr Concatenate(const PyObjPtr& args) {
-  if (!args->is(ListKlass::Self())) {
-    throw std::runtime_error("Concatenate(): args is not a list");
-  }
-  auto argList = args->as<PyList>();
-
-  if (argList->Length() != 1) {
-    throw std::runtime_error("Concatenate(): args length is not 1");
-  }
-  auto list = argList->GetItem(0)->as<PyList>();
-  auto rows = list->Length();
-  auto cols = list->GetItem(0)
-                ->as<PyMatrix>()
-                ->Shape()
-                ->GetItem(1)
-                ->as<PyInteger>()
-                ->ToU64();
-  Collections::List<double> data;
-  for (Index i = 0; i < rows; i++) {
-    auto row = list->GetItem(i)->as<PyMatrix>();
-    if (row->Shape()->GetItem(1)->as<PyInteger>()->ToU64() != cols) {
-      throw std::runtime_error("Concatenate(): cols is not equal");
-    }
-    auto rowData = row->Ravel();
-    for (Index j = 0; j < rowData.Size(); j++) {
-      data.Push(rowData[j]);
-    }
-  }
-  return CreatePyMatrix(Collections::Matrix(rows, cols, data));
-}
-
 PyObjPtr MatrixKlass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (!lhs->is(Self())) {
     throw std::runtime_error("MatrixKlass::pow(): lhs is not a matrix");
@@ -495,6 +296,32 @@ PyObjPtr MatrixKlass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
     n >>= 1;
   }
   return result;
+}
+
+void MatrixKlass::Initialize() {
+  if (this->isInitialized) {
+    return;
+  }
+  auto instance = Self();
+  InitKlass(CreatePyString("matrix")->as<PyString>(), instance);
+  instance->AddAttribute(
+    CreatePyString("T")->as<PyString>(), CreatePyIife(Transpose)
+  );
+  instance->AddAttribute(
+    CreatePyString("shape")->as<PyString>(), CreatePyIife(Shape)
+  );
+  instance->AddAttribute(
+    CreatePyString("reshape")->as<PyString>(), CreatePyNativeFunction(Reshape)
+  );
+  instance->AddAttribute(
+    CreatePyString("ravel")->as<PyString>(), CreatePyNativeFunction(Ravel)
+  );
+  this->isInitialized = true;
+}
+
+PyObjPtr MatrixKlass::neg(const torchlight::Object::PyObjPtr& obj) {
+  auto matrix = obj->as<PyMatrix>();
+  return matrix->Multiply(-1);
 }
 
 }  // namespace torchlight::Object

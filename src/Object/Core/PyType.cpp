@@ -1,5 +1,5 @@
 #include "Object/Core/PyType.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/String/PyString.h"
 namespace torchlight::Object {

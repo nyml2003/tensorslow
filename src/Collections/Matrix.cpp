@@ -194,6 +194,17 @@ Matrix Matrix::Multiply(double scalar) const {
   return result;
 }
 
+Matrix Matrix::Divide(double scalar) const {
+  if (scalar == 0) {
+    throw std::invalid_argument("Matrix::Divide: Division by zero");
+  }
+  Matrix result(rows, cols);
+  for (Index i = 0; i < rows * cols; i++) {
+    result.data.Set(i, data.Get(i) / scalar);
+  }
+  return result;
+}
+
 Index Matrix::Rows() const {
   return rows;
 }
@@ -202,7 +213,7 @@ Index Matrix::Cols() const {
   return cols;
 }
 
-List<double> Matrix::Data() const {
+const List<double>& Matrix::Data() const {
   return data;
 }
 

@@ -3,7 +3,7 @@
 
 #include "../Collections/Collections.h"
 #include "ByteCode/ByteCode.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object.h"
 #include "Object/Core/Klass.h"
 #include "Object/Number/PyInteger.h"

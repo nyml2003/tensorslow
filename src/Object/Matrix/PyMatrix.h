@@ -2,7 +2,7 @@
 #define TORCHLIGHT_OBJECT_PYMATRIX_H
 
 #include "Collections/Matrix.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Core/Klass.h"
@@ -14,51 +14,10 @@
 #include "Object/String/PyString.h"
 namespace torchlight::Object {
 
-PyObjPtr Transpose(const PyObjPtr& args);
-
-PyObjPtr Matrix(const PyObjPtr& args);
-
-PyObjPtr Eye(const PyObjPtr& args);
-
-PyObjPtr Zeros(const PyObjPtr& args);
-
-PyObjPtr Ones(const PyObjPtr& args);
-
-PyObjPtr Diagnostic(const PyObjPtr& args);
-
-PyObjPtr Reshape(const PyObjPtr& args);
-
-PyObjPtr Shape(const PyObjPtr& args);
-
-PyObjPtr Where(const PyObjPtr& args);
-
-PyObjPtr Concatenate(const PyObjPtr& args);
-
-PyObjPtr Ravel(const PyObjPtr& args);
-
 class MatrixKlass : public Klass {
  public:
   explicit MatrixKlass() = default;
-  void Initialize() override {
-    if (this->isInitialized) {
-      return;
-    }
-    auto instance = Self();
-    InitKlass(CreatePyString("matrix")->as<PyString>(), instance);
-    instance->AddAttribute(
-      CreatePyString("T")->as<PyString>(), CreatePyIife(Transpose)
-    );
-    instance->AddAttribute(
-      CreatePyString("shape")->as<PyString>(), CreatePyIife(Shape)
-    );
-    instance->AddAttribute(
-      CreatePyString("reshape")->as<PyString>(), CreatePyNativeFunction(Reshape)
-    );
-    instance->AddAttribute(
-      CreatePyString("ravel")->as<PyString>(), CreatePyNativeFunction(Ravel)
-    );
-    this->isInitialized = true;
-  }
+  void Initialize() override;
   static KlassPtr Self() {
     static KlassPtr instance = std::make_shared<MatrixKlass>();
     return instance;
@@ -74,9 +33,13 @@ class MatrixKlass : public Klass {
 
   PyObjPtr sub(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
+  PyObjPtr truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+
   PyObjPtr gt(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
+
+  PyObjPtr neg(const PyObjPtr& obj) override;
 
   PyObjPtr len(const PyObjPtr& obj) override;
 
@@ -109,7 +72,7 @@ class PyMatrix : public PyObject {
 
   void Shuffle() { matrix.Shuffle(); }
   PyMatrixPtr Transpose() const { return CreatePyMatrix(matrix.Transpose()); }
-  PyMatrixPtr MatrixMultiply(const PyMatrixPtr& other) const {
+  PyMatrixPtr MatrixMultiply(const PyMatrixPtr& other) {
     return CreatePyMatrix(matrix.MatrixMultiply(other->matrix));
   }
   PyMatrixPtr Multiply(const PyMatrixPtr& other) const {
@@ -117,6 +80,9 @@ class PyMatrix : public PyObject {
   }
   PyMatrixPtr Multiply(double scalar) const {
     return CreatePyMatrix(matrix.Multiply(scalar));
+  }
+  PyMatrixPtr Divide(double scalar) const {
+    return CreatePyMatrix(matrix.Divide(scalar));
   }
   PyMatrixPtr Add(const PyMatrixPtr& other) const {
     return CreatePyMatrix(matrix.Add(other->matrix));
@@ -138,6 +104,8 @@ class PyMatrix : public PyObject {
   PyIntPtr Cols() const {
     return CreatePyInteger(matrix.Cols())->as<PyInteger>();
   }
+  Index RowsIndex() const { return matrix.Rows(); }
+  Index ColsIndex() const { return matrix.Cols(); }
 
   PyMatrixPtr Reshape(Index rows, Index cols) const {
     return CreatePyMatrix(matrix.Reshape(rows, cols));
@@ -171,7 +139,7 @@ class PyMatrix : public PyObject {
   double At(Index row, Index col) const { return matrix.At(row, col); }
   void Set(Index row, Index col, double value) { matrix.Set(row, col, value); }
 
-  Collections::List<double> Ravel() const { return matrix.Data(); }
+  const Collections::List<double>& Ravel() const { return matrix.Data(); }
 };
 
 using PyMatrixPtr = std::shared_ptr<PyMatrix>;

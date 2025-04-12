@@ -3,7 +3,7 @@
 
 #include "Collections/Integer/Integer.h"
 #include "Collections/Integer/IntegerHelper.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Core/Klass.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"

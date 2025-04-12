@@ -1,21 +1,17 @@
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Collections/Integer/IntegerHelper.h"
-#include "Object/Container/PyDictionary.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
-#include "Object/Core/PyObject.h"
 #include "Object/Core/PyType.h"
 #include "Object/Function/PyFunction.h"
-#include "Object/Function/PyIife.h"
 #include "Object/Function/PyMethod.h"
 #include "Object/Function/PyNativeFunction.h"
-#include "Object/Iterator/Iterator.h"
 #include "Object/Iterator/PyGenerator.h"
+#include "Object/Matrix/PyMatrix.h"
 #include "Object/Number/PyFloat.h"
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
-#include "Object/PyMatrix.h"
 #include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
 
@@ -286,6 +282,119 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
   auto klass = Object::CreatePyKlass(typeName, classDict, bases);
   auto type = Object::CreatePyType(klass);
   return type;
+}
+
+auto LogisticLoss(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
+  auto argList = args->as<Object::PyList>();
+  auto matrix = argList->GetItem(0)->as<Object::PyMatrix>();
+  const Collections::List<double>& values = matrix->Ravel();
+  Collections::List<double> result(values.Size(), double(0));
+  for (Index i = 0; i < values.Size(); i++) {
+    double value = values[i];
+    if (-value > 1e2) {
+      result[i] = -value;
+    }
+    result[i] = std::log(1 + std::exp(-value));
+  }
+  return Object::CreatePyMatrix(
+    Collections::Matrix(matrix->RowsIndex(), matrix->ColsIndex(), result)
+  );
+}
+
+auto LogisticLossDerivative(const Object::PyObjPtr& args) noexcept
+  -> Object::PyObjPtr {
+  auto argList = args->as<Object::PyList>();
+  auto matrix = argList->GetItem(0)->as<Object::PyMatrix>();
+  const Collections::List<double>& values = matrix->Ravel();
+  Collections::List<double> result(values.Size(), double(0));
+  for (Index i = 0; i < values.Size(); i++) {
+    double value = values[i];
+    if (-value > 1e2) {
+      result[i] = -value;
+    }
+    result[i] = -1 / (1 + std::exp(value));
+  }
+  return Object::CreatePyMatrix(
+    Collections::Matrix(matrix->RowsIndex(), matrix->ColsIndex(), result)
+  );
+}
+
+auto Sum(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
+  auto argList = args->as<Object::PyList>();
+  auto matrix = argList->GetItem(0)->as<Object::PyMatrix>();
+  const Collections::List<double>& values = matrix->Ravel();
+  double result = 0;
+  for (Index i = 0; i < values.Size(); i++) {
+    result += values[i];
+  }
+  return Object::CreatePyFloat(result);
+}
+
+auto Log(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
+  auto argList = args->as<Object::PyList>();
+  auto matrix = argList->GetItem(0)->as<Object::PyMatrix>();
+  const Collections::List<double>& values = matrix->Ravel();
+  Collections::List<double> result(values.Size(), double(0));
+  for (Index i = 0; i < values.Size(); i++) {
+    double value = values[i];
+    result[i] = std::log(value);
+  }
+  return Object::CreatePyMatrix(
+    Collections::Matrix(matrix->RowsIndex(), matrix->ColsIndex(), result)
+  );
+}
+
+auto SoftMax(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
+  auto argList = args->as<Object::PyList>();
+  auto matrix = argList->GetItem(0)->as<Object::PyMatrix>();
+  const Collections::List<double>& values = matrix->Ravel();
+  Collections::List<double> result(values.Size(), double(0));
+  double sum = 0;
+  for (Index i = 0; i < values.Size(); i++) {
+    double value = values[i];
+    result[i] = std::exp(value);
+    sum += result[i];
+  }
+  for (Index i = 0; i < values.Size(); i++) {
+    result[i] /= sum;
+  }
+  return Object::CreatePyMatrix(
+    Collections::Matrix(matrix->RowsIndex(), matrix->ColsIndex(), result)
+  );
+}
+
+auto Max(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
+  auto argList = args->as<Object::PyList>();
+  auto matrix = argList->GetItem(0)->as<Object::PyMatrix>();
+  const Collections::List<double>& values = matrix->Ravel();
+  double maxValue = values[0];
+  for (Index i = 1; i < values.Size(); i++) {
+    if (values[i] > maxValue) {
+      maxValue = values[i];
+    }
+  }
+  return Object::CreatePyFloat(maxValue);
+}
+
+auto ArgMax(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
+  auto argList = args->as<Object::PyList>();
+  auto matrix = argList->GetItem(0)->as<Object::PyMatrix>();
+  const Collections::List<double>& values = matrix->Ravel();
+  double maxValue = values[0];
+  Index maxIndex = 0;
+  for (Index i = 1; i < values.Size(); i++) {
+    if (values[i] > maxValue) {
+      maxValue = values[i];
+      maxIndex = i;
+    }
+  }
+  return Object::CreatePyInteger(maxIndex);
+}
+
+auto Hash(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
+  auto argList = args->as<Object::PyList>();
+  auto arg = argList->GetItem(0);
+  return arg->hash();
 }
 
 }  // namespace torchlight::Function

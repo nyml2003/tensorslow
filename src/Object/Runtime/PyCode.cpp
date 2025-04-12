@@ -1,7 +1,7 @@
 #include "Object/Runtime/PyCode.h"
 #include "ByteCode/ByteCode.h"
 #include "Collections/String/BytesHelper.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyObject.h"

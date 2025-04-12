@@ -1,5 +1,6 @@
 #ifndef TORCHLIGHT_OBJECT_KLASS_H
 #define TORCHLIGHT_OBJECT_KLASS_H
+#include "Common.h"
 #include "Object/Object.h"
 
 #include <stdexcept>
@@ -31,7 +32,6 @@ class Klass : public std::enable_shared_from_this<Klass> {
   void SetSuper(const PyListPtr& _super);
   void SetMro(const PyListPtr& _mro);
   virtual void Initialize() { throw std::runtime_error("not implemented"); }
-
   [[nodiscard]] bool IsNative() const { return isNative; }
   void AddAttribute(const PyStrPtr& key, const PyObjPtr& value);
   Klass(const Klass& other) = delete;

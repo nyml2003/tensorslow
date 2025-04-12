@@ -57,10 +57,13 @@ class PyDictionary : public PyObject {
   PyObjPtr GetItem(Index index) const;
 
   PyDictPtr Add(const PyDictPtr& other);
+  void Clear() { dict.clear(); }
 };
 
 PyObjPtr CreatePyDict();
 using PyDictPtr = std::shared_ptr<PyDictionary>;
+
+auto DictClear(const PyObjPtr& obj) -> PyObjPtr;
 }  // namespace torchlight::Object
 
 #endif

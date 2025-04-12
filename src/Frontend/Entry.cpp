@@ -1,7 +1,7 @@
 
 #include "Collections/String/BytesHelper.h"
 #include "Collections/String/StringHelper.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Generation/Generator.h"
 #include "Object/Runtime/PyCode.h"
 #include "Object/String/PyString.h"

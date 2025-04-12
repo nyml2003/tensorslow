@@ -1,6 +1,6 @@
 #include "Ast/Module.h"
 #include "Ast/INode.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"

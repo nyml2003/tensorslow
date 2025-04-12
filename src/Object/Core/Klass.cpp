@@ -1,5 +1,5 @@
 #include "Object/Core/Klass.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Core/PyBoolean.h"
@@ -158,18 +158,23 @@ PyObjPtr Klass::repr(const PyObjPtr& self) {
 }
 
 PyObjPtr Klass::hash(const PyObjPtr& obj) {
-  if (isNative) {
-    return CreatePyInteger(
-      Collections::CreateIntegerWithU64(reinterpret_cast<uint64_t>(obj.get()))
-    );
+  if (obj->Hashed()) {
+    return CreatePyInteger(obj->HashValue());
   }
   auto hashFunc = obj->getattr(CreatePyString("__hash__")->as<PyString>());
   if (hashFunc != nullptr) {
-    return Runtime::Interpreter::Eval(hashFunc, CreatePyList()->as<PyList>());
+    auto pyHashValue =
+      Runtime::Interpreter::Eval(hashFunc, CreatePyList()->as<PyList>());
+    if (!pyHashValue->is(IntegerKlass::Self())) {
+      throw std::runtime_error("Hash value must be an integer");
+    }
+    Index hashValue = reinterpret_cast<uint64_t>(obj.get());
+    obj->SetHashValue(hashValue);
+    return CreatePyInteger(hashValue);
   }
-  return CreatePyInteger(
-    Collections::CreateIntegerWithU64(reinterpret_cast<uint64_t>(obj.get()))
-  );
+  Index hashValue = reinterpret_cast<uint64_t>(obj.get());
+  obj->SetHashValue(hashValue);
+  return CreatePyInteger(hashValue);
 }
 
 PyObjPtr Klass::gt(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -314,9 +319,7 @@ PyObjPtr Klass::str(const PyObjPtr& self) {
 }
 
 PyObjPtr Klass::matmul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  return Invoke(
-    lhs, CreatePyString("__matmul__"), CreatePyList({rhs})->as<PyList>()
-  );
+  return Invoke(lhs, CreatePyString("__"), CreatePyList({rhs})->as<PyList>());
 }
 
 PyObjPtr Klass::iter(const PyObjPtr& obj) {
@@ -340,7 +343,6 @@ PyObjPtr Klass::_serialize_(const PyObjPtr& obj) {
 }
 
 void Klass::AddAttribute(const PyStrPtr& key, const PyObjPtr& value) {
-  attributes->Put(key, value);
+  this->attributes->Put(key, value);
 }
-
 }  // namespace torchlight::Object

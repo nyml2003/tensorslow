@@ -2,7 +2,7 @@
 #define TORCHLIGHT_AST_IF_STATEMENT_H
 
 #include "Ast/INode.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Object.h"
 
 namespace torchlight::Ast {

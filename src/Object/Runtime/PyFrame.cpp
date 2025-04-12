@@ -1,7 +1,7 @@
 #include "Object/Runtime/PyFrame.h"
 #include "ByteCode/ByteCode.h"
 #include "Collections/Stack.h"
-#include "Function/ObjectHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyDictionary.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
@@ -378,10 +378,10 @@ bool PyFrame::HasCaller() const {
 PyObjPtr PyFrame::Eval() {
   while (!Finished()) {
     const auto& inst = Instruction();
-    if (ArgsHelper::Instance().Has("debug")) {
-      CreatePyString("-------------------")->as<PyString>()->PrintLine();
-      PrintFrame(shared_from_this()->as<PyFrame>());
-    }
+    //    if (ArgsHelper::Instance().Has("debug")) {
+    //      CreatePyString("-------------------")->as<PyString>()->PrintLine();
+    //      PrintFrame(shared_from_this()->as<PyFrame>());
+    //    }
     switch (inst->Code()) {
       case ByteCode::LOAD_CONST: {
         auto key = std::get<Index>(inst->Operand());
