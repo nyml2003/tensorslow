@@ -5,7 +5,6 @@
 #include "Collections/Integer/DecimalHelper.h"
 #include "Collections/Integer/Integer.h"
 #include "Collections/Integer/IntegerHelper.h"
-#include "Collections/Iterator.h"
 #include "Collections/List.h"
 #include "Collections/String/Bytes.h"
 #include "Collections/String/BytesHelper.h"

@@ -1,5 +1,4 @@
 include(${torchlight_dir}/test/unittest/Collections/List.cmake)
-include(${torchlight_dir}/test/unittest/Collections/Iterator.cmake)
 include(${torchlight_dir}/test/unittest/Collections/String.cmake)
 include(${torchlight_dir}/test/unittest/Collections/Bytes.cmake)
 include(${torchlight_dir}/test/unittest/Collections/Integer.cmake)

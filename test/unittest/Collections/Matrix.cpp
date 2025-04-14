@@ -15,7 +15,7 @@ TEST(Matrix, Constructor) {
     }
   }
 
-  List<double> data = {1, 2, 3, 4, 5, 6};
+  List<double> data{1, 2, 3, 4, 5, 6};
   Matrix mat2(2, 3, data);
   ASSERT_EQ(mat2.Rows(), 2);
   ASSERT_EQ(mat2.Cols(), 3);
@@ -93,7 +93,7 @@ TEST(Matrix, Multiply) {
   Matrix mat3(1, 3, {1, 2, 3});
   Matrix mat4(2, 1, {4, 5});
   result = mat3.Multiply(mat4);
-  List<double> expected2 = {4, 8, 12, 5, 10, 15};
+  List<double> expected2{4, 8, 12, 5, 10, 15};
   for (Index i = 0; i < 2; ++i) {
     for (Index j = 0; j < 3; ++j) {
       ASSERT_EQ(result.At(i, j), expected2[i * 3 + j]);

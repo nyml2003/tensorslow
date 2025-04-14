@@ -1,6 +1,5 @@
 #include "Collections/Integer/DecimalHelper.h"
 #include <stdexcept>
-#include "Collections/Iterator.h"
 #include "Collections/String/StringHelper.h"
 #include "Common.h"
 
@@ -47,17 +46,17 @@ Decimal CreateDecimalWithString(const String& str) {
   return Decimal(parts, sign);
 }
 void TrimTrailingZero(List<int32_t>& parts) {
-  for (auto it = Iterator<int32_t>::RBegin(parts); !it.End(); it.Next()) {
-    if (it.Get() != 0 || it.GetCurrentIndex() == 0) {
-      parts = parts.Slice(0, it.GetCurrentIndex() + 1);
+  for (Index i = parts.Size() - 1; ~i; --i) {
+    if (parts[i] != 0 || i == 0) {
+      parts = parts.Slice(0, i + 1);
       break;
     }
   }
 }
 void TrimLeadingZero(List<int32_t>& parts) {
-  for (auto it = Iterator<int32_t>::Begin(parts); !it.End(); it.Next()) {
-    if (it.Get() != 0 || it.GetCurrentIndex() == parts.Size() - 1) {
-      parts = parts.Slice(it.GetCurrentIndex(), parts.Size());
+  for (Index i = 0; i < parts.Size(); i++) {
+    if (parts[i] != 0 || i == parts.Size() - 1) {
+      parts = parts.Slice(i, parts.Size());
       break;
     }
   }

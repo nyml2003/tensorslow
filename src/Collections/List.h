@@ -42,7 +42,7 @@ class List {
    */
   explicit List(Index capacity = INIT_CAPACITY);
   explicit List(Index count, T element);
-  explicit List(std::initializer_list<T> list);
+  List(std::initializer_list<T> list);
   explicit List(Index count, std::unique_ptr<T[]> data)
     : size(count), capacity(count), elements(std::move(data)) {}
   explicit List(Index count, T* stream)

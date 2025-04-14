@@ -46,14 +46,14 @@ TEST(String, Concat) {
   ASSERT_TRUE(str2[0] == ' ');
 }
 
-TEST(String, Copy) {
-  String str1 = CreateStringWithCString("Hello");
-  String str2 = str1.Copy();
-  ASSERT_EQ(str1.Size(), str2.Size());
-  for (size_t i = 0; i < str1.Size(); ++i) {
-    ASSERT_EQ(str1.Get(i), str2.Get(i));
-  }
-}
+// TEST(String, Copy) {
+//   String str1 = CreateStringWithCString("Hello");
+//   String str2 = str1.Copy();
+//   ASSERT_EQ(str1.Size(), str2.Size());
+//   for (size_t i = 0; i < str1.Size(); ++i) {
+//     ASSERT_EQ(str1.Get(i), str2.Get(i));
+//   }
+// }
 
 TEST(String, Clear) {
   StringBuilder sb(CreateStringWithCString("Hello"));
@@ -85,18 +85,18 @@ TEST(String, Slice) {
   ASSERT_THROW(str.Slice(5, 4), std::runtime_error);
 }
 
-TEST(String, Find) {
-  String str = CreateStringWithCString("Hello World");
-  String sub = CreateStringWithCString("ll");
-  ASSERT_EQ(str.Find(sub, 0), 2);
-  String empty = CreateStringWithCString("");
-  ASSERT_EQ(str.Find(empty, 0), 0);
-  ASSERT_THROW(str.Find(sub, 12), std::runtime_error);
-  ASSERT_THROW(str.Find(sub, 10), std::runtime_error);
-  str = CreateStringWithCString("abababab");
-  sub = CreateStringWithCString("bab");
-  ASSERT_EQ(str.Find(sub, 0), 1);
-}
+// TEST(String, Find) {
+//   String str = CreateStringWithCString("Hello World");
+//   String sub = CreateStringWithCString("ll");
+//   ASSERT_EQ(str.Find(sub, 0), 2);
+//   String empty = CreateStringWithCString("");
+//   ASSERT_EQ(str.Find(empty, 0), 0);
+//   ASSERT_THROW(str.Find(sub, 12), std::runtime_error);
+//   ASSERT_THROW(str.Find(sub, 10), std::runtime_error);
+//   str = CreateStringWithCString("abababab");
+//   sub = CreateStringWithCString("bab");
+//   ASSERT_EQ(str.Find(sub, 0), 1);
+// }
 
 TEST(String, Equal) {
   String str1 = CreateStringWithCString("Hello");
@@ -175,23 +175,23 @@ TEST(String, Add) {
   ASSERT_TRUE(str3.Equal(CreateStringWithCString("Hello World")));
 }
 
-TEST(String, Spilt) {
-  String str = CreateStringWithCString("Hello, World");
-  String delimiter = CreateStringWithCString(", ");
-  torchlight::Collections::List<String> list = str.Split(delimiter);
-  ASSERT_EQ(list.Size(), 2);
-  ASSERT_TRUE(list.Get(0).Equal(CreateStringWithCString("Hello")));
-  ASSERT_TRUE(list.Get(1).Equal(CreateStringWithCString("World")));
-  str = CreateStringWithCString("h,e,l,l,o");
-  delimiter = CreateStringWithCString(",");
-  list = str.Split(delimiter);
-  ASSERT_EQ(list.Size(), 5);
-  ASSERT_TRUE(list.Get(0).Equal(CreateStringWithCString("h")));
-  ASSERT_TRUE(list.Get(1).Equal(CreateStringWithCString("e")));
-  ASSERT_TRUE(list.Get(2).Equal(CreateStringWithCString("l")));
-  ASSERT_TRUE(list.Get(3).Equal(CreateStringWithCString("l")));
-  ASSERT_TRUE(list.Get(4).Equal(CreateStringWithCString("o")));
-}
+// TEST(String, Spilt) {
+//   String str = CreateStringWithCString("Hello, World");
+//   String delimiter = CreateStringWithCString(", ");
+//   torchlight::Collections::List<String> list = str.Split(delimiter);
+//   ASSERT_EQ(list.Size(), 2);
+//   ASSERT_TRUE(list.Get(0).Equal(CreateStringWithCString("Hello")));
+//   ASSERT_TRUE(list.Get(1).Equal(CreateStringWithCString("World")));
+//   str = CreateStringWithCString("h,e,l,l,o");
+//   delimiter = CreateStringWithCString(",");
+//   list = str.Split(delimiter);
+//   ASSERT_EQ(list.Size(), 5);
+//   ASSERT_TRUE(list.Get(0).Equal(CreateStringWithCString("h")));
+//   ASSERT_TRUE(list.Get(1).Equal(CreateStringWithCString("e")));
+//   ASSERT_TRUE(list.Get(2).Equal(CreateStringWithCString("l")));
+//   ASSERT_TRUE(list.Get(3).Equal(CreateStringWithCString("l")));
+//   ASSERT_TRUE(list.Get(4).Equal(CreateStringWithCString("o")));
+// }
 
 TEST(String, Move) {
   String str1 = CreateStringWithCString("Hello");

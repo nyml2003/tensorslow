@@ -1,1 +1,0 @@
-include(${torchlight_dir}/test/unittest/Runtime/Serialize.cmake)

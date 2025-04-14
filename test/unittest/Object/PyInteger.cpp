@@ -96,7 +96,7 @@ TEST_F(PyIntegerTest, TestNe) {
 
 TEST_F(PyIntegerTest, TestSerialize) {
   auto result = IntegerKlass::Self()->_serialize_(integer1);
-  auto bytes = std::dynamic_pointer_cast<PyBytes>(result)->value;
+  const auto& bytes = result->as<PyBytes>()->value;
   EXPECT_EQ(bytes.value.First(), static_cast<Byte>(Literal::INTEGER));
   Bytes content(bytes.value.Slice(1, bytes.Size()));
   EXPECT_TRUE(Collections::DeserializeInteger(content.value)

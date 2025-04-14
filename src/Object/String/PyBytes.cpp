@@ -1,6 +1,5 @@
 #include "Object/String/PyBytes.h"
 #include "ByteCode/ByteCode.h"
-#include "Collections/Iterator.h"
 #include "Collections/String/BytesHelper.h"
 #include "Collections/String/StringHelper.h"
 #include "Object/Container/PyList.h"

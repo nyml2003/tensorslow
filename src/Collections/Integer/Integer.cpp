@@ -1,10 +1,7 @@
 #include "Collections/Integer/Integer.h"
-#include <array>
-#include <stdexcept>
 #include "Collections/Integer/Decimal.h"
 #include "Collections/Integer/DecimalHelper.h"
 #include "Collections/Integer/IntegerHelper.h"
-#include "Collections/Iterator.h"
 #include "Collections/String/StringHelper.h"
 
 namespace torchlight::Collections {
@@ -53,15 +50,15 @@ Integer Integer::Add(const Integer& rhs) const {
   if (sign == rhs.sign) {
     uint32_t carry = 0;
     List<uint32_t> result;
-    for (auto itl = Iterator<uint32_t>::RBegin(parts),
-              itr = Iterator<uint32_t>::RBegin(rhs.parts);
-         !itl.End() || !itr.End(); itl.Next(), itr.Next()) {
+    for (Index i = parts.Size() - 1, j = rhs.parts.Size() - 1; ~i || ~j;) {
       uint32_t sum = carry;
-      if (!itl.End()) {
-        sum += itl.Get();
+      if (~i) {
+        sum += parts.Get(i);
+        --i;
       }
-      if (!itr.End()) {
-        sum += itr.Get();
+      if (~j) {
+        sum += rhs.parts.Get(j);
+        --j;
       }
       // 进位是高16位
       carry = (sum >> 16) & 0x0000FFFF;
@@ -109,13 +106,11 @@ bool Integer::GreaterThan(const Integer& rhs) const {
     return sign ^ (parts.Size() > rhs.parts.Size());
   }
   // 此时左值和右值的位数相等，正负号相同
-  for (auto it = Iterator<uint32_t>::Begin(parts),
-            it2 = Iterator<uint32_t>::Begin(rhs.parts);
-       !it.End() && !it2.End(); it.Next(), it2.Next()) {
-    if (it.Get() == it2.Get()) {
+  for (Index i = 0; i < parts.Size(); i++) {
+    if (parts.Get(i) == rhs.parts.Get(i)) {
       continue;
     }
-    return sign ^ (it.Get() > it2.Get());
+    return sign ^ (parts.Get(i) > rhs.parts.Get(i));
   }
   return false;
 }
@@ -143,13 +138,11 @@ Integer Integer::Subtract(const Integer& rhs) const {
       std::swap(_lhs, _rhs);
     } else {
       size = _lhs.Size();
-      for (auto it = Iterator<uint32_t>::RBegin(_lhs),
-                it2 = Iterator<uint32_t>::RBegin(_rhs);
-           !it.End() && !it2.End(); it.Next(), it2.Next()) {
-        if (it.Get() > it2.Get()) {
+      for (Index i = size - 1; ~i; --i) {
+        if (_lhs.Get(i) > _rhs.Get(i)) {
           break;
         }
-        if (it.Get() < it2.Get()) {
+        if (_lhs.Get(i) < _rhs.Get(i)) {
           _sign = true;
           std::swap(_lhs, _rhs);
           break;
@@ -158,16 +151,14 @@ Integer Integer::Subtract(const Integer& rhs) const {
     }
     List<uint32_t> result(size);
     bool borrow = false;
-    for (auto it = Iterator<uint32_t>::Begin(_lhs),
-              it2 = Iterator<uint32_t>::Begin(_rhs);
-         !it.End() && !it2.End(); it.Next(), it2.Next()) {
+    for (Index i = 0; i < size; i++) {
       uint32_t diff = 0;
-      uint32_t sub = it2.Get() + (borrow ? 1 : 0);
-      if (it.Get() < sub) {
-        diff = 0x10000 + it.Get() - sub;
+      uint32_t sub = _rhs.Get(i) + (borrow ? 1 : 0);
+      if (_lhs.Get(i) < sub) {
+        diff = 0x10000 + _lhs.Get(i) - sub;
         borrow = true;
       } else {
-        diff = it.Get() - sub;
+        diff = _lhs.Get(i) - sub;
         borrow = false;
       }
       result.Push(diff);
@@ -188,10 +179,10 @@ Integer Integer::Multiply(const Integer& rhs) const {
   _lhs.Reverse();
   auto _rhs = rhs.parts;
   _rhs.Reverse();
-  for (auto it = Iterator<uint32_t>::Begin(_lhs); !it.End(); it.Next()) {
-    for (auto it2 = Iterator<uint32_t>::Begin(_rhs); !it2.End(); it2.Next()) {
-      uint32_t product = it.Get() * it2.Get();
-      Index index = it.GetCurrentIndex() + it2.GetCurrentIndex();
+  for (Index i = 0; i < _lhs.Size(); i++) {
+    for (Index j = 0; j < _rhs.Size(); j++) {
+      uint32_t product = _lhs.Get(i) * _rhs.Get(j);
+      Index index = i + j;
       result.Set(index, result.Get(index) + product);
       result.Set(index + 1, result.Get(index + 1) + (result.Get(index) >> 16));
       result.Set(index, (result.Get(index) & 0x0000FFFF));
@@ -247,8 +238,8 @@ bool Integer::IsZero() const {
   if (parts.Size() == 0) {
     return true;
   }
-  for (auto it = Iterator<uint32_t>::Begin(parts); !it.End(); it.Next()) {
-    if (it.Get() != 0) {
+  for (Index i = 0; i < parts.Size(); i++) {
+    if (parts.Get(i) != 0) {
       return false;
     }
   }
@@ -273,13 +264,12 @@ bool Integer::Equal(const Integer& rhs) const {
 }
 Integer Integer::BitWiseAnd(const Integer& rhs) const {
   List<uint32_t> result(std::max(parts.Size(), rhs.parts.Size()));
-  for (auto it = Iterator<uint32_t>::RBegin(parts),
-            it2 = Iterator<uint32_t>::RBegin(rhs.parts);
-       !it.End() || !it2.End(); it.Next(), it2.Next()) {
-    if (it.End() || it2.End()) {
+  for (Index i = parts.Size() - 1, j = rhs.parts.Size() - 1; ~i || ~j;
+       --i, --j) {
+    if (!~i || !~j) {
       result.Push(0);
     } else {
-      result.Push(it.Get() & it2.Get());
+      result.Push(parts.Get(i) & rhs.parts.Get(j));
     }
   }
   result.Reverse();
@@ -287,15 +277,14 @@ Integer Integer::BitWiseAnd(const Integer& rhs) const {
 }
 Integer Integer::BitWiseOr(const Integer& rhs) const {
   List<uint32_t> result(std::max(parts.Size(), rhs.parts.Size()));
-  for (auto it = Iterator<uint32_t>::RBegin(parts),
-            it2 = Iterator<uint32_t>::RBegin(rhs.parts);
-       !it.End() || !it2.End(); it.Next(), it2.Next()) {
-    if (it.End()) {
-      result.Push(it2.Get());
-    } else if (it2.End()) {
-      result.Push(it.Get());
+  for (Index i = parts.Size() - 1, j = rhs.parts.Size() - 1; ~i || ~j;
+       --i, --j) {
+    if (!~i) {
+      result.Push(rhs.parts[j]);
+    } else if (!~j) {
+      result.Push(parts[i]);
     } else {
-      result.Push(it.Get() | it2.Get());
+      result.Push(parts[i] | rhs.parts[j]);
     }
   }
   result.Reverse();
@@ -303,15 +292,14 @@ Integer Integer::BitWiseOr(const Integer& rhs) const {
 }
 Integer Integer::BitWiseXor(const Integer& rhs) const {
   List<uint32_t> result(std::max(parts.Size(), rhs.parts.Size()));
-  for (auto it = Iterator<uint32_t>::RBegin(parts),
-            it2 = Iterator<uint32_t>::RBegin(rhs.parts);
-       !it.End() || !it2.End(); it.Next(), it2.Next()) {
-    if (it.End()) {
-      result.Push(it2.Get());
-    } else if (it2.End()) {
-      result.Push(it.Get());
+  for (Index i = parts.Size() - 1, j = rhs.parts.Size() - 1; ~i || ~j;
+       --i, --j) {
+    if (!~i) {
+      result.Push(rhs.parts[j]);
+    } else if (!~j) {
+      result.Push(parts[i]);
     } else {
-      result.Push(it.Get() ^ it2.Get());
+      result.Push(parts[i] ^ rhs.parts[j]);
     }
   }
   result.Reverse();
@@ -319,8 +307,8 @@ Integer Integer::BitWiseXor(const Integer& rhs) const {
 }
 Integer Integer::BitWiseNot() const {
   List<uint32_t> result(parts.Size());
-  for (auto it = Iterator<uint32_t>::Begin(parts); !it.End(); it.Next()) {
-    result.Push(~it.Get());
+  for (Index i = 0; i < parts.Size(); i++) {
+    result.Push(~parts.Get(i));
   }
   return Integer(result, !sign);
 }

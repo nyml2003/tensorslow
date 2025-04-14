@@ -14,10 +14,10 @@ String ReprByte(Byte byte) {
   std::snprintf(buffer, sizeof(buffer), "\\x%02X", byte);
   return CreateStringWithCString(buffer);
 }
-// Bytes CreateBytesWithCString(const char* str) {
-//   Byte* data = reinterpret_cast<Byte*>(const_cast<char*>(str));
-//   return Bytes(List<Byte>(static_cast<Index>(std::strlen(str)), data));
-// }
+Bytes CreateBytesWithCString(const char* str) {
+  Byte* data = reinterpret_cast<Byte*>(const_cast<char*>(str));
+  return Bytes(List<Byte>(static_cast<Index>(std::strlen(str)), data));
+}
 void Write(const Bytes& bytes, const String& filename) {
   List<Byte> data = bytes.Value();
   std::string filenameCppString = ToCppString(filename);

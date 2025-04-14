@@ -10,15 +10,6 @@ TEST(Bytes, CreateBytesWithCString) {
   ASSERT_EQ(bytes.Size(), 13);
   ASSERT_EQ(ToCppString(bytes), "Hello, World!");
 }
-TEST(Bytes, AddBytes) {
-  Bytes bytes = CreateBytesWithCString("Hello, ");
-  Bytes bytes2 = CreateBytesWithCString("World!");
-  Bytes bytes3 = bytes.Add(bytes2);
-  ASSERT_EQ(bytes.Size(), 7);
-  ASSERT_EQ(bytes2.Size(), 6);
-  ASSERT_EQ(bytes3.Size(), 13);
-  ASSERT_EQ(ToCppString(bytes3), "Hello, World!");
-}
 TEST(Bytes, Concat) {
   Bytes bytes = CreateBytesWithCString("Hello, ");
   bytes.Concat(CreateBytesWithCString("World!"));

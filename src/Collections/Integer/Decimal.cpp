@@ -1,9 +1,6 @@
 #include "Collections/Integer/DecimalHelper.h"
 #include "Collections/Integer/IntegerHelper.h"
-#include "Collections/Iterator.h"
 #include "Collections/String/StringHelper.h"
-
-#include <stdexcept>
 namespace torchlight::Collections {
 String Decimal::ToString() const {
   if (IsZero()) {
@@ -31,15 +28,16 @@ Decimal Decimal::Add(const Decimal& rhs) const {
     Index size = std::max(parts.Size(), rhs.parts.Size());
     List<int32_t> result(size + 1);
     int32_t carry = 0;
-    for (auto it = Iterator<int32_t>::RBegin(parts),
-              it2 = Iterator<int32_t>::RBegin(rhs.parts);
-         !it.End() || !it2.End(); it.Next(), it2.Next()) {
+    for (Index lhsIndex = parts.Size() - 1, rhsIndex = rhs.parts.Size() - 1;
+         ~lhsIndex || ~rhsIndex;) {
       int32_t sum = carry;
-      if (!it.End()) {
-        sum += it.Get();
+      if (~lhsIndex) {
+        sum += parts.Get(lhsIndex);
+        lhsIndex--;
       }
-      if (!it2.End()) {
-        sum += it2.Get();
+      if (~rhsIndex) {
+        sum += rhs.parts.Get(rhsIndex);
+        rhsIndex--;
       }
       carry = sum / 10;
       sum %= 10;
@@ -158,10 +156,10 @@ Decimal Decimal::Multiply(const Decimal& rhs) const {
   _lhs.Reverse();
   List<int32_t> _rhs = rhs.parts.Copy();
   _rhs.Reverse();
-  for (auto it = Iterator<int32_t>::Begin(_lhs); !it.End(); it.Next()) {
-    for (auto it2 = Iterator<int32_t>::Begin(_rhs); !it2.End(); it2.Next()) {
-      int32_t product = it.Get() * it2.Get();
-      Index index = it.GetCurrentIndex() + it2.GetCurrentIndex();
+  for (Index i = 0; i < _lhs.Size(); i++) {
+    for (Index j = 0; j < _rhs.Size(); j++) {
+      int32_t product = _lhs.Get(i) * _rhs.Get(j);
+      Index index = i + j;
       result.Set(index, result.Get(index) + product);
       result.Set(index + 1, result.Get(index + 1) + result.Get(index) / 10);
       result.Set(index, result.Get(index) % 10);
@@ -216,8 +214,8 @@ bool Decimal::IsZero() const {
   if (parts.Size() == 0) {
     return true;
   }
-  for (auto it = Iterator<int32_t>::Begin(parts); !it.End(); it.Next()) {
-    if (it.Get() != 0) {
+  for (Index i = 0; i < parts.Size(); i++) {
+    if (parts.Get(i) != 0) {
       return false;
     }
   }
