@@ -36,6 +36,10 @@ PyListPtr CreatePyList(Collections::List<PyObjPtr> list) {
   return std::make_shared<PyList>(list);
 }
 
+PyListPtr CreatePyList(std::initializer_list<PyObjPtr> list) {
+  return std::make_shared<PyList>(Collections::List<PyObjPtr>(list));
+}
+
 void ListKlass::Initialize() {
   if (this->isInitialized) {
     return;
@@ -338,13 +342,12 @@ PyObjPtr ListKlass::_serialize_(const PyObjPtr& obj) {
     throw std::runtime_error("List does not support serialize operation");
   }
   auto list = obj->as<PyList>();
-  PyObjPtr bytes =
-    CreatePyBytes(Collections::Serialize(Literal::LIST)
-                    .Add(Collections::Serialize(list->Length())));
+  auto bytes = CreatePyBytes(Collections::Serialize(Literal::LIST));
+  bytes->Concat(CreatePyBytes(Collections::Serialize(list->Length())));
   auto iter = CreateListIterator(obj);
   auto value = iter->next();
   while (!value->is(IterDoneKlass::Self())) {
-    bytes = bytes->add(value->_serialize_());
+    bytes->Concat(value->_serialize_()->as<PyBytes>());
     value = iter->next();
   }
   return bytes;

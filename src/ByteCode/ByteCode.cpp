@@ -69,15 +69,15 @@ Collections::Bytes Serialize(None /*kind*/) {
 }
 
 Collections::Bytes Serialize(Object::CompareOp kind) {
-  return Collections::Bytes({static_cast<Byte>(kind)});
+  return Collections::Bytes(Collections::List({static_cast<Byte>(kind)}));
 }
 
 Collections::Bytes Serialize(Object::ByteCode code) {
-  return Collections::Bytes({static_cast<Byte>(code)});
+  return Collections::Bytes(Collections::List({static_cast<Byte>(code)}));
 }
 
 Collections::Bytes Serialize(Object::Literal kind) {
-  return Collections::Bytes({static_cast<Byte>(kind)});
+  return Collections::Bytes(Collections::List({static_cast<Byte>(kind)}));
 }
 
 }  // namespace torchlight::Collections

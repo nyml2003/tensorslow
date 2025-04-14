@@ -1,6 +1,7 @@
 #include "Object/Runtime/PyFrame.h"
 #include "ByteCode/ByteCode.h"
 #include "Collections/Stack.h"
+#include "Collections/String/BytesHelper.h"
 #include "Function/BuiltinFunction.h"
 #include "Object/Container/PyDictionary.h"
 #include "Object/Container/PyList.h"
@@ -17,7 +18,6 @@
 #include "Object/Runtime/PyInst.h"
 #include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
-#include "Runtime/Serialize.h"
 #include "Tools/Tools.h"
 
 namespace torchlight::Object {
@@ -118,20 +118,19 @@ void PyFrame::NextProgramCounter() {
 }
 
 void ParseByteCode(const PyCodePtr& code) {
-  auto bytes = code->ByteCode()->Value().Value();
-  auto iter = Collections::Iterator<Byte>::Begin(bytes);
-  if (static_cast<Literal>(iter.Get()) != Literal::LIST) {
+  const auto& bytes = code->ByteCode()->Value().Value();
+  Index iter = 0;
+  if (static_cast<Literal>(bytes[iter]) != Literal::LIST) {
     throw std::runtime_error("Invalid insts");
   }
-  iter.Next();
-  Index size = Runtime::ReadU64(iter);
+  iter++;
+  Index size = Collections::DeserializeU64(bytes, iter);
   auto insts = Collections::List<PyObjPtr>(size);
   while ((size--) != 0U) {
-    auto byte = iter.Get();
-    iter.Next();
+    auto byte = bytes[iter++];
     switch (static_cast<ByteCode>(byte)) {
       case ByteCode::LOAD_CONST: {
-        insts.Push(CreateLoadConst(Runtime::ReadU64(iter)));
+        insts.Push(CreateLoadConst(Collections::DeserializeU64(bytes, iter)));
         break;
       }
       case ByteCode::BINARY_ADD: {
@@ -147,24 +146,26 @@ void ParseByteCode(const PyCodePtr& code) {
         break;
       }
       case ByteCode::STORE_FAST: {
-        insts.Push(CreateStoreFast(Runtime::ReadU64(iter)));
+        insts.Push(CreateStoreFast(Collections::DeserializeU64(bytes, iter)));
         break;
       }
       case ByteCode::LOAD_FAST: {
-        insts.Push(CreateLoadFast(Runtime::ReadU64(iter)));
+        insts.Push(CreateLoadFast(Collections::DeserializeU64(bytes, iter)));
         break;
       }
       case ByteCode::COMPARE_OP: {
-        insts.Push(CreateCompareOp(static_cast<CompareOp>(Runtime::ReadU8(iter))
-        ));
+        auto compareOp = bytes[iter++];
+        insts.Push(CreateCompareOp(static_cast<CompareOp>(compareOp)));
         break;
       }
       case ByteCode::POP_JUMP_IF_FALSE: {
-        insts.Push(CreatePopJumpIfFalse(Runtime::ReadI64(iter)));
+        insts.Push(CreatePopJumpIfFalse(Collections::DeserializeI64(bytes, iter)
+        ));
         break;
       }
       case ByteCode::POP_JUMP_IF_TRUE: {
-        insts.Push(CreatePopJumpIfTrue(Runtime::ReadI64(iter)));
+        insts.Push(CreatePopJumpIfTrue(Collections::DeserializeI64(bytes, iter))
+        );
         break;
       }
       case ByteCode::MAKE_FUNCTION: {
@@ -172,7 +173,8 @@ void ParseByteCode(const PyCodePtr& code) {
         break;
       }
       case ByteCode::CALL_FUNCTION: {
-        insts.Push(CreateCallFunction(Runtime::ReadU64(iter)));
+        insts.Push(CreateCallFunction(Collections::DeserializeU64(bytes, iter))
+        );
         break;
       }
       case ByteCode::RETURN_VALUE: {
@@ -180,15 +182,15 @@ void ParseByteCode(const PyCodePtr& code) {
         break;
       }
       case ByteCode::LOAD_NAME: {
-        insts.Push(CreateLoadName(Runtime::ReadU64(iter)));
+        insts.Push(CreateLoadName(Collections::DeserializeU64(bytes, iter)));
         break;
       }
       case ByteCode::STORE_NAME: {
-        insts.Push(CreateStoreName(Runtime::ReadU64(iter)));
+        insts.Push(CreateStoreName(Collections::DeserializeU64(bytes, iter)));
         break;
       }
       case ByteCode::LOAD_GLOBAL: {
-        insts.Push(CreateLoadGlobal(Runtime::ReadU64(iter)));
+        insts.Push(CreateLoadGlobal(Collections::DeserializeU64(bytes, iter)));
         break;
       }
       case ByteCode::POP_TOP: {
@@ -196,11 +198,11 @@ void ParseByteCode(const PyCodePtr& code) {
         break;
       }
       case ByteCode::LOAD_ATTR: {
-        insts.Push(CreateLoadAttr(Runtime::ReadU64(iter)));
+        insts.Push(CreateLoadAttr(Collections::DeserializeU64(bytes, iter)));
         break;
       }
       case ByteCode::BUILD_LIST: {
-        insts.Push(CreateBuildList(Runtime::ReadU64(iter)));
+        insts.Push(CreateBuildList(Collections::DeserializeU64(bytes, iter)));
         break;
       }
       case ByteCode::BUILD_SLICE: {
@@ -208,7 +210,7 @@ void ParseByteCode(const PyCodePtr& code) {
         break;
       }
       case ByteCode::BUILD_MAP: {
-        insts.Push(CreateBuildMap(Runtime::ReadU64(iter)));
+        insts.Push(CreateBuildMap(Collections::DeserializeU64(bytes, iter)));
         break;
       }
       case ByteCode::BINARY_MATRIX_MULTIPLY: {
@@ -216,7 +218,8 @@ void ParseByteCode(const PyCodePtr& code) {
         break;
       }
       case ByteCode::JUMP_ABSOLUTE: {
-        insts.Push(CreateJumpAbsolute(Runtime::ReadU64(iter)));
+        insts.Push(CreateJumpAbsolute(Collections::DeserializeU64(bytes, iter))
+        );
         break;
       }
       case ByteCode::BINARY_SUBSCR: {
@@ -232,7 +235,7 @@ void ParseByteCode(const PyCodePtr& code) {
         break;
       }
       case ByteCode::FOR_ITER: {
-        insts.Push(CreateForIter(Runtime::ReadI64(iter)));
+        insts.Push(CreateForIter(Collections::DeserializeI64(bytes, iter)));
         break;
       }
       case ByteCode::LOAD_BUILD_CLASS: {
@@ -240,7 +243,7 @@ void ParseByteCode(const PyCodePtr& code) {
         break;
       }
       case ByteCode::STORE_ATTR: {
-        insts.Push(CreateStoreAttr(Runtime::ReadU64(iter)));
+        insts.Push(CreateStoreAttr(Collections::DeserializeU64(bytes, iter)));
         break;
       }
       case ByteCode::NOP: {
@@ -304,12 +307,12 @@ void ParseByteCode(const PyCodePtr& code) {
         break;
       }
       case ByteCode::JUMP_FORWARD: {
-        insts.Push(CreateJumpForward(Runtime::ReadU64(iter)));
+        insts.Push(CreateJumpForward(Collections::DeserializeU64(bytes, iter)));
         break;
       }
       default:
         throw std::runtime_error(
-          "Unknown byte code:" + std::to_string(static_cast<int>(iter.Get()))
+          "Unknown byte code:" + std::to_string(static_cast<int>(bytes[iter]))
         );
         break;
     }

@@ -27,15 +27,14 @@ class BytesKlass : public Klass {
     this->isInitialized = true;
   }
 
-  PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
-
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 
   PyObjPtr repr(const PyObjPtr& obj) override;
 
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 };
-
+class PyBytes;
+using PyBytesPtr = std::shared_ptr<PyBytes>;
 class PyBytes : public PyObject {
  private:
   Collections::Bytes value;
@@ -44,11 +43,14 @@ class PyBytes : public PyObject {
   explicit PyBytes(Collections::Bytes value)
     : PyObject(BytesKlass::Self()), value(std::move(value)) {}
 
-  [[nodiscard]] Collections::Bytes Value() const { return value; }
+  [[nodiscard]] Collections::Bytes& Value() { return value; }
+
+  void Concat(const PyBytesPtr& other);
+  bool Equals(const PyBytesPtr& other) const;
 };
-using PyBytesPtr = std::shared_ptr<PyBytes>;
-inline PyBytesPtr CreatePyBytes(Collections::Bytes value) {
-  return std::make_shared<PyBytes>(value);
+
+inline PyBytesPtr CreatePyBytes(Collections::Bytes&& value) {
+  return std::make_shared<PyBytes>(std::move(value));
 }
 inline PyBytesPtr CreatePyBytes() {
   return std::make_shared<PyBytes>(Collections::Bytes());

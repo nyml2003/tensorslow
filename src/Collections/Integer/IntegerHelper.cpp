@@ -106,16 +106,13 @@ Integer Slice(const Integer& integer, Index start, Index end) {
   return Integer(parts, integer.Sign());
 }
 Integer CreateIntegerZero() {
-  List<uint32_t> parts = {0};
-  return Integer(parts, false);
+  return Integer(List<uint32_t>({0}), false);
 }
 Integer CreateIntegerOne() {
-  List<uint32_t> parts = {1};
-  return Integer(parts, false);
+  return Integer(List<uint32_t>({1}), false);
 }
 Integer CreateIntegerTwo() {
-  List<uint32_t> parts = {2};
-  return Integer(parts, false);
+  return Integer(List<uint32_t>({2}), false);
 }
 uint64_t ToU64(const Integer& integer) {
   if (integer.IsZero()) {

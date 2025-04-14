@@ -21,14 +21,15 @@ String ToString(int32_t value);
 String ToString(int64_t value);
 std::string ToCppString(const String& str);
 String Join(const List<String>& list, const String& separator);
-
+std::size_t UnicodeListHash(const List<Unicode>& str) noexcept;
+std::size_t Hash(const char* str) noexcept;
 }  // namespace torchlight::Collections
 
 namespace std {
 template <>
 struct hash<torchlight::Collections::String> {
   size_t operator()(const torchlight::Collections::String& str) const {
-    return hash<std::string>{}(torchlight::Collections::ToCppString(str));
+    return str.Hash();
   }
 };
 }  // namespace std

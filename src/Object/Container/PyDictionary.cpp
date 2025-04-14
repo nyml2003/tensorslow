@@ -90,12 +90,7 @@ PyObjPtr DictionaryKlass::setitem(
     throw std::runtime_error("PyDictionary::setitem(): obj is not a dict");
   }
   auto dict = obj->as<PyDictionary>();
-  //  std::cout << "key: " << key->hash()->str()->as<PyString>()->ToCppString()
-  //            << std::endl;
-  //  std::cout << "value: " <<
-  //  value->hash()->str()->as<PyString>()->ToCppString()
-  //            << std::endl;
-  dict->Put(key->hash(), value);
+  dict->Put(key, value);
   return CreatePyNone();
 }
 
@@ -104,9 +99,7 @@ PyObjPtr DictionaryKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
     throw std::runtime_error("PyDictionary::getitem(): obj is not a dict");
   }
   auto dict = obj->as<PyDictionary>();
-  //  std::cout << "key: " << key->hash()->str()->as<PyString>()->ToCppString()
-  //            << std::endl;
-  return dict->Get(key->hash());
+  return dict->Get(key);
 }
 
 PyObjPtr DictionaryKlass::delitem(const PyObjPtr& obj, const PyObjPtr& key) {

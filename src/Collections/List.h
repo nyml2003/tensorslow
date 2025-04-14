@@ -41,9 +41,14 @@ class List {
    * @param capacity 列表的初始容量，默认为 INIT_CAPACITY
    */
   explicit List(Index capacity = INIT_CAPACITY);
-  explicit List(Index count, const T* stream);
   explicit List(Index count, T element);
-  List(std::initializer_list<T> list);
+  explicit List(std::initializer_list<T> list);
+  explicit List(Index count, std::unique_ptr<T[]> data)
+    : size(count), capacity(count), elements(std::move(data)) {}
+  explicit List(Index count, T* stream)
+    : size(count), capacity(count), elements(std::make_unique<T[]>(count)) {
+    std::copy(stream, stream + count, elements.get());
+  }
   List(const List<T>& other);
   List(List<T>&& other) noexcept;
   List<T>& operator=(const List<T>& other);
@@ -208,15 +213,6 @@ List<T>::List(Index _capacity) : size(0), capacity(_capacity) {
   if (_capacity > 0) {
     elements = std::make_unique<T[]>(_capacity);
   }
-}
-template <typename T>
-List<T>::List(Index count, const T* stream) : size(count) {
-  if (count == 0) {
-    throw std::runtime_error("List::List: count is 0");
-  }
-  capacity = count;
-  elements = std::make_unique<T[]>(count);
-  std::copy(std::execution::par, stream, stream + count, elements.get());
 }
 template <typename T>
 List<T>::List(Index count, T element) : size(count) {

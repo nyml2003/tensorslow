@@ -9,8 +9,17 @@ class Bytes {
  public:
   explicit Bytes(const List<Byte>& value);
   explicit Bytes();
-  [[nodiscard]] Bytes Add(const Bytes& rhs) const;
-  [[nodiscard]] List<Byte> Value() const;
+  // 删除拷贝
+  Bytes(const Bytes&) = delete;
+  Bytes& operator=(const Bytes&) = delete;
+  Bytes(Bytes&& other) noexcept { this->value = std::move(other.value); }
+  Bytes& operator=(Bytes&& other) noexcept {
+    if (this != &other) {
+      this->value = std::move(other.value);
+    }
+    return *this;
+  }
+  [[nodiscard]] const List<Byte>& Value() const;
   void Concat(const Bytes& rhs);
   void Push(Byte byte);
   [[nodiscard]] Byte Get(Index index) const;

@@ -1,12 +1,11 @@
 #include "Collections/String/String.h"
 #include <stdexcept>
+#include "StringHelper.h"
 
 namespace torchlight::Collections {
+StringPool String::stringPool;
 String::~String() = default;
 String::String(const List<Unicode>& codePoints) : codePoints(codePoints) {}
-void String::Concat(const String& rhs) {
-  this->codePoints.Concat(rhs.codePoints);
-}
 String String::Copy() const {
   return String(codePoints.Copy());
 }
@@ -15,16 +14,6 @@ Unicode String::Get(Index index) const {
 }
 Index String::Size() const {
   return codePoints.Size();
-}
-void String::RemoveAt(Index index) {
-  codePoints.RemoveAt(index);
-}
-void String::Clear() {
-  codePoints.Clear();
-  codePoints.TrimExcess();
-}
-void String::Push(Unicode codePoint) {
-  codePoints.Push(codePoint);
 }
 List<String> String::Split(String& delimiter) const {
   List<String> list;
@@ -141,9 +130,6 @@ bool String::LessThanOrEqual(const String& rhs) const {
 bool String::NotEqual(const String& rhs) const {
   return !Equal(rhs);
 }
-void String::Reverse() {
-  codePoints.Reverse();
-}
 String String::Add(const String& rhs) {
   return String(codePoints.Add(rhs.codePoints));
 }
@@ -152,9 +138,6 @@ String::String(const String& other) = default;
 String::String(String& other) = default;
 bool String::operator==(const String& rhs) const {
   return Equal(rhs);
-}
-Unicode String::operator[](Index index) {
-  return codePoints[index];
 }
 Unicode String::operator[](Index index) const {
   return codePoints[index];
@@ -178,4 +161,28 @@ String String::Upper() const {
   }
   return String(upper);
 }
+
+std::size_t String::Hash() const {
+  return UnicodeListHash(codePoints);
+}
+
+const String* StringPool::Intern(const List<Unicode>& codePoints) {
+  size_t hash = UnicodeListHash(codePoints);    // 计算哈希值
+  std::lock_guard<std::mutex> lock(poolMutex);  // 线程安全保护
+  auto it = pool.find(hash);
+  if (it != pool.end()) {
+    return it->second.get();  // 返回已有的字符串指针
+  }
+  auto newStr = std::make_unique<String>(codePoints);  // 创建新的字符串实例
+  const String* result = newStr.get();  // 保存裸指针用于返回
+  pool[hash] = std::move(newStr);       // 将所有权转移给 pool
+  return result;                        // 返回裸指针
+}
+
+bool StringPool::Contains(const List<Unicode>& codePoints) const {
+  size_t hash = UnicodeListHash(codePoints);  // 计算哈希值
+  auto it = pool.find(hash);
+  return it != pool.end();
+}
+
 }  // namespace torchlight::Collections

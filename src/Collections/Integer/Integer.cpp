@@ -212,12 +212,10 @@ List<Integer> Integer::DivMod(const Integer& rhs) const {
     throw std::runtime_error("Division by zero");
   }
   if (IsZero() || LessThan(rhs)) {
-    List<Integer> divmods = {CreateIntegerZero(), Copy()};
-    return divmods;
+    return List<Integer>({CreateIntegerZero(), Copy()});
   }
   if (Equal(rhs)) {
-    List<Integer> divmods = {CreateIntegerOne(), CreateIntegerZero()};
-    return divmods;
+    return List<Integer>({CreateIntegerOne(), CreateIntegerZero()});
   }
   Integer result;
   result.sign = sign ^ rhs.sign;

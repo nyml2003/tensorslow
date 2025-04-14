@@ -29,24 +29,10 @@ TEST(List, Copy) {
 }
 TEST(List, Constructor) {
   const char* message = "Hello, World!";
-  List<char> list(strlen(message), const_cast<char*>(message));
-  // 验证结果
-  ASSERT_EQ(list.Size(), strlen(message));  // 检查大小是否为字符串长度
-  for (size_t i = 0; i < strlen(message); i++) {
-    ASSERT_EQ(list[i], message[i]);  // 检查每个元素是否正确
-  }
   List<char> list2(strlen(message), 'a');
   for (size_t i = 0; i < strlen(message); i++) {
     ASSERT_EQ(list2[i], 'a');  // 检查每个元素是否正确
   }
-  List<char> sub = list.Slice(2, 4);
-  ASSERT_EQ(sub.Size(), 4 - 2);  // 检查大小是否为 2
-  for (size_t i = 0; i < sub.Size(); i++) {
-    ASSERT_EQ(sub[i], message[i + 2]);  // 检查每个元素是否正确
-  }
-  sub[0] = 'a';
-  ASSERT_EQ(sub[0], 'a');
-  ASSERT_EQ(list[2], 'l');
 }
 TEST(List, First) {
   List<char> list = {1, 2, 3};
@@ -67,15 +53,6 @@ TEST(List, First) {
   ASSERT_EQ(list.Size(), 1);  // 检查大小是否为 1
   list.Unshift('Y');
   ASSERT_EQ(list.Capacity(), 10);  // 检查容量是否为 2
-}
-TEST(List, Error) {
-  const char* message = "Hello, World!";
-  ASSERT_THROW(
-    List<char> list(0, const_cast<char*>(message)), std::runtime_error
-  );
-  ASSERT_THROW(List<char> list(0, 'a'), std::runtime_error);
-  List<char> list(strlen(message), const_cast<char*>(message));
-  ASSERT_THROW(list[100], std::out_of_range);
 }
 // 测试自赋值
 TEST(List, SelfAssignment) {
@@ -280,7 +257,7 @@ TEST(List, RemoveRangeBoundaryAndError) {
   list.RemoveRange(0, 1);  // 移除第一个元素
   ASSERT_EQ(list.Size(), 4);
   ASSERT_EQ(list[0], 2);
-  list.RemoveRange(list.Size() - 2,2);  // 移除最后两个元素
+  list.RemoveRange(list.Size() - 2, 2);  // 移除最后两个元素
   ASSERT_EQ(list.Size(), 2);
   ASSERT_EQ(list[0], 2);
   ASSERT_EQ(list[1], 3);

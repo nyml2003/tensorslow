@@ -115,11 +115,11 @@ void ParseAndGenerate(const fs::path& filePath) {
   if (ArgsHelper::Has("show_code")) {
     torchlight::Object::PrintCode(code);
   }
-  torchlight::Collections::Bytes data =
-    code->_serialize_()->as<torchlight::Object::PyBytes>()->Value();
+  auto data = code->_serialize_()->as<torchlight::Object::PyBytes>();
+  const auto& bytes = data->Value();
   auto writePath = fs::path(filePath).replace_extension(".pyc");
   torchlight::Collections::Write(
-    data,
+    bytes,
     torchlight::Collections::CreateStringWithCString(writePath.string().c_str())
   );
 }

@@ -124,8 +124,9 @@ PyObjPtr FloatKlass::_serialize_(const PyObjPtr& obj) {
     throw std::runtime_error("PyFloat::_serialize_(): obj is not a float");
   }
   auto floatObj = obj->as<PyFloat>();
-  return CreatePyBytes(Collections::Serialize(Literal::FLOAT)
-                         .Add(Collections::Serialize(floatObj->Value())));
+  auto bytes = Collections::Serialize(Literal::FLOAT);
+  bytes.Concat(Collections::Serialize(floatObj->Value()));
+  return CreatePyBytes(std::move(bytes));
 }
 
 PyObjPtr FloatKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {

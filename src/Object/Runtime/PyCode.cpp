@@ -119,14 +119,15 @@ PyObjPtr CodeKlass::_serialize_(const PyObjPtr& self) {
     throw std::runtime_error("PyCode::_serialize_(): obj is not a code object");
   }
   auto code = self->as<PyCode>();
-  PyObjPtr result =
-    CreatePyBytes(Collections::Serialize(Literal::CODE))
-      ->add(code->Consts()->_serialize_())
-      ->add(code->Names()->_serialize_())
-      ->add(code->VarNames()->_serialize_())
-      ->add(code->Name()->_serialize_())
-      ->add(CreatePyBytes(Collections::Serialize(code->NLocals())))
-      ->add(code->Instructions()->_serialize_()->_serialize_());
+  auto result = CreatePyBytes(Collections::Serialize(Literal::CODE));
+  result->Concat(code->Consts()->_serialize_()->as<PyBytes>());
+  result->Concat(code->Names()->_serialize_()->as<PyBytes>());
+  result->Concat(code->VarNames()->_serialize_()->as<PyBytes>());
+  result->Concat(code->Name()->_serialize_()->as<PyBytes>());
+  result->Concat(CreatePyBytes(Collections::Serialize(code->NLocals())));
+  result->Concat(
+    code->Instructions()->_serialize_()->_serialize_()->as<PyBytes>()
+  );
   return result;
 }
 

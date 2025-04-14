@@ -13,7 +13,6 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 #include "Runtime/Genesis.h"
-#include "Runtime/Serialize.h"
 
 namespace torchlight {
 

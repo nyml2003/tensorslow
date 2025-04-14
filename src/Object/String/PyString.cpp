@@ -163,9 +163,9 @@ PyObjPtr StringKlass::_serialize_(const PyObjPtr& obj) {
   if (!obj->is(StringKlass::Self())) {
     throw std::runtime_error("StringKlass::_serialize_(): obj is not a string");
   }
-  return CreatePyBytes(Collections::Serialize(Literal::STRING)
-                         .Add(Collections::Serialize(obj->as<PyString>()->value)
-                         ));
+  auto bytes = Collections::Serialize(Literal::STRING);
+  bytes.Concat(Collections::Serialize(obj->as<PyString>()->value));
+  return CreatePyBytes(std::move(bytes));
 }
 
 PyStrPtr PyString::GetItem(Index index) const {

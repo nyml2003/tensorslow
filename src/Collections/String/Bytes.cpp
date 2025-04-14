@@ -2,11 +2,6 @@
 namespace torchlight::Collections {
 Bytes::Bytes(const List<Byte>& _value) : value(_value) {}
 Bytes::Bytes() = default;
-[[nodiscard]] Bytes Bytes::Add(const Bytes& rhs) const {
-  List<Byte> bytes(value.Copy());
-  bytes.Concat(rhs.value);
-  return Bytes(bytes);
-}
 [[nodiscard]] Byte Bytes::Get(Index index) const {
   return value.Get(index);
 }
@@ -25,7 +20,7 @@ void Bytes::Push(Byte byte) {
 Bytes Bytes::Slice(Index start, Index end) const {
   return Bytes(value.Slice(start, end));
 }
-List<Byte> Bytes::Value() const {
+const List<Byte>& Bytes::Value() const {
   return value;
 }
 bool Bytes::Equal(const Bytes& rhs) const {

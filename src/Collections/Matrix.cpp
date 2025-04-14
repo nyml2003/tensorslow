@@ -58,20 +58,20 @@ void Matrix::Shuffle() {
 }
 
 String Matrix::ToString() const {
-  String str;
-  str.Concat(CreateStringWithCString("["));
+  StringBuilder sb;
+  sb.Append(CreateStringWithCString("["));
   for (Index i = 0; i < rows; i++) {
-    str.Concat(CreateStringWithCString("["));
+    sb.Append(CreateStringWithCString("["));
     for (Index j = 0; j < cols; j++) {
-      str.Concat(Collections::ToString(At(i, j)));
+      sb.Append(Collections::ToString(At(i, j)));
       if (j != cols - 1) {
-        str.Concat(CreateStringWithCString(","));
+        sb.Append(CreateStringWithCString(","));
       }
     }
-    str.Concat(CreateStringWithCString("]"));
+    sb.Append(CreateStringWithCString("]"));
   }
-  str.Concat(CreateStringWithCString("]"));
-  return str;
+  sb.Append(CreateStringWithCString("]"));
+  return sb.ToString();
 }
 
 Matrix Matrix::Transpose() const {

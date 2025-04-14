@@ -14,10 +14,10 @@ String ReprByte(Byte byte) {
   std::snprintf(buffer, sizeof(buffer), "\\x%02X", byte);
   return CreateStringWithCString(buffer);
 }
-Bytes CreateBytesWithCString(const char* str) {
-  const Byte* data = reinterpret_cast<const Byte*>(str);
-  return Bytes(List<Byte>(static_cast<Index>(std::strlen(str)), data));
-}
+// Bytes CreateBytesWithCString(const char* str) {
+//   Byte* data = reinterpret_cast<Byte*>(const_cast<char*>(str));
+//   return Bytes(List<Byte>(static_cast<Index>(std::strlen(str)), data));
+// }
 void Write(const Bytes& bytes, const String& filename) {
   List<Byte> data = bytes.Value();
   std::string filenameCppString = ToCppString(filename);
@@ -89,10 +89,14 @@ Bytes Serialize(int32_t value) {
 }
 Bytes Serialize(const String& value) {
   Bytes bytes = ToBytes(value);
-  return Serialize(bytes.Size()).Add(bytes);
+  Bytes bytesWithSize = Serialize(bytes.Size());
+  bytesWithSize.Concat(bytes);
+  return bytesWithSize;
 }
 Bytes Serialize(const Bytes& value) {
-  return Serialize(value.Size()).Add(value);
+  Bytes bytesWithSize = Serialize(value.Size());
+  bytesWithSize.Concat(value);
+  return bytesWithSize;
 }
 double DeserializeDouble(const List<Byte>& bytes) {
   if (bytes.Size() != sizeof(double)) {
@@ -106,8 +110,16 @@ uint64_t DeserializeU64(const List<Byte>& bytes) {
   }
   return *reinterpret_cast<const uint64_t*>(bytes.Data());
 }
+uint64_t DeserializeU64(const List<Byte>& bytes, Index& offset) {
+  uint64_t value = *reinterpret_cast<const uint64_t*>(bytes.Data() + offset);
+  offset += sizeof(uint64_t);
+  return value;
+}
 int64_t DeserializeI64(const List<Byte>& bytes) {
   return static_cast<int64_t>(DeserializeU64(bytes));
+}
+int64_t DeserializeI64(const List<Byte>& bytes, Index& offset) {
+  return static_cast<int64_t>(DeserializeU64(bytes, offset));
 }
 uint32_t DeserializeU32(const List<Byte>& bytes) {
   if (bytes.Size() != sizeof(uint32_t)) {

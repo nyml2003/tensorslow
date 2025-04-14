@@ -37,6 +37,7 @@ class ListKlass : public Klass {
 PyListPtr CreatePyList();
 PyListPtr CreatePyList(Index capacity);
 PyListPtr CreatePyList(Collections::List<PyObjPtr> list);
+PyListPtr CreatePyList(std::initializer_list<PyObjPtr> list);
 class PyList;
 using PyListPtr = std::shared_ptr<PyList>;
 class PyList : public PyObject {

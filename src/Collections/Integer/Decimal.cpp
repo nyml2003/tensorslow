@@ -182,10 +182,10 @@ List<Decimal> Decimal::DivMod(const Decimal& rhs) const {
     throw std::runtime_error("Division by zero");
   }
   if (IsZero() || LessThan(rhs)) {
-    return {CreateDecimalZero(), Copy()};
+    return List<Decimal>({CreateDecimalZero(), Copy()});
   }
   if (Equal(rhs)) {
-    return {CreateDecimalOne(), CreateDecimalZero()};
+    return List<Decimal>({CreateDecimalOne(), CreateDecimalZero()});
   }
   Decimal result;
   result.sign = sign ^ rhs.sign;

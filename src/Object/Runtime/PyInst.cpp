@@ -34,7 +34,7 @@ PyObjPtr InstKlass::_serialize_(const PyObjPtr& obj) {
       [&bytes](int64_t index) { bytes.Concat(Collections::Serialize(index)); }},
     inst->Operand()
   );
-  return std::make_shared<PyBytes>(bytes);
+  return std::make_shared<PyBytes>(std::move(bytes));
 }
 
 PyObjPtr InstKlass::repr(const PyObjPtr& obj) {
@@ -42,22 +42,18 @@ PyObjPtr InstKlass::repr(const PyObjPtr& obj) {
     throw std::runtime_error("PyInst::repr(): obj is not an inst object");
   }
   auto inst = obj->as<PyInst>();
-  Collections::String result =
-    Collections::ToString(inst->Code())
-      .Add(Collections::CreateStringWithCString(" "));
+  Collections::StringBuilder sb(Collections::ToString(inst->Code())
+                                  .Add(Collections::CreateStringWithCString(" ")
+                                  ));
   std::visit(
     overload{
       [](None) {},
-      [&result](Index index) { result.Concat(Collections::ToString(index)); },
-      [&result](CompareOp compOp) {
-        result.Concat(Collections::ToString(compOp));
-      },
-      [&result](int64_t index) {
-        result.Concat(Collections::ToString(index));
-      }},
+      [&sb](Index index) { sb.Append(Collections::ToString(index)); },
+      [&sb](CompareOp compOp) { sb.Append(Collections::ToString(compOp)); },
+      [&sb](int64_t index) { sb.Append(Collections::ToString(index)); }},
     inst->Operand()
   );
-  return CreatePyString(result);
+  return CreatePyString(sb.ToString());
 }
 
 PyInstPtr CreateLoadConst(Index index) {

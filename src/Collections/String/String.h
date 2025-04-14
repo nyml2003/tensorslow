@@ -1,11 +1,16 @@
 #ifndef TORCHLIGHT_COLLECTIONS_STRING_H
 #define TORCHLIGHT_COLLECTIONS_STRING_H
-#include "Collections/List.h"
 
+#include <mutex>
+#include "Collections/List.h"
 namespace torchlight::Collections {
+class StringPool;
 class String {
+  friend class StringBuilder;
+
  private:
   List<Unicode> codePoints;
+  static StringPool stringPool;
 
  public:
   explicit String(const List<Unicode>& codePoints);
@@ -29,18 +34,13 @@ class String {
    */
   [[nodiscard]] Index Find(String& sub, Index start = 0) const;
   [[nodiscard]] String Upper() const;
-  void Concat(const String& rhs);
   String Add(const String& rhs);
   [[nodiscard]] String Copy() const;
   [[nodiscard]] Unicode Get(Index index) const;
   [[nodiscard]] Index Size() const;
-  void RemoveAt(Index index);
-  void Clear();
   [[nodiscard]] String Slice(Index start, Index end) const;
   [[nodiscard]] bool StartsWith(const String& prefix) const;
   [[nodiscard]] bool EndsWith(const String& suffix) const;
-  void Reverse();
-  void Push(Unicode codePoint);
   [[nodiscard]] bool Equal(const String& rhs) const;
   [[nodiscard]] bool GreaterThan(const String& rhs) const;
   [[nodiscard]] bool LessThan(const String& rhs) const;
@@ -48,10 +48,42 @@ class String {
   [[nodiscard]] bool LessThanOrEqual(const String& rhs) const;
   [[nodiscard]] bool NotEqual(const String& rhs) const;
   bool operator==(const String& rhs) const;
-  Unicode operator[](Index index);
   Unicode operator[](Index index) const;
+  [[nodiscard]] size_t Hash() const;
 };
 
-// namespace std
+class StringBuilder {
+ private:
+  List<Unicode> codePoints;
+
+ public:
+  explicit StringBuilder() = default;
+  explicit StringBuilder(const String& str) : codePoints(str.codePoints) {}
+  void Append(const String& str) { codePoints.Concat(str.codePoints); }
+  void Append(const Unicode& codePoint) { codePoints.Push(codePoint); }
+  [[nodiscard]] String ToString() const { return String(codePoints); }
+  [[nodiscard]] Index Size() const { return codePoints.Size(); }
+  void Clear() { codePoints.Clear(); }
+};
+
+class StringPool {
+ private:
+  std::unordered_map<size_t, std::unique_ptr<String>> pool;
+  std::mutex poolMutex;
+
+ public:
+  // 禁止拷贝和赋值
+  StringPool(const StringPool&) = delete;
+  StringPool& operator=(const StringPool&) = delete;
+
+  // 构造函数和析构函数
+  StringPool() = default;
+  ~StringPool() = default;  // unique_ptr 会自动释放资源，无需手动清理
+
+  // 获取或创建字符串实例
+  const String* Intern(const List<Unicode>& codePoints);
+  bool Contains(const List<Unicode>& codePoints) const;
+};
+
 }  // namespace torchlight::Collections
 #endif  // TORCHLIGHT_COLLECTIONS_STRING_H

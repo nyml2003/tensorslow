@@ -36,11 +36,13 @@ TEST(String, CreateStringWithBytes) {
 TEST(String, Concat) {
   String str1 = CreateStringWithCString("Hello");
   String str2 = CreateStringWithCString(" World");
-  str1.Concat(str2);
-  ASSERT_EQ(str1.Size(), 11);
-  ASSERT_TRUE(str1.Equal(CreateStringWithCString("Hello World")));
-  ASSERT_TRUE(str1 == str1);
-  ASSERT_TRUE(str1 == CreateStringWithCString("Hello World"));
+  StringBuilder sb;
+  sb.Append(str1);
+  sb.Append(str2);
+  String str3 = sb.ToString();
+  ASSERT_EQ(str3.Size(), 11);
+  ASSERT_TRUE(str3.Equal(CreateStringWithCString("Hello World")));
+  ASSERT_TRUE(str3 == CreateStringWithCString("Hello World"));
   ASSERT_TRUE(str2[0] == ' ');
 }
 
@@ -53,28 +55,21 @@ TEST(String, Copy) {
   }
 }
 
-TEST(String, RemoveAt) {
-  String str = CreateStringWithCString("Hello");
-  str.RemoveAt(2);
-  ASSERT_EQ(str.Size(), 4);
-  ASSERT_TRUE(str.Equal(CreateStringWithCString("Helo")));
-}
-
 TEST(String, Clear) {
-  String str = CreateStringWithCString("Hello");
-  str.Clear();
-  ASSERT_EQ(str.Size(), 0);
+  StringBuilder sb(CreateStringWithCString("Hello"));
+  sb.Clear();
+  ASSERT_EQ(sb.Size(), 0);
 }
 
 TEST(String, Push) {
-  String str;
-  str.Push('H');
-  str.Push('e');
-  str.Push('l');
-  str.Push('l');
-  str.Push('o');
-  ASSERT_EQ(str.Size(), 5);
-  ASSERT_TRUE(str.Equal(CreateStringWithCString("Hello")));
+  StringBuilder sb;
+  sb.Append('H');
+  sb.Append('e');
+  sb.Append('l');
+  sb.Append('l');
+  sb.Append('o');
+  ASSERT_EQ(sb.Size(), 5);
+  ASSERT_TRUE(sb.ToString().Equal(CreateStringWithCString("Hello")));
 }
 
 TEST(String, Slice) {
@@ -149,12 +144,6 @@ TEST(String, NotEqual) {
   String str1 = CreateStringWithCString("Hello");
   String str2 = CreateStringWithCString("World");
   ASSERT_TRUE(str1.NotEqual(str2));
-}
-
-TEST(String, Reverse) {
-  String str = CreateStringWithCString("Hello");
-  str.Reverse();
-  ASSERT_TRUE(str.Equal(CreateStringWithCString("olleH")));
 }
 
 TEST(String, ToString) {

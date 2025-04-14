@@ -1,5 +1,4 @@
 #include "Runtime/BinaryFileParser.h"
-#include "Runtime/BufferedInputStream.h"
 #include "Runtime/Interpreter.h"
 #include "Tools/Tools.h"
 
@@ -135,9 +134,7 @@ void HandleResultEnd(const fs::path& filename) {
 }
 void RunTest(const fs::path& filename) {
   std::cout << "解析字节码文件: " << filename << std::endl;
-  Runtime::BinaryFileParser parser(
-    std::make_unique<Runtime::BufferedInputStream>(filename.string().c_str())
-  );
+  Runtime::BinaryFileParser parser(filename);
   auto code = parser.Parse();
 
   HandleResultBegin(filename);
