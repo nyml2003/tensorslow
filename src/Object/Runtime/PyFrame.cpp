@@ -354,11 +354,11 @@ void PrintFrame(const PyFramePtr& frame) {
     std::cout << " ( " << stack->GetItem(i).get() << " ) " << std::endl;
   }
   CreatePyString("Locals: ")->as<PyString>()->PrintLine();
-  frame->CurrentLocals()->str()->as<PyString>()->PrintLine();
+  frame->CurrentLocals()->repr()->as<PyString>()->PrintLine();
   CreatePyString("Globals: ")->as<PyString>()->PrintLine();
-  frame->CurrentGlobals()->str()->as<PyString>()->PrintLine();
+  frame->CurrentGlobals()->repr()->as<PyString>()->PrintLine();
   CreatePyString("FastLocals: ")->as<PyString>()->PrintLine();
-  frame->CurrentFastLocals()->str()->as<PyString>()->PrintLine();
+  frame->CurrentFastLocals()->repr()->as<PyString>()->PrintLine();
   // 调用栈
   CreatePyString("Caller: ")->as<PyString>()->Print();
   if (frame->HasCaller()) {

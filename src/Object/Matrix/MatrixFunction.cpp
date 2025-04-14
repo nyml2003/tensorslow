@@ -35,7 +35,18 @@ PyObjPtr Array(const PyObjPtr& args) {
     Collections::List<double> data(1, value);
     return CreatePyMatrix(Collections::Matrix(1, 1, data));
   }
-  throw std::runtime_error("Matrix(): arg is not a list or float");
+  if (arg->is(IntegerKlass::Self())) {
+    auto value = arg->as<PyInteger>()->ToU64();
+    Collections::List<double> data(1, static_cast<double>(value));
+    return CreatePyMatrix(Collections::Matrix(1, 1, data));
+  }
+  if (arg->is(MatrixKlass::Self())) {
+    return arg;
+  }
+  throw std::runtime_error(
+    "Matrix(): arg is not a list or float" +
+    arg->str()->as<PyString>()->ToCppString()
+  );
 }
 
 PyObjPtr Eye(const PyObjPtr& args) {
@@ -164,29 +175,21 @@ PyObjPtr Concatenate(const PyObjPtr& args) {
     throw std::runtime_error("Concatenate(): args is not a list");
   }
   auto argList = args->as<PyList>();
-
   if (argList->Length() != 1) {
     throw std::runtime_error("Concatenate(): args length is not 1");
   }
-  auto list = argList->GetItem(0)->as<PyList>();
-  auto rows = list->Length();
-  auto cols = list->GetItem(0)
-                ->as<PyMatrix>()
-                ->Shape()
-                ->GetItem(1)
-                ->as<PyInteger>()
-                ->ToU64();
+  auto matrixList = argList->GetItem(0)->as<PyList>();
+  auto firstMatrix = matrixList->GetItem(0)->as<PyMatrix>();
+  auto cols = firstMatrix->Shape()->GetItem(1)->as<PyInteger>()->ToU64();
   Collections::List<double> data;
-  for (Index i = 0; i < rows; i++) {
-    auto row = list->GetItem(i)->as<PyMatrix>();
-    if (row->Shape()->GetItem(1)->as<PyInteger>()->ToU64() != cols) {
+  for (Index i = 0; i < matrixList->Length(); i++) {
+    auto matrix = matrixList->GetItem(i)->as<PyMatrix>();
+    if (matrix->Shape()->GetItem(1)->as<PyInteger>()->ToU64() != cols) {
       throw std::runtime_error("Concatenate(): cols is not equal");
     }
-    auto rowData = row->Ravel();
-    for (Index j = 0; j < rowData.Size(); j++) {
-      data.Push(rowData[j]);
-    }
+    data.Concat(matrix->Ravel());
   }
+  auto rows = data.Size() / cols;
   return CreatePyMatrix(Collections::Matrix(rows, cols, data));
 }
 

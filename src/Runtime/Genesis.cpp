@@ -133,7 +133,7 @@ Object::PyDictPtr Genesis() {
     Object::CreatePyString("Log"), Object::CreatePyNativeFunction(Function::Log)
   );
   builtins->Put(
-    Object::CreatePyString("SoftMax"),
+    Object::CreatePyString("Softmax"),
     Object::CreatePyNativeFunction(Function::SoftMax)
   );
   builtins->Put(

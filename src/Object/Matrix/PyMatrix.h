@@ -23,7 +23,7 @@ class MatrixKlass : public Klass {
     return instance;
   }
   PyObjPtr repr(const PyObjPtr& obj) override;
-  PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
+  PyObjPtr str(const PyObjPtr& obj) override;
 
   PyObjPtr matmul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 

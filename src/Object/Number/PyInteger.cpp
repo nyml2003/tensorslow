@@ -44,6 +44,12 @@ PyObjPtr IntegerKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {
     auto str = value->as<PyString>();
     return CreatePyInteger(Collections::CreateIntegerWithString(str->Value()));
   }
+  if (value->is(FloatKlass::Self())) {
+    auto floatValue = value->as<PyFloat>()->Value();
+    return CreatePyInteger(
+      Collections::CreateIntegerWithU64(static_cast<uint64_t>(floatValue))
+    );
+  }
   throw std::runtime_error("PyInteger::init(): value is not an integer");
 }
 

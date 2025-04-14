@@ -13,8 +13,10 @@
 #include "Runtime/Interpreter.h"
 #include "Tools/Tools.h"
 namespace torchlight::Object {
-
 PyObjPtr MatrixKlass::repr(const PyObjPtr& obj) {
+  return Klass::repr(obj);
+}
+PyObjPtr MatrixKlass::str(const PyObjPtr& obj) {
   if (!obj->is(Self())) {
     throw std::runtime_error("MatrixKlass::repr(): obj is not a matrix");
   }
@@ -217,6 +219,24 @@ PyObjPtr MatrixKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
       auto rowStart = rowSlice->GetStart()->as<PyInteger>()->ToU64();
       auto rowStop = rowSlice->GetStop()->as<PyInteger>()->ToU64();
       return matrix->GetSlice(rowStart, colValue, rowStop, colValue + 1);
+    }
+    if (keyList->GetItem(0)->is(IntegerKlass::Self()) && keyList->GetItem(1)->is(SliceKlass::Self())) {
+      // a[row,colStart:colEnd]
+      auto colSlice = keyList->GetItem(1)->as<PySlice>();
+      auto shape = matrix->Shape();
+      colSlice->BindLength(matrix->Shape()->GetItem(1)->as<PyInteger>()->ToU64()
+      );
+      auto row = keyList->GetItem(0)->as<PyInteger>();
+      Index rowValue = 0;
+      if (row->GetSign() == Collections::Integer::IntSign::Positive) {
+        rowValue = row->ToU64();
+      }
+      if (row->GetSign() == Collections::Integer::IntSign::Negative) {
+        rowValue = matrix->Rows()->as<PyInteger>()->ToU64() + row->ToI64();
+      }
+      auto colStart = colSlice->GetStart()->as<PyInteger>()->ToU64();
+      auto colStop = colSlice->GetStop()->as<PyInteger>()->ToU64();
+      return matrix->GetSlice(rowValue, colStart, rowValue + 1, colStop);
     }
   }
   if (key->is(SliceKlass::Self())) {

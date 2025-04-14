@@ -126,7 +126,7 @@ PyObjPtr DictionaryKlass::repr(const PyObjPtr& obj) {
     auto key = item->as<PyList>()->GetItem(0);
     auto value = item->as<PyList>()->GetItem(1);
     return StringConcat(CreatePyList(
-      {key->repr()->repr(), CreatePyString(": ")->as<PyString>(), value->repr()}
+      {key->repr(), CreatePyString(": ")->as<PyString>(), value->repr()}
     ));
   });
   auto repr = CreatePyString(", ")->as<PyString>()->Join(dictItemReprList);

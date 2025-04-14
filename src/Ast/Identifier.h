@@ -72,7 +72,7 @@ class Identifier : public INode {
        Object::CreatePyString("LogisticLossDerivative"),
        Object::CreatePyString("Sum"),
        Object::CreatePyString("Log"),
-       Object::CreatePyString("SoftMax"),
+       Object::CreatePyString("Softmax"),
        Object::CreatePyString("Max"),
        Object::CreatePyString("ArgMax"),
        Object::CreatePyString("id"),

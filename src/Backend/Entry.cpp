@@ -138,7 +138,13 @@ void RunTest(const fs::path& filename) {
   auto code = parser.Parse();
 
   HandleResultBegin(filename);
-  Runtime::Interpreter::Run(code);
+  try {
+    Runtime::Interpreter::Run(code);
+  } catch (...) {
+    PrintFrame(Runtime::Interpreter::Instance().CurrentFrame());
+    throw;
+  }
+
   HandleResultEnd(filename);
 }
 

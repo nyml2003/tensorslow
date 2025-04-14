@@ -51,12 +51,20 @@ PyObjPtr FloatKlass::sub(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 PyObjPtr FloatKlass::mul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (!lhs->is(Self()) || !rhs->is(Self())) {
-    throw std::runtime_error("PyFloat::mul(): lhs or rhs is not a float");
+  if (!lhs->is(Self())) {
+    throw std::runtime_error("PyFloat::mul(): lhs is not a float");
   }
-  return CreatePyFloat(
-    lhs->as<PyFloat>()->Value() * rhs->as<PyFloat>()->Value()
-  );
+  if (rhs->is(Self())) {
+    return CreatePyFloat(
+      lhs->as<PyFloat>()->Value() * rhs->as<PyFloat>()->Value()
+    );
+  }
+  if (rhs->is(IntegerKlass::Self())) {
+    return CreatePyFloat(
+      lhs->as<PyFloat>()->Value() * rhs->as<PyInteger>()->ToU64()
+    );
+  }
+  throw std::runtime_error("PyFloat::mul(): rhs is not a float or int");
 }
 
 PyObjPtr FloatKlass::truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
