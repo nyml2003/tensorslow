@@ -178,7 +178,13 @@ Object::PyObjPtr Time(const Object::PyObjPtr& args) {
 
   time_t nowTime = std::chrono::system_clock::to_time_t(now);
   tm localTime;
-  localtime_s(&localTime, &nowTime);  // 使用线程安全的localtime_s
+#if defined(_WIN32) || defined(_WIN64)
+  // Windows 平台使用 localtime_s
+  localtime_s(&localTime, &nowTime);
+#else
+  // POSIX 平台使用 localtime_r
+  localtime_r(&nowTime, &localTime);
+#endif
 
   std::ostringstream oss;
   oss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");
