@@ -47,7 +47,7 @@ String Integer::ToHexString() const {
   str = str.Slice(it, str.Size());
   str.Unshift(UnicodeDigit_x);
   str.Unshift(UnicodeDigitZero);
-  return String(str);
+  return String(std::move(str));
 }
 Integer Integer::Add(const Integer& rhs) const {
   if (sign == rhs.sign) {

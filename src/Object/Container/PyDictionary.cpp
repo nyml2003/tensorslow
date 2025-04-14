@@ -171,17 +171,10 @@ PyObjPtr DictionaryKlass::contains(const PyObjPtr& obj, const PyObjPtr& key) {
 }
 
 bool KeyCompare(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  if (lhs->Klass() == StringKlass::Self() && rhs->Klass() == StringKlass::Self()) {
-    auto lstr = lhs->as<PyString>();
-    auto rstr = rhs->as<PyString>();
-    size_t lhash = lstr->Hashed() ? lstr->HashValue()
-                                  : lstr->hash()->as<PyInteger>()->ToU64();
-    size_t rhash = rstr->Hashed() ? rstr->HashValue()
-                                  : rstr->hash()->as<PyInteger>()->ToU64();
-    return lhash < rhash;
-  }
-  auto leftHash = lhs->hash()->as<PyInteger>()->ToU64();
-  auto rightHash = rhs->hash()->as<PyInteger>()->ToU64();
+  auto leftHash =
+    lhs->Hashed() ? lhs->HashValue() : lhs->hash()->as<PyInteger>()->ToU64();
+  auto rightHash =
+    rhs->Hashed() ? rhs->HashValue() : rhs->hash()->as<PyInteger>()->ToU64();
   return leftHash < rightHash;
 }
 

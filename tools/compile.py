@@ -8,7 +8,7 @@ frontend_exe = os.path.join(build_dir, "torchlight_frontend")
 backend_exe = os.path.join(build_dir, "torchlight_backend")
 
 # 获取源代码文件路径
-source_code = "../ml/adaline_batch.py"
+source_code = "../ml/optimizer.py"
 # source_code = "../test/dev/dev.py"
 # 显示源代码内容
 print("源代码:")

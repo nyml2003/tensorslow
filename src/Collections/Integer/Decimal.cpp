@@ -17,7 +17,7 @@ String Decimal::ToString() const {
   for (Index i = 0; i < parts.Size(); i++) {
     str.Push(static_cast<uint32_t>(parts.Get(i)) + UnicodeDigitZero);
   }
-  return String(str);
+  return String(std::move(str));
 }
 String Decimal::ToHexString() const {
   return CreateIntegerWithDecimal(*this).ToHexString();

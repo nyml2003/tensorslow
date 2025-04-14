@@ -241,6 +241,7 @@ Object::PyObjPtr Range(const Object::PyObjPtr& args) {
         }
         return value;
       }
+      throw std::runtime_error("Range generator exhausted");
     }
   );
 }

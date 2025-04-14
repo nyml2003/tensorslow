@@ -19,17 +19,17 @@
 
 namespace torchlight::Object {
 Index PyString::indent = 0;
-std::unordered_map<Collections::String, std::weak_ptr<PyString>>
-  PyString::stringPool;
+std::unordered_map<size_t, std::shared_ptr<PyString>> PyString::stringPool;
 std::mutex PyString::poolMutex;
 void StringKlass::Initialize() {
   InitKlass(CreatePyString("str")->as<PyString>(), Self());
   Self()->AddAttribute(
     CreatePyString("join")->as<PyString>(), CreatePyNativeFunction(StringJoin)
   );
-  Self()->AddAttribute(
-    CreatePyString("split")->as<PyString>(), CreatePyNativeFunction(StringSplit)
-  );
+  //  Self()->AddAttribute(
+  //    CreatePyString("split")->as<PyString>(),
+  //    CreatePyNativeFunction(StringSplit)
+  //  );
   Self()->AddAttribute(
     CreatePyString("upper")->as<PyString>(), CreatePyNativeFunction(StringUpper)
   );
@@ -143,12 +143,13 @@ PyObjPtr StringKlass::hash(const PyObjPtr& obj) {
   if (!obj->is(StringKlass::Self())) {
     throw std::runtime_error("StringKlass::hash(): obj is not a string");
   }
-  auto string = obj->as<PyString>();
-  if (!string->hashed) {
-    string->hashValue = std::hash<std::string>{}(string->ToCppString());
-    string->hashed = true;
+  if (obj->Hashed()) {
+    return CreatePyInteger(obj->HashValue());
   }
-  return CreatePyInteger(string->hashValue);
+  auto string = obj->as<PyString>();
+  size_t hash = string->Hash();
+  string->SetHashValue(hash);
+  return CreatePyInteger(hash);
 }
 
 PyObjPtr StringKlass::boolean(const PyObjPtr& obj) {
@@ -179,27 +180,27 @@ PyStrPtr PyString::GetItem(Index index) const {
 }
 
 PyStrPtr PyString::Join(const PyObjPtr& iterable) {
-  auto result = CreatePyString("")->as<PyString>();
+  Collections::StringBuilder sb;
   for (Index i = 0; i < iterable->as<PyList>()->Length(); i++) {
     auto item = iterable->as<PyList>()->GetItem(i);
     if (i == 0) {
-      result = result->Add(item->as<PyString>());
+      sb.Append(item->as<PyString>()->value);
     } else {
-      result = result->Add(CreatePyString(value)->as<PyString>())
-                 ->Add(item->as<PyString>());
+      sb.Append(value);
+      sb.Append(item->as<PyString>()->value);
     }
   }
-  return result;
+  return CreatePyString(sb.ToString())->as<PyString>();
 }
 
-PyListPtr PyString::Split(const PyStrPtr& delimiter) {
-  auto parts = value.Split(delimiter->value);
-  auto result = CreatePyList(parts.Size())->as<PyList>();
-  for (Index i = 0; i < parts.Size(); i++) {
-    result->SetItem(i, CreatePyString(parts[i]));
-  }
-  return result;
-}
+// PyListPtr PyString::Split(const PyStrPtr& delimiter) {
+//   auto parts = value.Split(delimiter->value);
+//   auto result = CreatePyList(parts.Size())->as<PyList>();
+//   for (Index i = 0; i < parts.Size(); i++) {
+//     result->SetItem(i, CreatePyString(parts[i]));
+//   }
+//   return result;
+// }
 
 PyStrPtr PyString::Add(const PyStrPtr& other) {
   return CreatePyString(value.Add(other->value))->as<PyString>();
@@ -270,30 +271,28 @@ PyObjPtr StringJoin(const PyObjPtr& args) {
   return delimiter->Join(strList);
 }
 
-PyObjPtr StringSplit(const PyObjPtr& args) {
-  CheckNativeFunctionArgumentsWithExpectedLength(args, 2);
-  auto argList = args->as<PyList>();
-  auto delimiter = argList->GetItem(0)->as<PyString>();
-  auto value = argList->GetItem(1)->as<PyString>();
-  return value->Split(delimiter);
-}
+// PyObjPtr StringSplit(const PyObjPtr& args) {
+//   CheckNativeFunctionArgumentsWithExpectedLength(args, 2);
+//   auto argList = args->as<PyList>();
+//   auto delimiter = argList->GetItem(0)->as<PyString>();
+//   auto value = argList->GetItem(1)->as<PyString>();
+//   return value->Split(delimiter);
+// }
 
-PyStrPtr PyString::Create(const Collections::String& value) {
+PyStrPtr PyString::Create(Collections::String&& value) {
   std::lock_guard<std::mutex> lock(poolMutex);
-  auto iter = stringPool.find(value);
+  auto hash = value.Hash();
+  auto iter = stringPool.find(hash);
   if (iter != stringPool.end()) {
-    auto weakPtr = iter->second;
-    if (auto strongPtr = weakPtr.lock()) {
-      return strongPtr;
-    }
+    return iter->second;
   }
   auto result = std::make_shared<PyString>(value);
-  stringPool[value] = result;
+  stringPool[hash] = result;
   return result;
 }
 
-PyStrPtr CreatePyString(const Collections::String& value) {
-  return PyString::Create(value);
+PyStrPtr CreatePyString(Collections::String&& value) {
+  return PyString::Create(std::move(value));
 }
 
 PyStrPtr CreatePyString(const std::string& value) {

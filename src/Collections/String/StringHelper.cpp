@@ -79,7 +79,7 @@ String CreateStringWithCString(const char* str) noexcept {
   while (index < length) {
     codePoints.Push(GetUnicode(index, data, length));
   }
-  return String(codePoints);
+  return String(std::move(codePoints), Hash(str));
 }
 
 String CreateStringWithBytes(const List<Byte>& bytes) noexcept {
@@ -87,11 +87,10 @@ String CreateStringWithBytes(const List<Byte>& bytes) noexcept {
   const Byte* data = bytes.Data();  // 假设List提供Data()返回指针
   size_t length = bytes.Size();
   size_t index = 0;
-
   while (index < length) {
     codePoints.Push(GetUnicode(index, data, length));
   }
-  return String(codePoints);
+  return String(std::move(codePoints), Hash(bytes));
 }
 
 std::string ToCppString(const String& str) {
@@ -126,29 +125,40 @@ String ToString(uint32_t value) {
   return CreateStringWithCString(buffer);
 }
 
-String Join(const List<String>& list, const String& separator) {
-  StringBuilder sb;
-  for (Index i = 0; i < list.Size(); i++) {
-    sb.Append(list.Get(i));
-    if (i < list.Size() - 1) {
-      sb.Append(separator);
-    }
-  }
-  return sb.ToString();
-}
-
-std::size_t UnicodeListHash(const List<Unicode>& str) noexcept {
+// String Join(const List<String>& list, const String& separator) {
+//   StringBuilder sb;
+//   for (Index i = 0; i < list.Size(); i++) {
+//     sb.Append(list.Get(i));
+//     if (i < list.Size() - 1) {
+//       sb.Append(separator);
+//     }
+//   }
+//   return sb.ToString();
+// }
+std::size_t Hash(const char* str) noexcept {
   // FNV-1a 常量（64 位版本）
   constexpr std::size_t FNV_OFFSET_BASIS = 14695981039346656037ULL;
   constexpr std::size_t FNV_PRIME = 1099511628211ULL;
 
   std::size_t hash = FNV_OFFSET_BASIS;
 
-  for (Index i = 0; i < str.Size(); ++i) {
-    hash ^= str[i];
+  for (Index i = 0; str[i] != '\0'; ++i) {
+    hash ^= static_cast<std::size_t>(str[i]);
     hash *= FNV_PRIME;
   }
   return hash;
 }
+std::size_t Hash(const List<Byte>& bytes) noexcept {
+  // FNV-1a 常量（64 位版本）
+  constexpr std::size_t FNV_OFFSET_BASIS = 14695981039346656037ULL;
+  constexpr std::size_t FNV_PRIME = 1099511628211ULL;
 
+  std::size_t hash = FNV_OFFSET_BASIS;
+
+  for (Index i = 0; i < bytes.Size(); ++i) {
+    hash ^= static_cast<std::size_t>(bytes[i]);
+    hash *= FNV_PRIME;
+  }
+  return hash;
+}
 }  // namespace torchlight::Collections

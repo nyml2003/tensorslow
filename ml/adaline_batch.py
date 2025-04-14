@@ -323,7 +323,7 @@ for epoch in range(50):
     accuracy = predict_and_evaluate(train_set, predict, x, batch_size)
 
     # 打印当前epoch数和模型在训练集上的正确率
-    print("epoch: ", epoch + 1, " accuracy: ", accuracy)
+    # print("epoch: ", epoch + 1, " accuracy: ", accuracy)
 
 test_set = generateSample(32)
 

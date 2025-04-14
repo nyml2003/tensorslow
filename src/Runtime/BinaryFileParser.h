@@ -116,6 +116,7 @@ class BinaryFileParser {
       case Object::Literal::BYTES:
         return ReadBytes();
     }
+    throw std::runtime_error("Unknown object type");
   }
   Object::PyCodePtr ReadCode() {
     auto consts = ReadObject()->as<Object::PyList>();

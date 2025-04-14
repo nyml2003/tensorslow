@@ -37,12 +37,9 @@ class PyString : public PyObject {
 
  private:
   Collections::String value;
-  size_t hashValue = 0;
-  bool hashed = false;
   // 缩进深度
   static Index indent;
-  static std::unordered_map<Collections::String, std::weak_ptr<PyString>>
-    stringPool;
+  static std::unordered_map<size_t, std::shared_ptr<PyString>> stringPool;
   static std::mutex poolMutex;
 
  public:
@@ -51,17 +48,13 @@ class PyString : public PyObject {
   static void IncreaseIndent() { indent++; }
   static void DecreaseIndent() { indent--; }
 
-  bool Hashed() const { return hashed; }
-
-  size_t HashValue() const { return hashValue; }
-
   Index Length() const { return value.Size(); }
 
   PyStrPtr GetItem(Index index) const;
 
   PyStrPtr Join(const PyObjPtr& iterable);
 
-  PyListPtr Split(const PyStrPtr& delimiter);
+  //  PyListPtr Split(const PyStrPtr& delimiter);
 
   PyStrPtr Add(const PyStrPtr& other);
 
@@ -75,7 +68,8 @@ class PyString : public PyObject {
   PyStrPtr Upper() const;
 
   Collections::String Value() const { return value; }
-  static PyStrPtr Create(const Collections::String& value);
+  static PyStrPtr Create(Collections::String&& value);
+  size_t Hash() { return value.Hash(); }
 };
 
 using PyStrPtr = std::shared_ptr<PyString>;
@@ -84,11 +78,11 @@ PyObjPtr StringUpper(const PyObjPtr& args);
 
 PyObjPtr StringJoin(const PyObjPtr& args);
 
-PyObjPtr StringSplit(const PyObjPtr& args);
+// PyObjPtr StringSplit(const PyObjPtr& args);
 
 PyObjPtr StringConcat(const PyObjPtr& args);
 
-PyStrPtr CreatePyString(const Collections::String& value);
+PyStrPtr CreatePyString(Collections::String&& value);
 PyStrPtr CreatePyString(const char* value);
 PyStrPtr CreatePyString(const std::string& value);
 
