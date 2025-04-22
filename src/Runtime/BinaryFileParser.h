@@ -23,7 +23,10 @@ class BinaryFileParser {
     }
   }
 
-  Object::PyCodePtr Parse() { return ReadObject()->as<Object::PyCode>(); }
+  Object::PyCodePtr Parse() {
+    return ReadObject()->as<Object::PyCode>();
+    fileStream.close();
+  }
 
  private:
   std::ifstream fileStream;

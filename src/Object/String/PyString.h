@@ -82,7 +82,7 @@ PyObjPtr StringJoin(const PyObjPtr& args);
 
 PyObjPtr StringConcat(const PyObjPtr& args);
 
-PyStrPtr CreatePyString(Collections::String&& value);
+PyStrPtr CreatePyString(Collections::String&& value, bool pooling = true);
 PyStrPtr CreatePyString(const char* value);
 PyStrPtr CreatePyString(const std::string& value);
 

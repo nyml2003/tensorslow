@@ -5,7 +5,6 @@
 #include "Collections/String/Bytes.h"
 #include "Collections/String/String.h"
 
-
 namespace torchlight::Collections {
 class Integer {
   friend class List<Integer>;

@@ -2,7 +2,6 @@
 #include "ByteCode/ByteCode.h"
 #include "Collections/String/BytesHelper.h"
 #include "Collections/String/StringHelper.h"
-#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Core/PyBoolean.h"
@@ -203,7 +202,7 @@ PyStrPtr PyString::Join(const PyObjPtr& iterable) {
 // }
 
 PyStrPtr PyString::Add(const PyStrPtr& other) {
-  return CreatePyString(value.Add(other->value))->as<PyString>();
+  return CreatePyString(value.Add(other->value), false)->as<PyString>();
 }
 
 void PyString::Print(bool enableIndent) const {
@@ -291,8 +290,11 @@ PyStrPtr PyString::Create(Collections::String&& value) {
   return result;
 }
 
-PyStrPtr CreatePyString(Collections::String&& value) {
-  return PyString::Create(std::move(value));
+PyStrPtr CreatePyString(Collections::String&& value, bool pooling) {
+  if (pooling) {
+    return PyString::Create(std::move(value));
+  }
+  return std::make_shared<PyString>(std::move(value));
 }
 
 PyStrPtr CreatePyString(const std::string& value) {

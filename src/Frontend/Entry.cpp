@@ -15,7 +15,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include "Ast/AstHelper.h"
+#include "IR/AstHelper.h"
 #include "antlr4-runtime.h"
 namespace fs = std::filesystem;
 using antlr4::ANTLRInputStream;
@@ -80,7 +80,7 @@ void DefineOption() {
 void InitPyObj() {
   torchlight::Object::LoadBootstrapClasses();
   torchlight::Object::LoadRuntimeSupportClasses();
-  torchlight::Ast::RegisterAstKlass();
+  torchlight::IR::RegisterAstKlass();
 }
 
 // 使用ANTLR解析文件
@@ -99,8 +99,14 @@ void ParseAndGenerate(const fs::path& filePath) {
 
   antlr4::tree::ParseTree* tree = parser.file_input();
 
-  if (ArgsHelper::Has("show_ast")) {
-    std::cout << "AST tree: " << std::endl;
+  // 打印词法
+  std::cout << "词法分析结果: " << std::endl;
+  for (const auto& token : tokens.getTokens()) {
+    std::cout << token->toString() << std::endl;
+  }
+
+  if (ArgsHelper::Has("show_ast") || true) {
+    std::cout << "IR tree: " << std::endl;
     std::cout << tree->toStringTree(&parser) << std::endl;
   }
 

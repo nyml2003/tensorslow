@@ -1,25 +1,25 @@
 #include "Generation/Generator.h"
-#include "Ast/AssignStmt.h"
-#include "Ast/ClassDef.h"
-#include "Ast/Expression/Atom.h"
-#include "Ast/Expression/Binary.h"
-#include "Ast/Expression/FunctionCall.h"
-#include "Ast/Expression/List.h"
-#include "Ast/Expression/Map.h"
-#include "Ast/Expression/Slice.h"
-#include "Ast/Expression/Unary.h"
-#include "Ast/FuncDef.h"
-#include "Ast/INode.h"
-#include "Ast/Identifier.h"
-#include "Ast/MemberAccess.h"
-#include "Ast/Module.h"
-#include "Ast/Statement/ExprStmt.h"
-#include "Ast/Statement/ForStmt.h"
-#include "Ast/Statement/IfStmt.h"
-#include "Ast/Statement/PassStmt.h"
-#include "Ast/Statement/ReturnStmt.h"
-#include "Ast/Statement/WhileStmt.h"
-#include "Ast/Statement/YieldStmt.h"
+#include "IR/AssignStmt.h"
+#include "IR/ClassDef.h"
+#include "IR/Expression/Atom.h"
+#include "IR/Expression/Binary.h"
+#include "IR/Expression/FunctionCall.h"
+#include "IR/Expression/List.h"
+#include "IR/Expression/Map.h"
+#include "IR/Expression/Slice.h"
+#include "IR/Expression/Unary.h"
+#include "IR/FuncDef.h"
+#include "IR/INode.h"
+#include "IR/Identifier.h"
+#include "IR/MemberAccess.h"
+#include "IR/Module.h"
+#include "IR/Statement/ExprStmt.h"
+#include "IR/Statement/ForStmt.h"
+#include "IR/Statement/IfStmt.h"
+#include "IR/Statement/PassStmt.h"
+#include "IR/Statement/ReturnStmt.h"
+#include "IR/Statement/WhileStmt.h"
+#include "IR/Statement/YieldStmt.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
@@ -33,7 +33,7 @@ namespace torchlight::Generation {
 
 Generator::Generator(const Object::PyStrPtr& filename)
   : codeList(Object::CreatePyList()) {
-  context = Ast::CreateModule(Object::CreatePyList(), filename);
+  context = IR::CreateModule(Object::CreatePyList(), filename);
 }
 
 void Generator::Visit() {
@@ -45,7 +45,7 @@ void Generator::Emit() {
 }
 
 [[nodiscard]] Object::PyCodePtr Generator::Code() const {
-  return Ast::GetCodeFromList(codeList, context);
+  return IR::GetCodeFromList(codeList, context);
 }
 
 antlrcpp::Any Generator::visitStmt(Python3Parser::StmtContext* ctx) {
@@ -66,8 +66,8 @@ antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
   );
   for (auto* stmtItertor : stmts) {
     auto stmt = visitStmt(stmtItertor);
-    if (stmt.type() == typeid(Ast::INodePtr)) {
-      statements.Push(std::any_cast<Ast::INodePtr>(stmt));
+    if (stmt.type() == typeid(IR::INodePtr)) {
+      statements.Push(std::any_cast<IR::INodePtr>(stmt));
       continue;
     }
     if (stmt.type() == typeid(Object::PyListPtr)) {
@@ -79,12 +79,12 @@ antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
     }
     std::cerr << "visitFile_input: Unknown statement type" << std::endl;
   }
-  if (context->is(Ast::ModuleKlass::Self())) {
-    context->as<Ast::Module>()->SetBody(Object::CreatePyList(statements));
+  if (context->is(IR::ModuleKlass::Self())) {
+    context->as<IR::Module>()->SetBody(Object::CreatePyList(statements));
     return nullptr;
   }
-  if (context->is(Ast::FuncDefKlass::Self())) {
-    context->as<Ast::FuncDef>()->SetBody(Object::CreatePyList(statements));
+  if (context->is(IR::FuncDefKlass::Self())) {
+    context->as<IR::FuncDef>()->SetBody(Object::CreatePyList(statements));
     return nullptr;
   }
   std::cerr << "visitFile_input: Unknown context type" << std::endl;
@@ -98,7 +98,7 @@ antlrcpp::Any Generator::visitTestlist_comp(
   Collections::List<Object::PyObjPtr> tests(static_cast<uint64_t>(testlist.size(
   )));
   for (auto* test : testlist) {
-    tests.Push(std::any_cast<Ast::INodePtr>(visitTest(test)));
+    tests.Push(std::any_cast<IR::INodePtr>(visitTest(test)));
   }
   return Object::CreatePyList(tests);
 }
@@ -110,16 +110,16 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
   if (ctx->OPEN_BRACK() != nullptr) {
     // 情况 2: '[' testlist_comp? ']'
     if (ctx->testlist_comp() == nullptr) {
-      return Ast::CreateList(Object::CreatePyList(), context);
+      return IR::CreateList(Object::CreatePyList(), context);
     }
     auto testlist_comp =
       std::any_cast<Object::PyListPtr>(visitTestlist_comp(ctx->testlist_comp())
       );
-    return Ast::CreateList(testlist_comp, context);
+    return IR::CreateList(testlist_comp, context);
   } else if (ctx->OPEN_BRACE() != nullptr) {
     auto dictorsetmaker = ctx->dictorsetmaker();
     if (dictorsetmaker == nullptr) {
-      return Ast::CreateMap(
+      return IR::CreateMap(
         Object::CreatePyList(), Object::CreatePyList(), context
       );
     }
@@ -132,15 +132,15 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
       static_cast<uint64_t>(tests.size()) / 2
     );
     for (Index i = 0; i < tests.size(); i += 2) {
-      keys.Push(std::any_cast<Ast::INodePtr>(visitTest(tests[i])));
-      values.Push(std::any_cast<Ast::INodePtr>(visitTest(tests[i + 1])));
+      keys.Push(std::any_cast<IR::INodePtr>(visitTest(tests[i])));
+      values.Push(std::any_cast<IR::INodePtr>(visitTest(tests[i + 1])));
     }
-    return Ast::CreateMap(
+    return IR::CreateMap(
       Object::CreatePyList(keys), Object::CreatePyList(values), context
     );
   } else if (ctx->name() != nullptr) {
     // 情况 4: name
-    return Ast::CreateIdentifier(
+    return IR::CreateIdentifier(
       Object::CreatePyString(ctx->name()->getText().c_str()), context
     );
     // visitName(ctx->name());
@@ -151,12 +151,12 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
     // 检查字符串中是否包含小数点
     if (numberText.find('.') != std::string::npos) {
       // 情况 5.1: Float
-      return Ast::CreateAtom(
+      return IR::CreateAtom(
         Object::CreatePyFloat(std::stod(numberText)), context
       );
     }
     // 情况 5.2: Integer
-    return Ast::CreateAtom(
+    return IR::CreateAtom(
       Object::CreatePyInteger(
         Collections::CreateIntegerWithCString(numberText.c_str())
       ),
@@ -171,19 +171,19 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
       rawString = rawString.substr(1, rawString.size() - 2);
       str = str->add(Object::CreatePyString(rawString));
     }
-    return Ast::CreateAtom(str, context);
+    return IR::CreateAtom(str, context);
   } else if (ctx->ELLIPSIS() != nullptr) {
     // 情况 7: '...'
     std::cout << "atom: '...'" << std::endl;
   } else if (ctx->NONE() != nullptr) {
     // 情况 8: 'None'
-    return Ast::CreateAtom(Object::CreatePyNone(), context);
+    return IR::CreateAtom(Object::CreatePyNone(), context);
   } else if (ctx->TRUE() != nullptr) {
     // 情况 9: 'True'
-    return Ast::CreateAtom(Object::CreatePyBoolean(true), context);
+    return IR::CreateAtom(Object::CreatePyBoolean(true), context);
   } else if (ctx->FALSE() != nullptr) {
     // 情况 10: 'False'
-    return Ast::CreateAtom(Object::CreatePyBoolean(false), context);
+    return IR::CreateAtom(Object::CreatePyBoolean(false), context);
   } else {
     // 其他情况
     std::cout << "atom: Unknown type" << std::endl;
@@ -197,82 +197,68 @@ antlrcpp::Any Generator::visitExpr(Python3Parser::ExprContext* ctx) {
   }
   auto exprs = ctx->expr();
   if (exprs.size() == 1) {
-    auto operand = std::any_cast<Ast::INodePtr>(visitExpr(exprs[0]));
+    auto operand = std::any_cast<IR::INodePtr>(visitExpr(exprs[0]));
     if (ctx->ADD().size() == 1) {
-      return Ast::CreateUnary(Ast::Unary::Operator::PLUS, operand, context);
+      return IR::CreateUnary(IR::Unary::Operator::PLUS, operand, context);
     }
     if (ctx->MINUS().size() == 1) {
-      return Ast::CreateUnary(Ast::Unary::Operator::MINUS, operand, context);
+      return IR::CreateUnary(IR::Unary::Operator::MINUS, operand, context);
     }
     if (ctx->NOT_OP().size() == 1) {
-      return Ast::CreateUnary(Ast::Unary::Operator::INVERT, operand, context);
+      return IR::CreateUnary(IR::Unary::Operator::INVERT, operand, context);
     }
   }
   if (exprs.size() == 2) {
-    auto left = std::any_cast<Ast::INodePtr>(visitExpr(exprs[0]));
-    auto right = std::any_cast<Ast::INodePtr>(visitExpr(exprs[1]));
+    auto left = std::any_cast<IR::INodePtr>(visitExpr(exprs[0]));
+    auto right = std::any_cast<IR::INodePtr>(visitExpr(exprs[1]));
     if (ctx->STAR() != nullptr) {
-      return Ast::CreateBinary(
-        Ast::Binary::Operator::MUL, left, right, context
-      );
+      return IR::CreateBinary(IR::Binary::Operator::MUL, left, right, context);
     }
     if (ctx->POWER() != nullptr) {
-      return Ast::CreateBinary(
-        Ast::Binary::Operator::POWER, left, right, context
+      return IR::CreateBinary(
+        IR::Binary::Operator::POWER, left, right, context
       );
     }
     if (ctx->AT() != nullptr) {
-      return Ast::CreateBinary(
-        Ast::Binary::Operator::MATMUL, left, right, context
+      return IR::CreateBinary(
+        IR::Binary::Operator::MATMUL, left, right, context
       );
     }
     if (ctx->DIV() != nullptr) {
-      return Ast::CreateBinary(
-        Ast::Binary::Operator::DIV, left, right, context
-      );
+      return IR::CreateBinary(IR::Binary::Operator::DIV, left, right, context);
     }
     if (ctx->MOD() != nullptr) {
-      return Ast::CreateBinary(
-        Ast::Binary::Operator::MOD, left, right, context
-      );
+      return IR::CreateBinary(IR::Binary::Operator::MOD, left, right, context);
     }
     if (ctx->IDIV() != nullptr) {
-      return Ast::CreateBinary(
-        Ast::Binary::Operator::FLOOR_DIV, left, right, context
+      return IR::CreateBinary(
+        IR::Binary::Operator::FLOOR_DIV, left, right, context
       );
     }
     if (ctx->ADD().size() == 1) {
-      return Ast::CreateBinary(
-        Ast::Binary::Operator::ADD, left, right, context
-      );
+      return IR::CreateBinary(IR::Binary::Operator::ADD, left, right, context);
     }
     if (ctx->MINUS().size() == 1) {
-      return Ast::CreateBinary(
-        Ast::Binary::Operator::SUB, left, right, context
-      );
+      return IR::CreateBinary(IR::Binary::Operator::SUB, left, right, context);
     }
     if (ctx->LEFT_SHIFT() != nullptr) {
-      return Ast::CreateBinary(
-        Ast::Binary::Operator::LSHIFT, left, right, context
+      return IR::CreateBinary(
+        IR::Binary::Operator::LSHIFT, left, right, context
       );
     }
     if (ctx->RIGHT_SHIFT() != nullptr) {
-      return Ast::CreateBinary(
-        Ast::Binary::Operator::RSHIFT, left, right, context
+      return IR::CreateBinary(
+        IR::Binary::Operator::RSHIFT, left, right, context
       );
     }
     if (ctx->AND_OP() != nullptr) {
-      return Ast::CreateBinary(
-        Ast::Binary::Operator::AND, left, right, context
-      );
+      return IR::CreateBinary(IR::Binary::Operator::AND, left, right, context);
     }
     if (ctx->XOR() != nullptr) {
-      return Ast::CreateBinary(
-        Ast::Binary::Operator::XOR, left, right, context
-      );
+      return IR::CreateBinary(IR::Binary::Operator::XOR, left, right, context);
     }
     if (ctx->OR_OP() != nullptr) {
-      return Ast::CreateBinary(Ast::Binary::Operator::OR, left, right, context);
+      return IR::CreateBinary(IR::Binary::Operator::OR, left, right, context);
     }
   }
   throw std::runtime_error("Unknown expression type");
@@ -288,126 +274,124 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
 
   // 处理增强赋值 (augassign)
   if (ctx->augassign() != nullptr) {
-    auto target = std::any_cast<Ast::INodePtr>(
+    auto target = std::any_cast<IR::INodePtr>(
       visitTestlist_star_expr(ctx->testlist_star_expr(0))
     );
-    auto targetCopy = std::any_cast<Ast::INodePtr>(
+    auto targetCopy = std::any_cast<IR::INodePtr>(
       visitTestlist_star_expr(ctx->testlist_star_expr(0))
     );
-    auto source = std::any_cast<Ast::INodePtr>(visitTestlist(ctx->testlist()));
+    auto source = std::any_cast<IR::INodePtr>(visitTestlist(ctx->testlist()));
     if (ctx->augassign()->ADD_ASSIGN() != nullptr) {
-      return Ast::CreateAssignStmt(
+      return IR::CreateAssignStmt(
         target,
-        Ast::CreateBinary(
-          Ast::Binary::Operator::ADD, targetCopy, source, context
+        IR::CreateBinary(
+          IR::Binary::Operator::ADD, targetCopy, source, context
         ),
         context
       );
     }
     if (ctx->augassign()->SUB_ASSIGN() != nullptr) {
-      return Ast::CreateAssignStmt(
+      return IR::CreateAssignStmt(
         target,
-        Ast::CreateBinary(
-          Ast::Binary::Operator::SUB, targetCopy, source, context
+        IR::CreateBinary(
+          IR::Binary::Operator::SUB, targetCopy, source, context
         ),
         context
       );
     }
     if (ctx->augassign()->MULT_ASSIGN() != nullptr) {
-      return Ast::CreateAssignStmt(
+      return IR::CreateAssignStmt(
         target,
-        Ast::CreateBinary(
-          Ast::Binary::Operator::MUL, targetCopy, source, context
+        IR::CreateBinary(
+          IR::Binary::Operator::MUL, targetCopy, source, context
         ),
         context
       );
     }
     if (ctx->augassign()->AT_ASSIGN() != nullptr) {
-      return Ast::CreateAssignStmt(
+      return IR::CreateAssignStmt(
         target,
-        Ast::CreateBinary(
-          Ast::Binary::Operator::MATMUL, targetCopy, source, context
+        IR::CreateBinary(
+          IR::Binary::Operator::MATMUL, targetCopy, source, context
         ),
         context
       );
     }
     if (ctx->augassign()->DIV_ASSIGN() != nullptr) {
-      return Ast::CreateAssignStmt(
+      return IR::CreateAssignStmt(
         target,
-        Ast::CreateBinary(
-          Ast::Binary::Operator::DIV, targetCopy, source, context
+        IR::CreateBinary(
+          IR::Binary::Operator::DIV, targetCopy, source, context
         ),
         context
       );
     }
     if (ctx->augassign()->MOD_ASSIGN() != nullptr) {
-      return Ast::CreateAssignStmt(
+      return IR::CreateAssignStmt(
         target,
-        Ast::CreateBinary(
-          Ast::Binary::Operator::MOD, targetCopy, source, context
+        IR::CreateBinary(
+          IR::Binary::Operator::MOD, targetCopy, source, context
         ),
         context
       );
     }
     if (ctx->augassign()->AND_ASSIGN() != nullptr) {
-      return Ast::CreateAssignStmt(
+      return IR::CreateAssignStmt(
         target,
-        Ast::CreateBinary(
-          Ast::Binary::Operator::AND, targetCopy, source, context
+        IR::CreateBinary(
+          IR::Binary::Operator::AND, targetCopy, source, context
         ),
         context
       );
     }
     if (ctx->augassign()->OR_ASSIGN() != nullptr) {
-      return Ast::CreateAssignStmt(
+      return IR::CreateAssignStmt(
         target,
-        Ast::CreateBinary(
-          Ast::Binary::Operator::OR, targetCopy, source, context
-        ),
+        IR::CreateBinary(IR::Binary::Operator::OR, targetCopy, source, context),
         context
       );
     }
     if (ctx->augassign()->XOR_ASSIGN() != nullptr) {
-      return Ast::CreateAssignStmt(
+      return IR::CreateAssignStmt(
         target,
-        Ast::CreateBinary(
-          Ast::Binary::Operator::XOR, targetCopy, source, context
+        IR::CreateBinary(
+          IR::Binary::Operator::XOR, targetCopy, source, context
         ),
         context
       );
     }
     if (ctx->augassign()->LEFT_SHIFT_ASSIGN() != nullptr) {
-      return Ast::CreateAssignStmt(
+      return IR::CreateAssignStmt(
         target,
-        Ast::CreateBinary(
-          Ast::Binary::Operator::LSHIFT, targetCopy, source, context
+        IR::CreateBinary(
+          IR::Binary::Operator::LSHIFT, targetCopy, source, context
         ),
         context
       );
     }
     if (ctx->augassign()->RIGHT_SHIFT_ASSIGN() != nullptr) {
-      return Ast::CreateAssignStmt(
+      return IR::CreateAssignStmt(
         target,
-        Ast::CreateBinary(
-          Ast::Binary::Operator::RSHIFT, targetCopy, source, context
+        IR::CreateBinary(
+          IR::Binary::Operator::RSHIFT, targetCopy, source, context
         ),
         context
       );
     }
     if (ctx->augassign()->POWER_ASSIGN() != nullptr) {
-      return Ast::CreateAssignStmt(
+      return IR::CreateAssignStmt(
         target,
-        Ast::CreateBinary(
-          Ast::Binary::Operator::POWER, targetCopy, source, context
+        IR::CreateBinary(
+          IR::Binary::Operator::POWER, targetCopy, source, context
         ),
         context
       );
     }
     if (ctx->augassign()->IDIV_ASSIGN() != nullptr) {
-      return Ast::CreateAssignStmt(
+      return IR::CreateAssignStmt(
         target,
-        Ast::CreateBinary(
-          Ast::Binary::Operator::FLOOR_DIV, targetCopy, source, context
+        IR::CreateBinary(
+          IR::Binary::Operator::FLOOR_DIV, targetCopy, source, context
         ),
         context
       );
@@ -416,19 +400,19 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
 
   // 处理普通赋值或多重赋值
   if (!ctx->ASSIGN().empty()) {
-    auto source = std::any_cast<Ast::INodePtr>(
+    auto source = std::any_cast<IR::INodePtr>(
       visitTestlist_star_expr(ctx->testlist_star_expr(1))
     );
-    auto target = std::any_cast<Ast::INodePtr>(
+    auto target = std::any_cast<IR::INodePtr>(
       visitTestlist_star_expr(ctx->testlist_star_expr(0))
     );
-    return Ast::CreateAssignStmt(target, source, context);
+    return IR::CreateAssignStmt(target, source, context);
   }
 
   // 处理只有 testlist_star_expr 的情况
   if (ctx->ASSIGN().empty()) {
-    return Ast::CreateExprStmt(
-      std::any_cast<Ast::INodePtr>(
+    return IR::CreateExprStmt(
+      std::any_cast<IR::INodePtr>(
         visitTestlist_star_expr(ctx->testlist_star_expr(0))
       ),
       context
@@ -446,7 +430,7 @@ antlrcpp::Any Generator::visitArglist(Python3Parser::ArglistContext* ctx) {
   Collections::List<Object::PyObjPtr> args(static_cast<uint64_t>(arglist.size())
   );
   for (auto* arg : arglist) {
-    args.Push(std::any_cast<Ast::INodePtr>(visitArgument(arg)));
+    args.Push(std::any_cast<IR::INodePtr>(visitArgument(arg)));
   }
   return Object::CreatePyList(args);
 }
@@ -458,32 +442,32 @@ antlrcpp::Any Generator::visitArgument(Python3Parser::ArgumentContext* ctx) {
 antlrcpp::Any Generator::visitAtom_expr(Python3Parser::Atom_exprContext* ctx) {
   if (ctx->trailer().empty()) {
     if (ctx->atom() != nullptr) {
-      return std::any_cast<Ast::INodePtr>(visitAtom(ctx->atom()));
+      return std::any_cast<IR::INodePtr>(visitAtom(ctx->atom()));
     }
     return nullptr;
   }
-  auto identifier = std::any_cast<Ast::INodePtr>(visitAtom(ctx->atom()));
+  auto identifier = std::any_cast<IR::INodePtr>(visitAtom(ctx->atom()));
   auto result = identifier;
   auto trailers = ctx->trailer();
   for (auto& trailer : trailers) {
     if (trailer->OPEN_PAREN() != nullptr) {  // '('
       if (trailer->arglist() == nullptr) {
         result =
-          Ast::CreateFunctionCall(result, Object::CreatePyList(), context);
+          IR::CreateFunctionCall(result, Object::CreatePyList(), context);
       } else {
         auto args =
           std::any_cast<Object::PyListPtr>(visitArglist(trailer->arglist()));
-        result = Ast::CreateFunctionCall(result, args, context);
+        result = IR::CreateFunctionCall(result, args, context);
       }
     } else if (trailer->OPEN_BRACK() != nullptr) {  // '['
       auto args =
-        std::any_cast<Ast::INodePtr>(visitSubscriptlist(trailer->subscriptlist()
-        ));
+        std::any_cast<IR::INodePtr>(visitSubscriptlist(trailer->subscriptlist())
+        );
       result =
-        Ast::CreateBinary(Ast::Binary::Operator::SUBSCR, result, args, context);
+        IR::CreateBinary(IR::Binary::Operator::SUBSCR, result, args, context);
     } else if (trailer->DOT() != nullptr) {  // '.'
       auto args = Object::CreatePyString(trailer->name()->getText().c_str());
-      result = Ast::CreateMemberAccess(result, args, context);
+      result = IR::CreateMemberAccess(result, args, context);
     }
   }
   return result;
@@ -501,28 +485,28 @@ antlrcpp::Any Generator::visitTest(Python3Parser::TestContext* ctx) {
 
 antlrcpp::Any Generator::visitOr_test(Python3Parser::Or_testContext* ctx) {
   auto andTests = ctx->and_test();
-  auto left = std::any_cast<Ast::INodePtr>(visitAnd_test(andTests[0]));
+  auto left = std::any_cast<IR::INodePtr>(visitAnd_test(andTests[0]));
   if (andTests.size() == 1) {
     return left;
   }
-  Ast::INodePtr right = nullptr;
+  IR::INodePtr right = nullptr;
   for (Index i = 1; i < andTests.size(); ++i) {
-    right = std::any_cast<Ast::INodePtr>(visitAnd_test(andTests[i]));
-    left = Ast::CreateBinary(Ast::Binary::Operator::OR, left, right, context);
+    right = std::any_cast<IR::INodePtr>(visitAnd_test(andTests[i]));
+    left = IR::CreateBinary(IR::Binary::Operator::OR, left, right, context);
   }
   return left;
 }
 
 antlrcpp::Any Generator::visitAnd_test(Python3Parser::And_testContext* ctx) {
   auto notTests = ctx->not_test();
-  auto left = std::any_cast<Ast::INodePtr>(visitNot_test(notTests[0]));
+  auto left = std::any_cast<IR::INodePtr>(visitNot_test(notTests[0]));
   if (notTests.size() == 1) {
     return left;
   }
-  Ast::INodePtr right = nullptr;
+  IR::INodePtr right = nullptr;
   for (Index i = 1; i < notTests.size(); ++i) {
-    right = std::any_cast<Ast::INodePtr>(visitNot_test(notTests[i]));
-    left = Ast::CreateBinary(Ast::Binary::Operator::AND, left, right, context);
+    right = std::any_cast<IR::INodePtr>(visitNot_test(notTests[i]));
+    left = IR::CreateBinary(IR::Binary::Operator::AND, left, right, context);
   }
   return left;
 }
@@ -532,8 +516,8 @@ antlrcpp::Any Generator::visitNot_test(Python3Parser::Not_testContext* ctx) {
     return visitComparison(ctx->comparison());
   }
   if (ctx->NOT() != nullptr) {
-    auto operand = std::any_cast<Ast::INodePtr>(visitNot_test(ctx->not_test()));
-    return Ast::CreateUnary(Ast::Unary::Operator::NOT, operand, context);
+    auto operand = std::any_cast<IR::INodePtr>(visitNot_test(ctx->not_test()));
+    return IR::CreateUnary(IR::Unary::Operator::NOT, operand, context);
   }
   throw std::runtime_error("visitNot_test: Unknown type");
 }
@@ -543,37 +527,37 @@ antlrcpp::Any Generator::visitComparison(Python3Parser::ComparisonContext* ctx
   if (ctx->comp_op().empty()) {
     return visitExpr(ctx->expr(0));
   }
-  auto left = std::any_cast<Ast::INodePtr>(visitExpr(ctx->expr(0)));
-  auto right = std::any_cast<Ast::INodePtr>(visitExpr(ctx->expr(1)));
+  auto left = std::any_cast<IR::INodePtr>(visitExpr(ctx->expr(0)));
+  auto right = std::any_cast<IR::INodePtr>(visitExpr(ctx->expr(1)));
   if (ctx->comp_op(0)->GT_EQ() != nullptr) {
-    return CreateBinary(Ast::Binary::Operator::GE, left, right, context);
+    return CreateBinary(IR::Binary::Operator::GE, left, right, context);
   }
   if (ctx->comp_op(0)->LT_EQ() != nullptr) {
-    return CreateBinary(Ast::Binary::Operator::LE, left, right, context);
+    return CreateBinary(IR::Binary::Operator::LE, left, right, context);
   }
   if (ctx->comp_op(0)->EQUALS() != nullptr) {
-    return CreateBinary(Ast::Binary::Operator::EQ, left, right, context);
+    return CreateBinary(IR::Binary::Operator::EQ, left, right, context);
   }
   if ((ctx->comp_op(0)->NOT_EQ_1() != nullptr) || (ctx->comp_op(0)->NOT_EQ_2() != nullptr)) {
-    return CreateBinary(Ast::Binary::Operator::NE, left, right, context);
+    return CreateBinary(IR::Binary::Operator::NE, left, right, context);
   }
   if (ctx->comp_op(0)->LESS_THAN() != nullptr) {
-    return CreateBinary(Ast::Binary::Operator::LT, left, right, context);
+    return CreateBinary(IR::Binary::Operator::LT, left, right, context);
   }
   if (ctx->comp_op(0)->GREATER_THAN() != nullptr) {
-    return CreateBinary(Ast::Binary::Operator::GT, left, right, context);
+    return CreateBinary(IR::Binary::Operator::GT, left, right, context);
   }
   if (ctx->comp_op(0)->getText() == "in") {
-    return CreateBinary(Ast::Binary::Operator::IN_OP, left, right, context);
+    return CreateBinary(IR::Binary::Operator::IN_OP, left, right, context);
   }
   if (ctx->comp_op(0)->getText() == "notin") {
-    return CreateBinary(Ast::Binary::Operator::NOT_IN, left, right, context);
+    return CreateBinary(IR::Binary::Operator::NOT_IN, left, right, context);
   }
   if (ctx->comp_op(0)->getText() == "is") {
-    return CreateBinary(Ast::Binary::Operator::IS, left, right, context);
+    return CreateBinary(IR::Binary::Operator::IS, left, right, context);
   }
   if (ctx->comp_op(0)->getText() == "isnot") {
-    return CreateBinary(Ast::Binary::Operator::IS_NOT, left, right, context);
+    return CreateBinary(IR::Binary::Operator::IS_NOT, left, right, context);
   }
   return nullptr;
 }
@@ -636,15 +620,15 @@ antlrcpp::Any Generator::visitFuncdef(Python3Parser::FuncdefContext* ctx) {
     std::any_cast<Object::PyListPtr>(visitParameters(ctx->parameters()));
   // 3. 创建函数对象
   auto funcDef =
-    Ast::CreateFuncDef(funcName, parameters, Object::CreatePyList(), context)
-      ->as<Ast::FuncDef>();
+    IR::CreateFuncDef(funcName, parameters, Object::CreatePyList(), context)
+      ->as<IR::FuncDef>();
   auto oldContext = context;
   context = funcDef;
   // 4. 获取函数体
   auto body = std::any_cast<Object::PyListPtr>(visitBlock(ctx->block()));
   funcDef->SetBody(body);
   context = oldContext;
-  return std::dynamic_pointer_cast<Ast::INode>(funcDef);
+  return std::dynamic_pointer_cast<IR::INode>(funcDef);
 }
 
 antlrcpp::Any Generator::visitBlock(Python3Parser::BlockContext* ctx) {
@@ -655,8 +639,8 @@ antlrcpp::Any Generator::visitBlock(Python3Parser::BlockContext* ctx) {
     );
     for (auto* statement : statements) {
       auto stmt = visitStmt(statement);
-      if (stmt.type() == typeid(Ast::INodePtr)) {
-        stmts.Push(std::any_cast<Ast::INodePtr>(stmt));
+      if (stmt.type() == typeid(IR::INodePtr)) {
+        stmts.Push(std::any_cast<IR::INodePtr>(stmt));
         continue;
       }
       if (stmt.type() == typeid(Object::PyListPtr)) {
@@ -686,7 +670,7 @@ antlrcpp::Any Generator::visitSimple_stmts(
       static_cast<uint64_t>(simple_stmt.size())
     );
     for (auto* stmt : simple_stmt) {
-      stmts.Push(std::any_cast<Ast::INodePtr>(visitSimple_stmt(stmt)));
+      stmts.Push(std::any_cast<IR::INodePtr>(visitSimple_stmt(stmt)));
     }
     return Object::CreatePyList(stmts);
   }
@@ -696,12 +680,12 @@ antlrcpp::Any Generator::visitSimple_stmts(
 antlrcpp::Any Generator::visitReturn_stmt(Python3Parser::Return_stmtContext* ctx
 ) {
   if (ctx->testlist() == nullptr) {
-    return Ast::CreateReturnStmt(
+    return IR::CreateReturnStmt(
       CreateAtom(Object::CreatePyNone(), context), context
     );
   }
-  return Ast::CreateReturnStmt(
-    std::any_cast<Ast::INodePtr>(visitTestlist(ctx->testlist())), context
+  return IR::CreateReturnStmt(
+    std::any_cast<IR::INodePtr>(visitTestlist(ctx->testlist())), context
   );
 }
 
@@ -734,7 +718,7 @@ antlrcpp::Any Generator::visitTfpdef(Python3Parser::TfpdefContext* ctx) {
 }
 
 antlrcpp::Any Generator::visitIf_stmt(Python3Parser::If_stmtContext* ctx) {
-  auto condition = std::any_cast<Ast::INodePtr>(visitTest(ctx->test(0)));
+  auto condition = std::any_cast<IR::INodePtr>(visitTest(ctx->test(0)));
   auto thenStmts = std::any_cast<Object::PyListPtr>(visitBlock(ctx->block(0)));
   Object::PyListPtr elseStmts = Object::CreatePyList();
   Object::PyListPtr elseIfStmts = Object::CreatePyList();
@@ -744,7 +728,7 @@ antlrcpp::Any Generator::visitIf_stmt(Python3Parser::If_stmtContext* ctx) {
   if (elseifCount > 0) {
     for (size_t i = 0; i < elseifCount; ++i) {
       auto elseIfCondition =
-        std::any_cast<Ast::INodePtr>(visitTest(ctx->test(i + 1)));
+        std::any_cast<IR::INodePtr>(visitTest(ctx->test(i + 1)));
       elseIfConditions->Append(elseIfCondition);
       auto block =
         std::any_cast<Object::PyListPtr>(visitBlock(ctx->block(i + 1)));
@@ -756,7 +740,7 @@ antlrcpp::Any Generator::visitIf_stmt(Python3Parser::If_stmtContext* ctx) {
       std::any_cast<Object::PyListPtr>(visitBlock(ctx->block(elseifCount + 1)));
   }
 
-  auto ifStmt = Ast::CreateIfStmt(
+  auto ifStmt = IR::CreateIfStmt(
     condition, thenStmts, elseStmts, elseIfStmts, elseIfConditions, context
   );
   return ifStmt;
@@ -764,9 +748,9 @@ antlrcpp::Any Generator::visitIf_stmt(Python3Parser::If_stmtContext* ctx) {
 
 antlrcpp::Any Generator::visitWhile_stmt(Python3Parser::While_stmtContext* ctx
 ) {
-  auto condition = std::any_cast<Ast::INodePtr>(visitTest(ctx->test()));
+  auto condition = std::any_cast<IR::INodePtr>(visitTest(ctx->test()));
   auto body = std::any_cast<Object::PyListPtr>(visitBlock(ctx->block(0)));
-  return Ast::CreateWhileStmt(condition, body, context);
+  return IR::CreateWhileStmt(condition, body, context);
 }
 
 // 返回一个INodePtr
@@ -774,26 +758,26 @@ antlrcpp::Any Generator::visitSubscriptlist(
   Python3Parser::SubscriptlistContext* ctx
 ) {
   if (ctx->subscript_().size() == 1) {
-    return std::any_cast<Ast::INodePtr>(visitSubscript_(ctx->subscript_(0)));
+    return std::any_cast<IR::INodePtr>(visitSubscript_(ctx->subscript_(0)));
   }
   Collections::List<Object::PyObjPtr> subscripts(
     static_cast<uint64_t>(ctx->subscript_().size())
   );
   for (auto* subscript : ctx->subscript_()) {
-    subscripts.Push(std::any_cast<Ast::INodePtr>(visitSubscript_(subscript)));
+    subscripts.Push(std::any_cast<IR::INodePtr>(visitSubscript_(subscript)));
   }
-  return Ast::CreateList(Object::CreatePyList(subscripts), context);
+  return IR::CreateList(Object::CreatePyList(subscripts), context);
 }
 
 antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx
 ) {
   if (ctx->COLON() == nullptr) {
-    return std::any_cast<Ast::INodePtr>(visitTest(ctx->test(0)));
+    return std::any_cast<IR::INodePtr>(visitTest(ctx->test(0)));
   }
-  auto none = Ast::CreateAtom(Object::CreatePyNone(), context);
+  auto none = IR::CreateAtom(Object::CreatePyNone(), context);
   auto step = none;
   if (ctx->sliceop() != nullptr) {
-    step = std::any_cast<Ast::INodePtr>(visitSliceop(ctx->sliceop()));
+    step = std::any_cast<IR::INodePtr>(visitSliceop(ctx->sliceop()));
   }
   // 存在冒号
   // 如果只有一个test
@@ -801,27 +785,27 @@ antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx
   if (ctx->test().size() == 1) {
     auto* test = ctx->test(0);
     auto* colon = ctx->COLON();
-    auto value = std::any_cast<Ast::INodePtr>(visitTest(test));
+    auto value = std::any_cast<IR::INodePtr>(visitTest(test));
     if (colon->getSymbol()->getTokenIndex() < test->getStart()->getTokenIndex()) {
-      return Ast::CreateSlice(
+      return IR::CreateSlice(
         Object::CreatePyList({none, value, step}), context
       );
     }
-    return Ast::CreateSlice(Object::CreatePyList({value, none, step}), context);
+    return IR::CreateSlice(Object::CreatePyList({value, none, step}), context);
   }
   if (ctx->test().size() == 2) {
-    auto start = std::any_cast<Ast::INodePtr>(visitTest(ctx->test(0)));
-    auto stop = std::any_cast<Ast::INodePtr>(visitTest(ctx->test(1)));
-    return Ast::CreateSlice(Object::CreatePyList({start, stop, step}), context);
+    auto start = std::any_cast<IR::INodePtr>(visitTest(ctx->test(0)));
+    auto stop = std::any_cast<IR::INodePtr>(visitTest(ctx->test(1)));
+    return IR::CreateSlice(Object::CreatePyList({start, stop, step}), context);
   }
-  return Ast::CreateSlice(Object::CreatePyList({none, none, step}), context);
+  return IR::CreateSlice(Object::CreatePyList({none, none, step}), context);
 }
 
 antlrcpp::Any Generator::visitFor_stmt(Python3Parser::For_stmtContext* ctx) {
-  auto target = std::any_cast<Ast::INodePtr>(visitExprlist(ctx->exprlist()));
-  auto iter = std::any_cast<Ast::INodePtr>(visitTestlist(ctx->testlist()));
+  auto target = std::any_cast<IR::INodePtr>(visitExprlist(ctx->exprlist()));
+  auto iter = std::any_cast<IR::INodePtr>(visitTestlist(ctx->testlist()));
   auto body = std::any_cast<Object::PyListPtr>(visitBlock(ctx->block(0)));
-  return Ast::CreateForStmt(target, iter, body, context);
+  return IR::CreateForStmt(target, iter, body, context);
 }
 
 antlrcpp::Any Generator::visitExprlist(Python3Parser::ExprlistContext* ctx) {
@@ -830,42 +814,41 @@ antlrcpp::Any Generator::visitExprlist(Python3Parser::ExprlistContext* ctx) {
 
 antlrcpp::Any Generator::visitClassdef(Python3Parser::ClassdefContext* ctx) {
   auto className = Object::CreatePyString(ctx->name()->getText().c_str());
-
   auto bases = Object::CreatePyList();
   if (ctx->arglist() != nullptr) {
     bases = std::any_cast<Object::PyListPtr>(visitArglist(ctx->arglist()));
   }
   if (bases->Length() == 0) {
     bases->Append(
-      Ast::CreateIdentifier(Object::CreatePyString("object"), context)
+      IR::CreateIdentifier(Object::CreatePyString("object"), context)
     );
   }
   auto classDef =
-    Ast::CreateClassDef(className, Ast::CreateList(bases, context), context)
-      ->as<Ast::ClassDef>();
+    IR::CreateClassDef(className, IR::CreateList(bases, context), context)
+      ->as<IR::ClassDef>();
   auto oldContext = context;
   context = classDef;
   auto body = std::any_cast<Object::PyListPtr>(visitBlock(ctx->block()));
   classDef->SetBody(body);
   context = oldContext;
-  return std::dynamic_pointer_cast<Ast::INode>(classDef);
+  return std::dynamic_pointer_cast<IR::INode>(classDef);
 }
 
 antlrcpp::Any
 Generator::visitPass_stmt(Python3Parser::Pass_stmtContext* /*ctx*/) {
-  return Ast::CreatePassStmt(context);
+  return IR::CreatePassStmt(context);
 }
 
 antlrcpp::Any Generator::visitImport_stmt(
   Python3Parser::Import_stmtContext* /*ctx*/
 ) {
-  return Ast::CreateAtom(Object::CreatePyNone(), context);
+  return IR::CreateAtom(Object::CreatePyNone(), context);
 }
 
 antlrcpp::Any Generator::visitYield_stmt(Python3Parser::Yield_stmtContext* ctx
 ) {
-  return Ast::CreateYieldStmt(
-    std::any_cast<Ast::INodePtr>(visitYield_expr(ctx->yield_expr())), context
+  return IR::CreateYieldStmt(
+    std::any_cast<IR::INodePtr>(visitYield_expr(ctx->yield_expr())), context
   );
 }
 
@@ -874,7 +857,7 @@ antlrcpp::Any Generator::visitYield_expr(Python3Parser::Yield_exprContext* ctx
   if (ctx->yield_arg()->testlist() != nullptr) {
     return visitTestlist(ctx->yield_arg()->testlist());
   }
-  return Ast::CreateAtom(Object::CreatePyNone(), context);
+  return IR::CreateAtom(Object::CreatePyNone(), context);
 }
 
 }  // namespace torchlight::Generation

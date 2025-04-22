@@ -224,12 +224,19 @@ PyListPtr MergeMro(const PyListPtr& mros) {
     //    ));
   }
   if (mros->Length() == 0) {
+    //    Function::DebugPrint(StringConcat(
+    //      CreatePyList({CreatePyString("the mro is: "), result->str()})
+    //    ));
     return result;
   }
   auto last_mro = mros->GetItem(0)->as<PyList>();
   for (Index i = 0; i < last_mro->Length(); i++) {
     result->Append(last_mro->GetItem(i));
   }
+  //  Function::DebugPrint(
+  //    StringConcat(CreatePyList({CreatePyString("the mro is: "),
+  //    result->str()}))
+  //  );
   return result;
 }
 

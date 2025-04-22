@@ -1,0 +1,33 @@
+#include "IR/Expression/Atom.h"
+#include "Object/Core/PyNone.h"
+#include "Object/Core/PyObject.h"
+
+namespace torchlight::IR {
+
+Object::PyObjPtr
+AtomKlass::emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) {
+  auto atom = obj->as<Atom>();
+  auto code = GetCodeFromList(codeList, atom);
+  auto object = atom->Obj();
+  if (std::dynamic_pointer_cast<INode>(object) == nullptr) {
+    code->LoadConst(object);
+    return Object::CreatePyNone();
+  }
+  throw std::runtime_error("AtomKlass::emit(): unsupported object type");
+}
+
+Object::PyObjPtr AtomKlass::visit(
+  const Object::PyObjPtr& obj,
+  const Object::PyObjPtr& codeList
+) {
+  auto atom = obj->as<Atom>();
+  auto code = GetCodeFromList(codeList, atom);
+  auto object = atom->Obj();
+  if (std::dynamic_pointer_cast<INode>(object) == nullptr) {
+    code->RegisterConst(object);
+    return Object::CreatePyNone();
+  }
+  throw std::runtime_error("AtomKlass::visit(): unsupported object type");
+}
+
+}  // namespace torchlight::IR

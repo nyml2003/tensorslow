@@ -10,23 +10,6 @@ Unicode String::Get(Index index) const {
 Index String::Size() const {
   return codePoints.Size();
 }
-// List<String> String::Split(String& delimiter) const {
-//   List<Unicode> str;
-//   List<String> list;
-//   for (Index i = 0; i < Size(); i++) {
-//     if (Get(i) == delimiter.Get(0)) {
-//       if (Find(delimiter, i) == i) {
-//         list.Push(std::move(String(std::move(str))));
-//         str.Clear();
-//         i += delimiter.Size() - 1;
-//         continue;
-//       }
-//     }
-//     str.Push(Get(i));
-//   }
-//   list.Push(String(str));
-//   return list;
-// }
 String String::Slice(Index start, Index end) const {
   return String(codePoints.Slice(start, end));
 }
@@ -52,42 +35,6 @@ bool String::EndsWith(const String& suffix) const {
   }
   return true;
 }
-// Index String::Find(String& sub, Index start) const {
-//   if (sub.Size() == 0) {
-//     return 0;
-//   }
-//   if (start >= Size()) {
-//     throw std::runtime_error("Start index out of range");
-//   }
-//   if (sub.Size() + start > Size()) {
-//     throw std::runtime_error("Sub string is longer than the string");
-//   }
-//   List<Index> next(sub.Size());
-//   next.Fill(0);
-//   Index j = 0;
-//   for (Index i = 1; i < sub.Size(); i++) {
-//     while (j > 0 && sub.Get(i) != sub.Get(j)) {
-//       j = next.Get(j - 1);
-//     }
-//     if (sub.Get(i) == sub.Get(j)) {
-//       j++;
-//     }
-//     next.Set(i, j);
-//   }
-//   j = 0;
-//   for (Index i = start; i < Size(); i++) {
-//     while (j > 0 && Get(i) != sub.Get(j)) {
-//       j = next.Get(j - 1);
-//     }
-//     if (Get(i) == sub.Get(j)) {
-//       j++;
-//     }
-//     if (j == sub.Size()) {
-//       return i - sub.Size() + 1;
-//     }
-//   }
-//   throw std::runtime_error("Sub string not found");
-// }
 bool String::Equal(const String& rhs) const {
   if (Size() != rhs.Size()) {
     return false;

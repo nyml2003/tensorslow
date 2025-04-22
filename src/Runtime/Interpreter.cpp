@@ -88,6 +88,7 @@ Object::PyObjPtr Interpreter::Eval(
     auto type = func->as<Object::PyType>();
     return EvalConstructor(type, arguments);
   }
+  Function::DebugPrint(func);
   throw std::runtime_error("Unknown function type");
 }
 

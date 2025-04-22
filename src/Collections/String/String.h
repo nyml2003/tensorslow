@@ -24,21 +24,8 @@ class String {
   String& operator=(const String& other) = default;
   String& operator=(String&& other) noexcept = default;
   ~String() = default;
-  //  /**
-  //   * 用于将字符串分割成多个子串
-  //   * @param delimiter 分隔符
-  //   * @return
-  //   */
-  //  [[nodiscard]] List<String> Split(String& delimiter) const;
-  //  /**
-  //   * 找到start开始的第一个String的位置
-  //   * @param sub
-  //   * @return
-  //   */
-  //  [[nodiscard]] Index Find(String& sub, Index start = 0) const;
   [[nodiscard]] String Upper() const;
   String Add(const String& rhs);
-  // [[nodiscard]] String Copy() const;
   size_t Hash();
   void SetHash(size_t hashValue);
   [[nodiscard]] Unicode Get(Index index) const;

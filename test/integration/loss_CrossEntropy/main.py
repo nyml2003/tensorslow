@@ -96,12 +96,12 @@ class LossFunction(Node):
 
 class CrossEntropyWithSoftMax(LossFunction):
     def compute(self):
-        prob = SoftMax(self.parents[0].value)
+        prob = Softmax(self.parents[0].value)
         value = -Sum(self.parents[1].value * Log(prob))
         self.value = Array(value).reshape([1, 1])
 
     def get_jacobi(self, parent):
-        prob = SoftMax(self.parents[0].value)
+        prob = Softmax(self.parents[0].value)
         if parent is self.parents[0]:
             return (prob - self.parents[1].value).T
         else:

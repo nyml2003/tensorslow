@@ -1,3 +1,4 @@
+time()
 data_class_0 = Array([[5.1, 3.5, 1.4, 0.2, 1., 0., 0.],
                       [4.9, 3., 1.4, 0.2, 1., 0., 0.],
                       [4.7, 3.2, 1.3, 0.2, 1., 0., 0.],
@@ -499,6 +500,7 @@ for epoch in range(50):
             batch_counter = 0
     accuracy = predict_and_evaluate(train_set, predict, x)
     print("epoch: ", epoch + 1, " accuracy: ", accuracy)
-
 accuracy = predict_and_evaluate(test_set, predict, x)
 print("test accuracy: ", accuracy)
+
+time()

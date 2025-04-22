@@ -1,7 +1,7 @@
 #ifndef TORCHLIGHT_EVALVISITOR_H
 #define TORCHLIGHT_EVALVISITOR_H
 
-#include "Ast/INode.h"
+#include "IR/INode.h"
 #include "Python3ParserBaseVisitor.h"
 
 #include "antlr4-runtime.h"
@@ -11,7 +11,7 @@ namespace torchlight::Generation {
 class Generator : public Python3ParserBaseVisitor {
  private:
   Object::PyListPtr codeList;
-  Ast::INodePtr context;
+  IR::INodePtr context;
 
  public:
   explicit Generator(const Object::PyStrPtr& filename);
