@@ -183,7 +183,7 @@ PyObjPtr ListKlass::mul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 
 PyObjPtr ListKlass::str(const PyObjPtr& obj) {
   auto list = obj->as<PyList>();
-  auto strList = Map(list, [](const PyObjPtr& value) { return value->str(); });
+  auto strList = Map(list, [](const PyObjPtr& value) { return value->repr(); });
   return StringConcat(CreatePyList(
     {CreatePyString("[")->as<PyString>(),
      CreatePyString(", ")->as<PyString>()->Join(strList),

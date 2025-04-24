@@ -153,6 +153,7 @@ class ScalarMultiply(Operator):
     def get_jacobi(self, parent):
         parent0 = self.parents[0]
         parent1 = self.parents[1]
+
         if parent is parent0:
             return Diag(parent1.value.ravel())
         if parent is parent1:

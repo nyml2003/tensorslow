@@ -224,6 +224,9 @@ void PyString::PrintLine(bool enableIndent) const {
 }
 
 std::string PyString::ToCppString() const {
+  if (value.Size() == 0) {
+    return "";
+  }
   return Collections::ToCppString(value);
 }
 

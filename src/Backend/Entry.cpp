@@ -125,6 +125,8 @@ void HandleResultEnd(const fs::path& filename) {
       std::getline(expected_stream, expected_line);
       if (write_line != expected_line) {
         std::cout << "❌ 测试失败" << std::endl;
+        std::cout << "预期结果: " << expected_line << std::endl;
+        std::cout << "实际结果: " << write_line << std::endl;
         exit(1);
       }
     }

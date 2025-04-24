@@ -41,12 +41,16 @@ void DebugPrint(const Object::PyObjPtr& obj) {
 Object::PyObjPtr Print(const Object::PyObjPtr& args) {
   CheckNativeFunctionArguments(args);
   auto argList = args->as<Object::PyList>();
-  for (Index i = 0; i < argList->Length(); i++) {
+  if (argList->Length() == 0) {
+    Object::CreatePyString("\n")->Print();
+    return Object::CreatePyNone();
+  }
+  argList->GetItem(0)->str()->as<Object::PyString>()->Print();
+  auto sep = Object::CreatePyString(" ")->as<Object::PyString>()->ToCppString();
+  for (Index i = 1; i < argList->Length(); i++) {
+    std::cout << sep;
     auto arg = argList->GetItem(i);
     arg->str()->as<Object::PyString>()->Print();
-    if (i < argList->Length() - 1) {
-      Object::CreatePyString(" ")->Print();
-    }
   }
   Object::CreatePyString("\n")->Print();
   return Object::CreatePyNone();

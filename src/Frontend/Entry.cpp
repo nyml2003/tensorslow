@@ -99,11 +99,11 @@ void ParseAndGenerate(const fs::path& filePath) {
 
   antlr4::tree::ParseTree* tree = parser.file_input();
 
-  // 打印词法
-  std::cout << "词法分析结果: " << std::endl;
-  for (const auto& token : tokens.getTokens()) {
-    std::cout << token->toString() << std::endl;
-  }
+  //  // 打印词法
+  //  std::cout << "词法分析结果: " << std::endl;
+  //  for (const auto& token : tokens.getTokens()) {
+  //    std::cout << token->toString() << std::endl;
+  //  }
 
   if (ArgsHelper::Has("show_ast") || true) {
     std::cout << "IR tree: " << std::endl;
