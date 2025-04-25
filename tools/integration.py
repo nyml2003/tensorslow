@@ -39,27 +39,27 @@ for subdir in subdirs:
     subdir_path = os.path.join(test_dir, subdir)
 
     # 删除.pyc和.out文件
-    print(f"Cleaning up .pyc and .out files in {subdir_path}")
+    # print(f"Cleaning up .pyc and .out files in {subdir_path}")
     for file in glob.glob(os.path.join(subdir_path, "*.pyc")):
         os.remove(file)
     for file in glob.glob(os.path.join(subdir_path, "*.out")):
         os.remove(file)
 
-    print('---------------------------------')
+    # print('---------------------------------')
 
     # 获取所有.py文件（排除.pyc）
     py_files = glob.glob(os.path.join(subdir_path, "*.py"))
 
     for py_file in py_files:
         source_code = py_file
-        print("源代码:")
-        with open(source_code, "r", encoding="utf-8") as f:
-            print(f.read())
-        print("正在编译到字节码...")
+        # print("源代码:")
+        # with open(source_code, "r", encoding="utf-8") as f:
+        #     print(f.read())
+        # print("正在编译到字节码...")
 
         # 打印前端执行命令
         frontend_command = f'"{frontend_exe}" --file="{source_code}"'
-        print(frontend_command)
+        # print(frontend_command)
         subprocess.run(frontend_command, shell=True)
 
     # 选择执行的.pyc文件
@@ -75,16 +75,16 @@ for subdir in subdirs:
             selected_pyc = None
 
     if selected_pyc:
-        print(f"source_code: {selected_pyc}")
-        print("正在读取并执行字节码...")
+        # print(f"source_code: {selected_pyc}")
+        # print("正在读取并执行字节码...")
 
         # 打印后端执行命令
         backend_command = f'"{backend_exe}" --file="{selected_pyc}" --compare_result="true"'
-        print(backend_command)
+        # print(backend_command)
         result = subprocess.run(backend_command, shell=True)
         if result.returncode == 0:
             test_passed += 1
-            print(f"测试 {subdir} 成功")
+            # print(f"测试 {subdir} 成功")
         else:
             test_not_passed_names.append(subdir)
             print(f"测试 {subdir} 失败")
@@ -92,8 +92,8 @@ for subdir in subdirs:
         print(f"警告：{subdir} 目录中没有有效的 .pyc 文件")
         test_not_passed_names.append(subdir)
 
-    print('---------------------------------')
-    print()
+    # print('---------------------------------')
+    # print()
 
 # 计算通过率
 percentage = round((test_passed / test_total) * 100, 2)

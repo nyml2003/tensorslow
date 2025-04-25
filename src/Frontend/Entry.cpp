@@ -90,7 +90,7 @@ void ParseAndGenerate(const fs::path& filePath) {
     std::cerr << "Failed to open file: " << filePath << std::endl;
     return;
   }
-  std::cout << "正在解析文件: " << filePath << std::endl;
+  // std::cout << "正在解析文件: " << filePath << std::endl;
 
   ANTLRInputStream inputStream(stream);
   Python3Lexer lexer(&inputStream);
@@ -105,7 +105,7 @@ void ParseAndGenerate(const fs::path& filePath) {
   //    std::cout << token->toString() << std::endl;
   //  }
 
-  if (ArgsHelper::Has("show_ast") || true) {
+  if (ArgsHelper::Has("show_ast")) {
     std::cout << "IR tree: " << std::endl;
     std::cout << tree->toStringTree(&parser) << std::endl;
   }

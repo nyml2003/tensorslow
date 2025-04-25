@@ -33,8 +33,8 @@ void Write(const Bytes& bytes, const String& filename) {
     reinterpret_cast<const char*>(data.Data()),
     static_cast<std::streamsize>(bytes.Size())
   );
-  std::cout << "写入文件：" << filenameCppString << std::endl;
-  std::cout << "文件大小：" << bytes.Size() << std::endl;
+  // std::cout << "写入文件：" << filenameCppString << std::endl;
+  // std::cout << "文件大小：" << bytes.Size() << std::endl;
   if (!file) {
     std::cerr << "写入文件时出错：" << filenameCppString << std::endl;
   }

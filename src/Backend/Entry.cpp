@@ -80,11 +80,11 @@ void HandleResultBegin(const fs::path& filename) {
     throw std::runtime_error("show_result 和 debug 不能同时为 true");
   }
   if (compare_result) {
-    std::cout << "本次测试模式：和预期结果比较" << std::endl;
+    // std::cout << "本次测试模式：和预期结果比较" << std::endl;
     auto filename_dir = filename.parent_path();
     auto write_filename =
       filename_dir / filename_dir.filename().replace_extension(".out");
-    std::cout << "输出结果到: " << write_filename << std::endl;
+    // std::cout << "输出结果到: " << write_filename << std::endl;
     redirectCout.redirectToFile(write_filename.string());
     return;
   }
@@ -130,12 +130,12 @@ void HandleResultEnd(const fs::path& filename) {
         exit(1);
       }
     }
-    std::cout << "✅ 测试通过" << std::endl << std::endl;
+    // std::cout << "✅ 测试通过" << std::endl;
     return;
   }
 }
 void RunTest(const fs::path& filename) {
-  std::cout << "解析字节码文件: " << filename << std::endl;
+  // std::cout << "解析字节码文件: " << filename << std::endl;
   Runtime::BinaryFileParser parser(filename);
   auto code = parser.Parse();
 
