@@ -26,7 +26,8 @@ Object::PyObjPtr Identity(const Object::PyObjPtr& args) {
   auto obj = args->as<Object::PyList>()->GetItem(0);
   return Object::CreatePyString(
     Collections::CreateIntegerWithU64(reinterpret_cast<uint64_t>(obj.get()))
-      .ToHexString()
+      .ToHexString(),
+    false
   );
 }
 

@@ -4,6 +4,7 @@
 #include "Collections/String/String.h"
 
 #include <cstring>
+#include <iostream>
 #include <stdexcept>
 namespace torchlight::Collections {
 String CreateStringWithCString(const char* str) noexcept {

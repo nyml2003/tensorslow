@@ -188,7 +188,7 @@ PyStrPtr PyString::Join(const PyObjPtr& iterable) {
       sb.Append(item->as<PyString>()->value);
     }
   }
-  return CreatePyString(sb.ToString())->as<PyString>();
+  return CreatePyString(sb.ToString(), false)->as<PyString>();
 }
 
 // PyListPtr PyString::Split(const PyStrPtr& delimiter) {

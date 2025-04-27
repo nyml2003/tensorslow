@@ -50,7 +50,7 @@ PyObjPtr InstKlass::repr(const PyObjPtr& obj) {
       [&sb](int64_t index) { sb.Append(Collections::ToString(index)); }},
     inst->Operand()
   );
-  return CreatePyString(sb.ToString());
+  return CreatePyString(sb.ToString(), false);
 }
 
 PyInstPtr CreateLoadConst(Index index) {

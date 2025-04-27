@@ -94,9 +94,9 @@ class String {
     : codeUnits(std::move(codeUnits)), hashValue(hashValue), hashed(true) {}
   explicit String(List<Byte>&& codeUnits)
     : codeUnits(std::move(codeUnits)), hashValue(0), hashed(false) {}
-
+  
   explicit String(const String& other) = default;
-  explicit String(String& other) = default;
+  explicit String(String& other) = delete;
   explicit String(String&& other) noexcept = default;
   String& operator=(const String& other) = default;
   String& operator=(String&& other) noexcept = default;
