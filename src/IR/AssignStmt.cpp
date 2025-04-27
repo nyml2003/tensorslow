@@ -60,4 +60,16 @@ Object::PyObjPtr AssignStmtKlass::visit(
   return Object::CreatePyNone();
 }
 
+Object::PyObjPtr AssignStmtKlass::print(const Object::PyObjPtr& obj) {
+  auto assignStmt = obj->as<AssignStmt>();
+  auto source = assignStmt->Source();
+  auto target = assignStmt->Target();
+  PrintNode(assignStmt, Object::CreatePyString("AssignStmt"));
+  source->print();
+  PrintEdge(assignStmt, source, Object::CreatePyString("source"));
+  target->print();
+  PrintEdge(assignStmt, target, Object::CreatePyString("target"));
+  return Object::CreatePyNone();
+}
+
 }  // namespace torchlight::IR

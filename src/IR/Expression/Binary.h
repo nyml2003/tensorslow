@@ -28,6 +28,8 @@ class BinaryKlass : public INodeKlass {
 
   Object::PyObjPtr
   emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+
+  Object::PyObjPtr print(const Object::PyObjPtr& obj) override;
 };
 
 class Binary : public IR::INode {
@@ -89,6 +91,52 @@ inline INodePtr CreateBinary(
   return std::make_shared<Binary>(oprt, left, right, parent);
 }
 
+inline Object::PyStrPtr Stringify(Binary::Operator oprt) {
+  switch (oprt) {
+    case Binary::Operator::IN_OP:
+      return Object::CreatePyString("in");
+    case Binary::Operator::LT:
+      return Object::CreatePyString("<");
+    case Binary::Operator::GT:
+      return Object::CreatePyString(">");
+    case Binary::Operator::EQ:
+      return Object::CreatePyString("==");
+    case Binary::Operator::GE:
+      return Object::CreatePyString(">=");
+    case Binary::Operator::LE:
+      return Object::CreatePyString("<=");
+    case Binary::Operator::NE:
+      return Object::CreatePyString("!=");
+    case Binary::Operator::NOT_IN:
+      return Object::CreatePyString("not in");
+    case Binary::Operator::IS:
+      return Object::CreatePyString("is");
+    case Binary::Operator::IS_NOT:
+      return Object::CreatePyString("is not");
+    case Binary::Operator::ADD:
+      return Object::CreatePyString("+");
+    case Binary::Operator::SUB:
+      return Object::CreatePyString("-");
+    case Binary::Operator::MUL:
+      return Object::CreatePyString("*");
+    case Binary::Operator::DIV:
+      return Object::CreatePyString("/");
+    case Binary::Operator::MATMUL:
+      return Object::CreatePyString("@");
+    case Binary::Operator::MOD:
+      return Object::CreatePyString("%");
+    case Binary::Operator::FLOOR_DIV:
+      return Object::CreatePyString("//");
+    case Binary::Operator::SUBSCR:
+      return Object::CreatePyString("[]");
+    case Binary::Operator::STORE_SUBSCR:
+      return Object::CreatePyString("[]=");
+    case Binary::Operator::AND:
+      return Object::CreatePyString("and");
+    case Binary::Operator::OR:
+      return Object::CreatePyString("or");
+  }
+}
 }  // namespace torchlight::IR
 
 #endif

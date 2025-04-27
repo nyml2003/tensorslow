@@ -33,4 +33,18 @@ Object::PyObjPtr FunctionCallKlass::visit(
   return Object::CreatePyNone();
 }
 
+Object::PyObjPtr FunctionCallKlass::print(const Object::PyObjPtr& obj) {
+  auto functionCall = obj->as<FunctionCall>();
+  auto func = functionCall->Func();
+  auto args = functionCall->Args();
+  PrintNode(functionCall, Object::CreatePyString("FunctionCall"));
+  func->print();
+  PrintEdge(functionCall, func, Object::CreatePyString("function"));
+  Object::ForEach(args, [&](const Object::PyObjPtr& arg) {
+    arg->as<INode>()->print();
+    PrintEdge(functionCall, arg, Object::CreatePyString("argument"));
+  });
+  return Object::CreatePyNone();
+}
+
 }  // namespace torchlight::IR

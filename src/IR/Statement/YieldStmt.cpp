@@ -26,4 +26,13 @@ Object::PyObjPtr YieldStmtKlass::emit(
   return Object::CreatePyNone();
 }
 
+Object::PyObjPtr YieldStmtKlass::print(const Object::PyObjPtr& obj) {
+  auto stmt = obj->as<YieldStmt>();
+  auto content = stmt->Content();
+  PrintNode(stmt, Object::CreatePyString("YieldStmt"));
+  content->print();
+  PrintEdge(stmt, content);
+  return Object::CreatePyNone();
+}
+
 }  // namespace torchlight::IR

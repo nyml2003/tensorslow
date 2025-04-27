@@ -43,4 +43,22 @@ Object::PyObjPtr UnaryKlass::emit(
   return Object::CreatePyNone();
 }
 
+Object::PyObjPtr UnaryKlass::print(const Object::PyObjPtr& obj) {
+  auto unary = obj->as<Unary>();
+  auto operand = unary->Operand();
+  auto text = Object::CreatePyString("Unary");
+  auto oprt = Object::CreatePyString(
+    unary->Oprt() == Unary::Operator::PLUS
+      ? "+"
+      : (unary->Oprt() == Unary::Operator::MINUS
+           ? "-"
+           : (unary->Oprt() == Unary::Operator::INVERT ? "~" : "!"))
+  );
+  operand->print();
+  auto textList =
+    StringConcat(Object::CreatePyList({text, oprt}))->as<Object::PyString>();
+  PrintNode(unary, textList);
+  PrintEdge(unary, operand, textList);
+  return Object::CreatePyNone();
+}
 }  // namespace torchlight::IR

@@ -28,4 +28,15 @@ Object::PyObjPtr SliceKlass::visit(
   return Object::CreatePyNone();
 }
 
+Object::PyObjPtr SliceKlass::print(const Object::PyObjPtr& obj) {
+  auto list = obj->as<IR::Slice>();
+  auto elements = list->Elements();
+  PrintNode(list, Object::CreatePyString("Slice"));
+  Object::ForEach(elements, [&](const Object::PyObjPtr& element) {
+    element->as<INode>()->print();
+    PrintEdge(list, element);
+  });
+  return Object::CreatePyNone();
+}
+
 }  // namespace torchlight::IR

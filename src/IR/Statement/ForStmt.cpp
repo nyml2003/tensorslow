@@ -71,4 +71,21 @@ Object::PyObjPtr ForStmtKlass::visit(
   return Object::CreatePyNone();
 }
 
+Object::PyObjPtr ForStmtKlass::print(const Object::PyObjPtr& obj) {
+  auto stmt = obj->as<ForStmt>();
+  auto iter = stmt->Iter();
+  auto target = stmt->Target();
+  auto body = stmt->Body();
+  PrintNode(stmt, Object::CreatePyString("ForStmt"));
+  iter->print();
+  PrintEdge(stmt, iter, Object::CreatePyString("iter"));
+  target->print();
+  PrintEdge(stmt, target, Object::CreatePyString("target"));
+  Object::ForEach(body, [&](const Object::PyObjPtr& stmt) {
+    stmt->as<INode>()->print();
+    PrintEdge(stmt, stmt, Object::CreatePyString("stmt"));
+  });
+  return Object::CreatePyNone();
+}
+
 }  // namespace torchlight::IR

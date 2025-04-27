@@ -25,4 +25,12 @@ Object::PyObjPtr ReturnStmtKlass::emit(
   return Object::CreatePyNone();
 }
 
+Object::PyObjPtr ReturnStmtKlass::print(const Object::PyObjPtr& obj) {
+  auto stmt = obj->as<ReturnStmt>();
+  auto content = stmt->Content();
+  PrintNode(stmt, Object::CreatePyString("ReturnStmt"));
+  content->print();
+  PrintEdge(stmt, content);
+  return Object::CreatePyNone();
+}
 }  // namespace torchlight::IR

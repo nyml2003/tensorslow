@@ -114,4 +114,36 @@ Object::PyObjPtr IfStmtKlass::emit(
   return Object::CreatePyNone();
 }
 
+Object::PyObjPtr IfStmtKlass::print(const Object::PyObjPtr& obj) {
+  auto ifStmt = obj->as<IfStmt>();
+  auto condition = ifStmt->Condition();
+  auto thenStmts = ifStmt->ThenStmts();
+  auto elseStmts = ifStmt->ElseStmts();
+  auto elifs = ifStmt->Elifs();
+  auto elifConditions = ifStmt->ElifConditions();
+  PrintNode(ifStmt, Object::CreatePyString("IfStmt"));
+  condition->print();
+  PrintEdge(ifStmt, condition, Object::CreatePyString("condition"));
+  Object::ForEach(thenStmts, [&](const Object::PyObjPtr& stmt) {
+    stmt->as<INode>()->print();
+    PrintEdge(ifStmt, stmt, Object::CreatePyString("thenStmt"));
+  });
+  Object::ForEach(elifConditions, [&](const Object::PyObjPtr& elif) {
+    elif->as<INode>()->print();
+    PrintEdge(ifStmt, elif, Object::CreatePyString("elifCondition"));
+  });
+  Object::ForEach(elifs, [&](const Object::PyObjPtr& elif) {
+    auto elifStms = elif;
+    Object::ForEach(elifStms, [&](const Object::PyObjPtr& stmt) {
+      stmt->as<INode>()->print();
+      PrintEdge(ifStmt, stmt, Object::CreatePyString("elif"));
+    });
+  });
+  Object::ForEach(elseStmts, [&](const Object::PyObjPtr& stmt) {
+    stmt->as<INode>()->print();
+    PrintEdge(ifStmt, stmt, Object::CreatePyString("else"));
+  });
+  return Object::CreatePyNone();
+}
+
 }  // namespace torchlight::IR

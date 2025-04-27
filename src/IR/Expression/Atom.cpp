@@ -30,4 +30,16 @@ Object::PyObjPtr AtomKlass::visit(
   throw std::runtime_error("AtomKlass::visit(): unsupported object type");
 }
 
+Object::PyObjPtr AtomKlass::print(const Object::PyObjPtr& obj) {
+  auto atom = obj->as<Atom>();
+  PrintNode(
+    atom, Object::StringConcat(Object::CreatePyList(
+                                 {Object::CreatePyString("Atom: "),
+                                  atom->Obj()->str()}
+                               ))
+            ->as<Object::PyString>()
+  );
+  return Object::CreatePyNone();
+}
+
 }  // namespace torchlight::IR

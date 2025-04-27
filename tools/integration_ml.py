@@ -17,7 +17,7 @@ else:
     sys.exit(1)
 
 # print(f"Build directory: {build_dir}")
-test_dir = r"D:\code\project\torchlight\test\integration"
+test_dir = r"D:\code\project\torchlight\test\ml_base"
 frontend_exe = os.path.join(build_dir, "torchlight_frontend.exe")
 backend_exe = os.path.join(build_dir, "torchlight_backend.exe")
 

@@ -44,6 +44,10 @@ void Generator::Emit() {
   context->emit(codeList);
 }
 
+void Generator::Print() {
+  context->print();
+}
+
 [[nodiscard]] Object::PyCodePtr Generator::Code() const {
   return IR::GetCodeFromList(codeList, context);
 }

@@ -40,4 +40,18 @@ Object::PyObjPtr WhileStmtKlass::emit(
   return Object::CreatePyNone();
 }
 
+Object::PyObjPtr WhileStmtKlass::print(const Object::PyObjPtr& obj) {
+  auto whileStmt = obj->as<WhileStmt>();
+  auto condition = whileStmt->Condition();
+  auto body = whileStmt->Body();
+  PrintNode(whileStmt, Object::CreatePyString("WhileStmt"));
+  condition->print();
+  PrintEdge(whileStmt, condition);
+  Object::ForEach(body, [&whileStmt](const Object::PyObjPtr& stmt) {
+    stmt->as<INode>()->print();
+    PrintEdge(whileStmt, stmt);
+  });
+  return Object::CreatePyNone();
+}
+
 }  // namespace torchlight::IR

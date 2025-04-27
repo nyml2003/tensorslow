@@ -31,4 +31,20 @@ MapKlass::visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) {
   return Object::CreatePyNone();
 }
 
+Object::PyObjPtr MapKlass::print(const Object::PyObjPtr& obj) {
+  auto map = obj->as<Map>();
+  auto keys = map->Keys();
+  auto values = map->Values();
+  PrintNode(map, Object::CreatePyString("Map"));
+  Object::ForEach(keys, [&](const Object::PyObjPtr& element) {
+    element->as<INode>()->print();
+    PrintEdge(map, element, Object::CreatePyString("key"));
+  });
+  Object::ForEach(values, [&](const Object::PyObjPtr& element) {
+    element->as<INode>()->print();
+    PrintEdge(map, element, Object::CreatePyString("value"));
+  });
+  return Object::CreatePyNone();
+}
+
 }  // namespace torchlight::IR

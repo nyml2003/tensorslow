@@ -190,4 +190,16 @@ IdentifierRegistry GetIdentifierRegistry(
   return IdentifierRegistry::UNREGISTERED;
 }
 
+Object::PyObjPtr IdentifierKlass::print(const Object::PyObjPtr& obj) {
+  auto identifier = obj->as<Identifier>();
+  PrintNode(
+    identifier, Object::StringConcat(Object::CreatePyList(
+                                       {Object::CreatePyString("Identifier "),
+                                        identifier->Name()}
+                                     ))
+                  ->as<Object::PyString>()
+  );
+  return Object::CreatePyNone();
+}
+
 }  // namespace torchlight::IR

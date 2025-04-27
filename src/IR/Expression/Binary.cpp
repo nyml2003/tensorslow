@@ -110,4 +110,22 @@ Object::PyObjPtr BinaryKlass::emit(
   return Object::CreatePyNone();
 }
 
+Object::PyObjPtr BinaryKlass::print(const Object::PyObjPtr& obj) {
+  auto binary = obj->as<Binary>();
+  auto left = binary->Left();
+  auto right = binary->Right();
+  auto leftStr = left->print();
+  auto rightStr = right->print();
+  PrintNode(
+    binary, Object::StringConcat(Object::CreatePyList({
+                                   Object::CreatePyString("Binary "),
+                                   Stringify(binary->Oprt()),
+                                 }))
+              ->as<Object::PyString>()
+  );
+  PrintEdge(binary, left);
+  PrintEdge(binary, right);
+  return Object::CreatePyNone();
+}
+
 }  // namespace torchlight::IR

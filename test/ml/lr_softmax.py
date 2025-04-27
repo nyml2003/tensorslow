@@ -1,4 +1,3 @@
-time()
 data_class_0 = Array([[5.1, 3.5, 1.4, 0.2, 1., 0., 0.],
                       [4.9, 3., 1.4, 0.2, 1., 0., 0.],
                       [4.7, 3.2, 1.3, 0.2, 1., 0., 0.],
@@ -445,6 +444,7 @@ class LogLoss(LossFunction):
 
 class CrossEntropyWithSoftMax(LossFunction):
     def compute(self):
+        # print(self.parents[0].value.shape)
         prob = Softmax(self.parents[0].value)
         value = -Sum(self.parents[1].value * Log(prob))
         self.value = Array(value).reshape([1, 1])
@@ -454,7 +454,7 @@ class CrossEntropyWithSoftMax(LossFunction):
         if parent is self.parents[0]:
             return (prob - self.parents[1].value).T
         else:
-            return (-Log(prob)).T
+            print('invalid')
 
 
 x = Variable([4, 1], False, False)
@@ -499,8 +499,7 @@ for epoch in range(50):
             optimizer.update()
             batch_counter = 0
     accuracy = predict_and_evaluate(train_set, predict, x)
-    print("epoch: ", epoch + 1, " accuracy: ", accuracy)
+    if epoch % 10 == 0 or epoch == 49:
+        print("epoch: ", epoch + 1, " accuracy: ", accuracy)
 accuracy = predict_and_evaluate(test_set, predict, x)
 print("test accuracy: ", accuracy)
-
-time()

@@ -189,9 +189,6 @@ class PerceptionLoss(LossFunction):
         return Diag(diag.ravel())
 
 
-print('class loaded')
-
-
 def generateSample(num):
     male_heights = Normal(171.0, 6.0, num)
     male_weights = Normal(70.0, 10.0, num)
@@ -235,8 +232,6 @@ sample_num = 64
 
 train_set = generateSample(sample_num)
 
-print('data loaded', train_set)
-
 # 构造计算图：输入向量，是一个3x1矩阵，不需要初始化，不参与训练
 x = Variable([3, 1], False)
 
@@ -258,8 +253,6 @@ loss = PerceptionLoss([MatrixMultiply([label, output])])
 
 # 学习率
 learning_rate = 0.0001
-
-print('model loaded')
 
 # 训练执行50个epoch
 for epoch in range(50):
@@ -290,7 +283,8 @@ for epoch in range(50):
     accuracy = predict_and_evaluate(train_set, predict, x)
 
     # 打印当前epoch数和模型在训练集上的正确率
-    print("epoch: ", epoch + 1, " accuracy: ", accuracy)
+    if epoch % 10 == 0 or epoch == 49:
+        print("epoch: ", epoch + 1, " accuracy: ", accuracy)
 
 test_set = generateSample(32)
 

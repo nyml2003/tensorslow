@@ -17,6 +17,7 @@ class Generator : public Python3ParserBaseVisitor {
   explicit Generator(const Object::PyStrPtr& filename);
   void Visit();
   void Emit();
+  void Print();
   [[nodiscard]] Object::PyCodePtr Code() const;
   antlrcpp::Any visitFile_input(Python3Parser::File_inputContext* ctx) override;
   antlrcpp::Any visitAtom(Python3Parser::AtomContext* ctx) override;

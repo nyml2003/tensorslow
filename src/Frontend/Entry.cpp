@@ -75,6 +75,22 @@ void DefineOption() {
     },
     "true", "是否显示生成的code object"
   ));
+  schema.Add(Parameter(
+    "show_tokens",
+    [](const std::string& value) {
+      // value 是 "true" 或 "false"
+      return value == "true" || value.empty();
+    },
+    "true", "是否显示词法分析结果"
+  ));
+  schema.Add(Parameter(
+    "show_ir",
+    [](const std::string& value) {
+      // value 是 "true" 或 "false"
+      return value == "true" || value.empty();
+    },
+    "true", "是否显示中间代码树"
+  ));
   ArgsHelper::SetSchema(schema);
 }
 void InitPyObj() {
@@ -100,13 +116,16 @@ void ParseAndGenerate(const fs::path& filePath) {
   antlr4::tree::ParseTree* tree = parser.file_input();
 
   //  // 打印词法
-  //  std::cout << "词法分析结果: " << std::endl;
-  //  for (const auto& token : tokens.getTokens()) {
-  //    std::cout << token->toString() << std::endl;
-  //  }
-
+  if (ArgsHelper::Has("show_tokens")) {
+    std::cout << "词法分析结果: " << std::endl;
+    for (const auto& token : tokens.getTokens()) {
+      std::cout << token->toString() << " ";
+    }
+    std::cout << std::endl;
+  }
+  std::cout << std::endl;
   if (ArgsHelper::Has("show_ast")) {
-    std::cout << "IR tree: " << std::endl;
+    std::cout << "抽象语法树: " << std::endl;
     std::cout << tree->toStringTree(&parser) << std::endl;
   }
 
@@ -117,6 +136,13 @@ void ParseAndGenerate(const fs::path& filePath) {
 
   visitor.Visit();
   visitor.Emit();
+  if (ArgsHelper::Has("show_ir")) {
+    std::cout << "中间代码树: " << std::endl;
+    std::cout << "```mermaid" << std::endl;
+    std::cout << "graph TD" << std::endl;
+    visitor.Print();
+    std::cout << "```" << std::endl;
+  }
   auto code = visitor.Code();
   if (ArgsHelper::Has("show_code")) {
     torchlight::Object::PrintCode(code);

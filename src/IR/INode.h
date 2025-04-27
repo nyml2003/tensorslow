@@ -18,6 +18,8 @@ class INodeKlass : public Object::Klass {
 
   virtual Object::PyObjPtr
   emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) = 0;
+
+  virtual Object::PyObjPtr print(const Object::PyObjPtr& obj) = 0;
 };
 
 class INode;
@@ -51,6 +53,16 @@ class INode : public Object::PyObject {
     );
   }
 
+  /**
+   * @brief
+   * 遍历AST树，在当前INode节点所属的PyCode对象中打印AST树
+   */
+  virtual Object::PyObjPtr print() {
+    return std::dynamic_pointer_cast<INodeKlass>(Klass())->print(
+      shared_from_this()
+    );
+  }
+
  private:
   INodePtr parent;  // 保存父结点在codeList中的索引
 };
@@ -58,6 +70,12 @@ class INode : public Object::PyObject {
 Object::PyCodePtr
 GetCodeFromList(const Object::PyObjPtr& codeList, const INodePtr& node);
 
+void PrintNode(const Object::PyObjPtr& node, const Object::PyStrPtr& text);
+void PrintEdge(
+  const Object::PyObjPtr& parent,
+  const Object::PyObjPtr& child,
+  const Object::PyStrPtr& text = nullptr
+);
 }  // namespace torchlight::IR
 
 #endif

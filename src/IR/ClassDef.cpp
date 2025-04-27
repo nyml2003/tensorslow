@@ -89,4 +89,22 @@ Object::PyObjPtr ClassDefKlass::emit(
   return Object::CreatePyNone();
 }
 
+Object::PyObjPtr ClassDefKlass::print(const Object::PyObjPtr& obj) {
+  auto classDef = obj->as<ClassDef>();
+  PrintNode(
+    classDef, Object::StringConcat(Object::CreatePyList(
+                                     {Object::CreatePyString("ClassDef "),
+                                      classDef->Name()}
+                                   ))
+                ->as<Object::PyString>()
+  );
+  classDef->Bases()->print();
+  PrintEdge(classDef, classDef->Bases());
+  Object::ForEach(classDef->Body(), [&classDef](const Object::PyObjPtr& stmt) {
+    stmt->as<INode>()->print();
+    PrintEdge(classDef, stmt);
+  });
+  return Object::CreatePyNone();
+}
+
 }  // namespace torchlight::IR

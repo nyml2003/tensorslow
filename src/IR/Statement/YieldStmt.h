@@ -27,6 +27,8 @@ class YieldStmtKlass : public INodeKlass {
 
   Object::PyObjPtr
   emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
+
+  Object::PyObjPtr print(const Object::PyObjPtr& obj) override;
 };
 
 class YieldStmt : public INode {

@@ -38,4 +38,20 @@ Object::PyObjPtr ModuleKlass::emit(
   return Object::CreatePyNone();
 }
 
+Object::PyObjPtr ModuleKlass::print(const Object::PyObjPtr& obj) {
+  auto module = obj->as<Module>();
+  PrintNode(
+    module,
+    Object::StringConcat(
+      Object::CreatePyList({Object::CreatePyString("Module "), module->Name()})
+    )
+      ->as<Object::PyString>()
+  );
+  Object::ForEach(module->Body(), [&module](const Object::PyObjPtr& stmt) {
+    stmt->as<INode>()->print();
+    PrintEdge(module, stmt);
+  });
+  return Object::CreatePyNone();
+}
+
 }  // namespace torchlight::IR
