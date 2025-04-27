@@ -235,9 +235,9 @@ PyObjPtr IntegerKlass::_serialize_(const PyObjPtr& obj) {
   if (integer->value.IsZero()) {
     return CreatePyBytes(Collections::Serialize(Literal::ZERO));
   }
-  auto bytes = Collections::Serialize(Literal::INTEGER);
-  bytes.Concat(Collections::Serialize(integer->value));
-  return CreatePyBytes(std::move(bytes));
+  Collections::StringBuilder bytes(Collections::Serialize(Literal::INTEGER));
+  bytes.Append(Collections::Serialize(integer->value));
+  return CreatePyBytes(bytes.ToString());
 }
 
 bool PyInteger::LessThan(const PyObjPtr& other) const {

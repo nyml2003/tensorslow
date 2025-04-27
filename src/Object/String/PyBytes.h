@@ -2,7 +2,6 @@
 #define TORCHLIGHT_OBJECT_PYBYTES_H
 
 #include <iostream>
-#include "Collections/String/Bytes.h"
 #include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/String/PyString.h"
@@ -30,30 +29,22 @@ class BytesKlass : public Klass {
   PyObjPtr _serialize_(const PyObjPtr& obj) override;
 
   PyObjPtr repr(const PyObjPtr& obj) override;
-
-  PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
 };
 class PyBytes;
 using PyBytesPtr = std::shared_ptr<PyBytes>;
 class PyBytes : public PyObject {
  private:
-  Collections::Bytes value;
+  Collections::String value;
 
  public:
-  explicit PyBytes(Collections::Bytes value)
+  explicit PyBytes(Collections::String&& value)
     : PyObject(BytesKlass::Self()), value(std::move(value)) {}
 
-  [[nodiscard]] Collections::Bytes& Value() { return value; }
-
-  void Concat(const PyBytesPtr& other);
-  bool Equals(const PyBytesPtr& other) const;
+  [[nodiscard]] const Collections::String& Value() { return value; }
 };
 
-inline PyBytesPtr CreatePyBytes(Collections::Bytes&& value) {
+inline PyBytesPtr CreatePyBytes(Collections::String&& value) {
   return std::make_shared<PyBytes>(std::move(value));
-}
-inline PyBytesPtr CreatePyBytes() {
-  return std::make_shared<PyBytes>(Collections::Bytes());
 }
 
 }  // namespace torchlight::Object

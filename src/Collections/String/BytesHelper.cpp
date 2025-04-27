@@ -14,13 +14,13 @@ String ReprByte(Byte byte) {
   std::snprintf(buffer, sizeof(buffer), "\\x%02X", byte);
   return CreateStringWithCString(buffer);
 }
-Bytes CreateBytesWithCString(const char* str) {
+String CreateBytesWithCString(const char* str) {
   Byte* data = reinterpret_cast<Byte*>(const_cast<char*>(str));
-  return Bytes(List<Byte>(static_cast<Index>(std::strlen(str)), data));
+  return String(List<Byte>(static_cast<Index>(std::strlen(str)), data));
 }
-void Write(const Bytes& bytes, const String& filename) {
-  List<Byte> data = bytes.Value();
-  std::string filenameCppString = ToCppString(filename);
+void Write(const String& bytes, const String& filename) {
+  std::string data = bytes.ToCppString();
+  std::string filenameCppString = filename.ToCppString();
   if (filenameCppString.empty()) {
     throw std::runtime_error("Filename is empty");
   }
@@ -29,74 +29,37 @@ void Write(const Bytes& bytes, const String& filename) {
     std::cerr << "无法打开文件：" << filenameCppString << std::endl;
     return;
   }
-  file.write(
-    reinterpret_cast<const char*>(data.Data()),
-    static_cast<std::streamsize>(bytes.Size())
-  );
+  file.write(data.data(), data.size());
   std::cout << "写入文件：" << filenameCppString << std::endl;
-  std::cout << "文件大小：" << bytes.Size() << std::endl;
+  std::cout << "文件大小：" << data.size() << " 字节" << std::endl;
   if (!file) {
     std::cerr << "写入文件时出错：" << filenameCppString << std::endl;
   }
   file.close();
 }
-Bytes ToBytes(const String& str) noexcept {
-  List<Byte> bytes(str.Size());
-  for (Index i = 0; i < str.Size(); i++) {
-    Unicode codePoint = str[i];
-    if (codePoint < 0x80) {
-      bytes.Push(static_cast<Byte>(codePoint));
-    } else if (codePoint < 0x800) {
-      bytes.Push(static_cast<Byte>(0xC0 | (codePoint >> 6)));
-      bytes.Push(static_cast<Byte>(0x80 | (codePoint & 0x3F)));
-    } else if (codePoint < 0x10000) {
-      bytes.Push(static_cast<Byte>(0xE0 | (codePoint >> 12)));
-      bytes.Push(static_cast<Byte>(0x80 | ((codePoint >> 6) & 0x3F)));
-      bytes.Push(static_cast<Byte>(0x80 | (codePoint & 0x3F)));
-    } else if (codePoint <= 0x10FFFF) {
-      bytes.Push(static_cast<Byte>(0xF0 | (codePoint >> 18)));
-      bytes.Push(static_cast<Byte>(0x80 | ((codePoint >> 12) & 0x3F)));
-      bytes.Push(static_cast<Byte>(0x80 | ((codePoint >> 6) & 0x3F)));
-      bytes.Push(static_cast<Byte>(0x80 | (codePoint & 0x3F)));
-    }
-  }
-  return Bytes(bytes);
+
+String Serialize(double value) {
+  return String(List<Byte>(sizeof(double), reinterpret_cast<Byte*>(&value)));
 }
-std::string ToCppString(const Bytes& bytes) {
-  std::string str;
-  for (Index i = 0; i < bytes.Size(); i++) {
-    str.push_back(static_cast<char>(bytes.Get(i)));
-  }
-  return str;
+String Serialize(uint64_t value) {
+  return String(List<Byte>(sizeof(uint64_t), reinterpret_cast<Byte*>(&value)));
 }
-Bytes Serialize(double value) {
-  return Bytes(List<Byte>(sizeof(double), reinterpret_cast<Byte*>(&value)));
-}
-Bytes Serialize(uint64_t value) {
-  return Bytes(List<Byte>(sizeof(uint64_t), reinterpret_cast<Byte*>(&value)));
-}
-Bytes Serialize(int64_t value) {
+String Serialize(int64_t value) {
   return Serialize(static_cast<uint64_t>(value));
 }
-Bytes Serialize(uint32_t value) {
-  return Bytes(List<Byte>(sizeof(uint32_t), reinterpret_cast<Byte*>(&value)));
+String Serialize(uint32_t value) {
+  return String(List<Byte>(sizeof(uint32_t), reinterpret_cast<Byte*>(&value)));
 }
-Bytes Serialize(uint16_t value) {
-  return Bytes(List<Byte>(sizeof(uint16_t), reinterpret_cast<Byte*>(&value)));
+String Serialize(uint16_t value) {
+  return String(List<Byte>(sizeof(uint16_t), reinterpret_cast<Byte*>(&value)));
 }
-Bytes Serialize(int32_t value) {
-  return Bytes(List<Byte>(sizeof(int32_t), reinterpret_cast<Byte*>(&value)));
+String Serialize(int32_t value) {
+  return String(List<Byte>(sizeof(int32_t), reinterpret_cast<Byte*>(&value)));
 }
-Bytes Serialize(const String& value) {
-  Bytes bytes = ToBytes(value);
-  Bytes bytesWithSize = Serialize(bytes.Size());
-  bytesWithSize.Concat(bytes);
-  return bytesWithSize;
-}
-Bytes Serialize(const Bytes& value) {
-  Bytes bytesWithSize = Serialize(value.Size());
-  bytesWithSize.Concat(value);
-  return bytesWithSize;
+String Serialize(const String& value) {
+  StringBuilder bytesWithSize(Serialize(value.GetCodeUnitCount()));
+  bytesWithSize.Append(value);
+  return bytesWithSize.ToString();
 }
 double DeserializeDouble(const List<Byte>& bytes) {
   if (bytes.Size() != sizeof(double)) {
@@ -137,25 +100,22 @@ uint16_t DeserializeU16(const List<Byte>& bytes) {
   return *reinterpret_cast<const uint16_t*>(bytes.Data());
 }
 String DeserializeString(const List<Byte>& bytes) {
-  return CreateStringWithBytes(bytes.Slice(sizeof(uint64_t), bytes.Size()));
+  return String(bytes.Slice(sizeof(uint64_t), bytes.Size()));
 }
-Bytes DeserializeBytes(const List<Byte>& bytes) {
-  return Bytes(bytes.Slice(sizeof(uint64_t), bytes.Size()));
-}
-Bytes Serialize(const Decimal& value) {
+String Serialize(const Decimal& value) {
   if (value.IsZero()) {
-    return Bytes();
+    return CreateStringWithCString("");
   }
   Index size = value.Data().Size();
   List<Byte> bytes(size + sizeof(uint64_t) + 1);
-  Bytes result(bytes);
-  result.Concat(Serialize(size));
-  result.Push(value.Sign() ? '-' : '+');
+  StringBuilder result(String(std::move(bytes)));
+  result.Append(Serialize(size));
+  result.Append(value.Sign() ? '-' : '+');
   auto data = value.Data();
   for (Index i = 0; i < data.Size(); i++) {
-    result.Push(DecToByte(data.Get(i)));
+    result.Append(DecToByte(data.Get(i)));
   }
-  return result;
+  return result.ToString();
 }
 Decimal DeserializeDecimal(const List<Byte>& bytes) {
   if (bytes.Size() == 0) {
@@ -178,24 +138,24 @@ Decimal DeserializeDecimal(const List<Byte>& bytes) {
   i++;
   List<int32_t> data;
   for (Index j = 0; j < size; j++) {
-    data.Push(UnicodeToDec(bytes.Get(i + j)));
+    data.Push(ByteToDec(bytes.Get(i + j)));
   }
   return Decimal(data, sign);
 }
-Bytes Serialize(const Integer& value) {
+String Serialize(const Integer& value) {
   if (value.IsZero()) {
-    return Bytes();
+    return CreateStringWithCString("");
   }
   Index size = value.Data().Size();
   List<Byte> bytes(size * 2 + sizeof(uint64_t) + 1);
-  Bytes result(bytes);
-  result.Concat(Serialize(size));
-  result.Push(value.Sign() ? '-' : '+');
+  StringBuilder result(String(std::move(bytes)));
+  result.Append(Serialize(size));
+  result.Append(value.Sign() ? '-' : '+');
   auto data = value.Data();
   for (Index i = 0; i < size; i++) {
-    result.Concat(Serialize(static_cast<uint16_t>(data.Get(i) & 0x0000FFFF)));
+    result.Append(Serialize(static_cast<uint16_t>(data.Get(i) & 0x0000FFFF)));
   }
-  return result;
+  return result.ToString();
 }
 Integer DeserializeInteger(const List<Byte>& bytes) {
   if (bytes.Size() == 0) {

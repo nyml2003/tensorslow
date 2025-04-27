@@ -119,16 +119,16 @@ PyObjPtr CodeKlass::_serialize_(const PyObjPtr& self) {
     throw std::runtime_error("PyCode::_serialize_(): obj is not a code object");
   }
   auto code = self->as<PyCode>();
-  auto result = CreatePyBytes(Collections::Serialize(Literal::CODE));
-  result->Concat(code->Consts()->_serialize_()->as<PyBytes>());
-  result->Concat(code->Names()->_serialize_()->as<PyBytes>());
-  result->Concat(code->VarNames()->_serialize_()->as<PyBytes>());
-  result->Concat(code->Name()->_serialize_()->as<PyBytes>());
-  result->Concat(CreatePyBytes(Collections::Serialize(code->NLocals())));
-  result->Concat(
-    code->Instructions()->_serialize_()->_serialize_()->as<PyBytes>()
+  Collections::StringBuilder result(Collections::Serialize(Literal::CODE));
+  result.Append(code->Consts()->_serialize_()->as<PyBytes>()->Value());
+  result.Append(code->Names()->_serialize_()->as<PyBytes>()->Value());
+  result.Append(code->VarNames()->_serialize_()->as<PyBytes>()->Value());
+  result.Append(code->Name()->_serialize_()->as<PyBytes>()->Value());
+  result.Append(Collections::Serialize(code->NLocals()));
+  result.Append(
+    code->Instructions()->_serialize_()->_serialize_()->as<PyBytes>()->Value()
   );
-  return result;
+  return CreatePyBytes(result.ToString());
 }
 
 Index PyCode::IndexOfConst(const PyObjPtr& obj) {
@@ -276,7 +276,7 @@ void PyCode::BinaryOr() {
 }
 
 PyCodePtr CreatePyCode(const PyStrPtr& name) {
-  auto byteCode = CreatePyBytes()->as<PyBytes>();
+  auto byteCode = CreatePyString("")->as<PyBytes>();
   auto consts = CreatePyList()->as<PyList>();
   auto names = CreatePyList()->as<PyList>();
   auto varNames = CreatePyList()->as<PyList>();

@@ -1,9 +1,7 @@
 #ifndef TORCHLIGHT_BYTECODE_H
 #define TORCHLIGHT_BYTECODE_H
 
-#include "Collections/String/Bytes.h"
 #include "Collections/String/String.h"
-
 
 #include <map>
 #include <variant>
@@ -83,7 +81,7 @@ enum class Literal {
   FALSE,
   LIST,
   CODE,
-  BYTES,
+  BYTES
 };
 
 static const std::map<ByteCode, const char*> ByteCodeNames = {
@@ -140,9 +138,9 @@ String ToString(None kind);
 String ToString(Object::CompareOp kind);
 String ToString(Object::ByteCode code);
 String ToString(Object::Literal kind);
-Bytes Serialize(None kind);
-Bytes Serialize(Object::CompareOp kind);
-Bytes Serialize(Object::ByteCode code);
-Bytes Serialize(Object::Literal kind);
+String Serialize(None kind);
+String Serialize(Object::CompareOp kind);
+String Serialize(Object::ByteCode code);
+String Serialize(Object::Literal kind);
 }  // namespace torchlight::Collections
 #endif  // TORCHLIGHT_BYTECODE_H

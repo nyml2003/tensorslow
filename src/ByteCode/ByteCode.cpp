@@ -1,5 +1,5 @@
 #include "ByteCode/ByteCode.h"
-#include "Collections/String/Bytes.h"
+#include "Collections/String/String.h"
 #include "Collections/String/StringHelper.h"
 
 namespace torchlight::Collections {
@@ -58,26 +58,24 @@ Collections::String ToString(Object::Literal kind) {
       return Collections::CreateStringWithCString("LIST");
     case Object::Literal::CODE:
       return Collections::CreateStringWithCString("CODE");
-    case Object::Literal::BYTES:
-      return Collections::CreateStringWithCString("BYTES");
   }
   return Collections::CreateStringWithCString("UNKNOWN");
 }
 
-Collections::Bytes Serialize(None /*kind*/) {
-  return Collections::Bytes();
+Collections::String Serialize(None /*kind*/) {
+  return Collections::String(Collections::List<Byte>({0}));
 }
 
-Collections::Bytes Serialize(Object::CompareOp kind) {
-  return Collections::Bytes(Collections::List({static_cast<Byte>(kind)}));
+Collections::String Serialize(Object::CompareOp kind) {
+  return Collections::String(Collections::List({static_cast<Byte>(kind)}));
 }
 
-Collections::Bytes Serialize(Object::ByteCode code) {
-  return Collections::Bytes(Collections::List({static_cast<Byte>(code)}));
+Collections::String Serialize(Object::ByteCode code) {
+  return Collections::String(Collections::List({static_cast<Byte>(code)}));
 }
 
-Collections::Bytes Serialize(Object::Literal kind) {
-  return Collections::Bytes(Collections::List({static_cast<Byte>(kind)}));
+Collections::String Serialize(Object::Literal kind) {
+  return Collections::String(Collections::List({static_cast<Byte>(kind)}));
 }
 
 }  // namespace torchlight::Collections

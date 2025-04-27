@@ -7,14 +7,11 @@
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Core/PyType.h"
-#include "Object/Function/PyFunction.h"
 #include "Object/Function/PyNativeFunction.h"
 #include "Object/Matrix/MatrixFunction.h"
 #include "Object/Matrix/PyMatrix.h"
 #include "Object/Number/PyFloat.h"
-#include "Object/Runtime/PyFrame.h"
 #include "Object/String/PyString.h"
-#include "Runtime/Interpreter.h"
 
 namespace torchlight::Runtime {
 

@@ -2,6 +2,7 @@
 #include "ByteCode/ByteCode.h"
 #include "Object/Container/PyList.h"
 #include "Object/String/PyBytes.h"
+#include "Object/String/PyString.h"
 
 namespace torchlight::Object {
 

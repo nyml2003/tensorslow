@@ -11,6 +11,7 @@
 #include "Object/Matrix/PyMatrix.h"
 #include "Object/Number/PyFloat.h"
 #include "Object/Number/PyInteger.h"
+#include "Object/String/PyBytes.h"
 #include "Runtime/Interpreter.h"
 
 namespace torchlight::Object {

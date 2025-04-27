@@ -49,6 +49,10 @@ class List {
     : size(count), capacity(count), elements(std::make_unique<T[]>(count)) {
     std::copy(stream, stream + count, elements.get());
   }
+  explicit List(Index count, const T* stream)
+    : size(count), capacity(count), elements(std::make_unique<T[]>(count)) {
+    std::copy(stream, stream + count, elements.get());
+  }
   List(const List<T>& other);
   List(List<T>&& other) noexcept;
   List<T>& operator=(const List<T>& other);

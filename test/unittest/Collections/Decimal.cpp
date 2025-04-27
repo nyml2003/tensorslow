@@ -9,49 +9,49 @@ TEST(Decimal, DecimalAddition) {
   Decimal a = CreateDecimalWithCString("123");
   Decimal b = CreateDecimalWithCString("456");
   Decimal c = a.Add(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "579");
+  ASSERT_EQ(c.ToString().ToCppString(), "579");
 }
 
 TEST(Decimal, DecimalAdditionWithNegative) {
   Decimal a = CreateDecimalWithCString("-123");
   Decimal b = CreateDecimalWithCString("456");
   Decimal c = a.Add(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "333");
+  ASSERT_EQ(c.ToString().ToCppString(), "333");
 }
 
 TEST(Decimal, DecimalSubtraction) {
   Decimal a = CreateDecimalWithCString("123");
   Decimal b = CreateDecimalWithCString("456");
   Decimal c = a.Subtract(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "-333");
+  ASSERT_EQ(c.ToString().ToCppString(), "-333");
 }
 
 TEST(Decimal, DecimalSubtractionWithNegative) {
   Decimal a = CreateDecimalWithCString("-123");
   Decimal b = CreateDecimalWithCString("-456");
   Decimal c = a.Subtract(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "333");
+  ASSERT_EQ(c.ToString().ToCppString(), "333");
 }
 
 TEST(Decimal, DecimalMultiplication) {
   Decimal a = CreateDecimalWithCString("123");
   Decimal b = CreateDecimalWithCString("456");
   Decimal c = a.Multiply(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "56088");
+  ASSERT_EQ(c.ToString().ToCppString(), "56088");
 }
 
 TEST(Decimal, DecimalDivision) {
   Decimal a = CreateDecimalWithCString("123456");
   Decimal b = CreateDecimalWithCString("123");
   Decimal c = a.Divide(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "1003");
+  ASSERT_EQ(c.ToString().ToCppString(), "1003");
 }
 
 TEST(Decimal, DecimalModulo) {
   Decimal a = CreateDecimalWithCString("123456");
   Decimal b = CreateDecimalWithCString("123");
   Decimal c = a.Modulo(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "87");
+  ASSERT_EQ(c.ToString().ToCppString(), "87");
   b = CreateDecimalWithCString("123456");
   c = a.Modulo(b);
   Decimal d = a.Divide(b);
@@ -98,7 +98,7 @@ TEST(Decimal, DecimalDivisionByZero) {
 
 TEST(Decimal, DecimalToHexString) {
   Decimal a = CreateDecimalWithCString("255");
-  ASSERT_STREQ(ToCppString(a.ToHexString()).c_str(), "0xFF");
+  ASSERT_EQ(a.ToHexString().ToCppString(), "0xFF");
 }
 
 TEST(Decimal, ExtraAdd) {
@@ -167,7 +167,7 @@ TEST(Decimal, ExtraAdd) {
 
 TEST(Decimal, Zero) {
   ASSERT_TRUE(CreateDecimalWithCString("0").IsZero());
-  ASSERT_EQ(ToCppString(CreateDecimalZero().ToString()), "0");
+  ASSERT_EQ(CreateDecimalZero().ToString().ToCppString(), "0");
 }
 
 TEST(Decimal, LessThan) {

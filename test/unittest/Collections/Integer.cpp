@@ -11,49 +11,49 @@ TEST(Integer, IntegerAddition) {
   Integer a = CreateIntegerWithCString("123");
   Integer b = CreateIntegerWithCString("456");
   Integer c = a.Add(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "579");
+  ASSERT_EQ(c.ToString().ToCppString(), "579");
 }
 
 TEST(Integer, IntegerAdditionWithNegative) {
   Integer a = CreateIntegerWithCString("-123");
   Integer b = CreateIntegerWithCString("456");
   Integer c = a.Add(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "333");
+  ASSERT_EQ(c.ToString().ToCppString(), "333");
 }
 
 TEST(Integer, IntegerSubtraction) {
   Integer a = CreateIntegerWithCString("123");
   Integer b = CreateIntegerWithCString("456");
   Integer c = a.Subtract(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "-333");
+  ASSERT_EQ(c.ToString().ToCppString(), "-333");
 }
 
 TEST(Integer, IntegerSubtractionWithNegative) {
   Integer a = CreateIntegerWithCString("-123");
   Integer b = CreateIntegerWithCString("-456");
   Integer c = a.Subtract(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "333");
+  ASSERT_EQ(c.ToString().ToCppString(), "333");
 }
 
 TEST(Integer, IntegerMultiplication) {
   Integer a = CreateIntegerWithCString("123");
   Integer b = CreateIntegerWithCString("456");
   Integer c = a.Multiply(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "56088");
+  ASSERT_EQ(c.ToString().ToCppString(), "56088");
 }
 
 TEST(Integer, IntegerDivision) {
   Integer a = CreateIntegerWithCString("123456");
   Integer b = CreateIntegerWithCString("123");
   Integer c = a.Divide(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "1003");
+  ASSERT_EQ(c.ToString().ToCppString(), "1003");
 }
 
 TEST(Integer, IntegerModulo) {
   Integer a = CreateIntegerWithCString("123456");
   Integer b = CreateIntegerWithCString("123");
   Integer c = a.Modulo(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "87");
+  ASSERT_EQ(c.ToString().ToCppString(), "87");
 }
 
 TEST(Integer, IntegerGreaterThan) {
@@ -95,28 +95,28 @@ TEST(Integer, IntegerDivisionByZero) {
 
 TEST(Integer, IntegerToHexString) {
   Integer a = CreateIntegerWithCString("255");
-  ASSERT_EQ(ToCppString(a.ToHexString()), "0xFF");
+  ASSERT_EQ(a.ToHexString().ToCppString(), "0xFF");
 }
 
 TEST(Integer, IntegerBitWiseAnd) {
   Integer a = CreateIntegerWithCString("15");
   Integer b = CreateIntegerWithCString("11");
   Integer c = a.BitWiseAnd(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "11");
+  ASSERT_EQ(c.ToString().ToCppString(), "11");
 }
 
 TEST(Integer, IntegerBitWiseOr) {
   Integer a = CreateIntegerWithCString("15");
   Integer b = CreateIntegerWithCString("11");
   Integer c = a.BitWiseOr(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "15");
+  ASSERT_EQ(c.ToString().ToCppString(), "15");
 }
 
 TEST(Integer, IntegerBitWiseXor) {
   Integer a = CreateIntegerWithCString("15");
   Integer b = CreateIntegerWithCString("11");
   Integer c = a.BitWiseXor(b);
-  ASSERT_EQ(ToCppString(c.ToString()), "4");
+  ASSERT_EQ(c.ToString().ToCppString(), "4");
 }
 
 TEST(Integer, ExtraAdd) {
@@ -256,81 +256,81 @@ TEST(Integer, LessThanOrEqual) {
 TEST(Integer, Right_SHIFT) {
   Integer a = CreateIntegerWithCString("18446744073709551615");
   Integer b = CreateIntegerWithCString("1");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "9223372036854775807");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "9223372036854775807");
   b = CreateIntegerWithCString("2");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "4611686018427387903");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "4611686018427387903");
   b = CreateIntegerWithCString("3");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "2305843009213693951");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "2305843009213693951");
   b = CreateIntegerWithCString("4");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "1152921504606846975");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "1152921504606846975");
   b = CreateIntegerWithCString("5");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "576460752303423487");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "576460752303423487");
   b = CreateIntegerWithCString("6");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "288230376151711743");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "288230376151711743");
   b = CreateIntegerWithCString("7");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "144115188075855871");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "144115188075855871");
   b = CreateIntegerWithCString("8");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "72057594037927935");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "72057594037927935");
   b = CreateIntegerWithCString("9");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "36028797018963967");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "36028797018963967");
   b = CreateIntegerWithCString("10");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "18014398509481983");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "18014398509481983");
   b = CreateIntegerWithCString("11");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "9007199254740991");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "9007199254740991");
   b = CreateIntegerWithCString("12");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "4503599627370495");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "4503599627370495");
   b = CreateIntegerWithCString("13");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "2251799813685247");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "2251799813685247");
   b = CreateIntegerWithCString("14");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "1125899906842623");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "1125899906842623");
   b = CreateIntegerWithCString("15");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "562949953421311");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "562949953421311");
   b = CreateIntegerWithCString("16");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "281474976710655");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "281474976710655");
   b = CreateIntegerWithCString("17");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "140737488355327");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "140737488355327");
   b = CreateIntegerWithCString("18");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "70368744177663");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "70368744177663");
   b = CreateIntegerWithCString("19");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "35184372088831");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "35184372088831");
   b = CreateIntegerWithCString("20");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "17592186044415");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "17592186044415");
   b = CreateIntegerWithCString("21");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "8796093022207");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "8796093022207");
   b = CreateIntegerWithCString("22");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "4398046511103");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "4398046511103");
   b = CreateIntegerWithCString("23");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "2199023255551");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "2199023255551");
   b = CreateIntegerWithCString("24");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "1099511627775");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "1099511627775");
   b = CreateIntegerWithCString("25");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "549755813887");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "549755813887");
   b = CreateIntegerWithCString("26");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "274877906943");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "274877906943");
   b = CreateIntegerWithCString("27");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "137438953471");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "137438953471");
   b = CreateIntegerWithCString("28");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "68719476735");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "68719476735");
   b = CreateIntegerWithCString("29");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "34359738367");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "34359738367");
   b = CreateIntegerWithCString("30");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "17179869183");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "17179869183");
   b = CreateIntegerWithCString("31");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "8589934591");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "8589934591");
   b = CreateIntegerWithCString("32");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "4294967295");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "4294967295");
   b = CreateIntegerWithCString("33");
-  ASSERT_EQ(ToCppString(a.RightShift(b).ToString()), "2147483647");
+  ASSERT_EQ(a.RightShift(b).ToString().ToCppString(), "2147483647");
 }
 
 TEST(Integer, LEFT_SHIFT) {
   Integer a = CreateIntegerWithCString("65535");
   Integer b = CreateIntegerWithCString("1");
-  ASSERT_EQ(ToCppString(a.LeftShift(b).ToString()), "131070");
+  ASSERT_EQ(a.LeftShift(b).ToString().ToCppString(), "131070");
   b = CreateIntegerWithCString("2");
-  ASSERT_EQ(ToCppString(a.LeftShift(b).ToString()), "262140");
+  ASSERT_EQ(a.LeftShift(b).ToString().ToCppString(), "262140");
   b = CreateIntegerWithCString("15");
-  ASSERT_EQ(ToCppString(a.LeftShift(b).ToString()), "2147450880");
+  ASSERT_EQ(a.LeftShift(b).ToString().ToCppString(), "2147450880");
   b = CreateIntegerWithCString("16");
-  ASSERT_EQ(ToCppString(a.LeftShift(b).ToString()), "4294901760");
+  ASSERT_EQ(a.LeftShift(b).ToString().ToCppString(), "4294901760");
 }

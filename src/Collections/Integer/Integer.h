@@ -2,7 +2,6 @@
 #define TORCHLIGHT_COLLECTIONS_INTEGER_H
 #include "Collections/Integer/Decimal.h"
 #include "Collections/List.h"
-#include "Collections/String/Bytes.h"
 #include "Collections/String/String.h"
 
 namespace torchlight::Collections {
@@ -22,7 +21,7 @@ class Integer {
   [[nodiscard]] IntSign GetSign() const;
   [[nodiscard]] String ToHexString() const;
   [[nodiscard]] String ToString() const;
-  [[nodiscard]] Bytes Serialize() const;
+  //  [[nodiscard]] String Serialize() const;
   [[nodiscard]] Integer Add(const Integer& rhs) const;
   [[nodiscard]] Integer Subtract(const Integer& rhs) const;
   [[nodiscard]] Integer Multiply(const Integer& rhs) const;

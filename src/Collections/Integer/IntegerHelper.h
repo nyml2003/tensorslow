@@ -2,8 +2,10 @@
 #define TORCHLIGHT_COLLECTIONS_INTEGER_HELPER_H
 #include "Collections/Integer/Integer.h"
 namespace torchlight::Collections {
-int8_t UnicodeToHex(Unicode unicode) noexcept;
-Unicode HexToUnicode(uint8_t hex) noexcept;
+// int8_t UnicodeToHex(Unicode unicode) noexcept;
+// Unicode HexToUnicode(uint8_t hex) noexcept;
+int8_t ByteToHex(Byte byte) noexcept;
+Byte HexToByte(uint8_t hex) noexcept;
 Integer CreateIntegerWithDecimal(const Decimal& decimal);
 void TrimLeadingZero(List<uint32_t>& parts);
 void TrimTrailingZero(List<uint32_t>& parts);

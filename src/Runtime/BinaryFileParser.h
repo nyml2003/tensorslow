@@ -10,6 +10,7 @@
 #include "Object/Number/PyFloat.h"
 #include "Object/Number/PyInteger.h"
 #include "Object/Runtime/PyCode.h"
+#include "Object/String/PyBytes.h"
 
 namespace torchlight::Runtime {
 namespace fs = std::filesystem;
@@ -66,9 +67,7 @@ class BinaryFileParser {
     return Collections::List<Byte>(size, std::move(buffer));
   }
   Object::PyBytesPtr ReadBytes() {
-    return Object::CreatePyBytes(
-      Collections::Bytes(std::move(ReadBytes(ReadU64())))
-    );
+    return Object::CreatePyBytes(Collections::String(ReadBytes(ReadU64())));
   }
   Object::PyIntPtr ReadInteger() {
     uint64_t size = ReadSize();

@@ -43,14 +43,14 @@ class PyString : public PyObject {
   static std::mutex poolMutex;
 
  public:
-  explicit PyString(Collections::String _value)
-    : PyObject(StringKlass::Self()), value(std::move(_value)) {}
+  explicit PyString(const Collections::String& _value)
+    : PyObject(StringKlass::Self()), value(_value) {}
   static void IncreaseIndent() { indent++; }
   static void DecreaseIndent() { indent--; }
 
-  Index Length() const { return value.Size(); }
+  Index Length() { return value.GetCodePointCount(); }
 
-  PyStrPtr GetItem(Index index) const;
+  PyStrPtr GetItem(Index index);
 
   PyStrPtr Join(const PyObjPtr& iterable);
 
@@ -63,13 +63,13 @@ class PyString : public PyObject {
 
   std::string ToCppString() const;
 
-  bool Equal(const PyStrPtr& other) const;
+  bool Equal(const PyStrPtr& other);
 
-  PyStrPtr Upper() const;
+  PyStrPtr Upper();
 
-  Collections::String Value() const { return value; }
-  static PyStrPtr Create(Collections::String&& value);
-  size_t Hash() { return value.Hash(); }
+  Collections::String Value() const { return value.Copy(); }
+  static PyStrPtr Create(const Collections::String& value);
+  size_t Hash() { return value.HashValue(); }
 };
 
 using PyStrPtr = std::shared_ptr<PyString>;
@@ -82,7 +82,7 @@ PyObjPtr StringJoin(const PyObjPtr& args);
 
 PyObjPtr StringConcat(const PyObjPtr& args);
 
-PyStrPtr CreatePyString(Collections::String&& value, bool pooling = true);
+PyStrPtr CreatePyString(const Collections::String& value, bool pooling = true);
 PyStrPtr CreatePyString(const char* value);
 PyStrPtr CreatePyString(const std::string& value);
 

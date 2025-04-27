@@ -6,13 +6,12 @@ String Decimal::ToString() const {
   if (IsZero()) {
     return CreateStringWithCString("0");
   }
-  const Unicode UnicodeDigitZero = 0x30;
-  List<Unicode> str(parts.Size() + (sign ? 1 : 0));
+  List<Byte> str(parts.Size() + (sign ? 1 : 0));
   if (sign) {
-    str.Push(UnicodeMinus);
+    str.Push(ByteMinus);
   }
   for (Index i = 0; i < parts.Size(); i++) {
-    str.Push(static_cast<uint32_t>(parts.Get(i)) + UnicodeDigitZero);
+    str.Push(static_cast<uint32_t>(parts.Get(i)) + Byte_0);
   }
   return String(std::move(str));
 }

@@ -5,34 +5,44 @@
 
 #include <stdexcept>
 namespace torchlight::Collections {
-int8_t UnicodeToHex(Unicode unicode) noexcept {
-  if (unicode >= Unicode_0 && unicode <= Unicode_9) {
-    return static_cast<int8_t>(unicode - Unicode_0);
+int8_t ByteToHex(Byte byte) noexcept {
+  if (byte >= Byte_0 && byte <= Byte_9) {
+    return static_cast<int8_t>(byte - Byte_0);
   }
-  if (unicode >= Unicode_A && unicode <= Unicode_F) {
-    return static_cast<int8_t>(unicode - Unicode_A + 10);
+  if (byte >= Byte_A && byte <= Byte_F) {
+    return static_cast<int8_t>(byte - Byte_A + 10);
   }
-  if (unicode >= Unicode_a && unicode <= Unicode_f) {
-    return static_cast<int8_t>(unicode - Unicode_a + 10);
+  if (byte >= Byte_a && byte <= Byte_f) {
+    return static_cast<int8_t>(byte - Byte_a + 10);
   }
   return -1;
 }
-Unicode HexToUnicode(uint8_t hex) noexcept {
+// Unicode HexToUnicode(uint8_t hex) noexcept {
+//   if (hex <= 9) {
+//     return static_cast<Unicode>(hex + Unicode_0);
+//   }
+//   if (hex >= 10 && hex <= 15) {
+//     return static_cast<Unicode>(hex - 10 + Unicode_A);
+//   }
+//   return 0;
+// }
+Byte HexToByte(uint8_t hex) noexcept {
   if (hex <= 9) {
-    return static_cast<Unicode>(hex + Unicode_0);
+    return static_cast<Byte>(hex + Byte_0);
   }
   if (hex >= 10 && hex <= 15) {
-    return static_cast<Unicode>(hex - 10 + Unicode_A);
+    return static_cast<Byte>(hex - 10 + Byte_A);
   }
   return 0;
 }
+
 Integer CreateIntegerWithString(const String& str) {
-  if (str.Size() > 2 && str.Get(0) == Unicode_0 && (str.Get(1) == Unicode_X || str.Get(1) == Unicode_x)) {
+  if (str.GetCodeUnitCount() > 2 && str.GetCodeUnit(0) == Byte_0 && (str.GetCodeUnit(1) == Byte_x || str.GetCodeUnit(1) == Byte_X)) {
     List<uint32_t> parts;
     uint32_t buffer = 0;
     uint32_t count = 0;
-    for (Index i = str.Size() - 1; i >= 2; i--) {
-      int8_t value = UnicodeToHex(str.Get(i));
+    for (Index i = str.GetCodeUnitCount() - 1; i >= 2; i--) {
+      uint8_t value = ByteToHex(str.GetCodeUnit(i));
       if (value == -1) {
         throw std::runtime_error("Invalid character in Hexadecimal");
       }

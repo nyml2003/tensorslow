@@ -21,9 +21,7 @@ String Integer::ToHexString() const {
   if (IsZero()) {
     return CreateStringWithCString("0");
   }
-  const Unicode UnicodeDigitZero = 0x30;
-  const Unicode UnicodeDigit_x = 0x78;
-  List<Unicode> str;
+  List<Byte> str;
   for (Index i = 0; i < parts.Size(); i++) {
     uint32_t item = parts.Get(i);
     std::array<uint8_t, 4> buffer = {0, 0, 0, 0};
@@ -32,18 +30,18 @@ String Integer::ToHexString() const {
     buffer[2] = (item & 0x000000F0) >> 4;
     buffer[3] = (item & 0x0000000F);
     for (Index j = 0; j < 4; j++) {
-      str.Push(HexToUnicode(buffer[j]));
+      str.Push(HexToByte(buffer[j]));
     }
   }
   Index it = 0;
   for (; it < str.Size(); it++) {
-    if (str.Get(it) != UnicodeDigitZero) {
+    if (str.Get(it) != Byte_0) {
       break;
     }
   }
   str = str.Slice(it, str.Size());
-  str.Unshift(UnicodeDigit_x);
-  str.Unshift(UnicodeDigitZero);
+  str.Unshift(Byte_x);
+  str.Unshift(Byte_0);
   return String(std::move(str));
 }
 Integer Integer::Add(const Integer& rhs) const {
