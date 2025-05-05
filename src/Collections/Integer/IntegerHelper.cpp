@@ -4,7 +4,7 @@
 #include "Common.h"
 
 #include <stdexcept>
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 int8_t ByteToHex(Byte byte) noexcept {
   if (byte >= Byte_0 && byte <= Byte_9) {
     return static_cast<int8_t>(byte - Byte_0);
@@ -175,4 +175,4 @@ int64_t ToI64(const Integer& integer) {
   return integer.Sign() ? -static_cast<int64_t>(result) : result;
 }
 
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections

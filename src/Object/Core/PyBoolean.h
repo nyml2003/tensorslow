@@ -1,11 +1,11 @@
-#ifndef TORCHLIGHT_OBJECT_PYBOOLEAN_H
-#define TORCHLIGHT_OBJECT_PYBOOLEAN_H
+#ifndef TENSORSLOW_OBJECT_PYBOOLEAN_H
+#define TENSORSLOW_OBJECT_PYBOOLEAN_H
 
 #include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class PyBoolean;
 using PyBoolPtr = std::shared_ptr<PyBoolean>;
@@ -69,6 +69,6 @@ inline PyObjPtr And(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 inline PyObjPtr Or(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return IsTrue(lhs) || IsTrue(rhs) ? PyBoolean::True() : PyBoolean::False();
 }
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
-#endif  // TORCHLIGHT_OBJECT_PYBOOLEAN_H
+#endif  // TENSORSLOW_OBJECT_PYBOOLEAN_H

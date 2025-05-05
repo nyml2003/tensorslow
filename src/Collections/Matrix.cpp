@@ -3,7 +3,7 @@
 #include <iostream>
 #include "Collections/String/StringHelper.h"
 
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 
 Matrix::Matrix(Index rows, Index cols)
   : rows(rows), cols(cols), data(rows * cols) {
@@ -379,4 +379,4 @@ Matrix Matrix::Copy() const {
   return Matrix(rows, cols, data);
 }
 
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections

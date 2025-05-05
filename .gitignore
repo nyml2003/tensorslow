@@ -13,3 +13,4 @@
 *.pyc
 *.out
 /test/dev/
+/generated

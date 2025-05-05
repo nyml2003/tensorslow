@@ -1,7 +1,7 @@
-// #ifndef TORCHLIGHT_COLLECTIONS_ITERATOR_H
-// #define TORCHLIGHT_COLLECTIONS_ITERATOR_H
+// #ifndef TENSORSLOW_COLLECTIONS_ITERATOR_H
+// #define TENSORSLOW_COLLECTIONS_ITERATOR_H
 // #include "Collections/List.h"
-// namespace torchlight::Collections {
+// namespace tensorslow::Collections {
 // template <typename T>
 // class Iterator {
 //  private:
@@ -136,5 +136,5 @@
 //   return result;
 // }
 //
-// }  // namespace torchlight::Collections
+// }  // namespace tensorslow::Collections
 // #endif

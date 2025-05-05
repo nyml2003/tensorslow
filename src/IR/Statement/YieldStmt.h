@@ -1,9 +1,9 @@
-#ifndef TORCHLIGHT_AST_YIELD_STATEMENT_H
-#define TORCHLIGHT_AST_YIELD_STATEMENT_H
+#ifndef TENSORSLOW_AST_YIELD_STATEMENT_H
+#define TENSORSLOW_AST_YIELD_STATEMENT_H
 
 #include "IR/INode.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class YieldStmtKlass : public INodeKlass {
  public:
@@ -47,6 +47,6 @@ inline INodePtr CreateYieldStmt(INodePtr content, INodePtr parent) {
   return std::make_shared<YieldStmt>(std::move(content), std::move(parent));
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

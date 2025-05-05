@@ -29,7 +29,7 @@
 #include "Object/String/PyString.h"
 #include "support/Any.h"
 
-namespace torchlight::Generation {
+namespace tensorslow::Generation {
 
 Generator::Generator(const Object::PyStrPtr& filename)
   : codeList(Object::CreatePyList()) {
@@ -864,4 +864,4 @@ antlrcpp::Any Generator::visitYield_expr(Python3Parser::Yield_exprContext* ctx
   return IR::CreateAtom(Object::CreatePyNone(), context);
 }
 
-}  // namespace torchlight::Generation
+}  // namespace tensorslow::Generation

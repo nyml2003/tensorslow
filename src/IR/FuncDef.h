@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_AST_FUNCDEF_H
-#define TORCHLIGHT_AST_FUNCDEF_H
+#ifndef TENSORSLOW_AST_FUNCDEF_H
+#define TENSORSLOW_AST_FUNCDEF_H
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class FuncDefKlass : public INodeKlass {
  public:
@@ -74,6 +74,6 @@ inline INodePtr CreateFuncDef(
 ) {
   return std::make_shared<FuncDef>(name, parameters, body, parent);
 }
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

@@ -1,7 +1,7 @@
 #include "IR/Statement/ExprStmt.h"
 #include "Object/Core/PyNone.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 Object::PyObjPtr ExprStmtKlass::visit(
   const Object::PyObjPtr& obj,
@@ -34,4 +34,4 @@ Object::PyObjPtr ExprStmtKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

@@ -1,6 +1,6 @@
 #include "Tools/Tools.h"  // 包含你的代码文件
 #include "gtest/gtest.h"
-using namespace torchlight;
+using namespace tensorslow;
 
 class ParameterTest : public ::testing::Test {
  protected:

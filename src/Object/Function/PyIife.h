@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_OBJECT_IIFE_H
-#define TORCHLIGHT_OBJECT_IIFE_H
+#ifndef TENSORSLOW_OBJECT_IIFE_H
+#define TENSORSLOW_OBJECT_IIFE_H
 #include "Object/Core/PyObject.h"
 
 #include <functional>
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 using TypeFunction = std::function<PyObjPtr(PyObjPtr)>;
 
@@ -37,6 +37,6 @@ inline PyObjPtr CreatePyIife(TypeFunction nativeFunction) {
   return std::make_shared<PyIife>(std::move(nativeFunction));
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

@@ -17,7 +17,7 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyListPtr CreatePyList(Index capacity) {
   if (capacity == 0) {
@@ -358,7 +358,7 @@ PyObjPtr ListKlass::iter(const PyObjPtr& obj) {
   return CreateListIterator(obj);
 }
 
-PyObjPtr ListKlass::reversed(const torchlight::Object::PyObjPtr& obj) {
+PyObjPtr ListKlass::reversed(const tensorslow::Object::PyObjPtr& obj) {
   if (!obj->is(ListKlass::Self())) {
     throw std::runtime_error("List does not support reversed operation");
   }
@@ -406,8 +406,7 @@ PyObjPtr ListPop(const PyObjPtr& args) {
       index = list->Length() + argIndex;
     }
   }
-  list->Pop(index);
-  return CreatePyNone();
+  return list->Pop(index);
 }
 
 PyObjPtr ListClear(const PyObjPtr& args) {
@@ -508,4 +507,4 @@ PyListPtr CreatePyListFromIterable(const PyObjPtr& iterator) {
   return CreatePyList(list)->as<PyList>();
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

@@ -4,7 +4,7 @@
 #include "IR/FuncDef.h"
 #include "IR/Module.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 Object::PyCodePtr
 GetCodeFromList(const Object::PyObjPtr& codeList, const INodePtr& node) {
   if (node->is(ModuleKlass::Self())) {
@@ -60,4 +60,4 @@ void PrintEdge(
   Object::CreatePyString("")->PrintLine();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

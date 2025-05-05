@@ -3,7 +3,7 @@
 #include "Collections.h"
 #include "Collections/String/StringHelper.h"
 
-using namespace torchlight::Collections;
+using namespace tensorslow::Collections;
 
 TEST(Decimal, DecimalAddition) {
   Decimal a = CreateDecimalWithCString("123");
@@ -248,7 +248,7 @@ TEST(Decimal, NotEqual) {
 TEST(Decimal, Extra) {
   Decimal a = CreateDecimalWithCString("456456768578941657896468574896789");
   Decimal b = CreateDecimalWithCString("486546534");
-  torchlight::Collections::List<Decimal> c = a.DivMod(b);
+  tensorslow::Collections::List<Decimal> c = a.DivMod(b);
   ASSERT_TRUE(c.Get(0).Equal(CreateDecimalWithCString("938156448934731611707398"
   )));
   ASSERT_TRUE(c.Get(1).Equal(CreateDecimalWithCString("255838257")));

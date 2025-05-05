@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_AST_UNARY_H
-#define TORCHLIGHT_AST_UNARY_H
+#ifndef TENSORSLOW_AST_UNARY_H
+#define TENSORSLOW_AST_UNARY_H
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class UnaryKlass : public INodeKlass {
  public:
@@ -59,6 +59,6 @@ CreateUnary(Unary::Operator oprt, INodePtr operand, INodePtr parent) {
   return std::make_shared<Unary>(oprt, std::move(operand), std::move(parent));
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

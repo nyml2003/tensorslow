@@ -4,7 +4,7 @@
 #include "Collections/Integer/IntegerHelper.h"
 #include "Collections/String/StringHelper.h"
 
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 Integer::Integer(const List<uint32_t>& _parts, bool _sign)
   : parts(_parts), sign(_sign) {}
 Integer::Integer() = default;
@@ -401,16 +401,16 @@ Integer Integer::RightShift(const Integer& rhs) const {
     return result;
   }
   uint32_t overflowPicker = (1 << (bitShift + 1)) - 1;
-  for (Index i = result.parts.Size(); i > 1; i--) {
-    uint32_t high = result.parts.Get(i - 2);
-    uint32_t low = result.parts.Get(i - 1);
+  for (Index i = result.parts.Size() - 2; ~i; i--) {
+    uint32_t high = result.parts.Get(i);
+    uint32_t low = result.parts.Get(i + 1);
     low >>= bitShift;
     high &= overflowPicker;
     high = (high << (16 - bitShift)) & 0xFFFF;
-    result.parts.Set(i - 1, low | high);
+    result.parts.Set(i + 1, low | high);
   }
   result.parts.Set(0, result.parts.Get(0) >> bitShift);
   TrimLeadingZero(result.parts);
   return result;
 }
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections

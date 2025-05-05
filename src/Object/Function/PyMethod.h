@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_OBJECT_PYMETHOD_H
-#define TORCHLIGHT_OBJECT_PYMETHOD_H
+#ifndef TENSORSLOW_OBJECT_PYMETHOD_H
+#define TENSORSLOW_OBJECT_PYMETHOD_H
 
 #include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/String/PyString.h"
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class MethodKlass : public Klass {
  public:
@@ -46,6 +46,6 @@ inline PyObjPtr CreatePyMethod(PyObjPtr owner, PyObjPtr method) {
   return std::make_shared<PyMethod>(std::move(owner), std::move(method));
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

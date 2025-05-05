@@ -1,7 +1,7 @@
 #include "Collections/Integer/DecimalHelper.h"
 #include "Collections/Integer/IntegerHelper.h"
 #include "Collections/String/StringHelper.h"
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 String Decimal::ToString() const {
   if (IsZero()) {
     return CreateStringWithCString("0");
@@ -258,4 +258,4 @@ Decimal::Decimal() = default;
 bool Decimal::Sign() const {
   return sign;
 }
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections

@@ -12,7 +12,7 @@
 #include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 void Klass::SetName(const PyStrPtr& _name) {
   this->name = _name;
@@ -345,4 +345,4 @@ PyObjPtr Klass::_serialize_(const PyObjPtr& obj) {
 void Klass::AddAttribute(const PyStrPtr& key, const PyObjPtr& value) {
   this->attributes->Put(key, value);
 }
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

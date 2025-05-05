@@ -1,55 +1,55 @@
 cmake_minimum_required(VERSION 3.20)
-project(torchlight)
+project(tensorslow)
 include(cmake/GlobalSettings.cmake)
 include(cmake/AntlrConfig.cmake)
 
 include(src/source.cmake)
 include(test/unittest/unittest.cmake)
 include(test/extra/extra.cmake)
-message(STATUS "torchlight_frontend_files: ${torchlight_frontend_files}")
-message(STATUS "torchlight_backend_files: ${torchlight_backend_files}")
-message(STATUS "torchlight_common_files: ${torchlight_common_files}")
+message(STATUS "tensorslow_frontend_files: ${tensorslow_frontend_files}")
+message(STATUS "tensorslow_backend_files: ${tensorslow_backend_files}")
+message(STATUS "tensorslow_common_files: ${tensorslow_common_files}")
 
-add_library(torchlight_common STATIC ${torchlight_common_files})
+add_library(tensorslow_common STATIC ${tensorslow_common_files})
+add_dependencies(tensorslow_common antlr4_generate)
 
 add_executable(
-        torchlight_frontend
-        ${torchlight_frontend_entry_files}
-        ${torchlight_frontend_files}
+        tensorslow_compiler
+        ${tensorslow_frontend_entry_files}
+        ${tensorslow_frontend_files}
 )
 
-
 target_link_libraries(
-        torchlight_frontend
+        tensorslow_compiler
         antlr4_static
-        torchlight_common
+        tensorslow_common
 )
-add_dependencies(torchlight_frontend antlr4_static torchlight_common)
+add_dependencies(tensorslow_compiler antlr4_static tensorslow_common)
 
 add_executable(
-        torchlight_backend
-        ${torchlight_backend_files}
+        tensorslow_interpreter
+        ${tensorslow_backend_files}
 )
 target_link_libraries(
-        torchlight_backend
-        torchlight_common
+        tensorslow_interpreter
+        tensorslow_common
 )
 
-add_dependencies(torchlight_backend torchlight_common)
+add_dependencies(tensorslow_interpreter tensorslow_common)
 
 #add_executable(
-#        torchlight_compiler
-#        ${torchlight_Compiler_files}
-#        ${torchlight_common_files}
-#        ${torchlight_frontend_files}
+#        tensorslow_compiler
+#        ${tensorslow_Compiler_files}
+#        ${tensorslow_common_files}
+#        ${tensorslow_frontend_files}
 #)
 #
 #target_link_libraries(
-#        torchlight_compiler
+#        tensorslow_compiler
 #        antlr4_static
 #)
 #
-#add_dependencies(torchlight_compiler antlr4_static)
+#add_dependencies(tensorslow_compiler antlr4_static)
 
 include(cmake/tools.cmake)
 

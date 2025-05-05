@@ -2,9 +2,9 @@ set(test_name "TEST_PYINTEGER")
 
 add_executable(
         ${test_name}
-        ${torchlight_dir}/test/unittest/Object/PyInteger.cpp
+        ${tensorslow_dir}/test/unittest/Object/PyInteger.cpp
 )
 
 # gtest
-target_link_libraries(${test_name} gtest gtest_main torchlight_common)
+target_link_libraries(${test_name} gtest gtest_main tensorslow_common)
 add_test(NAME ${test_name} COMMAND ${test_name})

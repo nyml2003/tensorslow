@@ -1,9 +1,9 @@
 #!/bin/bash
-root_dir=/home/test/Desktop/torchlight
+root_dir=/home/test/Desktop/tensorslow
 build_dir=$root_dir/build
 test_dir=$root_dir/test/integration
-frontend_exe=$build_dir/torchlight_frontend
-backend_exe=$build_dir/torchlight_backend
+frontend_exe=$build_dir/tensorslow_frontend
+backend_exe=$build_dir/tensorslow_backend
 
 # 遍历test_dir
 subdirs=$(ls $test_dir)

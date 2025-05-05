@@ -3,7 +3,7 @@
 #include "Collections/String/StringHelper.h"
 #include "Common.h"
 
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 Decimal CreateDecimalZero() {
   return CreateDecimalWithU32(0);
 }
@@ -70,4 +70,4 @@ void TrimLeadingZero(List<int32_t>& parts) {
 Decimal CreateDecimalWithCString(const char* str) {
   return CreateDecimalWithString(CreateStringWithCString(str));
 }
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections

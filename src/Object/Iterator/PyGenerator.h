@@ -1,12 +1,12 @@
-#ifndef TORCHLIGHT_OBJECT_PYGENERATOR_H
-#define TORCHLIGHT_OBJECT_PYGENERATOR_H
+#ifndef TENSORSLOW_OBJECT_PYGENERATOR_H
+#define TENSORSLOW_OBJECT_PYGENERATOR_H
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Iterator/Iterator.h"
 #include "Object/Runtime/PyFrame.h"
 #include "Runtime/Interpreter.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 class PyGenerator;
 class GeneratorKlass : public Klass {
  public:
@@ -77,6 +77,6 @@ inline PyObjPtr CreatePyGenerator(
   return std::make_shared<PyGenerator>(func);
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

@@ -457,18 +457,6 @@ class CrossEntropyWithSoftMax(LossFunction):
             print('invalid')
 
 
-x = Variable([4, 1], False, False)
-label = Variable([3, 1], False, False)
-W = Variable([3, 4], True, True)
-b = Variable([3, 1], True, True)
-linear = Add([MatrixMultiply([W, x]), b])
-predict = SoftMax([linear])
-loss = CrossEntropyWithSoftMax([linear, label])
-learning_rate = 0.01
-optimizer = Momentum(graph, loss, learning_rate, 0.9)
-batch_size = 16
-
-
 def predict_and_evaluate(data, predict, input):
     size = len(data)
     pred = []
@@ -486,20 +474,35 @@ def predict_and_evaluate(data, predict, input):
     return accuracy
 
 
-for epoch in range(50):
-    batch_counter = 0
-    for i in range(len(train_set)):
-        features = train_set[i, :-3].T.reshape([4, 1])
-        l = Array(train_set[i, -3:]).T.reshape([3, 1])
-        x.set_value(features)
-        label.set_value(l)
-        optimizer.step()
-        batch_counter += 1
-        if batch_counter == batch_size:
-            optimizer.update()
-            batch_counter = 0
-    accuracy = predict_and_evaluate(train_set, predict, x)
-    if epoch % 10 == 0 or epoch == 49:
-        print("epoch: ", epoch + 1, " accuracy: ", accuracy)
-accuracy = predict_and_evaluate(test_set, predict, x)
-print("test accuracy: ", accuracy)
+def train():
+    x = Variable([4, 1], False, False)
+    label = Variable([3, 1], False, False)
+    W = Variable([3, 4], True, True)
+    b = Variable([3, 1], True, True)
+    linear = Add([MatrixMultiply([W, x]), b])
+    predict = SoftMax([linear])
+    loss = CrossEntropyWithSoftMax([linear, label])
+    learning_rate = 0.01
+    optimizer = Momentum(graph, loss, learning_rate, 0.9)
+    batch_size = 16
+
+    for epoch in range(50):
+        batch_counter = 0
+        for i in range(len(train_set)):
+            features = train_set[i, :-3].T.reshape([4, 1])
+            l = Array(train_set[i, -3:]).T.reshape([3, 1])
+            x.set_value(features)
+            label.set_value(l)
+            optimizer.step()
+            batch_counter += 1
+            if batch_counter == batch_size:
+                optimizer.update()
+                batch_counter = 0
+        accuracy = predict_and_evaluate(train_set, predict, x)
+        print("epoch: ", epoch, "train accuracy: ", accuracy)
+    accuracy = predict_and_evaluate(test_set, predict, x)
+    print("test accuracy: ", accuracy)
+
+
+train()
+train()

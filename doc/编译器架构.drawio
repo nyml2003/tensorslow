@@ -1,22 +1,24 @@
 <mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.1.1 Chrome/132.0.6834.210 Electron/34.3.3 Safari/537.36" version="26.1.1">
   <diagram name="第 1 页" id="mVP6j7SCdk7ZE-yo4KtM">
-    <mxGraphModel dx="1838" dy="1079" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="950" math="0" shadow="0">
+    <mxGraphModel dx="1953" dy="1146" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="950" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="shK-o-8r0Xd0-KGu6ifd-6" value="" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 8;" parent="1" vertex="1">
-          <mxGeometry x="50" y="140" width="390" height="230" as="geometry" />
+          <mxGeometry x="210" y="152.5" width="830" height="115" as="geometry" />
         </mxCell>
-        <mxCell id="shK-o-8r0Xd0-KGu6ifd-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="shK-o-8r0Xd0-KGu6ifd-3" target="shK-o-8r0Xd0-KGu6ifd-14" edge="1">
-          <mxGeometry relative="1" as="geometry" />
+        <mxCell id="shK-o-8r0Xd0-KGu6ifd-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="shK-o-8r0Xd0-KGu6ifd-3" target="shK-o-8r0Xd0-KGu6ifd-14" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="300" y="110" as="sourcePoint" />
+          </mxGeometry>
         </mxCell>
         <mxCell id="shK-o-8r0Xd0-KGu6ifd-38" value="输入" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="shK-o-8r0Xd0-KGu6ifd-19" vertex="1" connectable="0">
           <mxGeometry x="-0.4531" y="-1" relative="1" as="geometry">
-            <mxPoint y="3" as="offset" />
+            <mxPoint x="11" y="-1" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="shK-o-8r0Xd0-KGu6ifd-3" value="源代码" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="90" y="50" width="100" height="50" as="geometry" />
+          <mxGeometry x="40" y="185" width="100" height="50" as="geometry" />
         </mxCell>
         <mxCell id="shK-o-8r0Xd0-KGu6ifd-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="shK-o-8r0Xd0-KGu6ifd-14" target="shK-o-8r0Xd0-KGu6ifd-15" edge="1">
           <mxGeometry relative="1" as="geometry" />
@@ -27,9 +29,9 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="shK-o-8r0Xd0-KGu6ifd-14" value="词法分析" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="80" y="170" width="120" height="60" as="geometry" />
+          <mxGeometry x="250" y="180" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="shK-o-8r0Xd0-KGu6ifd-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" parent="1" source="shK-o-8r0Xd0-KGu6ifd-15" target="shK-o-8r0Xd0-KGu6ifd-16" edge="1">
+        <mxCell id="shK-o-8r0Xd0-KGu6ifd-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="shK-o-8r0Xd0-KGu6ifd-15" target="shK-o-8r0Xd0-KGu6ifd-16" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="shK-o-8r0Xd0-KGu6ifd-24" value="抽象语法树" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="shK-o-8r0Xd0-KGu6ifd-23" vertex="1" connectable="0">
@@ -38,41 +40,38 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="shK-o-8r0Xd0-KGu6ifd-15" value="语法分析" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="290" y="170" width="120" height="60" as="geometry" />
+          <mxGeometry x="470" y="180" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="shK-o-8r0Xd0-KGu6ifd-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="shK-o-8r0Xd0-KGu6ifd-16" target="shK-o-8r0Xd0-KGu6ifd-17" edge="1">
+        <mxCell id="shK-o-8r0Xd0-KGu6ifd-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="shK-o-8r0Xd0-KGu6ifd-16" target="shK-o-8r0Xd0-KGu6ifd-17" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="shK-o-8r0Xd0-KGu6ifd-26" value="中间代码" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="shK-o-8r0Xd0-KGu6ifd-25" vertex="1" connectable="0">
           <mxGeometry x="0.0307" y="2" relative="1" as="geometry">
-            <mxPoint as="offset" />
+            <mxPoint x="-6" y="2" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="shK-o-8r0Xd0-KGu6ifd-16" value="中间代码生成" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="290" y="280" width="120" height="60" as="geometry" />
+          <mxGeometry x="680" y="180" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="shK-o-8r0Xd0-KGu6ifd-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" target="shK-o-8r0Xd0-KGu6ifd-33" edge="1">
+        <mxCell id="shK-o-8r0Xd0-KGu6ifd-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" target="shK-o-8r0Xd0-KGu6ifd-33" edge="1" source="shK-o-8r0Xd0-KGu6ifd-17">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="140" y="340" as="sourcePoint" />
-            <Array as="points">
-              <mxPoint x="140" y="370" />
-              <mxPoint x="140" y="370" />
-            </Array>
+            <mxPoint x="300" y="350" as="sourcePoint" />
+            <Array as="points" />
           </mxGeometry>
         </mxCell>
         <mxCell id="shK-o-8r0Xd0-KGu6ifd-39" value="输出" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="shK-o-8r0Xd0-KGu6ifd-37" vertex="1" connectable="0">
           <mxGeometry x="-0.1744" y="1" relative="1" as="geometry">
-            <mxPoint y="-12" as="offset" />
+            <mxPoint x="15" y="1" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="shK-o-8r0Xd0-KGu6ifd-17" value="字节码生成" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="80" y="280" width="120" height="60" as="geometry" />
+          <mxGeometry x="890" y="180" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="shK-o-8r0Xd0-KGu6ifd-18" value="编译器" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=20;" parent="1" vertex="1">
-          <mxGeometry x="202.5" y="100" width="85" height="30" as="geometry" />
+          <mxGeometry x="595" y="110" width="85" height="30" as="geometry" />
         </mxCell>
         <mxCell id="shK-o-8r0Xd0-KGu6ifd-33" value="字节码" style="swimlane;fontStyle=0;childLayout=stackLayout;horizontal=1;startSize=26;fillColor=none;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="70" y="410" width="140" height="78" as="geometry">
+          <mxGeometry x="1120" y="171" width="140" height="78" as="geometry">
             <mxRectangle x="100" y="540" width="80" height="30" as="alternateBounds" />
           </mxGeometry>
         </mxCell>

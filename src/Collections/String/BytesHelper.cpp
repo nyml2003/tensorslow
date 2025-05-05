@@ -7,7 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 String ReprByte(Byte byte) {
   // 使用 \x 格式表示一个字节
   char buffer[5];  // 需要 5 个字符：\x + 2 个十六进制字符 + 终止符
@@ -184,4 +184,4 @@ Integer DeserializeInteger(const List<Byte>& bytes) {
   }
   return Integer(data, sign);
 }
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections

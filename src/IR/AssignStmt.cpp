@@ -5,7 +5,7 @@
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 Object::PyObjPtr AssignStmtKlass::emit(
   const Object::PyObjPtr& obj,
@@ -72,4 +72,4 @@ Object::PyObjPtr AssignStmtKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

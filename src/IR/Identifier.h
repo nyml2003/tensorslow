@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_AST_IDENTIFIER_H
-#define TORCHLIGHT_AST_IDENTIFIER_H
+#ifndef TENSORSLOW_AST_IDENTIFIER_H
+#define TENSORSLOW_AST_IDENTIFIER_H
 
 #include <utility>
 
@@ -7,7 +7,7 @@
 #include "IR/INode.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class IdentifierKlass : public INodeKlass {
  public:
@@ -118,6 +118,6 @@ IdentifierRegistry GetIdentifierRegistry(
   const Object::PyListPtr& builtins
 );
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

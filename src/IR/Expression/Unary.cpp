@@ -2,7 +2,7 @@
 #include "Object/Core/PyNone.h"
 #include "Object/Runtime/PyInst.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 Object::PyObjPtr UnaryKlass::visit(
   const Object::PyObjPtr& obj,
@@ -61,4 +61,4 @@ Object::PyObjPtr UnaryKlass::print(const Object::PyObjPtr& obj) {
   PrintEdge(unary, operand, textList);
   return Object::CreatePyNone();
 }
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

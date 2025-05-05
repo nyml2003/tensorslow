@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_AST_SLICE_H
-#define TORCHLIGHT_AST_SLICE_H
+#ifndef TENSORSLOW_AST_SLICE_H
+#define TENSORSLOW_AST_SLICE_H
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class SliceKlass : public INodeKlass {
  public:
@@ -52,6 +52,6 @@ CreateSlice(const Object::PyListPtr& elements, const INodePtr& parent) {
   return std::make_shared<Slice>(elements, parent);
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

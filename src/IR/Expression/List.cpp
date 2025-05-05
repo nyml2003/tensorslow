@@ -1,7 +1,7 @@
 #include "IR/Expression/List.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Iterator/IteratorHelper.h"
-namespace torchlight::IR {
+namespace tensorslow::IR {
 Object::PyObjPtr
 ListKlass::emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) {
   auto list = obj->as<List>();
@@ -38,4 +38,4 @@ Object::PyObjPtr ListKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

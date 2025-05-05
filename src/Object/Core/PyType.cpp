@@ -2,7 +2,7 @@
 #include "Function/BuiltinFunction.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/String/PyString.h"
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 void TypeKlass::Initialize() {
   if (this->isInitialized) {
@@ -36,4 +36,4 @@ PyObjPtr TypeKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   return CreatePyBoolean(lhsType->Owner() == rhsType->Owner());
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_AST_HELPER_H
-#define TORCHLIGHT_AST_HELPER_H
+#ifndef TENSORSLOW_AST_HELPER_H
+#define TENSORSLOW_AST_HELPER_H
 
 #include "IR/AssignStmt.h"
 #include "IR/ClassDef.h"
@@ -22,7 +22,7 @@
 #include "IR/Statement/WhileStmt.h"
 #include "IR/Statement/YieldStmt.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 inline void RegisterAstKlass() {
   AtomKlass::Self()->Initialize();
@@ -47,6 +47,6 @@ inline void RegisterAstKlass() {
   ModuleKlass::Self()->Initialize();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

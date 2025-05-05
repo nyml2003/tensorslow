@@ -4,7 +4,7 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyInst::PyInst(ByteCode code, OperandKind operand)
   : PyObject(InstKlass::Self()), code(code), operand(operand) {}
@@ -159,4 +159,4 @@ PyInstPtr CreateNop() {
   return std::make_shared<PyInst>(ByteCode::NOP);
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

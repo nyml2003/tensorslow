@@ -1,9 +1,9 @@
-#ifndef TORCHLIGHT_COLLECTIONS_BYTES_HELPER_H
-#define TORCHLIGHT_COLLECTIONS_BYTES_HELPER_H
+#ifndef TENSORSLOW_COLLECTIONS_BYTES_HELPER_H
+#define TENSORSLOW_COLLECTIONS_BYTES_HELPER_H
 #include "Collections/Integer/Decimal.h"
 #include "Collections/Integer/Integer.h"
 #include "Collections/String/String.h"
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 
 void Write(const String& bytes, const String& filename);
 std::string ToCppString(const String& bytes);
@@ -28,5 +28,5 @@ String Serialize(const Decimal& value);
 Decimal DeserializeDecimal(const List<Byte>& bytes);
 String Serialize(const String& value);
 String DeserializeString(const List<Byte>& bytes);
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections
 #endif

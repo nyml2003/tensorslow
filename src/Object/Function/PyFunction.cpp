@@ -1,7 +1,7 @@
 #include "Object/Function/PyFunction.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyObjPtr FunctionKlass::repr(const PyObjPtr& obj) {
   return StringConcat(CreatePyList(
@@ -12,4 +12,4 @@ PyObjPtr FunctionKlass::repr(const PyObjPtr& obj) {
   ));
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

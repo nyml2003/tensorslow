@@ -2,7 +2,7 @@
 #include "Object/Container/PyList.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyObjPtr MethodKlass::repr(const PyObjPtr& obj) {
   if (!obj->is(MethodKlass::Self())) {
@@ -21,4 +21,4 @@ PyObjPtr MethodKlass::repr(const PyObjPtr& obj) {
   ));
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

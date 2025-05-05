@@ -2,4 +2,4 @@
 
 valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all --undef-value-errors=no --log-file=log /app/build/test_integer
 
-valgrind --tool=callgrind  /app/build/torchlight_frontend
+valgrind --tool=callgrind  /app/build/tensorslow_frontend

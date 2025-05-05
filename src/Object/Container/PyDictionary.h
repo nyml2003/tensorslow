@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_OBJECT_PYDICTIONARY_H
-#define TORCHLIGHT_OBJECT_PYDICTIONARY_H
+#ifndef TENSORSLOW_OBJECT_PYDICTIONARY_H
+#define TENSORSLOW_OBJECT_PYDICTIONARY_H
 
 #include "Common.h"
 #include "Object/Core/Klass.h"
@@ -7,7 +7,7 @@
 
 #include <map>
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class DictionaryKlass : public Klass {
  public:
@@ -58,12 +58,15 @@ class PyDictionary : public PyObject {
 
   PyDictPtr Add(const PyDictPtr& other);
   void Clear() { dict.clear(); }
+  auto Dictionary() -> decltype(dict) { return dict; }
 };
 
 PyObjPtr CreatePyDict();
 using PyDictPtr = std::shared_ptr<PyDictionary>;
 
 auto DictClear(const PyObjPtr& obj) -> PyObjPtr;
-}  // namespace torchlight::Object
+auto DictItems(const PyObjPtr& obj) -> PyObjPtr;
+auto DictGet(const PyObjPtr& obj) -> PyObjPtr;
+}  // namespace tensorslow::Object
 
 #endif

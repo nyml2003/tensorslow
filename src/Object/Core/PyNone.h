@@ -1,12 +1,12 @@
-#ifndef TORCHLIGHT_OBJECT_PYNONE_H
-#define TORCHLIGHT_OBJECT_PYNONE_H
+#ifndef TENSORSLOW_OBJECT_PYNONE_H
+#define TENSORSLOW_OBJECT_PYNONE_H
 
 #include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class NoneKlass : public Klass {
  public:
@@ -45,6 +45,6 @@ inline PyNonePtr CreatePyNone() {
   return PyNone::Instance();
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

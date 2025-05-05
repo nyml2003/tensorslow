@@ -13,7 +13,7 @@
 #include "Object/Number/PyFloat.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Runtime {
+namespace tensorslow::Runtime {
 
 Object::PyDictPtr Genesis() {
   Object::LoadBootstrapClasses();
@@ -235,4 +235,4 @@ Object::PyDictPtr Genesis() {
 //   return matrix;
 // }
 
-}  // namespace torchlight::Runtime
+}  // namespace tensorslow::Runtime

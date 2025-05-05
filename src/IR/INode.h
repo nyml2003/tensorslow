@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_AST_AST_NODE_BASE_H
-#define TORCHLIGHT_AST_AST_NODE_BASE_H
+#ifndef TENSORSLOW_AST_AST_NODE_BASE_H
+#define TENSORSLOW_AST_AST_NODE_BASE_H
 
 #include "Object/Core/Klass.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Runtime/PyCode.h"
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 enum class STOREORLOAD {
   STORE,
@@ -76,6 +76,6 @@ void PrintEdge(
   const Object::PyObjPtr& child,
   const Object::PyStrPtr& text = nullptr
 );
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

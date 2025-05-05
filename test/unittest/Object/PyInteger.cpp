@@ -7,10 +7,10 @@
 #include "Object.h"
 #include "Object/String/PyBytes.h"
 
-using namespace torchlight::Object;
-using namespace torchlight::Collections;
+using namespace tensorslow::Object;
+using namespace tensorslow::Collections;
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class PyIntegerTest : public ::testing::Test {
  protected:
@@ -105,7 +105,7 @@ TEST_F(PyIntegerTest, TestSerialize) {
                 .Equal(CreateIntegerWithCString("10")));
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);

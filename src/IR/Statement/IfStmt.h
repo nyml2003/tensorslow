@@ -1,11 +1,11 @@
-#ifndef TORCHLIGHT_AST_IF_STATEMENT_H
-#define TORCHLIGHT_AST_IF_STATEMENT_H
+#ifndef TENSORSLOW_AST_IF_STATEMENT_H
+#define TENSORSLOW_AST_IF_STATEMENT_H
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 #include "Object/Object.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class IfStmtKlass : public INodeKlass {
  public:
@@ -83,6 +83,6 @@ inline INodePtr CreateIfStmt(
   );
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

@@ -1,9 +1,9 @@
 #include "Object/Iterator/PyGenerator.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyObjPtr GeneratorKlass::next(const PyObjPtr& obj) {
   return obj->as<PyGenerator>()->Next();
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

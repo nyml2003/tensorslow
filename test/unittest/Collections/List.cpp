@@ -2,8 +2,8 @@
 
 #include "Collections/List.h"
 
-using namespace torchlight::Collections;
-using torchlight::Index;
+using namespace tensorslow::Collections;
+using tensorslow::Index;
 TEST(List, Add) {
   List<char> list1 = {1, 2, 3};
   List<char> list2 = {4, 5, 6};

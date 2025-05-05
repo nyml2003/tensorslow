@@ -8,7 +8,7 @@
 #include "Object/Iterator/IteratorHelper.h"
 #include "Object/Runtime/PyCode.h"
 #include "Tools/Tools.h"
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 FuncDef::FuncDef(
   Object::PyStrPtr name,
@@ -101,4 +101,4 @@ Object::PyObjPtr FuncDefKlass::print(const Object::PyObjPtr& obj) {
   });
   return Object::CreatePyNone();
 }
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

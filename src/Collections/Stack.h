@@ -1,7 +1,7 @@
-#ifndef TORCHLIGHT_COLLECTIONS_STACK_H
-#define TORCHLIGHT_COLLECTIONS_STACK_H
+#ifndef TENSORSLOW_COLLECTIONS_STACK_H
+#define TENSORSLOW_COLLECTIONS_STACK_H
 #include "Collections/List.h"
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 template <typename T>
 class Stack {
  private:
@@ -16,5 +16,5 @@ class Stack {
   [[nodiscard]] bool Empty() const { return content.Empty(); }
   [[nodiscard]] Index Size() const { return content.Size(); }
 };
-}  // namespace torchlight::Collections
-#endif  // TORCHLIGHT_COLLECTIONS_STACK_H
+}  // namespace tensorslow::Collections
+#endif  // TENSORSLOW_COLLECTIONS_STACK_H

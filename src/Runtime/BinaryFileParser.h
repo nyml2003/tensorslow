@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_RUNTIME_BINARY_FILEPARSER_H
-#define TORCHLIGHT_RUNTIME_BINARY_FILEPARSER_H
+#ifndef TENSORSLOW_RUNTIME_BINARY_FILEPARSER_H
+#define TENSORSLOW_RUNTIME_BINARY_FILEPARSER_H
 
 #include <filesystem>
 #include <fstream>
@@ -12,7 +12,7 @@
 #include "Object/Runtime/PyCode.h"
 #include "Object/String/PyBytes.h"
 
-namespace torchlight::Runtime {
+namespace tensorslow::Runtime {
 namespace fs = std::filesystem;
 
 class BinaryFileParser {
@@ -132,6 +132,6 @@ class BinaryFileParser {
     );
   }
 };
-}  // namespace torchlight::Runtime
+}  // namespace tensorslow::Runtime
 
-#endif  // TORCHLIGHT_RUNTIME_BINARY_FILEPARSER_H
+#endif  // TENSORSLOW_RUNTIME_BINARY_FILEPARSER_H

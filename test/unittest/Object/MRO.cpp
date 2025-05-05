@@ -9,8 +9,8 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/String/PyString.h"
 
-using namespace torchlight::Object;
-using namespace torchlight::Collections;
+using namespace tensorslow::Object;
+using namespace tensorslow::Collections;
 
 class MROTest : public ::testing::Test {
  protected:

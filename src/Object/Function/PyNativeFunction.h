@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_OBJECT_PYNATIVEFUNCTION_H
-#define TORCHLIGHT_OBJECT_PYNATIVEFUNCTION_H
+#ifndef TENSORSLOW_OBJECT_PYNATIVEFUNCTION_H
+#define TENSORSLOW_OBJECT_PYNATIVEFUNCTION_H
 
 #include <functional>
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 using TypeFunction = std::function<PyObjPtr(PyObjPtr)>;
 
@@ -59,6 +59,6 @@ void CheckNativeFunctionArgumentWithType(
   const KlassPtr& klass
 );
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

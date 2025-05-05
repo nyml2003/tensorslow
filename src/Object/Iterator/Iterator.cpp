@@ -4,7 +4,7 @@
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyObjPtr ListIteratorKlass::next(const PyObjPtr& obj) {
   auto iterator = obj->as<ListIterator>();
@@ -84,4 +84,4 @@ PyObjPtr DictItemIteratorKlass::str(const PyObjPtr& obj) {
   return result;
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

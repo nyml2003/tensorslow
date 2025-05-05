@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_BACKEND_TOOLS_H
-#define TORCHLIGHT_BACKEND_TOOLS_H
+#ifndef TENSORSLOW_BACKEND_TOOLS_H
+#define TENSORSLOW_BACKEND_TOOLS_H
 
 #include <filesystem>
 #include <fstream>
@@ -10,7 +10,7 @@
 
 namespace fs = std::filesystem;
 
-namespace torchlight {
+namespace tensorslow {
 
 class Parameter {
  public:
@@ -81,6 +81,6 @@ class RedirectCout {
   std::ofstream file;              // 用于文件输出的文件流
 };
 
-}  // namespace torchlight
+}  // namespace tensorslow
 
-#endif  // TORCHLIGHT_TOOLS_H
+#endif  // TENSORSLOW_TOOLS_H

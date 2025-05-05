@@ -10,7 +10,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #endif
-using namespace torchlight;
+using namespace tensorslow;
 RedirectCout redirectCout;
 void DefineOption() {
   Schema schema;
@@ -142,8 +142,9 @@ void RunTest(const fs::path& filename) {
   HandleResultBegin(filename);
   try {
     Runtime::Interpreter::Run(code);
-  } catch (...) {
+  } catch (const std::exception& e) {
     PrintFrame(Runtime::Interpreter::Instance().CurrentFrame());
+    std::cerr << "Caught exception: " << e.what() << std::endl;
     throw;
   }
 

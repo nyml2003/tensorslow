@@ -2,7 +2,7 @@
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 Object::PyObjPtr
 AtomKlass::emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) {
@@ -42,4 +42,4 @@ Object::PyObjPtr AtomKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

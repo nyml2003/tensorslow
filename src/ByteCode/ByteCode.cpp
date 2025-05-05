@@ -2,7 +2,7 @@
 #include "Collections/String/String.h"
 #include "Collections/String/StringHelper.h"
 
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 
 Collections::String ToString(None /*kind*/) {
   return Collections::CreateStringWithCString("None");
@@ -78,4 +78,4 @@ Collections::String Serialize(Object::Literal kind) {
   return Collections::String(Collections::List({static_cast<Byte>(kind)}));
 }
 
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections

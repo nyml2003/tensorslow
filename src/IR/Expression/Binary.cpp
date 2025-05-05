@@ -2,7 +2,7 @@
 #include "Object/Core/PyNone.h"
 #include "Object/Runtime/PyInst.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 Object::PyObjPtr BinaryKlass::visit(
   const Object::PyObjPtr& obj,
@@ -128,4 +128,4 @@ Object::PyObjPtr BinaryKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

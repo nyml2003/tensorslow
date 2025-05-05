@@ -1,9 +1,9 @@
-#ifndef TORCHLIGHT_OBJECT_MATRIX_FUNCTION_H
-#define TORCHLIGHT_OBJECT_MATRIX_FUNCTION_H
+#ifndef TENSORSLOW_OBJECT_MATRIX_FUNCTION_H
+#define TENSORSLOW_OBJECT_MATRIX_FUNCTION_H
 
 #include "Object/Core/PyObject.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyObjPtr Transpose(const PyObjPtr& args);
 
@@ -24,6 +24,6 @@ PyObjPtr Shape(const PyObjPtr& args);
 PyObjPtr Concatenate(const PyObjPtr& args);
 
 PyObjPtr Ravel(const PyObjPtr& args);
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

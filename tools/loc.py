@@ -1,13 +1,13 @@
 import os
 
 # 定义参数
-torchlight_src_dir = r"D:\code\project\torchlight\src"  # 替换为实际路径
+tensorslow_src_dir = r"D:\code\project\tensorslow\src"  # 替换为实际路径
 
 # 初始化总行数
 total_lines = 0
 
 # 遍历目录中的文件
-for root, dirs, files in os.walk(torchlight_src_dir):
+for root, dirs, files in os.walk(tensorslow_src_dir):
 
     # 遍历当前目录下的文件
     for file_name in files:
@@ -19,7 +19,7 @@ for root, dirs, files in os.walk(torchlight_src_dir):
                 line_count = sum(1 for line in f if line.strip())
 
             # 输出文件信息
-            print(f"[INFO] {file_path.replace(torchlight_src_dir, '')}: [{line_count} lines]")
+            print(f"[INFO] {file_path.replace(tensorslow_src_dir, '')}: [{line_count} lines]")
 
             # 累加总行数
             total_lines += line_count

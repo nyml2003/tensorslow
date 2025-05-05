@@ -18,8 +18,9 @@
 #include <iomanip>
 #include <iostream>
 #include <random>
+#include <sstream>
 #include <thread>
-namespace torchlight::Function {
+namespace tensorslow::Function {
 
 Object::PyObjPtr Identity(const Object::PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
@@ -409,4 +410,4 @@ auto Hash(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
   return arg->hash();
 }
 
-}  // namespace torchlight::Function
+}  // namespace tensorslow::Function

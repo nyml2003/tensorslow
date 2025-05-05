@@ -9,7 +9,7 @@
 #include "Object/Runtime/PyCode.h"
 #include "Object/String/PyString.h"
 #include "Tools/Tools.h"
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 ClassDef::ClassDef(
   Object::PyStrPtr name,
@@ -107,4 +107,4 @@ Object::PyObjPtr ClassDefKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

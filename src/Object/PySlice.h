@@ -1,12 +1,12 @@
-#ifndef TORCHLIGHT_OBJECT_PYSLICE_H
-#define TORCHLIGHT_OBJECT_PYSLICE_H
+#ifndef TENSORSLOW_OBJECT_PYSLICE_H
+#define TENSORSLOW_OBJECT_PYSLICE_H
 
 #include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class SliceKlass : public Klass {
  public:
@@ -62,6 +62,6 @@ inline PyObjPtr CreatePySlice(
 }
 using PySlicePtr = std::shared_ptr<PySlice>;
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
-#endif  // TORCHLIGHT_OBJECT_PYSLICE_H
+#endif  // TENSORSLOW_OBJECT_PYSLICE_H

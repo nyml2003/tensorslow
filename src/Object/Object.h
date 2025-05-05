@@ -1,9 +1,9 @@
-#ifndef TORCHLIGHT_OBJECT_COMMON_H
-#define TORCHLIGHT_OBJECT_COMMON_H
+#ifndef TENSORSLOW_OBJECT_COMMON_H
+#define TENSORSLOW_OBJECT_COMMON_H
 
 #include <memory>
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class Klass;
 using KlassPtr = std::shared_ptr<Klass>;
@@ -21,6 +21,6 @@ using PyTypePtr = std::shared_ptr<PyType>;
 class PyInteger;
 using PyIntPtr = std::shared_ptr<PyInteger>;
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
-#endif  // TORCHLIGHT_OBJECT_COMMON_H
+#endif  // TENSORSLOW_OBJECT_COMMON_H

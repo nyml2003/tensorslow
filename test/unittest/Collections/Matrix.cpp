@@ -2,8 +2,8 @@
 #include "../test_default.h"
 #include "Collections/String/StringHelper.h"
 
-using namespace torchlight::Collections;
-using torchlight::Index;
+using namespace tensorslow::Collections;
+using tensorslow::Index;
 
 TEST(Matrix, Constructor) {
   Matrix mat1(2, 3);

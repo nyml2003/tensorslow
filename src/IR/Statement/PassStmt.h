@@ -1,11 +1,11 @@
-#ifndef TORCHLIGHT_AST_PASSSTMT_H
-#define TORCHLIGHT_AST_PASSSTMT_H
+#ifndef TENSORSLOW_AST_PASSSTMT_H
+#define TENSORSLOW_AST_PASSSTMT_H
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 #include "Object/Core/PyNone.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class PassStmtKlass : public INodeKlass {
  public:
@@ -47,6 +47,6 @@ inline INodePtr CreatePassStmt(const INodePtr& parent) {
   return std::make_shared<PassStmt>(parent);
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

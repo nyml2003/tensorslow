@@ -5,7 +5,7 @@
 
 #include "Collections.h"
 
-using namespace torchlight::Collections;
+using namespace tensorslow::Collections;
 
 TEST(Integer, IntegerAddition) {
   Integer a = CreateIntegerWithCString("123");

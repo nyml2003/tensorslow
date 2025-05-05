@@ -1,7 +1,7 @@
 #include "IR/Statement/WhileStmt.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Iterator/IteratorHelper.h"
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 Object::PyObjPtr WhileStmtKlass::visit(
   const Object::PyObjPtr& obj,
@@ -54,4 +54,4 @@ Object::PyObjPtr WhileStmtKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

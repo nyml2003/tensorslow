@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <utility>
-namespace torchlight {
+namespace tensorslow {
 
 // Parameter 类实现
 Parameter::Parameter(
@@ -178,4 +178,4 @@ void RedirectCout::restore() {
   std::cout.rdbuf(originalBuffer);  // 恢复 std::cout 的原始缓冲区
 }
 
-}  // namespace torchlight
+}  // namespace tensorslow

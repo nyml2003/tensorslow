@@ -1,12 +1,12 @@
-#ifndef TORCHLIGHT_OBJECT_PYLIST_H
-#define TORCHLIGHT_OBJECT_PYLIST_H
+#ifndef TENSORSLOW_OBJECT_PYLIST_H
+#define TENSORSLOW_OBJECT_PYLIST_H
 
 #include "Collections/List.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Object.h"
 #include "Object/PySlice.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 class ListKlass : public Klass {
  public:
   explicit ListKlass() = default;
@@ -66,7 +66,11 @@ class PyList : public PyObject {
   void InsertAndReplace(Index start, Index end, const PyListPtr& list) {
     value.InsertAndReplace(start, end, list->value);
   }
-  void Pop(Index index) { value.RemoveAt(index); }
+  PyObjPtr Pop(Index index) {
+    auto obj = value[index];
+    value.RemoveAt(index);
+    return obj;
+  }
   void Clear() { value.Clear(); }
   void Reverse() { value.Reverse(); }
   PyListPtr Copy() { return CreatePyList(value.Copy())->as<PyList>(); }
@@ -94,6 +98,6 @@ PyObjPtr ListClear(const PyObjPtr& args);
 PyObjPtr ListCopy(const PyObjPtr& args);
 
 PyListPtr CreatePyListFromIterable(const PyObjPtr& iterator);
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

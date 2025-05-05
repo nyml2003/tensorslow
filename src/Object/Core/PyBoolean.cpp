@@ -4,7 +4,7 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyObjPtr BooleanKlass::repr(const PyObjPtr& obj) {
   if (!obj->is(BooleanKlass::Self())) {
@@ -61,4 +61,4 @@ PyObjPtr BooleanKlass::_serialize_(const PyObjPtr& obj) {
   return CreatePyBytes(Collections::Serialize(Literal::FALSE));
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

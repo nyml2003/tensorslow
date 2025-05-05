@@ -6,7 +6,7 @@
 #include <cstring>
 #include <iostream>
 #include <stdexcept>
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 String CreateStringWithCString(const char* str) noexcept {
   constexpr std::size_t FNV_OFFSET_BASIS = 14695981039346656037ULL;
   constexpr std::size_t FNV_PRIME = 1099511628211ULL;
@@ -33,4 +33,4 @@ std::size_t Hash(const List<Byte>& str) noexcept {
   return hash;
 }
 
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections

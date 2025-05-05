@@ -20,7 +20,7 @@
 #include "Runtime/Interpreter.h"
 #include "Tools/Tools.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyFrame::PyFrame(
   PyCodePtr code,
@@ -381,10 +381,10 @@ bool PyFrame::HasCaller() const {
 PyObjPtr PyFrame::Eval() {
   while (!Finished()) {
     const auto& inst = Instruction();
-    //    if (ArgsHelper::Instance().Has("debug")) {
-    //      CreatePyString("-------------------")->as<PyString>()->PrintLine();
-    //      PrintFrame(shared_from_this()->as<PyFrame>());
-    //    }
+        if (ArgsHelper::Instance().Has("debug")) {
+          CreatePyString("-------------------")->as<PyString>()->PrintLine();
+          PrintFrame(shared_from_this()->as<PyFrame>());
+        }
     switch (inst->Code()) {
       case ByteCode::LOAD_CONST: {
         auto key = std::get<Index>(inst->Operand());
@@ -845,4 +845,4 @@ PyObjPtr PyFrame::EvalWithDestory() {
   return result;
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

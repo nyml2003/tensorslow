@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_OBJECT_PYSTRING_H
-#define TORCHLIGHT_OBJECT_PYSTRING_H
+#ifndef TENSORSLOW_OBJECT_PYSTRING_H
+#define TENSORSLOW_OBJECT_PYSTRING_H
 
 #include "Collections/String/String.h"
 #include "Object/Core/PyObject.h"
@@ -7,7 +7,7 @@
 
 #include <mutex>
 #include <unordered_map>
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class StringKlass : public Klass {
  public:
@@ -86,6 +86,6 @@ PyStrPtr CreatePyString(const Collections::String& value, bool pooling = true);
 PyStrPtr CreatePyString(const char* value);
 PyStrPtr CreatePyString(const std::string& value);
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
-#endif  // TORCHLIGHT_OBJECT_PYSTRING_H
+#endif  // TENSORSLOW_OBJECT_PYSTRING_H

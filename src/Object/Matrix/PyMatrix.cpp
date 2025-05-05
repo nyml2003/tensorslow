@@ -12,7 +12,7 @@
 #include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
 #include "Tools/Tools.h"
-namespace torchlight::Object {
+namespace tensorslow::Object {
 PyObjPtr MatrixKlass::repr(const PyObjPtr& obj) {
   return Klass::repr(obj);
 }
@@ -339,9 +339,9 @@ void MatrixKlass::Initialize() {
   this->isInitialized = true;
 }
 
-PyObjPtr MatrixKlass::neg(const torchlight::Object::PyObjPtr& obj) {
+PyObjPtr MatrixKlass::neg(const tensorslow::Object::PyObjPtr& obj) {
   auto matrix = obj->as<PyMatrix>();
   return matrix->Multiply(-1);
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

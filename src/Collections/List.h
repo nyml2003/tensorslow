@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_COLLECTIONS_LIST_H
-#define TORCHLIGHT_COLLECTIONS_LIST_H
+#ifndef TENSORSLOW_COLLECTIONS_LIST_H
+#define TENSORSLOW_COLLECTIONS_LIST_H
 
 #include "Common.h"
 
@@ -9,7 +9,7 @@
 #include <memory>
 #include <random>
 #include <stdexcept>
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 const Index INIT_CAPACITY = 10;
 template <typename T>
 class List {
@@ -36,11 +36,8 @@ class List {
 
  public:
   void ExpandWithElement(Index newCapacity, T element);
-  /**
-   * 构造函数
-   * @param capacity 列表的初始容量，默认为 INIT_CAPACITY
-   */
-  explicit List(Index capacity = INIT_CAPACITY);
+  explicit List(Index capacity);
+  explicit List();
   explicit List(Index count, T element);
   List(std::initializer_list<T> list);
   explicit List(Index count, std::unique_ptr<T[]> data)
@@ -217,6 +214,10 @@ List<T>::List(Index _capacity) : size(0), capacity(_capacity) {
   if (_capacity > 0) {
     elements = std::make_unique<T[]>(_capacity);
   }
+}
+template <typename T>
+List<T>::List() : size(0), capacity(0) {
+  elements = nullptr;
 }
 template <typename T>
 List<T>::List(Index count, T element) : size(count) {
@@ -573,7 +574,7 @@ void List<T>::Set(Index index, T element) {
 }
 template <typename T>
 void List<T>::Expand() {
-  Index newCapacity = std::max(capacity * 2, INIT_CAPACITY);
+  Index newCapacity = std::max(Index(capacity * 1.5), INIT_CAPACITY);
   std::unique_ptr<T[]> newElements = std::make_unique<T[]>(newCapacity);
   std::copy(
     std::execution::par, elements.get(), elements.get() + size,
@@ -634,5 +635,5 @@ void List<T>::Shuffle() {
   std::shuffle(elements.get(), elements.get() + size, gen);
 }
 
-}  // namespace torchlight::Collections
-#endif  // TORCHLIGHT_COLLECTIONS_LIST_H
+}  // namespace tensorslow::Collections
+#endif  // TENSORSLOW_COLLECTIONS_LIST_H

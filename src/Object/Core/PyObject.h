@@ -1,11 +1,11 @@
-#ifndef TORCHLIGHT_OBJECT_PYOBJECT_H
-#define TORCHLIGHT_OBJECT_PYOBJECT_H
+#ifndef TENSORSLOW_OBJECT_PYOBJECT_H
+#define TENSORSLOW_OBJECT_PYOBJECT_H
 
 #include <typeindex>
 #include "Object/Core/Klass.h"
 #include "Object/Object.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class PyObject : public std::enable_shared_from_this<PyObject> {
  private:
@@ -146,6 +146,6 @@ bool operator!=(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
 PyObjPtr ObjectInit(const PyObjPtr& args);
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
-#endif  // TORCHLIGHT_OBJECT_PYOBJECT_H
+#endif  // TENSORSLOW_OBJECT_PYOBJECT_H

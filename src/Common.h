@@ -1,7 +1,7 @@
-#ifndef TORCHLIGHT_COMMON_H
-#define TORCHLIGHT_COMMON_H
+#ifndef TENSORSLOW_COMMON_H
+#define TENSORSLOW_COMMON_H
 #include <cstdint>
-namespace torchlight {
+namespace tensorslow {
 using Byte = uint8_t;      // 将无符号8位整数定义为Byte
 using Unicode = uint32_t;  // 将无符号32位整数定义为Unicode
 using Index = uint64_t;    // 所有索引默认为无符号64位整数
@@ -37,5 +37,5 @@ struct overload : Ts... {
 };
 template <class... Ts>
 overload(Ts...) -> overload<Ts...>;
-}  // namespace torchlight
+}  // namespace tensorslow
 #endif

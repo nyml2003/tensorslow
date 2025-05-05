@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_AST_BINARY_H
-#define TORCHLIGHT_AST_BINARY_H
+#ifndef TENSORSLOW_AST_BINARY_H
+#define TENSORSLOW_AST_BINARY_H
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class BinaryKlass : public INodeKlass {
  public:
@@ -137,6 +137,6 @@ inline Object::PyStrPtr Stringify(Binary::Operator oprt) {
       return Object::CreatePyString("or");
   }
 }
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

@@ -6,5 +6,5 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 enable_testing()
-include(${torchlight_dir}/test/unittest/Collections/Collections.cmake)
-include(${torchlight_dir}/test/unittest/Object/Object.cmake)
+include(${tensorslow_dir}/test/unittest/Collections/Collections.cmake)
+include(${tensorslow_dir}/test/unittest/Object/Object.cmake)

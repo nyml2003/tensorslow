@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_OBJECT_PYCODE_H
-#define TORCHLIGHT_OBJECT_PYCODE_H
+#ifndef TENSORSLOW_OBJECT_PYCODE_H
+#define TENSORSLOW_OBJECT_PYCODE_H
 
 #include "Function/BuiltinFunction.h"
 #include "Object/Container/PyList.h"
@@ -11,7 +11,7 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class PyCode;
 
@@ -194,6 +194,6 @@ inline PyObjPtr CreatePyCode(
   );
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
-#endif  // TORCHLIGHT_RUNTIME_PYCODE_H
+#endif  // TENSORSLOW_RUNTIME_PYCODE_H

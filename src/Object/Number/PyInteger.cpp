@@ -9,7 +9,7 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyIntPtr CreatePyInteger(Collections::Integer value) {
   return std::make_shared<PyInteger>(value);
@@ -248,4 +248,4 @@ bool PyInteger::LessThan(const PyObjPtr& other) const {
   return value.LessThan(otherInteger->value);
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

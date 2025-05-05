@@ -1,9 +1,11 @@
-#ifndef TORCHLIGHT_COLLECTIONS_STRING_H
-#define TORCHLIGHT_COLLECTIONS_STRING_H
+#ifndef TENSORSLOW_COLLECTIONS_STRING_H
+#define TENSORSLOW_COLLECTIONS_STRING_H
 
 #include <mutex>
 #include "Collections/List.h"
-namespace torchlight::Collections {
+#include <cstdint>
+#include <array>
+namespace tensorslow::Collections {
 
 class String {
   friend class StringBuilder;
@@ -94,9 +96,8 @@ class String {
     : codeUnits(std::move(codeUnits)), hashValue(hashValue), hashed(true) {}
   explicit String(List<Byte>&& codeUnits)
     : codeUnits(std::move(codeUnits)), hashValue(0), hashed(false) {}
-  
+
   explicit String(const String& other) = default;
-  explicit String(String& other) = delete;
   explicit String(String&& other) noexcept = default;
   String& operator=(const String& other) = default;
   String& operator=(String&& other) noexcept = default;
@@ -162,5 +163,5 @@ class StringBuilder {
   void Clear() { codeUnits.Clear(); }
 };
 
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections
 #endif  // TORCHLIGHT_COLLECTIONS_STRING_H

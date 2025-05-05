@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_AST_FOR_STATEMENT_H
-#define TORCHLIGHT_AST_FOR_STATEMENT_H
+#ifndef TENSORSLOW_AST_FOR_STATEMENT_H
+#define TENSORSLOW_AST_FOR_STATEMENT_H
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class ForStmtKlass : public INodeKlass {
  public:
@@ -66,6 +66,6 @@ inline INodePtr CreateForStmt(
   return std::make_shared<ForStmt>(target, iter, body, parent);
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

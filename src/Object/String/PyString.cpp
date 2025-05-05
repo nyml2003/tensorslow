@@ -16,7 +16,7 @@
 
 #include <iostream>
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 Index PyString::indent = 0;
 std::unordered_map<size_t, std::shared_ptr<PyString>> PyString::stringPool;
 std::mutex PyString::poolMutex;
@@ -304,4 +304,4 @@ PyStrPtr CreatePyString(const char* value) {
   return PyString::Create(Collections::CreateStringWithCString(value));
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

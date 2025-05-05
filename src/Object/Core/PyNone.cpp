@@ -4,7 +4,7 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyObjPtr NoneKlass::_serialize_(const PyObjPtr& obj) {
   if (!obj->is(NoneKlass::Self())) {
@@ -41,4 +41,4 @@ PyNonePtr PyNone::Instance() {
   return instance;
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

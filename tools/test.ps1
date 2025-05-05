@@ -5,11 +5,11 @@ $buildType = "release"
 # 根据传参判断是build还是release
 if ($buildType -eq "release")
 {
-    $buildDir = "D:\code\project\torchlight\release"
+    $buildDir = "D:\code\project\tensorslow\release"
 }
 elseif ($buildType -eq "debug")
 {
-    $buildDir = "D:\code\project\torchlight\build"
+    $buildDir = "D:\code\project\tensorslow\build"
 }
 else
 {
@@ -18,9 +18,9 @@ else
 }
 
 # 定义路径和可执行文件
-$testDir = "D:\code\project\torchlight\test\integration"
-$frontendExe = Join-Path -Path $buildDir -ChildPath "torchlight_frontend.exe"
-$backendExe = Join-Path -Path $buildDir -ChildPath "torchlight_backend.exe"
+$testDir = "D:\code\project\tensorslow\test\integration"
+$frontendExe = Join-Path -Path $buildDir -ChildPath "tensorslow_frontend.exe"
+$backendExe = Join-Path -Path $buildDir -ChildPath "tensorslow_backend.exe"
 
 # 获取测试目录下的所有子目录
 $subdirs = Get-ChildItem -Path $testDir -Directory | ForEach-Object { $_.Name }

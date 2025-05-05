@@ -2,7 +2,7 @@
 
 #include "Collections.h"
 
-using namespace torchlight::Collections;
+using namespace tensorslow::Collections;
 
 TEST(String, CreateStringWithCString) {
   String str = CreateStringWithCString("Hello, World!");
@@ -93,6 +93,19 @@ TEST(String, Slice) {
   ASSERT_THROW(str.Slice(5, 0), std::invalid_argument);
   ASSERT_THROW(str.Slice(5, 5), std::invalid_argument);
   ASSERT_THROW(str.Slice(5, 4), std::invalid_argument);
+
+  ASSERT_EQ(str.Slice(0, 1).ToCppString(), "H");
+  ASSERT_EQ(str.Slice(1, 2).ToCppString(), "e");
+  ASSERT_EQ(str.Slice(2, 3).ToCppString(), "l");
+  ASSERT_EQ(str.Slice(3, 4).ToCppString(), "l");
+  ASSERT_EQ(str.Slice(4, 5).ToCppString(), "o");
+  ASSERT_EQ(str.Slice(5, 6).ToCppString(), " ");
+  ASSERT_EQ(str.Slice(6, 7).ToCppString(), "W");
+  ASSERT_EQ(str.Slice(7, 8).ToCppString(), "o");
+  ASSERT_EQ(str.Slice(8, 9).ToCppString(), "r");
+  ASSERT_EQ(str.Slice(9, 10).ToCppString(), "l");
+  ASSERT_EQ(str.Slice(10, 11).ToCppString(), "d");
+  ASSERT_EQ(str.Slice(0, 11).ToCppString(), "Hello World");
 }
 //
 //// TEST(String, Find) {
@@ -187,7 +200,7 @@ TEST(String, ToString) {
 //// TEST(String, Spilt) {
 ////   String str = CreateStringWithCString("Hello, World");
 ////   String delimiter = CreateStringWithCString(", ");
-////   torchlight::Collections::List<String> list = str.Split(delimiter);
+////   tensorslow::Collections::List<String> list = str.Split(delimiter);
 ////   ASSERT_EQ(list.Size(), 2);
 ////   ASSERT_TRUE(list.Get(0).Equal(CreateStringWithCString("Hello")));
 ////   ASSERT_TRUE(list.Get(1).Equal(CreateStringWithCString("World")));

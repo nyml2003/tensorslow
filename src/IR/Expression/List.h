@@ -1,12 +1,12 @@
-#ifndef TORCHLIGHT_AST_LIST_H
-#define TORCHLIGHT_AST_LIST_H
+#ifndef TENSORSLOW_AST_LIST_H
+#define TENSORSLOW_AST_LIST_H
 
 #include <utility>
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class ListKlass : public INodeKlass {
  public:
@@ -54,6 +54,6 @@ CreateList(const Object::PyListPtr& elements, const INodePtr& parent) {
   return std::make_shared<List>(elements, parent);
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

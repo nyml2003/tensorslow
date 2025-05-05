@@ -22,10 +22,10 @@ namespace fs = std::filesystem;
 using antlr4::ANTLRInputStream;
 using antlr4::CommonTokenStream;
 
-using torchlight::ArgsHelper;
-using torchlight::Parameter;
-using torchlight::Schema;
-using torchlight::Generation::Generator;
+using tensorslow::ArgsHelper;
+using tensorslow::Parameter;
+using tensorslow::Schema;
+using tensorslow::Generation::Generator;
 
 void DefineOption() {
   Schema schema;
@@ -63,9 +63,9 @@ void DefineOption() {
   ArgsHelper::SetSchema(schema);
 }
 void InitPyObj() {
-  torchlight::Object::LoadBootstrapClasses();
-  torchlight::Object::LoadRuntimeSupportClasses();
-  torchlight::IR::RegisterAstKlass();
+  tensorslow::Object::LoadBootstrapClasses();
+  tensorslow::Object::LoadRuntimeSupportClasses();
+  tensorslow::IR::RegisterAstKlass();
 }
 
 // 使用ANTLR解析文件
@@ -89,8 +89,8 @@ void ParseAndGenerate(const fs::path& filePath) {
     std::cout << tree->toStringTree(&parser) << std::endl;
   }
 
-  Generator visitor(torchlight::Object::CreatePyString(filePath.string())
-                      ->as<torchlight::Object::PyString>());
+  Generator visitor(tensorslow::Object::CreatePyString(filePath.string())
+                      ->as<tensorslow::Object::PyString>());
   try {
     visitor.visit(tree);
   } catch (const std::bad_any_cast&) {
@@ -101,9 +101,9 @@ void ParseAndGenerate(const fs::path& filePath) {
   visitor.Emit();
   auto code = visitor.Code();
   if (ArgsHelper::Has("show_code")) {
-    torchlight::Object::PrintCode(code);
+    tensorslow::Object::PrintCode(code);
   }
-  torchlight::Runtime::Interpreter::Run(code);
+  tensorslow::Runtime::Interpreter::Run(code);
 }
 
 int main(int argc, char** argv) {
@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
       }
     }
     for (const auto& subdir : subdirs) {
-      auto files = torchlight::GetFilesInDirectory(subdir.string(), ".py");
+      auto files = tensorslow::GetFilesInDirectory(subdir.string(), ".py");
       std::cout << "测试用例:" << subdir.filename().string() << std::endl;
       for (const auto& file : files) {
         ParseAndGenerate(file);

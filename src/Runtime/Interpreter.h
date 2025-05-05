@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_RUNTIME_INTERPRETER_H
-#define TORCHLIGHT_RUNTIME_INTERPRETER_H
+#ifndef TENSORSLOW_RUNTIME_INTERPRETER_H
+#define TENSORSLOW_RUNTIME_INTERPRETER_H
 
 #include "Object/Function/PyMethod.h"
 #include "Object/Function/PyNativeFunction.h"
@@ -7,7 +7,7 @@
 #include "Object/Runtime/PyCode.h"
 #include "Object/Runtime/PyFrame.h"
 
-namespace torchlight::Runtime {
+namespace tensorslow::Runtime {
 
 class Interpreter {
  private:
@@ -50,6 +50,6 @@ class Interpreter {
   [[nodiscard]] Object::PyFramePtr CurrentFrame() const;
 };
 
-}  // namespace torchlight::Runtime
+}  // namespace tensorslow::Runtime
 
 #endif

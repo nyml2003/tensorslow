@@ -4,10 +4,10 @@
 #include "../Collections/Collections.h"
 #include "Object.h"
 
-using namespace torchlight::Object;
-using namespace torchlight::Collections;
+using namespace tensorslow::Object;
+using namespace tensorslow::Collections;
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class PyStringTest : public ::testing::Test {
  protected:
@@ -69,4 +69,4 @@ TEST_F(PyStringTest, Boolean) {
   resultIdString->PrintLine();
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

@@ -1,9 +1,9 @@
-#ifndef TORCHLIGHT_OBJECT_PYTYPE_H
-#define TORCHLIGHT_OBJECT_PYTYPE_H
+#ifndef TENSORSLOW_OBJECT_PYTYPE_H
+#define TENSORSLOW_OBJECT_PYTYPE_H
 
 #include "Object/Core/PyObject.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class TypeKlass : public Klass {
  public:
@@ -39,6 +39,6 @@ inline PyObjPtr CreatePyType(KlassPtr owner) {
   auto type = std::make_shared<PyType>(owner)->as<PyType>();
   return type;
 }
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

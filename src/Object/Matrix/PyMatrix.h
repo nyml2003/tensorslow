@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_OBJECT_PYMATRIX_H
-#define TORCHLIGHT_OBJECT_PYMATRIX_H
+#ifndef TENSORSLOW_OBJECT_PYMATRIX_H
+#define TENSORSLOW_OBJECT_PYMATRIX_H
 
 #include "Collections/Matrix.h"
 #include "Function/BuiltinFunction.h"
@@ -12,7 +12,7 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class MatrixKlass : public Klass {
  public:
@@ -144,6 +144,6 @@ class PyMatrix : public PyObject {
 
 using PyMatrixPtr = std::shared_ptr<PyMatrix>;
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

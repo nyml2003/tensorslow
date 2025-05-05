@@ -3,18 +3,16 @@
 #include <stdexcept>
 #include "StringHelper.h"
 
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 
 String String::Slice(Index start, Index end) {
-  if (!~start || !~end || start >= end) {
+  if (!~start || end == 0 || start >= end) {
     throw std::invalid_argument("String::Slice(): invalid index");
   }
   ParseCodePointAt(end);
-  if (start > codePoints.Size() || end > codePoints.Size()) {
-    throw std::out_of_range("String::Slice(): index out of range");
-  }
   auto codeUnitStart = codePointIndices[start];
-  auto codeUnitEnd = codePointIndices[end];
+  auto codeUnitEnd =
+    codePointIndices.Size() == end ? codeUnits.Size() : codePointIndices[end];
   return String(codeUnits.Slice(codeUnitStart, codeUnitEnd));
 }
 
@@ -59,7 +57,7 @@ void String::ParseCodePointAt(Index index) {
   while (codePoints.Size() <= index && !HasParsedAllCodePoints()) {
     ParseCodePoint();
   }
-  if (HasParsedAllCodePoints() && codePoints.Size() <= index) {
+  if (HasParsedAllCodePoints() && codePoints.Size() < index) {
     throw std::out_of_range("String::ParseCodePointAt(): index out of range");
   }
 }
@@ -161,4 +159,4 @@ String String::Upper() {
   return sb.ToString();
 }
 
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections

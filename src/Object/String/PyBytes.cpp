@@ -7,7 +7,7 @@
 #include "Object/Core/PyObject.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyObjPtr BytesKlass::_serialize_(const PyObjPtr& obj) {
   if (!obj->is(Self())) {
@@ -34,4 +34,4 @@ PyObjPtr BytesKlass::repr(const PyObjPtr& obj) {
   return CreatePyString(sb.ToString());
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

@@ -1,12 +1,12 @@
-#ifndef TORCHLIGHT_BYTECODE_H
-#define TORCHLIGHT_BYTECODE_H
+#ifndef TENSORSLOW_BYTECODE_H
+#define TENSORSLOW_BYTECODE_H
 
 #include "Collections/String/String.h"
 
 #include <map>
 #include <variant>
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 enum class ByteCode {
   POP_TOP = 1,
@@ -132,8 +132,8 @@ static const std::map<ByteCode, const char*> ByteCodeNames = {
   {ByteCode::YIELD_VALUE, "YIELD_VALUE"},
 };
 
-}  // namespace torchlight::Object
-namespace torchlight::Collections {
+}  // namespace tensorslow::Object
+namespace tensorslow::Collections {
 String ToString(None kind);
 String ToString(Object::CompareOp kind);
 String ToString(Object::ByteCode code);
@@ -142,5 +142,5 @@ String Serialize(None kind);
 String Serialize(Object::CompareOp kind);
 String Serialize(Object::ByteCode code);
 String Serialize(Object::Literal kind);
-}  // namespace torchlight::Collections
-#endif  // TORCHLIGHT_BYTECODE_H
+}  // namespace tensorslow::Collections
+#endif  // TENSORSLOW_BYTECODE_H

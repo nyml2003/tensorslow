@@ -10,7 +10,7 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyObjPtr FloatKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {
   if (klass->as<PyType>()->Owner() != Self()) {
@@ -162,4 +162,4 @@ PyObjPtr FloatKlass::boolean(const PyObjPtr& obj) {
   return CreatePyBoolean(obj->as<PyFloat>()->Value() != 0.0);
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

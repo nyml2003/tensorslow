@@ -1,8 +1,8 @@
 #!/bin/bash
 build_dir=/app/build
 test_dir=/app/test/integration
-frontend_exe=$build_dir/torchlight_frontend
-backend_exe=$build_dir/torchlight_backend
+frontend_exe=$build_dir/tensorslow_frontend
+backend_exe=$build_dir/tensorslow_backend
 source_code=$1
 
 echo "源代码:"

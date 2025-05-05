@@ -11,7 +11,7 @@
 #include "Object/Runtime/PyFrame.h"
 #include "Runtime/Genesis.h"
 
-namespace torchlight::Runtime {
+namespace tensorslow::Runtime {
 
 Interpreter::Interpreter() {
   frame = nullptr;
@@ -103,4 +103,4 @@ void Interpreter::BackToParentFrame() {
   frame = frame->as<Object::PyFrame>()->Caller();
 }
 
-}  // namespace torchlight::Runtime
+}  // namespace tensorslow::Runtime

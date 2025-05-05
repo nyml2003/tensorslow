@@ -12,7 +12,7 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyCode::PyCode(
   PyBytesPtr byteCodes,
@@ -287,6 +287,8 @@ void PrintCode(const PyCodePtr& code) {
   auto codeObj = code->as<PyCode>();
   codeObj->str()->as<PyString>()->PrintLine();
   PyString::IncreaseIndent();
+  CreatePyString("name: ")->as<PyString>()->Print();
+  codeObj->Name()->str()->as<PyString>()->PrintLine(false);
   CreatePyString("consts: ")->as<PyString>()->Print();
   codeObj->Consts()->str()->as<PyString>()->PrintLine(false);
   CreatePyString("names: ")->as<PyString>()->Print();
@@ -295,13 +297,18 @@ void PrintCode(const PyCodePtr& code) {
   codeObj->VarNames()->str()->as<PyString>()->PrintLine(false);
   CreatePyString("instructions:")->as<PyString>()->PrintLine();
   PyString::IncreaseIndent();
-  ForEach(codeObj->Instructions(), [](const PyObjPtr& inst) {
-    inst->str()->as<PyString>()->PrintLine();
-  });
+  //  ForEach(codeObj->Instructions(), [](const PyObjPtr& inst) {
+  //    inst->str()->as<PyString>()->PrintLine();
+  //  });
+  for (Index i = 0; i < codeObj->Instructions()->Length(); i++) {
+    std::cout << i << ": " << std::flush;
+    auto inst = codeObj->Instructions()->GetItem(i);
+    inst->str()->as<PyString>()->PrintLine(false);
+  }
   PyString::DecreaseIndent();
   CreatePyString("nLocals: ")->as<PyString>()->Print();
   CreatePyInteger(codeObj->NLocals())->str()->as<PyString>()->PrintLine(false);
   PyString::DecreaseIndent();
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
