@@ -2,8 +2,8 @@
 root_dir=/home/test/Desktop/tensorslow
 build_dir=$root_dir/build
 test_dir=$root_dir/test/integration
-frontend_exe=$build_dir/tensorslow_frontend
-backend_exe=$build_dir/tensorslow_backend
+frontend_exe=$build_dir/tensorslow_compiler
+backend_exe=$build_dir/tensorslow_interpreter
 
 # 遍历test_dir
 subdirs=$(ls $test_dir)
@@ -16,23 +16,26 @@ if [ $test_total -eq 0 ]; then
 fi
 test_passed=0
 test_not_passed_names=()
+echo "测试用例总数: $test_total"
+# remove \n
+echo "测试用例: $(echo $subdirs | tr '\n' ' ')"
 for subdir in $subdirs
 do
     # 删除目录下的所有.pyc文件和所有.out文件
     rm -f $test_dir/$subdir/*.pyc
     rm -f $test_dir/$subdir/*.out
-    echo '---------------------------------'
+    # echo '---------------------------------'
     # 扫描subdir下的所有py文件
     pys=$(ls $test_dir/$subdir | grep .py | grep -v .pyc)
     for py in $pys
     do
         source_code=$test_dir/$subdir/$py
-        echo "源代码:"
-        cat $source_code
-        echo 
-        echo "正在编译到字节码..."
+        # echo "源代码:"
+        # cat $source_code
+        # echo
+        # echo "正在编译到字节码..."
         $frontend_exe --file="$source_code"
-        echo 
+        # echo
     done
     # 扫描subdir下的所有pyc文件,如果有main.pyc就选择main.pyc，否则选择第一个pyc文件
     pycs=$(ls $test_dir/$subdir | grep .pyc)
@@ -43,8 +46,8 @@ do
         pyc=$(ls $test_dir/$subdir | grep .pyc | head -n 1)
     fi
     source_code=$test_dir/$subdir/$pyc
-    echo source_code: $source_code
-    echo "正在读取并执行字节码..."
+    # echo source_code: $source_code
+    # echo "正在读取并执行字节码..."
     $backend_exe --file="$source_code" --compare_result=true
     if [ $? -eq 0 ]; then
         test_passed=$((test_passed+1))
@@ -52,8 +55,8 @@ do
     else
         test_not_passed_names+=($subdir)
     fi
-    echo '---------------------------------'
-    echo
+    # echo '---------------------------------'
+    # echo
 done
 # 百分比 *100%
 
