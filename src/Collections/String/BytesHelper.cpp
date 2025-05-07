@@ -30,8 +30,8 @@ void Write(const String& bytes, const String& filename) {
     return;
   }
   file.write(data.data(), data.size());
-//  std::cout << "写入文件：" << filenameCppString << std::endl;
-//  std::cout << "文件大小：" << data.size() << " 字节" << std::endl;
+  std::cout << "写入文件：" << filenameCppString << std::endl;
+  std::cout << "文件大小：" << data.size() << " 字节" << std::endl;
   if (!file) {
     std::cerr << "写入文件时出错：" << filenameCppString << std::endl;
   }

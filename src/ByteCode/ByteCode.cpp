@@ -50,9 +50,9 @@ Collections::String ToString(Object::Literal kind) {
       return Collections::CreateStringWithCString("STRING");
     case Object::Literal::NONE:
       return Collections::CreateStringWithCString("NONE");
-    case Object::Literal::TRUE:
+    case Object::Literal::TRUE_LITERAL:
       return Collections::CreateStringWithCString("TRUE");
-    case Object::Literal::FALSE:
+    case Object::Literal::FALSE_LITERAL:
       return Collections::CreateStringWithCString("FALSE");
     case Object::Literal::LIST:
       return Collections::CreateStringWithCString("LIST");

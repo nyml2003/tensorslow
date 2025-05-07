@@ -103,6 +103,7 @@ void Schema::PrintUsage() const {
   // 打印默认参数
   std::cout << "  --help  Display this help message" << std::endl;
   std::cout << "  --version  Display version information" << std::endl;
+  std::cout << "编译器作者：电子科技大学 蒋钦禹" << std::endl;
 }
 
 void ArgsHelper::HandleDefaultParameters(const std::string& option) const {

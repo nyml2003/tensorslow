@@ -499,10 +499,10 @@ def train():
                 optimizer.update()
                 batch_counter = 0
         accuracy = predict_and_evaluate(train_set, predict, x)
-        print("epoch: ", epoch, "train accuracy: ", accuracy)
+        if epoch % 10 == 1 or epoch == 50:
+            print("epoch: ", epoch, "train accuracy: ", accuracy)
     accuracy = predict_and_evaluate(test_set, predict, x)
     print("test accuracy: ", accuracy)
 
 
-train()
 train()

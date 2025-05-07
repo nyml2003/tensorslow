@@ -37,19 +37,19 @@ target_link_libraries(
 
 add_dependencies(tensorslow_interpreter tensorslow_common)
 
-#add_executable(
-#        tensorslow_compiler
-#        ${tensorslow_Compiler_files}
-#        ${tensorslow_common_files}
-#        ${tensorslow_frontend_files}
-#)
-#
-#target_link_libraries(
-#        tensorslow_compiler
-#        antlr4_static
-#)
-#
-#add_dependencies(tensorslow_compiler antlr4_static)
+add_executable(
+        tensorslow_engine
+        ${tensorslow_Engine_files}
+        ${tensorslow_common_files}
+        ${tensorslow_frontend_files}
+)
+
+target_link_libraries(
+        tensorslow_engine
+        antlr4_static
+)
+
+add_dependencies(tensorslow_engine antlr4_static tensorslow_common)
 
 include(cmake/tools.cmake)
 

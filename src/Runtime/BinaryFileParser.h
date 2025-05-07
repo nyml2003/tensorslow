@@ -1,8 +1,7 @@
 #ifndef TENSORSLOW_RUNTIME_BINARY_FILEPARSER_H
 #define TENSORSLOW_RUNTIME_BINARY_FILEPARSER_H
 
-#include <filesystem>
-#include <fstream>
+
 #include "Collections/String/BytesHelper.h"
 #include "Collections/String/StringHelper.h"
 #include "Object/Core/PyBoolean.h"
@@ -11,6 +10,9 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/Runtime/PyCode.h"
 #include "Object/String/PyBytes.h"
+
+#include <fstream>
+#include <filesystem>
 
 namespace tensorslow::Runtime {
 namespace fs = std::filesystem;
@@ -105,9 +107,9 @@ class BinaryFileParser {
         return ReadFloat();
       case Object::Literal::LIST:
         return ReadList();
-      case Object::Literal::TRUE:
+      case Object::Literal::TRUE_LITERAL:
         return Object::CreatePyBoolean(true);
-      case Object::Literal::FALSE:
+      case Object::Literal::FALSE_LITERAL:
         return Object::CreatePyBoolean(false);
       case Object::Literal::NONE:
         return Object::CreatePyNone();

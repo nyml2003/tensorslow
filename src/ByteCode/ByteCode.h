@@ -77,8 +77,8 @@ enum class Literal {
   FLOAT,
   STRING,
   NONE,
-  TRUE,
-  FALSE,
+  TRUE_LITERAL,
+  FALSE_LITERAL,
   LIST,
   CODE,
   BYTES

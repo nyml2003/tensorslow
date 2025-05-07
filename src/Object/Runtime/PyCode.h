@@ -40,6 +40,7 @@ class PyCode : public PyObject {
 
   void SetScope(Scope scope);
 
+
   PyBytesPtr ByteCode() const;
 
   [[nodiscard]] PyListPtr Consts() const;
@@ -142,6 +143,7 @@ class PyCode : public PyObject {
 
  private:
   PyBytesPtr byteCode;
+
   PyListPtr instructions;
   PyListPtr consts;
   PyListPtr names;

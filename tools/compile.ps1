@@ -1,12 +1,12 @@
 # 定义路径和可执行文件
 $buildDir = "../release"
 $testDir = "../test/integration"
-$frontendExe = Join-Path -Path $buildDir -ChildPath "tensorslow_frontend.exe"
-$backendExe = Join-Path -Path $buildDir -ChildPath "tensorslow_backend.exe"
+$frontendExe = Join-Path -Path $buildDir -ChildPath "tensorslow_compiler.exe"
+$backendExe = Join-Path -Path $buildDir -ChildPath "tensorslow_interpreter.exe"
 
 # 获取源代码文件路径
-$sourceCode = "../test/dev/dev.py"
-
+# $sourceCode = "../test/ml/adaline.py"
+$sourceCode = "../test/ml/iris.py"
 # 显示源代码内容
 Write-Host "正在读取源代码..."
 Get-Content -Path $sourceCode

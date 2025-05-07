@@ -118,6 +118,11 @@ void PyFrame::NextProgramCounter() {
 }
 
 void ParseByteCode(const PyCodePtr& code) {
+  if (code->ByteCode() == nullptr){
+    // TODO
+    //std::cerr << "Warning: bytecode passing in memory or something wrong" << std::endl;
+    return;
+  }
   auto bytes = code->ByteCode()->Value().CopyCodeUnits();
   Index iter = 0;
   if (static_cast<Literal>(bytes[iter]) != Literal::LIST) {

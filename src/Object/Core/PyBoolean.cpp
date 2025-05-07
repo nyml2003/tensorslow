@@ -56,9 +56,9 @@ PyObjPtr BooleanKlass::_serialize_(const PyObjPtr& obj) {
   }
   auto boolean = obj->as<PyBoolean>();
   if (boolean->Value()) {
-    return CreatePyBytes(Collections::Serialize(Literal::TRUE));
+    return CreatePyBytes(Collections::Serialize(Literal::TRUE_LITERAL));
   }
-  return CreatePyBytes(Collections::Serialize(Literal::FALSE));
+  return CreatePyBytes(Collections::Serialize(Literal::FALSE_LITERAL));
 }
 
 }  // namespace tensorslow::Object

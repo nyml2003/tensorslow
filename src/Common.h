@@ -30,7 +30,6 @@ const Byte Byte_x = 'x';                  // Byte_x 是字符 'x'
 const Byte Byte_Upper_Lower_Diff = 0x20;  // 大写字母和小写字母的差值
 const Byte ByteMinus = '-';               // Byte_0x2D 是字符 '-'
 const Byte BytePlus = '+';                // Byte_0x2B 是字符 '+'
-
 template <class... Ts>
 struct overload : Ts... {
   using Ts::operator()...;
