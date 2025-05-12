@@ -39,7 +39,13 @@ class Identifier : public INode {
   explicit Identifier(Object::PyStrPtr _name, INodePtr parent)
     : INode(IdentifierKlass::Self(), std::move(parent)),
       name(std::move(_name)) {
-    builtins = Object::CreatePyList(
+  }
+
+  [[nodiscard]] Object::PyStrPtr Name() const { return name; }
+  void SetStoreMode() { mode = STOREORLOAD::STORE; }
+  STOREORLOAD Mode() const { return mode; }
+  [[nodiscard]] static Object::PyListPtr Builtins() {
+    static Object::PyListPtr builtins = Object::CreatePyList(
       {Object::CreatePyString("print"),
        Object::CreatePyString("reshape"),
        Object::CreatePyString("Reshape"),
@@ -59,6 +65,7 @@ class Identifier : public INode {
        Object::CreatePyString("slice"),
        Object::CreatePyString("repr"),
        Object::CreatePyString("bool"),
+       Object::CreatePyString("whoami"),
        Object::CreatePyString("Array"),
        Object::CreatePyString("Eye"),
        Object::CreatePyString("Zeros"),
@@ -83,12 +90,8 @@ class Identifier : public INode {
        Object::CreatePyString("range"),
        Object::CreatePyString("iter")}
     );
+    return builtins;
   }
-
-  [[nodiscard]] Object::PyStrPtr Name() const { return name; }
-  void SetStoreMode() { mode = STOREORLOAD::STORE; }
-  STOREORLOAD Mode() const { return mode; }
-  [[nodiscard]] Object::PyListPtr Builtins() const { return builtins; }
 
  private:
   Object::PyStrPtr name;

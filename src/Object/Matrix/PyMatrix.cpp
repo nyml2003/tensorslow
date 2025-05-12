@@ -1,5 +1,4 @@
 #include "PyMatrix.h"
-#include <iostream>
 #include "Collections/Matrix.h"
 #include "MatrixFunction.h"
 #include "Object/Container/PyList.h"
@@ -11,7 +10,8 @@
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
-#include "Tools/Tools.h"
+#include "Tools/Config/Config.h"
+
 namespace tensorslow::Object {
 PyObjPtr MatrixKlass::repr(const PyObjPtr& obj) {
   return Klass::repr(obj);
@@ -247,7 +247,7 @@ PyObjPtr MatrixKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
     auto rowStop = rowSlice->GetStop()->as<PyInteger>()->ToU64();
     return matrix->GetRows(rowStart, rowStop);
   }
-  if (ArgsHelper::Instance().Has("debug")) {
+  if (Config::Has("debug")) {
     PrintFrame(Runtime::Interpreter::Instance().CurrentFrame());
   }
   throw std::runtime_error("MatrixKlass::getitem(): key type is not supported");

@@ -1,11 +1,12 @@
 #include "Runtime/BinaryFileParser.h"
 #include "Runtime/Interpreter.h"
+#include "Tools/Config/Config.h"
+#include "Tools/Config/Schema.h"
 #include "Tools/Tools.h"
 
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <string>
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -13,63 +14,67 @@
 using namespace tensorslow;
 RedirectCout redirectCout;
 void DefineOption() {
-  Schema schema;
-  schema.Add(Parameter(
-    "file",
-    [](const std::string& value) {
-      if (value.empty()) {
-        return false;
-      }
-      // 文件系统里有没有这个文件
-      bool file_exists = std::filesystem::exists(value);
-      // 后缀名是.py 且文件是一个普通文件
-      bool is_py = value.substr(value.find_last_of('.') + 1) == "pyc";
-      bool is_regular = std::filesystem::is_regular_file(value);
-      return file_exists && is_py && is_regular;
-    },
-    "", "单文件模式，指定要解析的文件"
-  ));
-  schema.Add(Parameter(
-    "dir",
-    [](const std::string& value) {
-      if (value.empty()) {
-        return false;
-      }
-      // 文件系统里有没有这个文件夹
-      bool dir_exists = std::filesystem::exists(value);
-      // 文件是一个目录
-      bool is_dir = std::filesystem::is_directory(value);
-      return dir_exists && is_dir;
-    },
-    "",
-    "目录模式，指定要解析的目录, "
-    "认为目录下有且仅有包，将每个包下的所有.py文件都解析"
-  ));
-  schema.Add(Parameter(
-    "debug",
-    [](const std::string& value) { return value == "true" || value.empty(); },
-    "true", "是否开启调试模式"
-  ));
-  schema.Add(Parameter(
-    "compare_result",
-    [](const std::string& value) { return value == "true" || value.empty(); },
-    "true", "是否和预期结果比较"
-  ));
-  schema.Add(Parameter(
-    "show_result",
-    [](const std::string& value) {
-      // value 是 "true" 或 "false"
-      return value == "true" || value.empty();
-    },
-    "true", "是否直接输出结果"
-  ));
-  ArgsHelper::SetSchema(schema);
+  Schema::Accept(
+    {OptionConvention(
+       "file",
+       [](const std::string& value) {
+         if (value.empty()) {
+           return false;
+         }
+         // 文件系统里有没有这个文件
+         bool file_exists = std::filesystem::exists(value);
+         // 后缀名是.py 且文件是一个普通文件
+         bool is_py = value.substr(value.find_last_of('.') + 1) == "pyc";
+         bool is_regular = std::filesystem::is_regular_file(value);
+         return file_exists && is_py && is_regular;
+       },
+       "", "单文件模式，指定要解析的文件"
+     ),
+     OptionConvention(
+       "dir",
+       [](const std::string& value) {
+         if (value.empty()) {
+           return false;
+         }
+         // 文件系统里有没有这个文件夹
+         bool dir_exists = std::filesystem::exists(value);
+         // 文件是一个目录
+         bool is_dir = std::filesystem::is_directory(value);
+         return dir_exists && is_dir;
+       },
+       "",
+       "目录模式，指定要解析的目录, "
+       "认为目录下有且仅有包，将每个包下的所有.py文件都解析"
+     ),
+     OptionConvention(
+       "debug",
+       [](const std::string& value) {
+         return value == "true" || value.empty();
+       },
+       "true", "是否开启调试模式"
+     ),
+     OptionConvention(
+       "compare_result",
+       [](const std::string& value) {
+         return value == "true" || value.empty();
+       },
+       "true", "是否和预期结果比较"
+     ),
+     OptionConvention(
+       "show_result",
+       [](const std::string& value) {
+         // value 是 "true" 或 "false"
+         return value == "true" || value.empty();
+       },
+       "true", "是否直接输出结果"
+     )}
+  );
 }
 
 void HandleResultBegin(const fs::path& filename) {
-  bool compare_result = ArgsHelper::Has("compare_result");
-  bool show_result = ArgsHelper::Has("show_result");
-  bool debug = ArgsHelper::Has("debug");
+  bool compare_result = Config::Has("compare_result");
+  bool show_result = Config::Has("show_result");
+  bool debug = Config::Has("debug");
   if (compare_result && show_result) {
     throw std::runtime_error("compare_result 和 show_result 不能同时为 true");
   }
@@ -109,7 +114,7 @@ void HandleResultBegin(const fs::path& filename) {
 
 void HandleResultEnd(const fs::path& filename) {
   redirectCout.restore();
-  bool compare_result = ArgsHelper::Has("compare_result");
+  bool compare_result = Config::Has("compare_result");
   if (compare_result) {
     auto filename_dir = filename.parent_path();
     auto write_filename =
@@ -156,9 +161,9 @@ int main(int argc, char** argv) {
   SetConsoleOutputCP(CP_UTF8);  // 在Windows平台上设置控制台输出为UTF-8编码
 #endif
   DefineOption();
-  ArgsHelper::Instance().Accept(argc, argv);
-  if (ArgsHelper::Has("dir")) {
-    auto dir = ArgsHelper::Get("dir");
+  Config::Accept(argc, argv);
+  if (Config::Has("dir")) {
+    auto dir = Config::Get("dir");
     std::vector<fs::path> subdirs;
     for (const auto& entry : fs::directory_iterator(dir)) {
       if (entry.is_directory()) {
@@ -175,18 +180,18 @@ int main(int argc, char** argv) {
     }
     return 0;
   }
-  if (ArgsHelper::Has("file")) {
-    auto file = ArgsHelper::Get("file");
+  if (Config::Has("file")) {
+    auto file = Config::Get("file");
 
     RunTest(file);
 
     return 0;
   }
-  auto file = ArgsHelper::Get("file");
+  auto file = Config::Get("file");
   if (!file.empty()) {
     RunTest(file);
   } else {
-    ArgsHelper::PrintUsage();
+    Schema::PrintUsage();
   }
   return 0;
 }

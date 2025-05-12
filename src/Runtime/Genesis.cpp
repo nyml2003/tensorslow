@@ -67,6 +67,10 @@ Object::PyDictPtr Genesis() {
   builtins->Put(
     Object::CreatePyString("type"), CreatePyNativeFunction(Function::Type)
   );
+  builtins->Put(
+    Object::CreatePyString("whoami"),
+    Object::CreatePyString("版权所有 © 2025 蒋钦禹. 保留所有权利。")
+    );
 
   // 内置全局对象
   builtins->Put(

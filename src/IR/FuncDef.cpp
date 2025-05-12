@@ -1,5 +1,4 @@
 #include "IR/FuncDef.h"
-#include "Function/BuiltinFunction.h"
 #include "IR/ClassDef.h"
 #include "IR/INode.h"
 #include "IR/Module.h"
@@ -7,7 +6,7 @@
 #include "Object/Core/PyObject.h"
 #include "Object/Iterator/IteratorHelper.h"
 #include "Object/Runtime/PyCode.h"
-#include "Tools/Tools.h"
+#include "Tools/Config/Config.h"
 namespace tensorslow::IR {
 
 FuncDef::FuncDef(
@@ -80,7 +79,7 @@ Object::PyObjPtr FuncDefKlass::emit(
   parent->LoadConst(funcDef->Name());
   parent->MakeFunction();
   parent->StoreName(funcDef->Name());
-  if (ArgsHelper::Instance().Has("show_code")) {
+  if (Config::Has("show_code")) {
     Object::PrintCode(selfCode);
   }
   return Object::CreatePyNone();

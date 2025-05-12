@@ -4,7 +4,7 @@ using namespace tensorslow;
 
 class ParameterTest : public ::testing::Test {
  protected:
-  Parameter param;
+  OptionConvention param;
 
   ParameterTest()
     : param(
@@ -27,7 +27,7 @@ TEST_F(ParameterTest, ValidateEmpty) {
 class SchemaTest : public ::testing::Test {
  protected:
   Schema schema;
-  Parameter param1;
+  OptionConvention param1;
 
   SchemaTest()
     : param1(
@@ -42,7 +42,7 @@ class SchemaTest : public ::testing::Test {
 };
 
 TEST_F(SchemaTest, FindExistingParameter) {
-  Parameter p = schema.Find("option1");
+  OptionConvention p = schema.Find("option1");
   EXPECT_EQ(p.Name(), "option1");
   EXPECT_EQ(p.DefaultValue(), "default1");
 }
@@ -51,16 +51,16 @@ TEST_F(SchemaTest, FindNonExistingParameter) {
   EXPECT_THROW(schema.Find("non_existing"), std::out_of_range);
 }
 
-class ArgsHelperTest : public ::testing::Test {
+class ConfigTest : public ::testing::Test {
  protected:
   Schema schema;
-  ArgsHelper& processor;
+  Config& processor;
   char** argv;
   int argc;
 
-  ArgsHelperTest() : processor(ArgsHelper::Instance()) {
+  ConfigTest() : processor(Config::Instance()) {
     // 添加示例参数
-    schema.Add(Parameter(
+    schema.Add(OptionConvention(
       "option1",
       [](const std::string& value) {
         return value == "valid";  // 只接受 "valid" 作为有效值
@@ -82,25 +82,25 @@ class ArgsHelperTest : public ::testing::Test {
   void TearDown() override { delete[] argv; }
 };
 
-TEST_F(ArgsHelperTest, ValidInput) {
+TEST_F(ConfigTest, ValidInput) {
   // 测试有效输入
   ASSERT_NO_THROW(processor.Accept(argc, argv))
     << "Valid input failed validation.";
 }
 
-TEST_F(ArgsHelperTest, InvalidOption) {
+TEST_F(ConfigTest, InvalidOption) {
   // 测试无效选项
   argv[1] = const_cast<char*>("--invalid_option=value");
   EXPECT_THROW(processor.Accept(argc, argv), std::out_of_range);
 }
 
-TEST_F(ArgsHelperTest, InvalidValue) {
+TEST_F(ConfigTest, InvalidValue) {
   // 测试无效值
   argv[1] = const_cast<char*>("--option1=invalid_value");
   EXPECT_THROW(processor.Accept(argc, argv), std::invalid_argument);
 }
 
-TEST_F(ArgsHelperTest, DefaultValueHandling) {
+TEST_F(ConfigTest, DefaultValueHandling) {
   // 测试未提供值时处理默认值的情况
   argv[1] = const_cast<char*>("--option1");
   ASSERT_NO_THROW(processor.Accept(argc, argv));

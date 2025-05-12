@@ -22,14 +22,14 @@ namespace fs = std::filesystem;
 using antlr4::ANTLRInputStream;
 using antlr4::CommonTokenStream;
 
-using tensorslow::ArgsHelper;
-using tensorslow::Parameter;
+using tensorslow::Config;
+using tensorslow::OptionConvention;
 using tensorslow::Schema;
 using tensorslow::Generation::Generator;
 
 void DefineOption() {
   Schema schema;
-  schema.Add(Parameter(
+  schema.Add(OptionConvention(
     "file",
     [](const std::string& value) {
       if (value.empty() && !std::filesystem::exists(value)) {
@@ -39,11 +39,11 @@ void DefineOption() {
       std::string extension = fs::path(value).extension().string();
       bool is_py = extension == ".py" || extension == ".pyc";
       bool is_regular = std::filesystem::is_regular_file(value);
-      return  is_py && is_regular;
+      return is_py && is_regular;
     },
     "", "单文件模式，指定要解析的文件"
   ));
-  schema.Add(Parameter(
+  schema.Add(OptionConvention(
     "show_ast",
     [](const std::string& value) {
       // value 是 "true" 或 "false"
@@ -51,7 +51,7 @@ void DefineOption() {
     },
     "true", "是否显示抽象语法树"
   ));
-  schema.Add(Parameter(
+  schema.Add(OptionConvention(
     "show_code",
     [](const std::string& value) {
       // value 是 "true" 或 "false"
@@ -59,7 +59,7 @@ void DefineOption() {
     },
     "true", "是否显示生成的code object"
   ));
-  schema.Add(Parameter(
+  schema.Add(OptionConvention(
     "show_tokens",
     [](const std::string& value) {
       // value 是 "true" 或 "false"
@@ -67,7 +67,7 @@ void DefineOption() {
     },
     "true", "是否显示词法分析结果"
   ));
-  schema.Add(Parameter(
+  schema.Add(OptionConvention(
     "show_ir",
     [](const std::string& value) {
       // value 是 "true" 或 "false"
@@ -75,7 +75,7 @@ void DefineOption() {
     },
     "true", "是否显示中间代码树"
   ));
-  schema.Add(Parameter(
+  schema.Add(OptionConvention(
     "show_result",
     [](const std::string& value) {
       // value 是 "true" 或 "false"
@@ -83,86 +83,85 @@ void DefineOption() {
     },
     "true", "是否直接输出结果"
   ));
-  schema.Add(Parameter(
+  schema.Add(OptionConvention(
     "compile",
     [](const std::string& value) { return value == "true" || value.empty(); },
     "true", "是否编译成字节码"
   ));
-  schema.Add(Parameter(
+  schema.Add(OptionConvention(
     "interpret",
     [](const std::string& value) { return value == "true" || value.empty(); },
     "true", "是否直接解释执行源代码"
   ));
-  schema.Add(Parameter(
+  schema.Add(OptionConvention(
     "interpret_bytecode",
     [](const std::string& value) { return value == "true" || value.empty(); },
     "true", "是否解释执行字节码"
   ));
-  schema.Add(Parameter(
-    "source",
-    [](const std::string& value) {
-      return !value.empty();
-    },
-    "", "字符串模式，指定要解析的源代码字符串"
+  schema.Add(OptionConvention(
+    "source", [](const std::string& value) { return !value.empty(); }, "",
+    "字符串模式，指定要解析的源代码字符串"
   ));
-  ArgsHelper::SetSchema(schema);
+  Config::SetSchema(schema);
 }
 
 void DefaultExit(const std::string& error) {
   std::cerr << error << std::endl;
-  ArgsHelper::PrintUsage();
+  Config::PrintUsage();
   exit(1);
 }
-
 void OptionEnhance() {
-  // 至少选一个执行方式：interpret / compile / interpret_bytecode
-  if ((!ArgsHelper::Has("interpret") && !ArgsHelper::Has("compile") && ArgsHelper::Has("interpret_bytecode"))
-      ||
-      (!ArgsHelper::Has("interpret") && ArgsHelper::Has("compile") && !ArgsHelper::Has("interpret_bytecode"))
-      ||
-      (ArgsHelper::Has("interpret") && !ArgsHelper::Has("compile") && !ArgsHelper::Has("interpret_bytecode"))
-    )
-  {
-    DefaultExit("错误: 至少需要启用 --interpret、--compile 或 --interpret_bytecode 中的一个");
+  // 检查执行方式唯一性
+  int mode_count = Config::Has("interpret") + Config::Has("compile") +
+                   Config::Has("interpret_bytecode");
+  if (mode_count != 1) {
+    DefaultExit(
+      "错误: 必须指定且只能指定一个执行方式：--interpret、--compile 或 "
+      "--interpret_bytecode"
+    );
   }
 
-  // 检查是否指定了 file 或 source
-  if (!ArgsHelper::Has("file") && ArgsHelper::Has("source")
-      || ArgsHelper::Has("file") && !ArgsHelper::Has("source")
-      ) {
-    DefaultExit("错误: 需要指定要执行的文件或源代码字符串");
-  }
-
-  // 检查是否同时指定了 file 和 source
-  if (ArgsHelper::Has("file") && ArgsHelper::Has("source")) {
-    DefaultExit("错误: 不能同时指定 --file 和 --source");
+  // 检查来源唯一性
+  if (!(Config::Has("file") ^ Config::Has("source"))) {
+    DefaultExit("错误: 必须指定且只能指定一个来源：--file 或 --source");
   }
 
   // 检查 source 与 interpret_bytecode 互斥
-  if (ArgsHelper::Has("source") && ArgsHelper::Has("interpret_bytecode")) {
+  if (Config::Has("source") && Config::Has("interpret_bytecode")) {
     DefaultExit("错误: 当使用 --source 时，不能启用 --interpret_bytecode 模式");
   }
 
-  // 处理 file 相关的校验
-  if (ArgsHelper::Has("file")) {
-    std::string file_path = ArgsHelper::Get("file");
-    std::string ext = std::filesystem::path(file_path).extension().string();
-
-    if (ext != ".py" && ArgsHelper::Has("interpret")) {
-      DefaultExit("错误: interpret 模式只支持 .py 文件");
-    }
-
-    if (ext != ".pyc" && ArgsHelper::Has("interpret_bytecode")) {
-      DefaultExit("错误: interpret_bytecode 模式只支持 .pyc 文件");
-    }
-
-    if (ext != ".py" && ArgsHelper::Has("compile")) {
-      DefaultExit("错误: compile 模式只支持 .py 文件");
-    }
+  // 检查 source 与 compile 的依赖
+  if (Config::Has("source") && !Config::Has("interpret")) {
+    DefaultExit("错误: source 模式需要启用 --interpret 模式");
   }
-  if (ArgsHelper::Has("source")) {
-    if (!ArgsHelper::Has("compile")) {
-      DefaultExit("错误: source 模式需要启用 compile 模式");
+
+  // 处理 file 校验
+  if (Config::Has("file")) {
+    std::string file_path = Config::Get("file");
+    if (file_path.empty()) {
+      DefaultExit("错误: --file 参数值为空");
+    }
+    std::string ext = std::filesystem::path(file_path).extension().string();
+    std::transform(
+      ext.begin(), ext.end(), ext.begin(), ::tolower
+    );  // 处理大小写
+
+    std::string mode;
+    if (Config::Has("interpret"))
+      mode = "interpret";
+    else if (Config::Has("interpret_bytecode"))
+      mode = "interpret_bytecode";
+    else
+      mode = "compile";
+
+    if ((mode == "interpret" && ext != ".py") || (mode == "interpret_bytecode" && ext != ".pyc") || (mode == "compile" && ext != ".py")) {
+      DefaultExit(
+        "错误: " + mode +
+        " 模式要求文件扩展名为 .py（interpret/compile）或 "
+        ".pyc（interpret_bytecode），但当前文件为: " +
+        ext
+      );
     }
   }
 }
@@ -179,23 +178,25 @@ tensorslow::Object::PyCodePtr Compile(ANTLRInputStream* inputStream) {
   Python3Parser parser(&tokens);
   antlr4::tree::ParseTree* tree = parser.file_input();
   // 打印词法
-  if (ArgsHelper::Has("show_tokens")) {
+  if (Config::Has("show_tokens")) {
     std::cout << "词法分析结果: " << std::endl;
     for (const auto& token : tokens.getTokens()) {
       std::cout << token->toString() << " ";
     }
     std::cout << std::endl;
   }
-  if (ArgsHelper::Has("show_ast")) {
+  if (Config::Has("show_ast")) {
     std::cout << "抽象语法树: " << std::endl;
     std::cout << tree->toStringTree(&parser) << std::endl;
   }
-  std::string moduleName = ArgsHelper::Has("file") ? ArgsHelper::Get("file") : ArgsHelper::Has("source") ? "temporaryModule" : "unreached";
+  std::string moduleName = Config::Has("file")     ? Config::Get("file")
+                           : Config::Has("source") ? "temporaryModule"
+                                                   : "unreached";
   Generator visitor(tensorslow::Object::CreatePyString(moduleName));
   visitor.visit(tree);
   visitor.Visit();
   visitor.Emit();
-  if (ArgsHelper::Has("show_ir")) {
+  if (Config::Has("show_ir")) {
     std::cout << "中间代码树: " << std::endl;
     std::cout << "```mermaid" << std::endl;
     std::cout << "graph TD" << std::endl;
@@ -203,30 +204,29 @@ tensorslow::Object::PyCodePtr Compile(ANTLRInputStream* inputStream) {
     std::cout << "```" << std::endl;
   }
   auto code = visitor.Code();
-  if (ArgsHelper::Has("show_code")) {
+  if (Config::Has("show_code")) {
     tensorslow::Object::PrintCode(code);
   }
   return code;
 }
 
-ANTLRInputStream* CreateANTLRInputStream(){
-  if (ArgsHelper::Has("file")) {
-    std::cout << "文件名: " << ArgsHelper::Get("file") << std::endl;
-    std::ifstream file(ArgsHelper::Get("file"));
+ANTLRInputStream* CreateANTLRInputStream() {
+  if (Config::Has("file")) {
+    std::cout << "文件名: " << Config::Get("file") << std::endl;
+    std::ifstream file(Config::Get("file"));
     return new ANTLRInputStream(file);
   }
-  if (ArgsHelper::Has("source")) {
-    return new ANTLRInputStream(ArgsHelper::Get("source"));
+  if (Config::Has("source")) {
+    return new ANTLRInputStream(Config::Get("source"));
   }
   throw std::runtime_error("未指定文件或源码");
 }
 
-void DestoryANTLRInputStream(ANTLRInputStream* input){
+void DestroyANTLRInputStream(ANTLRInputStream* input) {
   delete input;
 }
 
-
-void Interpret(const tensorslow::Object::PyCodePtr& code){
+void Interpret(const tensorslow::Object::PyCodePtr& code) {
   try {
     tensorslow::Runtime::Interpreter::Run(code);
   } catch (const std::exception& e) {
@@ -239,12 +239,12 @@ void Interpret(const tensorslow::Object::PyCodePtr& code){
 void HandleInterpret() {
   auto inputStream = CreateANTLRInputStream();
   auto code = Compile(inputStream);
-  DestoryANTLRInputStream(inputStream);
+  DestroyANTLRInputStream(inputStream);
   Interpret(code);
 }
 
 void HandleInterpretBytecode() {
-  auto filename = ArgsHelper::Get("file");
+  auto filename = Config::Get("file");
   tensorslow::Runtime::BinaryFileParser parser(filename);
   auto code = parser.Parse();
   Interpret(code);
@@ -253,11 +253,11 @@ void HandleInterpretBytecode() {
 void HandleCompile() {
   auto inputStream = CreateANTLRInputStream();
   auto code = Compile(inputStream);
-  DestoryANTLRInputStream(inputStream);
+  DestroyANTLRInputStream(inputStream);
 
   auto data = code->_serialize_()->as<tensorslow::Object::PyBytes>();
   const auto& bytes = data->Value();
-  auto filePath = ArgsHelper::Get("file");
+  auto filePath = Config::Get("file");
   auto writePath = fs::path(filePath).replace_extension(".pyc");
   tensorslow::Collections::Write(
     bytes,
@@ -265,22 +265,21 @@ void HandleCompile() {
   );
 }
 
-
-
 int main(int argc, char** argv) {
 #ifdef _WIN32
   SetConsoleOutputCP(CP_UTF8);  // 在Windows平台上设置控制台输出为UTF-8编码
 #endif
   DefineOption();
+  Config::Instance().Accept(argc, argv);
   OptionEnhance();
-  ArgsHelper::Instance().Accept(argc, argv);
+
   InitPyObj();
 
-  if (ArgsHelper::Has("compile")) {
+  if (Config::Has("compile")) {
     HandleCompile();
-  } else if (ArgsHelper::Has("interpret")) {
+  } else if (Config::Has("interpret")) {
     HandleInterpret();
-  } else if (ArgsHelper::Has("interpret_bytecode")){
+  } else if (Config::Has("interpret_bytecode")) {
     HandleInterpretBytecode();
   }
   return 0;

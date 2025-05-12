@@ -18,7 +18,7 @@
 #include "Object/Runtime/PyInst.h"
 #include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
-#include "Tools/Tools.h"
+#include "Tools/Config/Config.h"
 
 namespace tensorslow::Object {
 
@@ -118,9 +118,10 @@ void PyFrame::NextProgramCounter() {
 }
 
 void ParseByteCode(const PyCodePtr& code) {
-  if (code->ByteCode() == nullptr){
+  if (code->ByteCode() == nullptr) {
     // TODO
-    //std::cerr << "Warning: bytecode passing in memory or something wrong" << std::endl;
+    // std::cerr << "Warning: bytecode passing in memory or something wrong" <<
+    // std::endl;
     return;
   }
   auto bytes = code->ByteCode()->Value().CopyCodeUnits();
@@ -386,10 +387,10 @@ bool PyFrame::HasCaller() const {
 PyObjPtr PyFrame::Eval() {
   while (!Finished()) {
     const auto& inst = Instruction();
-        if (ArgsHelper::Instance().Has("debug")) {
-          CreatePyString("-------------------")->as<PyString>()->PrintLine();
-          PrintFrame(shared_from_this()->as<PyFrame>());
-        }
+    if (Config::Has("debug")) {
+      CreatePyString("-------------------")->as<PyString>()->PrintLine();
+      PrintFrame(shared_from_this()->as<PyFrame>());
+    }
     switch (inst->Code()) {
       case ByteCode::LOAD_CONST: {
         auto key = std::get<Index>(inst->Operand());
