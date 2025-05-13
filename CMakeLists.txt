@@ -5,7 +5,6 @@ include(cmake/AntlrConfig.cmake)
 
 include(src/source.cmake)
 include(test/unittest/unittest.cmake)
-include(test/extra/extra.cmake)
 message(STATUS "tensorslow_frontend_files: ${tensorslow_frontend_files}")
 message(STATUS "tensorslow_backend_files: ${tensorslow_backend_files}")
 message(STATUS "tensorslow_common_files: ${tensorslow_common_files}")

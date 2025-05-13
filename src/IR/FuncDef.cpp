@@ -79,7 +79,7 @@ Object::PyObjPtr FuncDefKlass::emit(
   parent->LoadConst(funcDef->Name());
   parent->MakeFunction();
   parent->StoreName(funcDef->Name());
-  if (Config::Has("show_code")) {
+  if (Config::Has("show_bc")) {
     Object::PrintCode(selfCode);
   }
   return Object::CreatePyNone();

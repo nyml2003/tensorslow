@@ -5,7 +5,7 @@
 #include "Collections/String/String.h"
 namespace tensorslow::Collections {
 
-void Write(const String& bytes, const String& filename);
+void Write(const String& bytes, const std::string& filename);
 std::string ToCppString(const String& bytes);
 String ReprByte(Byte byte);
 String Serialize(double value);

@@ -1,5 +1,5 @@
-#ifndef TENSORSLOW_AST_HELPER_H
-#define TENSORSLOW_AST_HELPER_H
+#ifndef TENSORSLOW_IR_HELPER_H
+#define TENSORSLOW_IR_HELPER_H
 
 #include "IR/AssignStmt.h"
 #include "IR/ClassDef.h"
@@ -24,7 +24,7 @@
 
 namespace tensorslow::IR {
 
-inline void RegisterAstKlass() {
+inline void RegisterIRClasses() {
   AtomKlass::Self()->Initialize();
   BinaryKlass::Self()->Initialize();
   FunctionCallKlass::Self()->Initialize();

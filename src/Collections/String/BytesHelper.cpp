@@ -15,27 +15,26 @@ String ReprByte(Byte byte) {
   return CreateStringWithCString(buffer);
 }
 
-void Write(const String& bytes, const String& filename) {
+void Write(const String& bytes, const std::string& filename) {
   std::string data = bytes.ToCppString();
-  std::string filenameCppString = filename.ToCppString();
-  if (filenameCppString.empty()) {
+  if (filename.empty()) {
     throw std::runtime_error("Filename is empty");
   }
-  std::ofstream file(filenameCppString, std::ios::binary);
+  std::ofstream file(filename, std::ios::binary);
   if (!file.is_open()) {
-    std::cerr << "无法打开文件：" << filenameCppString << std::endl;
+    std::cerr << "无法打开文件：" << filename << std::endl;
     return;
   }
   file.write(data.data(), std::streamsize(data.size()));
   tensorslow::ConsoleLogger::getInstance().log("写入文件：");
-  tensorslow::ConsoleLogger::getInstance().log(filenameCppString);
+  tensorslow::ConsoleLogger::getInstance().log(filename);
   tensorslow::ConsoleLogger::getInstance().log("\n");
   tensorslow::ConsoleLogger::getInstance().log("文件大小：");
   tensorslow::ConsoleLogger::getInstance().log(std::to_string(data.size()));
   tensorslow::ConsoleLogger::getInstance().log("字节");
   tensorslow::ConsoleLogger::getInstance().log("\n");
   if (!file) {
-    std::cerr << "写入文件时出错：" << filenameCppString << std::endl;
+    std::cerr << "写入文件时出错：" << filename << std::endl;
   }
   file.close();
 }

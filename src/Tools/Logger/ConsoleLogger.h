@@ -26,11 +26,11 @@ class ConsoleLogger : public Logger {
       (*m_callback)(msg);
     }
   }
+  ConsoleLogger(const ConsoleLogger&) = delete;
+  ConsoleLogger& operator=(const ConsoleLogger&) = delete;
 
  private:
   ConsoleLogger() = default;
-  ConsoleLogger(const ConsoleLogger&) = delete;
-  ConsoleLogger& operator=(const ConsoleLogger&) = delete;
 };
 
 }  // namespace tensorslow
