@@ -123,9 +123,9 @@ void PyFrame::NextProgramCounter() {
 
 void ParseByteCode(const PyCodePtr& code) {
   if (code->ByteCode() == nullptr) {
-    ErrorLogger::getInstance().log(
-      "bytecode passing in memory or something wrong"
-    );
+    //    ErrorLogger::getInstance().log(
+    //      "bytecode passing in memory or something wrong"
+    //    );
     return;
   }
   auto bytes = code->ByteCode()->Value().CopyCodeUnits();

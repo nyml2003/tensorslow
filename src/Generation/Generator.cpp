@@ -27,6 +27,7 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
+#include "Tools/Logger/ErrorLogger.h"
 #include "support/Any.h"
 
 namespace tensorslow::Generation {
@@ -81,7 +82,7 @@ antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
       }
       continue;
     }
-    std::cerr << "visitFile_input: Unknown statement type" << std::endl;
+    ErrorLogger::getInstance().log("visitFile_input: Unknown statement type");
   }
   if (context->is(IR::ModuleKlass::Self())) {
     context->as<IR::Module>()->SetBody(Object::CreatePyList(statements));
@@ -91,7 +92,7 @@ antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
     context->as<IR::FuncDef>()->SetBody(Object::CreatePyList(statements));
     return nullptr;
   }
-  std::cerr << "visitFile_input: Unknown context type" << std::endl;
+  ErrorLogger::getInstance().log("visitFile_input: Unknown context type");
   return nullptr;
 }
 
@@ -179,6 +180,7 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
   } else if (ctx->ELLIPSIS() != nullptr) {
     // 情况 7: '...'
     std::cout << "atom: '...'" << std::endl;
+    
   } else if (ctx->NONE() != nullptr) {
     // 情况 8: 'None'
     return IR::CreateAtom(Object::CreatePyNone(), context);
@@ -542,8 +544,7 @@ antlrcpp::Any Generator::visitComparison(Python3Parser::ComparisonContext* ctx
   if (ctx->comp_op(0)->EQUALS() != nullptr) {
     return CreateBinary(IR::Binary::Operator::EQ, left, right, context);
   }
-  if ((ctx->comp_op(0)->NOT_EQ_1() != nullptr) ||
-      (ctx->comp_op(0)->NOT_EQ_2() != nullptr)) {
+  if ((ctx->comp_op(0)->NOT_EQ_1() != nullptr) || (ctx->comp_op(0)->NOT_EQ_2() != nullptr)) {
     return CreateBinary(IR::Binary::Operator::NE, left, right, context);
   }
   if (ctx->comp_op(0)->LESS_THAN() != nullptr) {
@@ -612,8 +613,9 @@ antlrcpp::Any Generator::visitCompound_stmt(
   }
   // 其他情况（不应该出现）
 
-  std::cerr << "visitCompound_stmt: Unknown compound statement type"
-            << std::endl;
+  ErrorLogger::getInstance().log(
+    "visitCompound_stmt: Unknown compound statement type"
+  );
   return nullptr;
 }
 
@@ -651,7 +653,7 @@ antlrcpp::Any Generator::visitBlock(Python3Parser::BlockContext* ctx) {
         }
         continue;
       }
-      std::cerr << "visitBlock: Unknown statement type" << std::endl;
+      ErrorLogger::getInstance().log("visitBlock: Unknown statement type");
     }
     return Object::CreatePyList(stmts);
   }
@@ -787,8 +789,7 @@ antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx
     auto* test = ctx->test(0);
     auto* colon = ctx->COLON();
     auto value = std::any_cast<IR::INodePtr>(visitTest(test));
-    if (colon->getSymbol()->getTokenIndex() <
-        test->getStart()->getTokenIndex()) {
+    if (colon->getSymbol()->getTokenIndex() < test->getStart()->getTokenIndex()) {
       return IR::CreateSlice(
         Object::CreatePyList({none, value, step}), context
       );

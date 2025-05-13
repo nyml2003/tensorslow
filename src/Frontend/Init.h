@@ -13,6 +13,7 @@
 #include "Tools/Config/Schema.h"
 #include "Tools/Logger/BytecodeLogger.h"
 #include "Tools/Logger/ConsoleLogger.h"
+#include "Tools/Logger/ErrorLogger.h"
 #include "Tools/Logger/IntermediateCodeTreeLogger.h"
 #include "Tools/Logger/LexicalAnalysisLogger.h"
 #include "Tools/Logger/SyntaxAnalysisLogger.h"
@@ -84,7 +85,7 @@ void InitFrontendClasses() {
 void ParseAndGenerate(const std::filesystem::path& filePath) {
   std::ifstream stream(filePath);
   if (!stream.is_open()) {
-    std::cerr << "Failed to open file: " << filePath << std::endl;
+    ErrorLogger::getInstance().log("Failed to open file: " + filePath.string());
     return;
   }
   ConsoleLogger::getInstance().log("正在解析文件 ");
