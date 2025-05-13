@@ -11,9 +11,10 @@
 #include "Object/Matrix/PyMatrix.h"
 #include "Object/Number/PyFloat.h"
 #include "Object/Number/PyInteger.h"
+#include "Object/String/PyBytes.h"
 #include "Runtime/Interpreter.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 void LoadClass(const PyStrPtr& name, const KlassPtr& klass) {
   klass->SetName(name);
   klass->SetAttributes(CreatePyDict()->as<PyDictionary>());
@@ -360,4 +361,4 @@ void LoadRuntimeSupportClasses() {
   SliceKlass::Self()->Initialize();
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

@@ -1,7 +1,7 @@
 #include "IR/Expression/Slice.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Iterator/IteratorHelper.h"
-namespace torchlight::IR {
+namespace tensorslow::IR {
 Object::PyObjPtr SliceKlass::emit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
@@ -39,4 +39,4 @@ Object::PyObjPtr SliceKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

@@ -1,8 +1,7 @@
-#ifndef TORCHLIGHT_RUNTIME_BINARY_FILEPARSER_H
-#define TORCHLIGHT_RUNTIME_BINARY_FILEPARSER_H
+#ifndef TENSORSLOW_RUNTIME_BINARY_FILEPARSER_H
+#define TENSORSLOW_RUNTIME_BINARY_FILEPARSER_H
 
-#include <filesystem>
-#include <fstream>
+
 #include "Collections/String/BytesHelper.h"
 #include "Collections/String/StringHelper.h"
 #include "Object/Core/PyBoolean.h"
@@ -10,8 +9,12 @@
 #include "Object/Number/PyFloat.h"
 #include "Object/Number/PyInteger.h"
 #include "Object/Runtime/PyCode.h"
+#include "Object/String/PyBytes.h"
 
-namespace torchlight::Runtime {
+#include <fstream>
+#include <filesystem>
+
+namespace tensorslow::Runtime {
 namespace fs = std::filesystem;
 
 class BinaryFileParser {
@@ -66,9 +69,7 @@ class BinaryFileParser {
     return Collections::List<Byte>(size, std::move(buffer));
   }
   Object::PyBytesPtr ReadBytes() {
-    return Object::CreatePyBytes(
-      Collections::Bytes(std::move(ReadBytes(ReadU64())))
-    );
+    return Object::CreatePyBytes(Collections::String(ReadBytes(ReadU64())));
   }
   Object::PyIntPtr ReadInteger() {
     uint64_t size = ReadSize();
@@ -106,9 +107,9 @@ class BinaryFileParser {
         return ReadFloat();
       case Object::Literal::LIST:
         return ReadList();
-      case Object::Literal::TRUE:
+      case Object::Literal::TRUE_LITERAL:
         return Object::CreatePyBoolean(true);
-      case Object::Literal::FALSE:
+      case Object::Literal::FALSE_LITERAL:
         return Object::CreatePyBoolean(false);
       case Object::Literal::NONE:
         return Object::CreatePyNone();
@@ -133,6 +134,6 @@ class BinaryFileParser {
     );
   }
 };
-}  // namespace torchlight::Runtime
+}  // namespace tensorslow::Runtime
 
-#endif  // TORCHLIGHT_RUNTIME_BINARY_FILEPARSER_H
+#endif  // TENSORSLOW_RUNTIME_BINARY_FILEPARSER_H

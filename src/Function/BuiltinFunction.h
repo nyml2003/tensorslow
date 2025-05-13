@@ -1,12 +1,12 @@
-#ifndef TORCHLIGHT_BUILTIN_FUNCTION_H
-#define TORCHLIGHT_BUILTIN_FUNCTION_H
+#ifndef TENSORSLOW_BUILTIN_FUNCTION_H
+#define TENSORSLOW_BUILTIN_FUNCTION_H
 #include "Common.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Object.h"
 
 #include <functional>
 
-namespace torchlight::Function {
+namespace tensorslow::Function {
 Object::PyObjPtr Identity(const Object::PyObjPtr& args);
 Object::PyObjPtr RandInt(const Object::PyObjPtr& args);
 Object::PyObjPtr Sleep(const Object::PyObjPtr& args);
@@ -31,6 +31,6 @@ auto SoftMax(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
 auto Max(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
 auto ArgMax(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
 auto Hash(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
-}  // namespace torchlight::Function
+}  // namespace tensorslow::Function
 
 #endif

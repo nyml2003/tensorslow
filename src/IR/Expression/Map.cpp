@@ -1,7 +1,7 @@
 #include "IR/Expression/Map.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Iterator/IteratorHelper.h"
-namespace torchlight::IR {
+namespace tensorslow::IR {
 Object::PyObjPtr
 MapKlass::emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) {
   auto map = obj->as<IR::Map>();
@@ -47,4 +47,4 @@ Object::PyObjPtr MapKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

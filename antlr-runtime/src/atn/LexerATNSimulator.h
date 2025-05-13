@@ -120,7 +120,7 @@ namespace atn {
 
     /// <summary>
     /// Given a starting configuration set, figure out all ATN configurations
-    ///  we can reach upon input {@code t}. Parameter {@code reach} is a return
+    ///  we can reach upon input {@code t}. OptionConvention {@code reach} is a return
     ///  parameter.
     /// </summary>
     void getReachableConfigSet(CharStream *input, ATNConfigSet *closure_, // closure_ as we have a closure() already

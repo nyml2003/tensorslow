@@ -9,7 +9,6 @@
 #include "Object/Core/PyType.h"
 #include "Object/Number/PyFloat.h"
 #include "Object/Number/PyInteger.h"
-#include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
 #endif

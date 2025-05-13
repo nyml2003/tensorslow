@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_AST_MODULE_H
-#define TORCHLIGHT_AST_MODULE_H
+#ifndef TENSORSLOW_AST_MODULE_H
+#define TENSORSLOW_AST_MODULE_H
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class ModuleKlass : public INodeKlass {
  public:
@@ -61,6 +61,6 @@ CreateModule(const Object::PyListPtr& body, const Object::PyStrPtr& name) {
   return std::make_shared<Module>(body, name);
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

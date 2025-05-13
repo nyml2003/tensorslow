@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_OBJECT_PYSTRING_H
-#define TORCHLIGHT_OBJECT_PYSTRING_H
+#ifndef TENSORSLOW_OBJECT_PYSTRING_H
+#define TENSORSLOW_OBJECT_PYSTRING_H
 
 #include "Collections/String/String.h"
 #include "Object/Core/PyObject.h"
@@ -7,7 +7,8 @@
 
 #include <mutex>
 #include <unordered_map>
-namespace torchlight::Object {
+#include <utility>
+namespace tensorslow::Object {
 
 class StringKlass : public Klass {
  public:
@@ -37,20 +38,16 @@ class PyString : public PyObject {
 
  private:
   Collections::String value;
-  // 缩进深度
-  static Index indent;
   static std::unordered_map<size_t, std::shared_ptr<PyString>> stringPool;
   static std::mutex poolMutex;
 
  public:
   explicit PyString(Collections::String _value)
     : PyObject(StringKlass::Self()), value(std::move(_value)) {}
-  static void IncreaseIndent() { indent++; }
-  static void DecreaseIndent() { indent--; }
 
-  Index Length() const { return value.Size(); }
+  Index Length() { return value.GetCodePointCount(); }
 
-  PyStrPtr GetItem(Index index) const;
+  PyStrPtr GetItem(Index index);
 
   PyStrPtr Join(const PyObjPtr& iterable);
 
@@ -58,18 +55,18 @@ class PyString : public PyObject {
 
   PyStrPtr Add(const PyStrPtr& other);
 
-  void Print(bool enableIndent = true) const;
-  void PrintLine(bool enableIndent = true) const;
+  void Print() const;
+  void PrintLine() const;
 
   std::string ToCppString() const;
 
-  bool Equal(const PyStrPtr& other) const;
+  bool Equal(const PyStrPtr& other);
 
-  PyStrPtr Upper() const;
+  PyStrPtr Upper();
 
-  Collections::String Value() const { return value; }
-  static PyStrPtr Create(Collections::String&& value);
-  size_t Hash() { return value.Hash(); }
+  Collections::String Value() const { return value.Copy(); }
+  static PyStrPtr Create(const Collections::String& value);
+  size_t Hash() { return value.HashValue(); }
 };
 
 using PyStrPtr = std::shared_ptr<PyString>;
@@ -82,10 +79,10 @@ PyObjPtr StringJoin(const PyObjPtr& args);
 
 PyObjPtr StringConcat(const PyObjPtr& args);
 
-PyStrPtr CreatePyString(Collections::String&& value, bool pooling = true);
+PyStrPtr CreatePyString(const Collections::String& value, bool pooling = true);
 PyStrPtr CreatePyString(const char* value);
 PyStrPtr CreatePyString(const std::string& value);
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
-#endif  // TORCHLIGHT_OBJECT_PYSTRING_H
+#endif  // TENSORSLOW_OBJECT_PYSTRING_H

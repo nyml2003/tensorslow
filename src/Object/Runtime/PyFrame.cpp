@@ -18,9 +18,13 @@
 #include "Object/Runtime/PyInst.h"
 #include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
-#include "Tools/Tools.h"
+#include "Tools/Config/Config.h"
+#include "Tools/Logger/BytecodeLogger.h"
+#include "Tools/Logger/ConsoleLogger.h"
+#include "Tools/Logger/ErrorLogger.h"
+#include "Tools/Logger/VerboseLogger.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyFrame::PyFrame(
   PyCodePtr code,
@@ -118,7 +122,13 @@ void PyFrame::NextProgramCounter() {
 }
 
 void ParseByteCode(const PyCodePtr& code) {
-  const auto& bytes = code->ByteCode()->Value().Value();
+  if (code->ByteCode() == nullptr) {
+    ErrorLogger::getInstance().log(
+      "bytecode passing in memory or something wrong"
+    );
+    return;
+  }
+  auto bytes = code->ByteCode()->Value().CopyCodeUnits();
   Index iter = 0;
   if (static_cast<Literal>(bytes[iter]) != Literal::LIST) {
     throw std::runtime_error("Invalid insts");
@@ -314,7 +324,6 @@ void ParseByteCode(const PyCodePtr& code) {
         throw std::runtime_error(
           "Unknown byte code:" + std::to_string(static_cast<int>(bytes[iter]))
         );
-        break;
     }
   }
   code->SetInstructions(std::make_shared<PyList>(insts));
@@ -333,43 +342,73 @@ PyObjPtr FrameKlass::repr(const PyObjPtr& obj) {
 }
 
 void PrintFrame(const PyFramePtr& frame) {
-  frame->repr()->as<PyString>()->PrintLine();
-  CreatePyString("Program Counter: ")->as<PyString>()->Print();
-  CreatePyInteger(frame->ProgramCounter())
-    ->repr()
-    ->as<PyString>()
-    ->PrintLine(false);
-  CreatePyString("Current Instruction: ")->as<PyString>()->Print();
-  frame->Instruction()->repr()->as<PyString>()->PrintLine(false);
-  CreatePyString("Code: ")->as<PyString>()->PrintLine();
-  PyString::IncreaseIndent();
+  // Frame representation
+  VerboseLogger::getInstance().log(frame->repr()->as<PyString>()->ToCppString()
+  );
+  VerboseLogger::getInstance().log("\n");
+
+  // Program Counter
+  VerboseLogger::getInstance().log("Program Counter: ");
+  auto pc_repr = CreatePyInteger(frame->ProgramCounter())
+                   ->repr()
+                   ->as<PyString>()
+                   ->ToCppString();
+  VerboseLogger::getInstance().log(pc_repr);
+
+  // Current Instruction
+  VerboseLogger::getInstance().log("\nCurrent Instruction: ");
+  auto instr_repr = frame->Instruction()->repr()->as<PyString>()->ToCppString();
+  VerboseLogger::getInstance().log(instr_repr);
+
+  // Code
+  VerboseLogger::getInstance().log("\nCode:\n");
+  VerboseLogger::IncreaseIndent();
   PrintCode(frame->Code());
-  PyString::DecreaseIndent();
-  CreatePyString("Stack(*ptr): ")->as<PyString>()->PrintLine();
+  VerboseLogger::DecreaseIndent();
+
+  // Stack
+  VerboseLogger::getInstance().log("\nStack(*ptr):\n");
   auto stack = frame->CurrentStack();
   for (Index i = 0; i < stack->Length(); i++) {
-    CreatePyInteger(i)->repr()->as<PyString>()->Print();
-    CreatePyString("  ")->as<PyString>()->Print();
-    stack->GetItem(i)->repr()->as<PyString>()->Print();
-    std::cout << " ( " << stack->GetItem(i).get() << " ) " << std::endl;
+    auto index_repr = CreatePyInteger(i)->repr()->as<PyString>()->ToCppString();
+    VerboseLogger::getInstance().log(index_repr);
+    VerboseLogger::getInstance().log("  ");
+    auto item = stack->GetItem(i);
+    auto item_repr = item->repr()->as<PyString>()->ToCppString();
+    VerboseLogger::getInstance().log(item_repr);
+    auto ptr = reinterpret_cast<uint64_t>(item.get());
+    std::string ptr_str = " ( " + std::to_string(ptr) + " ) ";
+    VerboseLogger::getInstance().log(ptr_str);
   }
-  CreatePyString("Locals: ")->as<PyString>()->PrintLine();
-  frame->CurrentLocals()->repr()->as<PyString>()->PrintLine();
-  CreatePyString("Globals: ")->as<PyString>()->PrintLine();
-  frame->CurrentGlobals()->repr()->as<PyString>()->PrintLine();
-  CreatePyString("FastLocals: ")->as<PyString>()->PrintLine();
-  frame->CurrentFastLocals()->repr()->as<PyString>()->PrintLine();
-  // 调用栈
-  CreatePyString("Caller: ")->as<PyString>()->Print();
+
+  // Locals
+  VerboseLogger::getInstance().log("\nLocals:\n");
+  auto locals_repr =
+    frame->CurrentLocals()->repr()->as<PyString>()->ToCppString();
+  VerboseLogger::getInstance().log(locals_repr + "\n");
+
+  // Globals
+  VerboseLogger::getInstance().log("Globals:\n");
+  auto globals_repr =
+    frame->CurrentGlobals()->repr()->as<PyString>()->ToCppString();
+  VerboseLogger::getInstance().log(globals_repr + "\n");
+
+  // FastLocals
+  VerboseLogger::getInstance().log("FastLocals:\n");
+  auto fast_locals_repr =
+    frame->CurrentFastLocals()->repr()->as<PyString>()->ToCppString();
+  VerboseLogger::getInstance().log(fast_locals_repr + "\n");
+
+  // Caller
+  VerboseLogger::getInstance().log("Caller: ");
   if (frame->HasCaller()) {
-    PyString::IncreaseIndent();
+    VerboseLogger::IncreaseIndent();
     PrintFrame(frame->Caller());
-    PyString::DecreaseIndent();
+    VerboseLogger::DecreaseIndent();
   } else {
-    CreatePyString("This is the top frame")->as<PyString>()->PrintLine();
+    VerboseLogger::getInstance().log("This is the top frame\n");
   }
 }
-
 PyFramePtr PyFrame::Caller() const {
   return caller;
 }
@@ -381,10 +420,9 @@ bool PyFrame::HasCaller() const {
 PyObjPtr PyFrame::Eval() {
   while (!Finished()) {
     const auto& inst = Instruction();
-    //    if (ArgsHelper::Instance().Has("debug")) {
-    //      CreatePyString("-------------------")->as<PyString>()->PrintLine();
-    //      PrintFrame(shared_from_this()->as<PyFrame>());
-    //    }
+    if (Config::Has("verbose")) {
+      PrintFrame(shared_from_this()->as<PyFrame>());
+    }
     switch (inst->Code()) {
       case ByteCode::LOAD_CONST: {
         auto key = std::get<Index>(inst->Operand());
@@ -608,7 +646,6 @@ PyObjPtr PyFrame::Eval() {
       case ByteCode::RETURN_VALUE: {
         auto value = stack.Pop();
         return value;
-        break;
       }
       case ByteCode::MAKE_FUNCTION: {
         auto name = stack.Pop();
@@ -696,11 +733,6 @@ PyObjPtr PyFrame::Eval() {
             "NameError: name '" + key->as<PyString>()->ToCppString() +
             "' is not defined"
           );
-          auto errorMessage = StringConcat(CreatePyList(
-            {CreatePyString("NameError: name '"), key,
-             CreatePyString("' is not defined")}
-          ));
-          throw std::runtime_error(errorMessage->as<PyString>()->ToCppString());
         }
         stack.Push(value);
         NextProgramCounter();
@@ -816,7 +848,6 @@ PyObjPtr PyFrame::Eval() {
       case ByteCode::YIELD_VALUE: {
         NextProgramCounter();
         return CreatePyGenerator(shared_from_this()->as<PyFrame>());
-        break;
       }
       case ByteCode::JUMP_FORWARD: {
         SetProgramCounter(programCounter + std::get<Index>(inst->Operand()));
@@ -845,4 +876,4 @@ PyObjPtr PyFrame::EvalWithDestory() {
   return result;
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_AST_FUNCTIONCALL_H
-#define TORCHLIGHT_AST_FUNCTIONCALL_H
+#ifndef TENSORSLOW_AST_FUNCTIONCALL_H
+#define TENSORSLOW_AST_FUNCTIONCALL_H
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class FunctionCallKlass : public INodeKlass {
  public:
@@ -58,6 +58,6 @@ inline INodePtr CreateFunctionCall(
   return std::make_shared<FunctionCall>(func, args, parent);
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

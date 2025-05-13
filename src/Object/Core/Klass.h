@@ -1,11 +1,11 @@
-#ifndef TORCHLIGHT_OBJECT_KLASS_H
-#define TORCHLIGHT_OBJECT_KLASS_H
+#ifndef TENSORSLOW_OBJECT_KLASS_H
+#define TENSORSLOW_OBJECT_KLASS_H
 #include "Common.h"
 #include "Object/Object.h"
 
 #include <stdexcept>
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 class Klass : public std::enable_shared_from_this<Klass> {
  private:
   PyStrPtr name;
@@ -86,6 +86,6 @@ class Klass : public std::enable_shared_from_this<Klass> {
   virtual PyObjPtr reversed(const PyObjPtr& obj);
   virtual PyObjPtr _serialize_(const PyObjPtr& obj);
 };
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
-#endif  // TORCHLIGHT_OBJECT_KLASS_H
+#endif  // TENSORSLOW_OBJECT_KLASS_H

@@ -3,7 +3,7 @@
 #include "Collections/String/StringHelper.h"
 #include "Common.h"
 
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 Decimal CreateDecimalZero() {
   return CreateDecimalWithU32(0);
 }
@@ -19,25 +19,31 @@ Decimal CreateDecimalWithU32(uint32_t value) {
   parts.Reverse();
   return Decimal(parts, false);
 }
-int32_t UnicodeToDec(Unicode unicode) noexcept {
-  if (unicode >= Unicode_0 && unicode <= Unicode_9) {
-    return static_cast<int32_t>(unicode - Unicode_0);
+// int32_t UnicodeToDec(Unicode unicode) noexcept {
+//   if (unicode >= Unicode_0 && unicode <= Unicode_9) {
+//     return static_cast<int32_t>(unicode - Unicode_0);
+//   }
+//   return -1;
+// }
+Byte DecToByte(int32_t dec) noexcept {
+  return static_cast<Byte>(static_cast<Byte>(dec) + Byte_0);
+}
+int32_t ByteToDec(Byte byte) noexcept {
+  if (byte >= Byte_0 && byte <= Byte_9) {
+    return static_cast<int32_t>(byte - Byte_0);
   }
   return -1;
-}
-Byte DecToByte(int32_t dec) noexcept {
-  return static_cast<Byte>(static_cast<Byte>(dec) + Unicode_0);
 }
 Decimal CreateDecimalWithString(const String& str) {
   Index index = 0;
   bool sign = false;
-  if (str[0] == UnicodeMinus) {
+  if (str.GetCodeUnit(0) == '-') {
     sign = true;
     index = 1;
   }
   List<int32_t> parts;
-  for (; index < str.Size(); index++) {
-    int32_t character = UnicodeToDec(str[index]);
+  for (; index < str.GetCodeUnitCount(); ++index) {
+    int32_t character = ByteToDec(str.GetCodeUnit(index));
     if (character == -1) {
       throw std::runtime_error("Invalid character in Decimal");
     }
@@ -64,4 +70,4 @@ void TrimLeadingZero(List<int32_t>& parts) {
 Decimal CreateDecimalWithCString(const char* str) {
   return CreateDecimalWithString(CreateStringWithCString(str));
 }
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections

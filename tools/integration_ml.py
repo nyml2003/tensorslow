@@ -9,17 +9,17 @@ build_type = sys.argv[1] if len(sys.argv) > 1 else "release"
 
 # 根据传参判断是build还是release
 if build_type == "release":
-    build_dir = r"D:\code\project\torchlight\release"
+    build_dir = r"D:\code\project\tensorslow\release"
 elif build_type == "debug":
-    build_dir = r"D:\code\project\torchlight\build"
+    build_dir = r"D:\code\project\tensorslow\build"
 else:
     print(f"Invalid build type: {build_type}")
     sys.exit(1)
 
 # print(f"Build directory: {build_dir}")
-test_dir = r"D:\code\project\torchlight\test\ml_base"
-frontend_exe = os.path.join(build_dir, "torchlight_frontend.exe")
-backend_exe = os.path.join(build_dir, "torchlight_backend.exe")
+test_dir = r"D:\code\project\tensorslow\test\ml_base"
+frontend_exe = os.path.join(build_dir, "tensorslow_frontend.exe")
+backend_exe = os.path.join(build_dir, "tensorslow_backend.exe")
 
 # 获取测试目录下的所有子目录
 subdirs = [d for d in os.listdir(test_dir) if os.path.isdir(os.path.join(test_dir, d))]

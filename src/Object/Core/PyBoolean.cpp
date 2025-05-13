@@ -2,8 +2,9 @@
 #include "ByteCode/ByteCode.h"
 #include "Object/Container/PyList.h"
 #include "Object/String/PyBytes.h"
+#include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyObjPtr BooleanKlass::repr(const PyObjPtr& obj) {
   if (!obj->is(BooleanKlass::Self())) {
@@ -55,9 +56,9 @@ PyObjPtr BooleanKlass::_serialize_(const PyObjPtr& obj) {
   }
   auto boolean = obj->as<PyBoolean>();
   if (boolean->Value()) {
-    return CreatePyBytes(Collections::Serialize(Literal::TRUE));
+    return CreatePyBytes(Collections::Serialize(Literal::TRUE_LITERAL));
   }
-  return CreatePyBytes(Collections::Serialize(Literal::FALSE));
+  return CreatePyBytes(Collections::Serialize(Literal::FALSE_LITERAL));
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

@@ -5,7 +5,7 @@
 #include "Object/Matrix/PyMatrix.h"
 #include "Object/Number/PyFloat.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 PyObjPtr Array(const PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   auto argList = args->as<PyList>();
@@ -200,4 +200,4 @@ PyObjPtr Transpose(const PyObjPtr& args) {
   );
   return args->as<PyList>()->GetItem(0)->as<PyMatrix>()->Transpose();
 }
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

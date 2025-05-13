@@ -10,7 +10,7 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyObjPtr FloatKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {
   if (klass->as<PyType>()->Owner() != Self()) {
@@ -132,9 +132,9 @@ PyObjPtr FloatKlass::_serialize_(const PyObjPtr& obj) {
     throw std::runtime_error("PyFloat::_serialize_(): obj is not a float");
   }
   auto floatObj = obj->as<PyFloat>();
-  auto bytes = Collections::Serialize(Literal::FLOAT);
-  bytes.Concat(Collections::Serialize(floatObj->Value()));
-  return CreatePyBytes(std::move(bytes));
+  Collections::StringBuilder sb(Collections::Serialize(Literal::FLOAT));
+  sb.Append(Collections::Serialize(floatObj->Value()));
+  return CreatePyBytes(sb.ToString());
 }
 
 PyObjPtr FloatKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {
@@ -162,4 +162,4 @@ PyObjPtr FloatKlass::boolean(const PyObjPtr& obj) {
   return CreatePyBoolean(obj->as<PyFloat>()->Value() != 0.0);
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

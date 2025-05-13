@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_OBJECT_PYFUNCTION_H
-#define TORCHLIGHT_OBJECT_PYFUNCTION_H
+#ifndef TENSORSLOW_OBJECT_PYFUNCTION_H
+#define TENSORSLOW_OBJECT_PYFUNCTION_H
 
 #include "Function/BuiltinFunction.h"
 #include "Object/Container/PyDictionary.h"
@@ -7,7 +7,7 @@
 #include "Object/Runtime/PyCode.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class FunctionKlass : public Klass {
  public:
@@ -54,6 +54,6 @@ CreatePyFunction(const PyObjPtr& code, const PyObjPtr& globals) {
   return std::make_shared<PyFunction>(code, globals);
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

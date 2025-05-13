@@ -1,11 +1,10 @@
-#ifndef TORCHLIGHT_COLLECTIONS_INTEGER_H
-#define TORCHLIGHT_COLLECTIONS_INTEGER_H
+#ifndef TENSORSLOW_COLLECTIONS_INTEGER_H
+#define TENSORSLOW_COLLECTIONS_INTEGER_H
 #include "Collections/Integer/Decimal.h"
 #include "Collections/List.h"
-#include "Collections/String/Bytes.h"
 #include "Collections/String/String.h"
 
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 class Integer {
   friend class List<Integer>;
 
@@ -22,7 +21,6 @@ class Integer {
   [[nodiscard]] IntSign GetSign() const;
   [[nodiscard]] String ToHexString() const;
   [[nodiscard]] String ToString() const;
-  [[nodiscard]] Bytes Serialize() const;
   [[nodiscard]] Integer Add(const Integer& rhs) const;
   [[nodiscard]] Integer Subtract(const Integer& rhs) const;
   [[nodiscard]] Integer Multiply(const Integer& rhs) const;
@@ -46,5 +44,5 @@ class Integer {
   [[nodiscard]] Integer LeftShift(const Integer& rhs) const;
   [[nodiscard]] Integer RightShift(const Integer& rhs) const;
 };
-}  // namespace torchlight::Collections
-#endif  // TORCHLIGHT_COLLECTIONS_INTEGER_H
+}  // namespace tensorslow::Collections
+#endif  // TENSORSLOW_COLLECTIONS_INTEGER_H

@@ -1,18 +1,16 @@
 #include "Object/Container/PyDictionary.h"
-#include <iostream>
-#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
-#include "Object/Core/PyObject.h"
 #include "Object/Core/PyType.h"
 #include "Object/Function/PyNativeFunction.h"
 #include "Object/Iterator/Iterator.h"
 #include "Object/Iterator/IteratorHelper.h"
+#include "Object/Iterator/PyGenerator.h"
 #include "Object/Number/PyInteger.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyObjPtr CreatePyDict() {
   return std::make_shared<PyDictionary>();
@@ -66,6 +64,14 @@ void DictionaryKlass::Initialize() {
     CreatePyString("clear")->as<PyString>(),
     CreatePyNativeFunction(DictClear)->as<PyNativeFunction>()
   );
+  Self()->AddAttribute(
+    CreatePyString("items")->as<PyString>(),
+    CreatePyNativeFunction(DictItems)->as<PyNativeFunction>()
+  );
+  Self()->AddAttribute(
+    CreatePyString("get")->as<PyString>(),
+    CreatePyNativeFunction(DictGet)->as<PyNativeFunction>()
+  );
 
   this->isInitialized = true;
 }
@@ -115,7 +121,7 @@ PyObjPtr DictionaryKlass::iter(const PyObjPtr& obj) {
   if (!obj->is(DictionaryKlass::Self())) {
     throw std::runtime_error("PyDictionary::iter(): obj is not a dict");
   }
-  return CreateDictItemIterator(obj);
+  return CreateDictItemIterator(obj->as<PyDictionary>());
 }
 
 PyObjPtr DictionaryKlass::repr(const PyObjPtr& obj) {
@@ -185,4 +191,19 @@ auto DictClear(const PyObjPtr& obj) -> PyObjPtr {
   return CreatePyNone();
 }
 
-}  // namespace torchlight::Object
+auto DictItems(const PyObjPtr& obj) -> PyObjPtr {
+  auto argList = obj->as<PyList>();
+  auto dict = argList->GetItem(0)->as<PyDictionary>();
+  auto items = CreatePyList();
+  for (const auto& item : dict->Dictionary()) {
+    items->Append(CreatePyList({item.first, item.second}));
+  }
+  return items;
+}
+
+auto DictGet(const PyObjPtr& obj) -> PyObjPtr {
+  auto argList = obj->as<PyList>();
+  auto dict = argList->GetItem(0)->as<PyDictionary>();
+  return dict->Get(argList->GetItem(1));
+}
+}  // namespace tensorslow::Object

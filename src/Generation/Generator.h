@@ -1,12 +1,12 @@
-#ifndef TORCHLIGHT_EVALVISITOR_H
-#define TORCHLIGHT_EVALVISITOR_H
+#ifndef TENSORSLOW_EVALVISITOR_H
+#define TENSORSLOW_EVALVISITOR_H
 
 #include "IR/INode.h"
 #include "Python3ParserBaseVisitor.h"
 
 #include "antlr4-runtime.h"
 
-namespace torchlight::Generation {
+namespace tensorslow::Generation {
 
 class Generator : public Python3ParserBaseVisitor {
  private:
@@ -97,6 +97,6 @@ class Generator : public Python3ParserBaseVisitor {
   ) override;
 };
 
-}  // namespace torchlight::Generation
+}  // namespace tensorslow::Generation
 
-#endif  // TORCHLIGHT_EVALVISITOR_H
+#endif  // TENSORSLOW_EVALVISITOR_H

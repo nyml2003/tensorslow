@@ -1,11 +1,9 @@
-#ifndef TORCHLIGHT_MATRIX_H
-#define TORCHLIGHT_MATRIX_H
+#ifndef TENSORSLOW_MATRIX_H
+#define TENSORSLOW_MATRIX_H
 
 #include "Collections/List.h"
 #include "Collections/String/String.h"
-namespace torchlight::Collections {
-
-using BroadcastType = uint8_t;
+namespace tensorslow::Collections {
 
 class Matrix {
  private:
@@ -72,5 +70,5 @@ class Matrix {
   [[nodiscard]] Matrix Copy() const;
 };
 
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections
 #endif

@@ -1,5 +1,4 @@
 #include "PyMatrix.h"
-#include <iostream>
 #include "Collections/Matrix.h"
 #include "MatrixFunction.h"
 #include "Object/Container/PyList.h"
@@ -11,8 +10,9 @@
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
-#include "Tools/Tools.h"
-namespace torchlight::Object {
+#include "Tools/Config/Config.h"
+
+namespace tensorslow::Object {
 PyObjPtr MatrixKlass::repr(const PyObjPtr& obj) {
   return Klass::repr(obj);
 }
@@ -247,9 +247,6 @@ PyObjPtr MatrixKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
     auto rowStop = rowSlice->GetStop()->as<PyInteger>()->ToU64();
     return matrix->GetRows(rowStart, rowStop);
   }
-  if (ArgsHelper::Instance().Has("debug")) {
-    PrintFrame(Runtime::Interpreter::Instance().CurrentFrame());
-  }
   throw std::runtime_error("MatrixKlass::getitem(): key type is not supported");
 }
 
@@ -339,9 +336,9 @@ void MatrixKlass::Initialize() {
   this->isInitialized = true;
 }
 
-PyObjPtr MatrixKlass::neg(const torchlight::Object::PyObjPtr& obj) {
+PyObjPtr MatrixKlass::neg(const tensorslow::Object::PyObjPtr& obj) {
   auto matrix = obj->as<PyMatrix>();
   return matrix->Multiply(-1);
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

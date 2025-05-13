@@ -1,7 +1,7 @@
 #include "IR/Statement/ReturnStmt.h"
 #include "Object/Core/PyNone.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 Object::PyObjPtr ReturnStmtKlass::visit(
   const Object::PyObjPtr& obj,
@@ -33,4 +33,4 @@ Object::PyObjPtr ReturnStmtKlass::print(const Object::PyObjPtr& obj) {
   PrintEdge(stmt, content);
   return Object::CreatePyNone();
 }
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

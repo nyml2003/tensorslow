@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_AST_ATOM_H
-#define TORCHLIGHT_AST_ATOM_H
+#ifndef TENSORSLOW_AST_ATOM_H
+#define TENSORSLOW_AST_ATOM_H
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class AtomKlass : public INodeKlass {
  public:
@@ -48,6 +48,6 @@ inline INodePtr CreateAtom(Object::PyObjPtr obj, INodePtr parent) {
   return std::make_shared<Atom>(std::move(obj), std::move(parent));
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

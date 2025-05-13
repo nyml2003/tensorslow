@@ -12,12 +12,12 @@
 #include "Object/Iterator/IteratorHelper.h"
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
-#include "Object/String/PyBytes.h"
+#include "PyBytes.h"
+#include "Tools/Logger/ConsoleLogger.h"
 
 #include <iostream>
 
-namespace torchlight::Object {
-Index PyString::indent = 0;
+namespace tensorslow::Object {
 std::unordered_map<size_t, std::shared_ptr<PyString>> PyString::stringPool;
 std::mutex PyString::poolMutex;
 void StringKlass::Initialize() {
@@ -163,19 +163,18 @@ PyObjPtr StringKlass::_serialize_(const PyObjPtr& obj) {
   if (!obj->is(StringKlass::Self())) {
     throw std::runtime_error("StringKlass::_serialize_(): obj is not a string");
   }
-  auto bytes = Collections::Serialize(Literal::STRING);
-  bytes.Concat(Collections::Serialize(obj->as<PyString>()->value));
-  return CreatePyBytes(std::move(bytes));
+  Collections::StringBuilder bytes(Collections::Serialize(Literal::STRING));
+  bytes.Append(Collections::Serialize(obj->as<PyString>()->value));
+  return CreatePyBytes(bytes.ToString());
 }
 
-PyStrPtr PyString::GetItem(Index index) const {
-  if (index >= value.Size()) {
+PyStrPtr PyString::GetItem(Index index) {
+  if (index >= value.GetCodePointCount()) {
     throw std::runtime_error("PyString::GetItem(): index out of range");
   }
   return CreatePyString(
-           Collections::String(Collections::List<Unicode>(1, value[index]))
-  )
-    ->as<PyString>();
+    Collections::String(value.Slice(index, index + 1)), false
+  );
 }
 
 PyStrPtr PyString::Join(const PyObjPtr& iterable) {
@@ -189,7 +188,7 @@ PyStrPtr PyString::Join(const PyObjPtr& iterable) {
       sb.Append(item->as<PyString>()->value);
     }
   }
-  return CreatePyString(sb.ToString())->as<PyString>();
+  return CreatePyString(sb.ToString(), false)->as<PyString>();
 }
 
 // PyListPtr PyString::Split(const PyStrPtr& delimiter) {
@@ -205,36 +204,24 @@ PyStrPtr PyString::Add(const PyStrPtr& other) {
   return CreatePyString(value.Add(other->value), false)->as<PyString>();
 }
 
-void PyString::Print(bool enableIndent) const {
-  if (enableIndent) {
-    for (Index i = 0; i < indent; i++) {
-      std::cout << "  " << std::flush;
-    }
-  }
-  std::cout << ToCppString() << std::flush;
+void PyString::Print() const {
+  tensorslow::ConsoleLogger::getInstance().log(ToCppString());
 }
 
-void PyString::PrintLine(bool enableIndent) const {
-  if (enableIndent) {
-    for (Index i = 0; i < indent; i++) {
-      std::cout << "  " << std::flush;
-    }
-  }
-  std::cout << ToCppString() << std::endl;
+void PyString::PrintLine() const {
+  tensorslow::ConsoleLogger::getInstance().log(ToCppString());
+  tensorslow::ConsoleLogger::getInstance().log("\n");
 }
 
 std::string PyString::ToCppString() const {
-  if (value.Size() == 0) {
-    return "";
-  }
-  return Collections::ToCppString(value);
+  return value.ToCppString();
 }
 
-bool PyString::Equal(const PyStrPtr& other) const {
+bool PyString::Equal(const PyStrPtr& other) {
   return value.Equal(other->value);
 }
 
-PyStrPtr PyString::Upper() const {
+PyStrPtr PyString::Upper() {
   return CreatePyString(value.Upper())->as<PyString>();
 }
 
@@ -281,9 +268,9 @@ PyObjPtr StringJoin(const PyObjPtr& args) {
 //   return value->Split(delimiter);
 // }
 
-PyStrPtr PyString::Create(Collections::String&& value) {
+PyStrPtr PyString::Create(const Collections::String& value) {
   std::lock_guard<std::mutex> lock(poolMutex);
-  auto hash = value.Hash();
+  auto hash = value.HashValue();
   auto iter = stringPool.find(hash);
   if (iter != stringPool.end()) {
     return iter->second;
@@ -293,11 +280,11 @@ PyStrPtr PyString::Create(Collections::String&& value) {
   return result;
 }
 
-PyStrPtr CreatePyString(Collections::String&& value, bool pooling) {
+PyStrPtr CreatePyString(const Collections::String& value, bool pooling) {
   if (pooling) {
-    return PyString::Create(std::move(value));
+    return PyString::Create(value);
   }
-  return std::make_shared<PyString>(std::move(value));
+  return std::make_shared<PyString>(value);
 }
 
 PyStrPtr CreatePyString(const std::string& value) {
@@ -308,4 +295,4 @@ PyStrPtr CreatePyString(const char* value) {
   return PyString::Create(Collections::CreateStringWithCString(value));
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

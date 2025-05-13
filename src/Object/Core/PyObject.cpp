@@ -8,7 +8,7 @@
 #include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyDictPtr PyObject::Attributes() noexcept {
   if (attributes == nullptr) {
@@ -94,4 +94,4 @@ bool operator<(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   throw std::runtime_error("TypeError: '<' not supported between instances");
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

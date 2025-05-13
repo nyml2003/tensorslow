@@ -4,12 +4,12 @@ import subprocess
 # 定义路径和可执行文件
 build_dir = "../release"
 test_dir = "../test/integration"
-frontend_exe = os.path.join(build_dir, "torchlight_frontend")
-backend_exe = os.path.join(build_dir, "torchlight_backend")
+frontend_exe = os.path.join(build_dir, "tensorslow_compiler")
+backend_exe = os.path.join(build_dir, "tensorslow_interpreter")
 
 # 获取源代码文件路径
-source_code = "../test/ml/lr_softmax.py"
-# source_code = "../test/dev/dev.py"
+# source_code = "../test/ml/lr_softmax.py"
+source_code = "../test/dev/dev.py"
 # 显示源代码内容
 print("源代码:")
 with open(source_code, 'r', encoding='utf-8') as file:
@@ -18,6 +18,7 @@ with open(source_code, 'r', encoding='utf-8') as file:
 # 编译到字节码
 print("正在编译到字节码...")
 frontend_command = [frontend_exe, f"--file={source_code}"]
+print(frontend_command)
 result = subprocess.run(frontend_command)
 
 # 执行字节码（替换文件扩展名为.pyc）

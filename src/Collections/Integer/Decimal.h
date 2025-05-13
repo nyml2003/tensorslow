@@ -1,8 +1,8 @@
-#ifndef TORCHLIGHT_COLLECTIONS_DECIMAL_H
-#define TORCHLIGHT_COLLECTIONS_DECIMAL_H
+#ifndef TENSORSLOW_COLLECTIONS_DECIMAL_H
+#define TENSORSLOW_COLLECTIONS_DECIMAL_H
 #include "Collections/List.h"
 #include "Collections/String/String.h"
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 class Decimal {
   friend class List<Decimal>;
   friend class Integer;
@@ -34,5 +34,5 @@ class Decimal {
   [[nodiscard]] bool IsZero() const;
   [[nodiscard]] Decimal Copy() const;
 };
-}  // namespace torchlight::Collections
-#endif  // TORCHLIGHT_UTIL_Decimal_H
+}  // namespace tensorslow::Collections
+#endif  // TENSORSLOW_COLLECTIONS_DECIMAL_H

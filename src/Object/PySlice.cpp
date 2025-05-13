@@ -4,7 +4,7 @@
 #include "Object/Core/PyType.h"
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 void PySlice::BindLength(Index length) {
   auto length64 = static_cast<int64_t>(length);  // 明确转换
@@ -83,4 +83,4 @@ PyObjPtr SliceKlass::str(const PyObjPtr& obj) {
   ));
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

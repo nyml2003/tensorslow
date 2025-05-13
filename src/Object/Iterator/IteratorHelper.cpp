@@ -1,7 +1,7 @@
 #include "Object/Iterator/IteratorHelper.h"
 #include "Object/Iterator/Iterator.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 void ForEach(
   const PyObjPtr& obj,
   const std::function<void(const PyObjPtr& value)>& func
@@ -28,4 +28,4 @@ PyObjPtr Map(
   return CreatePyList(result)->as<PyList>();
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

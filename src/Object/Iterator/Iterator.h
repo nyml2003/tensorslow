@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_OBJECT_ITERATOR_H
-#define TORCHLIGHT_OBJECT_ITERATOR_H
+#ifndef TENSORSLOW_OBJECT_ITERATOR_H
+#define TENSORSLOW_OBJECT_ITERATOR_H
 
 #include "Function/BuiltinFunction.h"
 #include "Object/Container/PyDictionary.h"
@@ -7,7 +7,7 @@
 #include "Object/Core/CoreHelper.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class IterDoneKlass : public Klass {
  public:
@@ -185,19 +185,17 @@ class DictItemIterator : public PyObject {
   Index index{};
 
  public:
-  explicit DictItemIterator(const PyObjPtr& dict)
-    : PyObject(DictItemIteratorKlass::Self()) {
-    this->dict = dict->as<PyDictionary>();
-  }
+  explicit DictItemIterator(PyDictPtr dict)
+    : PyObject(DictItemIteratorKlass::Self()), dict(std::move(dict)) {}
   [[nodiscard]] PyDictPtr Dict() const { return dict; }
   [[nodiscard]] Index CurrentIndex() const { return index; }
   void Next() { index++; }
 };
 
-inline PyObjPtr CreateDictItemIterator(const PyObjPtr& dict) {
+inline PyObjPtr CreateDictItemIterator(const PyDictPtr& dict) {
   return std::make_shared<DictItemIterator>(dict);
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

@@ -9,7 +9,7 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyIntPtr CreatePyInteger(Collections::Integer value) {
   return std::make_shared<PyInteger>(value);
@@ -235,9 +235,9 @@ PyObjPtr IntegerKlass::_serialize_(const PyObjPtr& obj) {
   if (integer->value.IsZero()) {
     return CreatePyBytes(Collections::Serialize(Literal::ZERO));
   }
-  auto bytes = Collections::Serialize(Literal::INTEGER);
-  bytes.Concat(Collections::Serialize(integer->value));
-  return CreatePyBytes(std::move(bytes));
+  Collections::StringBuilder bytes(Collections::Serialize(Literal::INTEGER));
+  bytes.Append(Collections::Serialize(integer->value));
+  return CreatePyBytes(bytes.ToString());
 }
 
 bool PyInteger::LessThan(const PyObjPtr& other) const {
@@ -248,4 +248,4 @@ bool PyInteger::LessThan(const PyObjPtr& other) const {
   return value.LessThan(otherInteger->value);
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

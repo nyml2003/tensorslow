@@ -4,7 +4,7 @@
 #include "Collections/Integer/IntegerHelper.h"
 #include "Collections/String/StringHelper.h"
 
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 Integer::Integer(const List<uint32_t>& _parts, bool _sign)
   : parts(_parts), sign(_sign) {}
 Integer::Integer() = default;
@@ -21,9 +21,7 @@ String Integer::ToHexString() const {
   if (IsZero()) {
     return CreateStringWithCString("0");
   }
-  const Unicode UnicodeDigitZero = 0x30;
-  const Unicode UnicodeDigit_x = 0x78;
-  List<Unicode> str;
+  List<Byte> str;
   for (Index i = 0; i < parts.Size(); i++) {
     uint32_t item = parts.Get(i);
     std::array<uint8_t, 4> buffer = {0, 0, 0, 0};
@@ -32,18 +30,18 @@ String Integer::ToHexString() const {
     buffer[2] = (item & 0x000000F0) >> 4;
     buffer[3] = (item & 0x0000000F);
     for (Index j = 0; j < 4; j++) {
-      str.Push(HexToUnicode(buffer[j]));
+      str.Push(HexToByte(buffer[j]));
     }
   }
   Index it = 0;
   for (; it < str.Size(); it++) {
-    if (str.Get(it) != UnicodeDigitZero) {
+    if (str.Get(it) != Byte_0) {
       break;
     }
   }
   str = str.Slice(it, str.Size());
-  str.Unshift(UnicodeDigit_x);
-  str.Unshift(UnicodeDigitZero);
+  str.Unshift(Byte_x);
+  str.Unshift(Byte_0);
   return String(std::move(str));
 }
 Integer Integer::Add(const Integer& rhs) const {
@@ -119,7 +117,7 @@ Integer Integer::Subtract(const Integer& rhs) const {
   if (sign == rhs.sign) {
     // 假定左值大于右值
     bool _sign = false;
-    Index size = 0;
+    Index size;
     List<uint32_t> _lhs = parts.Copy();
     _lhs.Reverse();
     List<uint32_t> _rhs = rhs.parts.Copy();
@@ -152,7 +150,7 @@ Integer Integer::Subtract(const Integer& rhs) const {
     List<uint32_t> result(size);
     bool borrow = false;
     for (Index i = 0; i < size; i++) {
-      uint32_t diff = 0;
+      uint32_t diff;
       uint32_t sub = _rhs.Get(i) + (borrow ? 1 : 0);
       if (_lhs.Get(i) < sub) {
         diff = 0x10000 + _lhs.Get(i) - sub;
@@ -403,16 +401,16 @@ Integer Integer::RightShift(const Integer& rhs) const {
     return result;
   }
   uint32_t overflowPicker = (1 << (bitShift + 1)) - 1;
-  for (Index i = result.parts.Size(); i > 1; i--) {
-    uint32_t high = result.parts.Get(i - 2);
-    uint32_t low = result.parts.Get(i - 1);
+  for (Index i = result.parts.Size() - 2; ~i; i--) {
+    uint32_t high = result.parts.Get(i);
+    uint32_t low = result.parts.Get(i + 1);
     low >>= bitShift;
     high &= overflowPicker;
     high = (high << (16 - bitShift)) & 0xFFFF;
-    result.parts.Set(i - 1, low | high);
+    result.parts.Set(i + 1, low | high);
   }
   result.parts.Set(0, result.parts.Get(0) >> bitShift);
   TrimLeadingZero(result.parts);
   return result;
 }
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections

@@ -2,7 +2,7 @@
 #include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/String/PyString.h"
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 void IifeKlass::Initialize() {
   if (this->isInitialized) {
@@ -17,4 +17,4 @@ PyObjPtr IifeKlass::str(const PyObjPtr& /*self*/) {
   return CreatePyString("<iife>");
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

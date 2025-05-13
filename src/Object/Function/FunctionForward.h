@@ -1,8 +1,8 @@
-#ifndef TORCHLIGHT_OBJECT_FUNCTIONFORWARD_H
-#define TORCHLIGHT_OBJECT_FUNCTIONFORWARD_H
+#ifndef TENSORSLOW_OBJECT_FUNCTIONFORWARD_H
+#define TENSORSLOW_OBJECT_FUNCTIONFORWARD_H
 
 #include "Object/Container/PyList.h"
-namespace torchlight::Object {
+namespace tensorslow::Object {
 using TypeFunction = std::function<PyObjPtr(PyObjPtr)>;
 // 外部定义的辅助函数模板（可放在头文件或命名空间中）
 // 外部辅助函数：处理索引序列并赋值到 params
@@ -57,6 +57,6 @@ TypeFunction CreateForwardFunction(PyObjPtr (T::*func)(Args...)) {
     return ForwardFunction<T>(args, func);
   };
 }
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

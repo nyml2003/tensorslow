@@ -1,18 +1,17 @@
 #include "Collections/Integer/DecimalHelper.h"
 #include "Collections/Integer/IntegerHelper.h"
 #include "Collections/String/StringHelper.h"
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 String Decimal::ToString() const {
   if (IsZero()) {
     return CreateStringWithCString("0");
   }
-  const Unicode UnicodeDigitZero = 0x30;
-  List<Unicode> str(parts.Size() + (sign ? 1 : 0));
+  List<Byte> str(parts.Size() + (sign ? 1 : 0));
   if (sign) {
-    str.Push(UnicodeMinus);
+    str.Push(ByteMinus);
   }
   for (Index i = 0; i < parts.Size(); i++) {
-    str.Push(static_cast<uint32_t>(parts.Get(i)) + UnicodeDigitZero);
+    str.Push(static_cast<uint32_t>(parts.Get(i)) + Byte_0);
   }
   return String(std::move(str));
 }
@@ -98,7 +97,7 @@ Decimal Decimal::Subtract(const Decimal& rhs) const {
   if (sign == rhs.sign) {
     // 假定左值大于右值
     bool newSign = false;
-    Index size = 0;
+    Index size;
     List<int32_t> _lhs = parts.Copy();
     List<int32_t> _rhs = rhs.parts.Copy();
     _lhs.Reverse();
@@ -259,4 +258,4 @@ Decimal::Decimal() = default;
 bool Decimal::Sign() const {
   return sign;
 }
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections

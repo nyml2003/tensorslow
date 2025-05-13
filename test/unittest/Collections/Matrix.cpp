@@ -2,8 +2,8 @@
 #include "../test_default.h"
 #include "Collections/String/StringHelper.h"
 
-using namespace torchlight::Collections;
-using torchlight::Index;
+using namespace tensorslow::Collections;
+using tensorslow::Index;
 
 TEST(Matrix, Constructor) {
   Matrix mat1(2, 3);
@@ -39,10 +39,10 @@ TEST(Matrix, Constructor) {
 TEST(Matrix, ToString) {
   List<List<double>> nested_data = {{1, 2, 3}, {4, 5, 6}};
   Matrix mat(nested_data);
-  String expected = CreateStringWithCString(
+  ASSERT_EQ(
+    mat.ToString().ToCppString(),
     "[[1.000000,2.000000,3.000000][4.000000,5.000000,6.000000]]"
   );
-  ASSERT_EQ(mat.ToString(), expected);
 }
 
 TEST(Matrix, Transpose) {

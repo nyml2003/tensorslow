@@ -1,5 +1,4 @@
 #include "IR/ClassDef.h"
-#include "Function/BuiltinFunction.h"
 #include "IR/FuncDef.h"
 #include "IR/INode.h"
 #include "IR/Module.h"
@@ -8,8 +7,10 @@
 #include "Object/Iterator/IteratorHelper.h"
 #include "Object/Runtime/PyCode.h"
 #include "Object/String/PyString.h"
-#include "Tools/Tools.h"
-namespace torchlight::IR {
+#include "Tools/Config/Config.h"
+#include "Tools/Logger/BytecodeLogger.h"
+#include "Tools/Logger/VerboseLogger.h"
+namespace tensorslow::IR {
 
 ClassDef::ClassDef(
   Object::PyStrPtr name,
@@ -83,7 +84,10 @@ Object::PyObjPtr ClassDefKlass::emit(
   classDef->Bases()->emit(codeList);
   parent->CallFunction(3);
   parent->StoreName(classDef->Name());
-  if (ArgsHelper::Instance().Has("show_code")) {
+  if (Config::Has("show_bc")) {
+    VerboseLogger::getInstance().setCallback(
+      std::make_shared<ProxyLogStrategy>(&BytecodeLogger::getInstance())
+    );
     Object::PrintCode(selfCode);
   }
   return Object::CreatePyNone();
@@ -107,4 +111,4 @@ Object::PyObjPtr ClassDefKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

@@ -3,12 +3,14 @@
 
 #include "../Collections/Collections.h"
 #include "ByteCode/ByteCode.h"
+#include "Collections/String/BytesHelper.h"
 #include "Object.h"
+#include "Object/String/PyBytes.h"
 
-using namespace torchlight::Object;
-using namespace torchlight::Collections;
+using namespace tensorslow::Object;
+using namespace tensorslow::Collections;
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class PyIntegerTest : public ::testing::Test {
  protected:
@@ -97,13 +99,13 @@ TEST_F(PyIntegerTest, TestNe) {
 TEST_F(PyIntegerTest, TestSerialize) {
   auto result = IntegerKlass::Self()->_serialize_(integer1);
   const auto& bytes = result->as<PyBytes>()->value;
-  EXPECT_EQ(bytes.value.First(), static_cast<Byte>(Literal::INTEGER));
-  Bytes content(bytes.value.Slice(1, bytes.Size()));
-  EXPECT_TRUE(Collections::DeserializeInteger(content.value)
+  EXPECT_EQ(bytes.codeUnits.First(), static_cast<Byte>(Literal::INTEGER));
+  String content(bytes.codeUnits.Slice(1, bytes.GetCodeUnitCount()));
+  EXPECT_TRUE(Collections::DeserializeInteger(content.codeUnits)
                 .Equal(CreateIntegerWithCString("10")));
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);

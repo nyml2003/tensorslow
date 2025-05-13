@@ -1,8 +1,8 @@
-#ifndef TORCHLIGHT_OBJECT_CORE_HELPER_H
-#define TORCHLIGHT_OBJECT_CORE_HELPER_H
+#ifndef TENSORSLOW_OBJECT_CORE_HELPER_H
+#define TENSORSLOW_OBJECT_CORE_HELPER_H
 #include "Object/Core/Klass.h"
 #include "Object/String/PyString.h"
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 void LoadClass(const Object::PyStrPtr& name, const Object::KlassPtr& klass);
 void ConfigureBasicAttributes(const Object::KlassPtr& klass);
@@ -56,6 +56,6 @@ Object::KlassPtr CreatePyKlass(
   const Object::PyDictPtr& attributes,
   const Object::PyListPtr& super
 );
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

@@ -1,9 +1,9 @@
 #!/bin/bash
-root_dir=/home/test/Desktop/torchlight
+root_dir=/home/test/Desktop/tensorslow
 build_dir=$root_dir/build
 test_dir=$root_dir/test/integration
-frontend_exe=$build_dir/torchlight_frontend
-backend_exe=$build_dir/torchlight_backend
+frontend_exe=$build_dir/tensorslow_compiler
+backend_exe=$build_dir/tensorslow_interpreter
 
 # 遍历test_dir
 subdirs=$(ls $test_dir)
@@ -16,7 +16,8 @@ if [ $test_total -eq 0 ]; then
 fi
 test_passed=0
 test_not_passed_names=()
-echo "测试用例" $subdirs
+echo "测试用例总数: $test_total"
+echo "测试用例: $(echo $subdirs | tr '\n' ' ')"
 for subdir in $subdirs
 do
     # 删除目录下的所有.pyc文件和所有.out文件
@@ -30,10 +31,10 @@ do
         source_code=$test_dir/$subdir/$py
         # echo "源代码:"
         # cat $source_code
-        # echo 
+        # echo
         # echo "正在编译到字节码..."
         $frontend_exe --file="$source_code"
-        # echo 
+        # echo
     done
     # 扫描subdir下的所有pyc文件,如果有main.pyc就选择main.pyc，否则选择第一个pyc文件
     pycs=$(ls $test_dir/$subdir | grep .pyc)

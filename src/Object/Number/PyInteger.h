@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_OBJECT_PYINTEGER_H
-#define TORCHLIGHT_OBJECT_PYINTEGER_H
+#ifndef TENSORSLOW_OBJECT_PYINTEGER_H
+#define TENSORSLOW_OBJECT_PYINTEGER_H
 
 #include "Collections/Integer/Integer.h"
 #include "Collections/Integer/IntegerHelper.h"
@@ -8,7 +8,7 @@
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class IntegerKlass : public Klass {
  public:
@@ -74,6 +74,6 @@ class PyInteger : public PyObject {
   bool LessThan(const PyObjPtr& other) const;
 };
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
-#endif  // TORCHLIGHT_OBJECT_PYINTEGER_H
+#endif  // TENSORSLOW_OBJECT_PYINTEGER_H

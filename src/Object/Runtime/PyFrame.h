@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_OBJECT_PYFRAME_H
-#define TORCHLIGHT_OBJECT_PYFRAME_H
+#ifndef TENSORSLOW_OBJECT_PYFRAME_H
+#define TENSORSLOW_OBJECT_PYFRAME_H
 
 #include "Collections/Stack.h"
 #include "Object/Container/PyDictionary.h"
@@ -12,7 +12,7 @@
 #include "Object/Runtime/PyCode.h"
 #include "Object/Runtime/PyInst.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 class PyFrame;
 using PyFramePtr = std::shared_ptr<PyFrame>;
 
@@ -108,6 +108,6 @@ inline PyFramePtr CreatePyFrame(
 ) {
   return std::make_shared<PyFrame>(code, locals, globals, fastLocals, caller);
 }
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

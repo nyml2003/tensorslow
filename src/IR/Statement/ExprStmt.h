@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_AST_EXPRESSION_STATEMENT_H
-#define TORCHLIGHT_AST_EXPRESSION_STATEMENT_H
+#ifndef TENSORSLOW_AST_EXPRESSION_STATEMENT_H
+#define TENSORSLOW_AST_EXPRESSION_STATEMENT_H
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class ExprStmtKlass : public INodeKlass {
  public:
@@ -49,6 +49,6 @@ CreateExprStmt(const INodePtr& content, const INodePtr& parent) {
   return std::make_shared<ExprStmt>(content, parent);
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

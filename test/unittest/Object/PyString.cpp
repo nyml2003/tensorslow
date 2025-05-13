@@ -2,13 +2,12 @@
 #include "../test_default.h"
 
 #include "../Collections/Collections.h"
-#include "ByteCode/ByteCode.h"
 #include "Object.h"
 
-using namespace torchlight::Object;
-using namespace torchlight::Collections;
+using namespace tensorslow::Object;
+using namespace tensorslow::Collections;
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class PyStringTest : public ::testing::Test {
  protected:
@@ -30,20 +29,22 @@ class PyStringTest : public ::testing::Test {
 };
 
 TEST_F(PyStringTest, Constructor) {
-  PyStrPtr str = std::dynamic_pointer_cast<PyString>(CreatePyString(Collections::CreateStringWithCString("test")));
-  EXPECT_EQ(str->value, Collections::CreateStringWithCString("test"));
+  PyStrPtr str = std::dynamic_pointer_cast<PyString>(
+    CreatePyString(Collections::CreateStringWithCString("test"))
+  );
+  EXPECT_EQ(str->value.ToCppString(), "test");
 }
 
 TEST_F(PyStringTest, Add) {
   auto result = StringKlass::Self()->add(str1, str2);
   auto pystr = std::dynamic_pointer_cast<PyString>(result);
-  EXPECT_EQ(pystr->value, Collections::CreateStringWithCString("helloworld"));
+  EXPECT_EQ(pystr->value.ToCppString(), "helloworld");
 }
 
 TEST_F(PyStringTest, Repr) {
   auto result = StringKlass::Self()->repr(str1);
   auto pystr = std::dynamic_pointer_cast<PyString>(result);
-  EXPECT_EQ(pystr->value, Collections::CreateStringWithCString("\'hello\'"));
+  EXPECT_EQ(pystr->value.ToCppString(), "\'hello\'");
 }
 
 TEST_F(PyStringTest, Eq) {
@@ -59,4 +60,13 @@ TEST_F(PyStringTest, Eq) {
   }
 }
 
-}  // namespace torchlight::Object
+TEST_F(PyStringTest, Boolean) {
+  auto result = CreatePyString("hello");
+  auto resultId =
+    Collections::CreateIntegerWithU64(reinterpret_cast<uint64_t>(result.get()))
+      .ToHexString();
+  auto resultIdString = CreatePyString(resultId);
+  resultIdString->PrintLine();
+}
+
+}  // namespace tensorslow::Object

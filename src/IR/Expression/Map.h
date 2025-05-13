@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_AST_MAP_H
-#define TORCHLIGHT_AST_MAP_H
+#ifndef TENSORSLOW_AST_MAP_H
+#define TENSORSLOW_AST_MAP_H
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class MapKlass : public INodeKlass {
  public:
@@ -59,6 +59,6 @@ inline INodePtr CreateMap(
   return std::make_shared<Map>(keys, values, parent);
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

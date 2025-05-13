@@ -1,5 +1,5 @@
-#ifndef TORCHLIGHT_OBJECT_PYINST_H
-#define TORCHLIGHT_OBJECT_PYINST_H
+#ifndef TENSORSLOW_OBJECT_PYINST_H
+#define TENSORSLOW_OBJECT_PYINST_H
 
 #include "ByteCode/ByteCode.h"
 #include "Function/BuiltinFunction.h"
@@ -7,7 +7,7 @@
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class PyInst : public PyObject {
  private:
@@ -173,6 +173,6 @@ inline PyInstPtr CreateJumpForward(Index index) {
   return std::make_shared<PyInst>(ByteCode::JUMP_FORWARD, index);
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
 #endif

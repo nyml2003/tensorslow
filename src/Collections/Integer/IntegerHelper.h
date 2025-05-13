@@ -1,9 +1,11 @@
-#ifndef TORCHLIGHT_COLLECTIONS_INTEGER_HELPER_H
-#define TORCHLIGHT_COLLECTIONS_INTEGER_HELPER_H
+#ifndef TENSORSLOW_COLLECTIONS_INTEGER_HELPER_H
+#define TENSORSLOW_COLLECTIONS_INTEGER_HELPER_H
 #include "Collections/Integer/Integer.h"
-namespace torchlight::Collections {
-int8_t UnicodeToHex(Unicode unicode) noexcept;
-Unicode HexToUnicode(uint8_t hex) noexcept;
+namespace tensorslow::Collections {
+// int8_t UnicodeToHex(Unicode unicode) noexcept;
+// Unicode HexToUnicode(uint8_t hex) noexcept;
+int8_t ByteToHex(Byte byte) noexcept;
+Byte HexToByte(uint8_t hex) noexcept;
 Integer CreateIntegerWithDecimal(const Decimal& decimal);
 void TrimLeadingZero(List<uint32_t>& parts);
 void TrimTrailingZero(List<uint32_t>& parts);
@@ -18,5 +20,5 @@ Integer CreateIntegerWithI64(int64_t value);
 uint64_t ToU64(const Integer& integer);
 bool IsBigNumber(const Integer& integer);
 int64_t ToI64(const Integer& integer);
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections
 #endif

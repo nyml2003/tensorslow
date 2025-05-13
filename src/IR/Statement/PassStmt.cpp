@@ -1,6 +1,6 @@
 #include "IR/Statement/PassStmt.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 Object::PyObjPtr PassStmtKlass::emit(
   const Object::PyObjPtr& obj,
@@ -18,4 +18,4 @@ Object::PyObjPtr PassStmtKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

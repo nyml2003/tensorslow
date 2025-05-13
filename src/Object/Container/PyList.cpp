@@ -17,7 +17,7 @@
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyListPtr CreatePyList(Index capacity) {
   if (capacity == 0) {
@@ -342,15 +342,13 @@ PyObjPtr ListKlass::_serialize_(const PyObjPtr& obj) {
     throw std::runtime_error("List does not support serialize operation");
   }
   auto list = obj->as<PyList>();
-  auto bytes = CreatePyBytes(Collections::Serialize(Literal::LIST));
-  bytes->Concat(CreatePyBytes(Collections::Serialize(list->Length())));
-  auto iter = CreateListIterator(obj);
-  auto value = iter->next();
-  while (!value->is(IterDoneKlass::Self())) {
-    bytes->Concat(value->_serialize_()->as<PyBytes>());
-    value = iter->next();
+  Collections::StringBuilder bytes(Collections::Serialize(Literal::LIST));
+  bytes.Append(Collections::Serialize(list->Length()));
+  for (Index i = 0; i < list->Length(); i++) {
+    auto value = list->GetItem(i);
+    bytes.Append(value->_serialize_()->as<PyBytes>()->Value());
   }
-  return bytes;
+  return CreatePyBytes(bytes.ToString());
 }
 
 PyObjPtr ListKlass::iter(const PyObjPtr& obj) {
@@ -360,7 +358,7 @@ PyObjPtr ListKlass::iter(const PyObjPtr& obj) {
   return CreateListIterator(obj);
 }
 
-PyObjPtr ListKlass::reversed(const torchlight::Object::PyObjPtr& obj) {
+PyObjPtr ListKlass::reversed(const tensorslow::Object::PyObjPtr& obj) {
   if (!obj->is(ListKlass::Self())) {
     throw std::runtime_error("List does not support reversed operation");
   }
@@ -408,8 +406,7 @@ PyObjPtr ListPop(const PyObjPtr& args) {
       index = list->Length() + argIndex;
     }
   }
-  list->Pop(index);
-  return CreatePyNone();
+  return list->Pop(index);
 }
 
 PyObjPtr ListClear(const PyObjPtr& args) {
@@ -510,4 +507,4 @@ PyListPtr CreatePyListFromIterable(const PyObjPtr& iterator) {
   return CreatePyList(list)->as<PyList>();
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

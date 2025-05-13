@@ -5,7 +5,7 @@
 #include "Object/Runtime/PyInst.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 Object::PyObjPtr IfStmtKlass::visit(
   const Object::PyObjPtr& obj,
@@ -146,4 +146,4 @@ Object::PyObjPtr IfStmtKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

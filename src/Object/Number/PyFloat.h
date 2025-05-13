@@ -1,12 +1,12 @@
-#ifndef TORCHLIGHT_OBJECT_PYFLOAT_H
-#define TORCHLIGHT_OBJECT_PYFLOAT_H
+#ifndef TENSORSLOW_OBJECT_PYFLOAT_H
+#define TENSORSLOW_OBJECT_PYFLOAT_H
 
 #include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
 
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 class FloatKlass : public Klass {
  public:
@@ -59,6 +59,6 @@ inline PyFloatPtr CreatePyFloat(double value) {
   return std::make_shared<PyFloat>(value);
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object
 
-#endif  // TORCHLIGHT_OBJECT_PYFLOAT_H
+#endif  // TENSORSLOW_OBJECT_PYFLOAT_H

@@ -1,7 +1,7 @@
 #include "IR/Expression/FunctionCall.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Iterator/IteratorHelper.h"
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 Object::PyObjPtr FunctionCallKlass::emit(
   const Object::PyObjPtr& obj,
@@ -47,4 +47,4 @@ Object::PyObjPtr FunctionCallKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

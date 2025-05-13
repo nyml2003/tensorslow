@@ -6,7 +6,7 @@
 #include "Object/Core/PyObject.h"
 #include "Object/Iterator/IteratorHelper.h"
 #include "Object/Runtime/PyCode.h"
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 Object::PyObjPtr ModuleKlass::visit(
   const Object::PyObjPtr& obj,
@@ -54,4 +54,4 @@ Object::PyObjPtr ModuleKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR

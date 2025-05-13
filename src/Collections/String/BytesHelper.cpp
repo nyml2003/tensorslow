@@ -2,107 +2,66 @@
 #include "Collections/Integer/DecimalHelper.h"
 #include "Collections/Integer/IntegerHelper.h"
 #include "Collections/String/StringHelper.h"
+#include "Tools/Logger/ConsoleLogger.h"
+#include "Tools/Logger/ErrorLogger.h"
 
-#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
-namespace torchlight::Collections {
+namespace tensorslow::Collections {
 String ReprByte(Byte byte) {
   // 使用 \x 格式表示一个字节
   char buffer[5];  // 需要 5 个字符：\x + 2 个十六进制字符 + 终止符
   std::snprintf(buffer, sizeof(buffer), "\\x%02X", byte);
   return CreateStringWithCString(buffer);
 }
-Bytes CreateBytesWithCString(const char* str) {
-  Byte* data = reinterpret_cast<Byte*>(const_cast<char*>(str));
-  return Bytes(List<Byte>(static_cast<Index>(std::strlen(str)), data));
-}
-void Write(const Bytes& bytes, const String& filename) {
-  List<Byte> data = bytes.Value();
-  std::string filenameCppString = ToCppString(filename);
-  if (filenameCppString.empty()) {
+
+void Write(const String& bytes, const std::string& filename) {
+  std::string data = bytes.ToCppString();
+  if (filename.empty()) {
     throw std::runtime_error("Filename is empty");
   }
-  std::ofstream file(filenameCppString, std::ios::binary);
+  std::ofstream file(filename, std::ios::binary);
   if (!file.is_open()) {
-    std::cerr << "无法打开文件：" << filenameCppString << std::endl;
+    tensorslow::ErrorLogger::getInstance().log("无法打开文件：" + filename);
     return;
   }
-  file.write(
-    reinterpret_cast<const char*>(data.Data()),
-    static_cast<std::streamsize>(bytes.Size())
-  );
-  std::cout << "写入文件：" << filenameCppString << std::endl;
-  std::cout << "文件大小：" << bytes.Size() << std::endl;
+  file.write(data.data(), std::streamsize(data.size()));
+  tensorslow::ConsoleLogger::getInstance().log("写入文件：");
+  tensorslow::ConsoleLogger::getInstance().log(filename);
+  tensorslow::ConsoleLogger::getInstance().log("\n");
+  tensorslow::ConsoleLogger::getInstance().log("文件大小：");
+  tensorslow::ConsoleLogger::getInstance().log(std::to_string(data.size()));
+  tensorslow::ConsoleLogger::getInstance().log("字节");
+  tensorslow::ConsoleLogger::getInstance().log("\n");
   if (!file) {
-    std::cerr << "写入文件时出错：" << filenameCppString << std::endl;
+    tensorslow::ErrorLogger::getInstance().log("写入文件时出错：" + filename);
   }
   file.close();
 }
-Bytes ToBytes(const String& str) noexcept {
-  List<Byte> bytes(str.Size());
-  for (Index i = 0; i < str.Size(); i++) {
-    Unicode codePoint = str[i];
-    if (codePoint < 0x80) {
-      bytes.Push(static_cast<Byte>(codePoint));
-    } else if (codePoint < 0x800) {
-      bytes.Push(static_cast<Byte>(0xC0 | (codePoint >> 6)));
-      bytes.Push(static_cast<Byte>(0x80 | (codePoint & 0x3F)));
-    } else if (codePoint < 0x10000) {
-      bytes.Push(static_cast<Byte>(0xE0 | (codePoint >> 12)));
-      bytes.Push(static_cast<Byte>(0x80 | ((codePoint >> 6) & 0x3F)));
-      bytes.Push(static_cast<Byte>(0x80 | (codePoint & 0x3F)));
-    } else if (codePoint <= 0x10FFFF) {
-      bytes.Push(static_cast<Byte>(0xF0 | (codePoint >> 18)));
-      bytes.Push(static_cast<Byte>(0x80 | ((codePoint >> 12) & 0x3F)));
-      bytes.Push(static_cast<Byte>(0x80 | ((codePoint >> 6) & 0x3F)));
-      bytes.Push(static_cast<Byte>(0x80 | (codePoint & 0x3F)));
-    }
-  }
-  return Bytes(bytes);
+
+String Serialize(double value) {
+  return String(List<Byte>(sizeof(double), reinterpret_cast<Byte*>(&value)));
 }
-std::string ToCppString(const Bytes& bytes) {
-  std::string str;
-  for (Index i = 0; i < bytes.Size(); i++) {
-    str.push_back(static_cast<char>(bytes.Get(i)));
-  }
-  return str;
+String Serialize(uint64_t value) {
+  return String(List<Byte>(sizeof(uint64_t), reinterpret_cast<Byte*>(&value)));
 }
-Bytes Serialize(double value) {
-  return Bytes(List<Byte>(sizeof(double), reinterpret_cast<Byte*>(&value)));
-}
-Bytes Serialize(uint64_t value) {
-  return Bytes(List<Byte>(sizeof(uint64_t), reinterpret_cast<Byte*>(&value)));
-}
-Bytes Serialize(int64_t value) {
+String Serialize(int64_t value) {
   return Serialize(static_cast<uint64_t>(value));
 }
-Bytes Serialize(uint32_t value) {
-  return Bytes(List<Byte>(sizeof(uint32_t), reinterpret_cast<Byte*>(&value)));
+String Serialize(uint32_t value) {
+  return String(List<Byte>(sizeof(uint32_t), reinterpret_cast<Byte*>(&value)));
 }
-Bytes Serialize(uint16_t value) {
-  return Bytes(List<Byte>(sizeof(uint16_t), reinterpret_cast<Byte*>(&value)));
+String Serialize(uint16_t value) {
+  return String(List<Byte>(sizeof(uint16_t), reinterpret_cast<Byte*>(&value)));
 }
-Bytes Serialize(int32_t value) {
-  return Bytes(List<Byte>(sizeof(int32_t), reinterpret_cast<Byte*>(&value)));
+String Serialize(int32_t value) {
+  return String(List<Byte>(sizeof(int32_t), reinterpret_cast<Byte*>(&value)));
 }
-Bytes Serialize(const String& value) {
-  Bytes bytes = ToBytes(value);
-  Bytes bytesWithSize = Serialize(bytes.Size());
-  bytesWithSize.Concat(bytes);
-  return bytesWithSize;
-}
-Bytes Serialize(const Bytes& value) {
-  Bytes bytesWithSize = Serialize(value.Size());
-  bytesWithSize.Concat(value);
-  return bytesWithSize;
-}
-double DeserializeDouble(const List<Byte>& bytes) {
-  if (bytes.Size() != sizeof(double)) {
-    throw std::runtime_error("Invalid byte size for double");
-  }
-  return *reinterpret_cast<const double*>(bytes.Data());
+String Serialize(const String& value) {
+  StringBuilder bytesWithSize(Serialize(value.GetCodeUnitCount()));
+  bytesWithSize.Append(value);
+  return bytesWithSize.ToString();
 }
 uint64_t DeserializeU64(const List<Byte>& bytes) {
   if (bytes.Size() != sizeof(uint64_t)) {
@@ -115,20 +74,8 @@ uint64_t DeserializeU64(const List<Byte>& bytes, Index& offset) {
   offset += sizeof(uint64_t);
   return value;
 }
-int64_t DeserializeI64(const List<Byte>& bytes) {
-  return static_cast<int64_t>(DeserializeU64(bytes));
-}
 int64_t DeserializeI64(const List<Byte>& bytes, Index& offset) {
   return static_cast<int64_t>(DeserializeU64(bytes, offset));
-}
-uint32_t DeserializeU32(const List<Byte>& bytes) {
-  if (bytes.Size() != sizeof(uint32_t)) {
-    throw std::runtime_error("Invalid byte size for uint32_t");
-  }
-  return *reinterpret_cast<const uint32_t*>(bytes.Data());
-}
-int32_t DeserializeI32(const List<Byte>& bytes) {
-  return static_cast<int32_t>(DeserializeU32(bytes));
 }
 uint16_t DeserializeU16(const List<Byte>& bytes) {
   if (bytes.Size() != sizeof(uint16_t)) {
@@ -136,66 +83,35 @@ uint16_t DeserializeU16(const List<Byte>& bytes) {
   }
   return *reinterpret_cast<const uint16_t*>(bytes.Data());
 }
-String DeserializeString(const List<Byte>& bytes) {
-  return CreateStringWithBytes(bytes.Slice(sizeof(uint64_t), bytes.Size()));
-}
-Bytes DeserializeBytes(const List<Byte>& bytes) {
-  return Bytes(bytes.Slice(sizeof(uint64_t), bytes.Size()));
-}
-Bytes Serialize(const Decimal& value) {
+String Serialize(const Decimal& value) {
   if (value.IsZero()) {
-    return Bytes();
+    return CreateStringWithCString("");
   }
   Index size = value.Data().Size();
   List<Byte> bytes(size + sizeof(uint64_t) + 1);
-  Bytes result(bytes);
-  result.Concat(Serialize(size));
-  result.Push(value.Sign() ? '-' : '+');
+  StringBuilder result(String(std::move(bytes)));
+  result.Append(Serialize(size));
+  result.Append(value.Sign() ? '-' : '+');
   auto data = value.Data();
   for (Index i = 0; i < data.Size(); i++) {
-    result.Push(DecToByte(data.Get(i)));
+    result.Append(DecToByte(data.Get(i)));
   }
-  return result;
+  return result.ToString();
 }
-Decimal DeserializeDecimal(const List<Byte>& bytes) {
-  if (bytes.Size() == 0) {
-    return CreateDecimalZero();
-  }
-  Index i = 0;
-  Index size = DeserializeU64(bytes.Slice(i, i + sizeof(uint64_t)));
-  i += sizeof(uint64_t);
-  bool sign = false;
-  switch (bytes.Get(i)) {
-    case '+':
-      sign = false;
-      break;
-    case '-':
-      sign = true;
-      break;
-    default:
-      throw std::runtime_error("Invalid sign for Decimal");
-  }
-  i++;
-  List<int32_t> data;
-  for (Index j = 0; j < size; j++) {
-    data.Push(UnicodeToDec(bytes.Get(i + j)));
-  }
-  return Decimal(data, sign);
-}
-Bytes Serialize(const Integer& value) {
+String Serialize(const Integer& value) {
   if (value.IsZero()) {
-    return Bytes();
+    return CreateStringWithCString("");
   }
   Index size = value.Data().Size();
   List<Byte> bytes(size * 2 + sizeof(uint64_t) + 1);
-  Bytes result(bytes);
-  result.Concat(Serialize(size));
-  result.Push(value.Sign() ? '-' : '+');
+  StringBuilder result(String(std::move(bytes)));
+  result.Append(Serialize(size));
+  result.Append(value.Sign() ? '-' : '+');
   auto data = value.Data();
   for (Index i = 0; i < size; i++) {
-    result.Concat(Serialize(static_cast<uint16_t>(data.Get(i) & 0x0000FFFF)));
+    result.Append(Serialize(static_cast<uint16_t>(data.Get(i) & 0x0000FFFF)));
   }
-  return result;
+  return result.ToString();
 }
 Integer DeserializeInteger(const List<Byte>& bytes) {
   if (bytes.Size() == 0) {
@@ -204,7 +120,7 @@ Integer DeserializeInteger(const List<Byte>& bytes) {
   Index i = 0;
   Index size = DeserializeU64(bytes.Slice(i, i + sizeof(uint64_t)));
   i += sizeof(uint64_t);
-  bool sign = false;
+  bool sign;
   switch (bytes.Get(i)) {
     case '+':
       sign = false;
@@ -224,4 +140,4 @@ Integer DeserializeInteger(const List<Byte>& bytes) {
   }
   return Integer(data, sign);
 }
-}  // namespace torchlight::Collections
+}  // namespace tensorslow::Collections

@@ -29,7 +29,7 @@
 #include "Object/String/PyString.h"
 #include "support/Any.h"
 
-namespace torchlight::Generation {
+namespace tensorslow::Generation {
 
 Generator::Generator(const Object::PyStrPtr& filename)
   : codeList(Object::CreatePyList()) {
@@ -542,7 +542,8 @@ antlrcpp::Any Generator::visitComparison(Python3Parser::ComparisonContext* ctx
   if (ctx->comp_op(0)->EQUALS() != nullptr) {
     return CreateBinary(IR::Binary::Operator::EQ, left, right, context);
   }
-  if ((ctx->comp_op(0)->NOT_EQ_1() != nullptr) || (ctx->comp_op(0)->NOT_EQ_2() != nullptr)) {
+  if ((ctx->comp_op(0)->NOT_EQ_1() != nullptr) ||
+      (ctx->comp_op(0)->NOT_EQ_2() != nullptr)) {
     return CreateBinary(IR::Binary::Operator::NE, left, right, context);
   }
   if (ctx->comp_op(0)->LESS_THAN() != nullptr) {
@@ -617,21 +618,17 @@ antlrcpp::Any Generator::visitCompound_stmt(
 }
 
 antlrcpp::Any Generator::visitFuncdef(Python3Parser::FuncdefContext* ctx) {
-  // 1. 获取函数名
   auto funcName = Object::CreatePyString(ctx->name()->getText().c_str());
-  // 2. 获取函数参数列表
   auto parameters =
     std::any_cast<Object::PyListPtr>(visitParameters(ctx->parameters()));
-  // 3. 创建函数对象
   auto funcDef =
     IR::CreateFuncDef(funcName, parameters, Object::CreatePyList(), context)
       ->as<IR::FuncDef>();
-  auto oldContext = context;
-  context = funcDef;
-  // 4. 获取函数体
+  auto oldContext = context;  // 保存当前上下文
+  context = funcDef;          // 设置当前上下文为函数定义
   auto body = std::any_cast<Object::PyListPtr>(visitBlock(ctx->block()));
   funcDef->SetBody(body);
-  context = oldContext;
+  context = oldContext;  // 恢复上下文
   return std::dynamic_pointer_cast<IR::INode>(funcDef);
 }
 
@@ -790,7 +787,8 @@ antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx
     auto* test = ctx->test(0);
     auto* colon = ctx->COLON();
     auto value = std::any_cast<IR::INodePtr>(visitTest(test));
-    if (colon->getSymbol()->getTokenIndex() < test->getStart()->getTokenIndex()) {
+    if (colon->getSymbol()->getTokenIndex() <
+        test->getStart()->getTokenIndex()) {
       return IR::CreateSlice(
         Object::CreatePyList({none, value, step}), context
       );
@@ -864,4 +862,4 @@ antlrcpp::Any Generator::visitYield_expr(Python3Parser::Yield_exprContext* ctx
   return IR::CreateAtom(Object::CreatePyNone(), context);
 }
 
-}  // namespace torchlight::Generation
+}  // namespace tensorslow::Generation

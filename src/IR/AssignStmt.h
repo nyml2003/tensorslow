@@ -1,10 +1,10 @@
-#ifndef TORCHLIGHT_AST_ASSIGN_STATEMENT_H
-#define TORCHLIGHT_AST_ASSIGN_STATEMENT_H
+#ifndef TENSORSLOW_AST_ASSIGN_STATEMENT_H
+#define TENSORSLOW_AST_ASSIGN_STATEMENT_H
 
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 class AssignStmtKlass : public INodeKlass {
  public:
@@ -55,6 +55,6 @@ CreateAssignStmt(INodePtr target, INodePtr source, INodePtr parent) {
   );
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
 
 #endif

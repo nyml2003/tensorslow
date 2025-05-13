@@ -3,7 +3,7 @@
 #include "Object/Container/PyList.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Number/PyInteger.h"
-namespace torchlight::Object {
+namespace tensorslow::Object {
 
 PyObjPtr PyNativeFunction::Call(const PyObjPtr& args) {
   return nativeFunction(args);
@@ -83,4 +83,4 @@ PyObjPtr NativeFunctionKlass::repr(const PyObjPtr& obj) {
   ));
 }
 
-}  // namespace torchlight::Object
+}  // namespace tensorslow::Object

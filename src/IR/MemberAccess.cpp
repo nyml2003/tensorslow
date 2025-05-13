@@ -1,7 +1,7 @@
 #include "IR/MemberAccess.h"
 #include "Object/Core/PyNone.h"
 
-namespace torchlight::IR {
+namespace tensorslow::IR {
 
 Object::PyObjPtr MemberAccessKlass::visit(
   const Object::PyObjPtr& obj,
@@ -45,4 +45,4 @@ Object::PyObjPtr MemberAccessKlass::print(const Object::PyObjPtr& obj) {
   return Object::CreatePyNone();
 }
 
-}  // namespace torchlight::IR
+}  // namespace tensorslow::IR
