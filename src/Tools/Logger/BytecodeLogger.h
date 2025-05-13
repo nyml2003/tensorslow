@@ -18,11 +18,11 @@ class BytecodeLogger : public Logger {
       (*m_callback)(msg);
     }
   }
+  BytecodeLogger(const BytecodeLogger&) = delete;
+  BytecodeLogger& operator=(const BytecodeLogger&) = delete;
 
  private:
   BytecodeLogger() = default;
-  BytecodeLogger(const BytecodeLogger&) = delete;
-  BytecodeLogger& operator=(const BytecodeLogger&) = delete;
 };
 
 }  // namespace tensorslow

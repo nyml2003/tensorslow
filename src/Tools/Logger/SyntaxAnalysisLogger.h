@@ -22,11 +22,11 @@ class SyntaxAnalysisLogger : public Logger {
       (*m_callback)(msg);
     }
   }
+  SyntaxAnalysisLogger(const SyntaxAnalysisLogger&) = delete;
+  SyntaxAnalysisLogger& operator=(const SyntaxAnalysisLogger&) = delete;
 
  private:
   SyntaxAnalysisLogger() = default;
-  SyntaxAnalysisLogger(const SyntaxAnalysisLogger&) = delete;
-  SyntaxAnalysisLogger& operator=(const SyntaxAnalysisLogger&) = delete;
 };
 
 }  // namespace tensorslow

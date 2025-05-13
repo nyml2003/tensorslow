@@ -247,9 +247,6 @@ PyObjPtr MatrixKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
     auto rowStop = rowSlice->GetStop()->as<PyInteger>()->ToU64();
     return matrix->GetRows(rowStart, rowStop);
   }
-  if (Config::Has("debug")) {
-    PrintFrame(Runtime::Interpreter::Instance().CurrentFrame());
-  }
   throw std::runtime_error("MatrixKlass::getitem(): key type is not supported");
 }
 

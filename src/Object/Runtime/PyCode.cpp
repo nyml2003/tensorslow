@@ -11,6 +11,7 @@
 #include "Object/Runtime/PyInst.h"
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
+#include "Tools/Logger/VerboseLogger.h"
 
 namespace tensorslow::Object {
 
@@ -285,28 +286,50 @@ PyCodePtr CreatePyCode(const PyStrPtr& name) {
 
 void PrintCode(const PyCodePtr& code) {
   auto codeObj = code->as<PyCode>();
-  codeObj->str()->as<PyString>()->PrintLine();
-  PyString::IncreaseIndent();
-  CreatePyString("name: ")->as<PyString>()->Print();
-  codeObj->Name()->str()->as<PyString>()->PrintLine(false);
-  CreatePyString("consts: ")->as<PyString>()->Print();
-  codeObj->Consts()->str()->as<PyString>()->PrintLine(false);
-  CreatePyString("names: ")->as<PyString>()->Print();
-  codeObj->Names()->str()->as<PyString>()->PrintLine(false);
-  CreatePyString("varNames: ")->as<PyString>()->Print();
-  codeObj->VarNames()->str()->as<PyString>()->PrintLine(false);
-  CreatePyString("instructions:")->as<PyString>()->PrintLine();
-  PyString::IncreaseIndent();
+  VerboseLogger::getInstance().log(codeObj->str()->as<PyString>()->ToCppString()
+  );
+  VerboseLogger::getInstance().log("\n");
+  VerboseLogger::IncreaseIndent();
+
+  VerboseLogger::getInstance().log("name: \n");
+  VerboseLogger::getInstance().log(
+    codeObj->Name()->str()->as<PyString>()->ToCppString()
+  );
+  VerboseLogger::getInstance().log("\n");
+
+  VerboseLogger::getInstance().log("consts: \n");
+  VerboseLogger::getInstance().log(
+    codeObj->Consts()->str()->as<PyString>()->ToCppString()
+  );
+  VerboseLogger::getInstance().log("\n");
+
+  VerboseLogger::getInstance().log("names: \n");
+  VerboseLogger::getInstance().log(
+    codeObj->Names()->str()->as<PyString>()->ToCppString()
+  );
+  VerboseLogger::getInstance().log("\n");
+
+  VerboseLogger::getInstance().log("varNames: \n");
+  VerboseLogger::getInstance().log(
+    codeObj->VarNames()->str()->as<PyString>()->ToCppString()
+  );
+  VerboseLogger::getInstance().log("\n");
+
+  VerboseLogger::getInstance().log("instructions:\n");
+  VerboseLogger::IncreaseIndent();
+
   for (Index i = 0; i < codeObj->Instructions()->Length(); i++) {
-    CreatePyString(std::to_string(i))->Print(false);
-    CreatePyString(": ")->Print(false);
     auto inst = codeObj->Instructions()->GetItem(i);
-    inst->str()->as<PyString>()->PrintLine(false);
+    std::string line = std::to_string(i) + ": " +
+                       inst->str()->as<PyString>()->ToCppString() + "\n";
+    VerboseLogger::getInstance().log(line);
   }
-  PyString::DecreaseIndent();
-  CreatePyString("nLocals: ")->as<PyString>()->Print();
-  CreatePyInteger(codeObj->NLocals())->str()->as<PyString>()->PrintLine(false);
-  PyString::DecreaseIndent();
+
+  VerboseLogger::DecreaseIndent();
+  VerboseLogger::getInstance().log("nLocals: ");
+  VerboseLogger::getInstance().log(std::to_string(codeObj->NLocals()) + "\n");
+
+  VerboseLogger::DecreaseIndent();
 }
 
 }  // namespace tensorslow::Object

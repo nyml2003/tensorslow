@@ -8,6 +8,8 @@
 #include "Object/Runtime/PyCode.h"
 #include "Object/String/PyString.h"
 #include "Tools/Config/Config.h"
+#include "Tools/Logger/BytecodeLogger.h"
+#include "Tools/Logger/VerboseLogger.h"
 namespace tensorslow::IR {
 
 ClassDef::ClassDef(
@@ -83,6 +85,9 @@ Object::PyObjPtr ClassDefKlass::emit(
   parent->CallFunction(3);
   parent->StoreName(classDef->Name());
   if (Config::Has("show_bc")) {
+    VerboseLogger::getInstance().setCallback(
+      std::make_shared<ProxyLogStrategy>(&BytecodeLogger::getInstance())
+    );
     Object::PrintCode(selfCode);
   }
   return Object::CreatePyNone();

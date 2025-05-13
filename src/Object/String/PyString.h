@@ -7,6 +7,7 @@
 
 #include <mutex>
 #include <unordered_map>
+#include <utility>
 namespace tensorslow::Object {
 
 class StringKlass : public Klass {
@@ -37,16 +38,12 @@ class PyString : public PyObject {
 
  private:
   Collections::String value;
-  // 缩进深度
-  static Index indent;
   static std::unordered_map<size_t, std::shared_ptr<PyString>> stringPool;
   static std::mutex poolMutex;
 
  public:
-  explicit PyString(const Collections::String& _value)
-    : PyObject(StringKlass::Self()), value(_value) {}
-  static void IncreaseIndent() { indent++; }
-  static void DecreaseIndent() { indent--; }
+  explicit PyString(Collections::String _value)
+    : PyObject(StringKlass::Self()), value(std::move(_value)) {}
 
   Index Length() { return value.GetCodePointCount(); }
 
@@ -58,8 +55,8 @@ class PyString : public PyObject {
 
   PyStrPtr Add(const PyStrPtr& other);
 
-  void Print(bool enableIndent = true) const;
-  void PrintLine(bool enableIndent = true) const;
+  void Print() const;
+  void PrintLine() const;
 
   std::string ToCppString() const;
 

@@ -11,10 +11,12 @@
 #include "Python3Parser.h"
 #include "Tools/Config/Config.h"
 #include "Tools/Config/Schema.h"
+#include "Tools/Logger/BytecodeLogger.h"
 #include "Tools/Logger/ConsoleLogger.h"
 #include "Tools/Logger/IntermediateCodeTreeLogger.h"
 #include "Tools/Logger/LexicalAnalysisLogger.h"
 #include "Tools/Logger/SyntaxAnalysisLogger.h"
+#include "Tools/Logger/VerboseLogger.h"
 #include "antlr4-runtime.h"
 
 #include <filesystem>
@@ -122,6 +124,9 @@ void ParseAndGenerate(const std::filesystem::path& filePath) {
   }
   auto code = visitor.Code();
   if (Config::Has("show_bc")) {
+    VerboseLogger::getInstance().setCallback(
+      std::make_shared<ProxyLogStrategy>(&BytecodeLogger::getInstance())
+    );
     Object::PrintCode(code);
   }
   auto data = code->_serialize_()->as<Object::PyBytes>();

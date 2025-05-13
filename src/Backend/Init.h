@@ -10,6 +10,7 @@
 #include "Tools/Config/Schema.h"
 #include "Tools/Logger/ConsoleLogger.h"
 #include "Tools/Logger/ErrorLogger.h"
+#include "Tools/Logger/VerboseLogger.h"
 
 #include <filesystem>
 
@@ -32,7 +33,7 @@ void DefineOption() {
        "", "单文件模式，指定要解析的文件"
      ),
      OptionConvention(
-       "debug",
+       "verbose",
        [](const std::string& value) {
          if (value.empty()) {
            return false;
@@ -64,15 +65,15 @@ void DefineOption() {
 void BeforeRun(const std::filesystem::path& filename) {
   bool compare_result = Config::Has("compare_result");
   bool show_result = Config::Has("show_result");
-  bool debug = Config::Has("debug");
+  bool verbose = Config::Has("verbose");
   if (compare_result && show_result) {
     throw std::runtime_error("compare_result 和 show_result 不能同时为 true");
   }
-  if (compare_result && debug) {
-    throw std::runtime_error("compare_result 和 debug 不能同时为 true");
+  if (compare_result && verbose) {
+    throw std::runtime_error("compare_result 和 verbose 不能同时为 true");
   }
-  if (show_result && debug) {
-    throw std::runtime_error("show_result 和 debug 不能同时为 true");
+  if (show_result && verbose) {
+    throw std::runtime_error("show_result 和 verbose 不能同时为 true");
   }
   if (compare_result) {
     ConsoleLogger::getInstance().log("本次测试模式：和预期结果比较\n");
@@ -91,10 +92,10 @@ void BeforeRun(const std::filesystem::path& filename) {
     ConsoleLogger::getInstance().log("本次测试模式：直接输出结果\n");
     return;
   }
-  if (debug) {
-    auto debug_dir = Config::Get("debug");
+  if (verbose) {
+    auto verbose_dir = Config::Get("verbose");
     auto log_file =
-      (std::filesystem::path(debug_dir) /
+      (std::filesystem::path(verbose_dir) /
        (filename.stem().replace_extension(".log")).filename());
     ConsoleLogger::getInstance().log("本次测试模式：调试模式\n");
     ConsoleLogger::getInstance().log("输出结果到: ");
@@ -151,6 +152,9 @@ void RunTest(const std::filesystem::path& filename) {
   try {
     Runtime::Interpreter::Run(code);
   } catch (const std::exception& e) {
+    VerboseLogger::getInstance().setCallback(
+      std::make_shared<ProxyLogStrategy>(&ErrorLogger::getInstance())
+    );
     PrintFrame(Runtime::Interpreter::Instance().CurrentFrame());
     ErrorLogger::getInstance().log(e.what());
     throw;

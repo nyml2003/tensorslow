@@ -18,7 +18,6 @@
 #include <iostream>
 
 namespace tensorslow::Object {
-Index PyString::indent = 0;
 std::unordered_map<size_t, std::shared_ptr<PyString>> PyString::stringPool;
 std::mutex PyString::poolMutex;
 void StringKlass::Initialize() {
@@ -205,21 +204,11 @@ PyStrPtr PyString::Add(const PyStrPtr& other) {
   return CreatePyString(value.Add(other->value), false)->as<PyString>();
 }
 
-void PyString::Print(bool enableIndent) const {
-  if (enableIndent) {
-    for (Index i = 0; i < indent; i++) {
-      tensorslow::ConsoleLogger::getInstance().log(" ");
-    }
-  }
+void PyString::Print() const {
   tensorslow::ConsoleLogger::getInstance().log(ToCppString());
 }
 
-void PyString::PrintLine(bool enableIndent) const {
-  if (enableIndent) {
-    for (Index i = 0; i < indent; i++) {
-      tensorslow::ConsoleLogger::getInstance().log(" ");
-    }
-  }
+void PyString::PrintLine() const {
   tensorslow::ConsoleLogger::getInstance().log(ToCppString());
   tensorslow::ConsoleLogger::getInstance().log("\n");
 }

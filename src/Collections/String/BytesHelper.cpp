@@ -3,6 +3,7 @@
 #include "Collections/Integer/IntegerHelper.h"
 #include "Collections/String/StringHelper.h"
 #include "Tools/Logger/ConsoleLogger.h"
+#include "Tools/Logger/ErrorLogger.h"
 
 #include <fstream>
 #include <iostream>
@@ -22,7 +23,7 @@ void Write(const String& bytes, const std::string& filename) {
   }
   std::ofstream file(filename, std::ios::binary);
   if (!file.is_open()) {
-    std::cerr << "无法打开文件：" << filename << std::endl;
+    tensorslow::ErrorLogger::getInstance().log("无法打开文件：" + filename);
     return;
   }
   file.write(data.data(), std::streamsize(data.size()));
@@ -34,7 +35,7 @@ void Write(const String& bytes, const std::string& filename) {
   tensorslow::ConsoleLogger::getInstance().log("字节");
   tensorslow::ConsoleLogger::getInstance().log("\n");
   if (!file) {
-    std::cerr << "写入文件时出错：" << filename << std::endl;
+    tensorslow::ErrorLogger::getInstance().log("写入文件时出错：" + filename);
   }
   file.close();
 }

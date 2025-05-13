@@ -8,6 +8,7 @@
 #include "LogStrategy.h"
 
 #include <mutex>
+#include <utility>
 
 namespace tensorslow {
 class Logger {
@@ -17,7 +18,7 @@ class Logger {
   // 设置自定义回调
   void setCallback(std::shared_ptr<LogStrategy> callback) {
     std::lock_guard<std::mutex> lock(m_mutex);
-    m_callback = callback;
+    m_callback = std::move(callback);
   }
 
   // 每个 Logger 都要实现自己的 log()

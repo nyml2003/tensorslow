@@ -13,10 +13,14 @@
 #include "Runtime/Interpreter.h"
 #include "Tools/Config/Config.h"
 #include "Tools/Config/Schema.h"
+#include "Tools/Logger/BytecodeLogger.h"
 #include "Tools/Logger/ConsoleLogger.h"
+#include "Tools/Logger/ErrorLogger.h"
+#include "Tools/Logger/FrameLogger.h"
 #include "Tools/Logger/IntermediateCodeTreeLogger.h"
 #include "Tools/Logger/LexicalAnalysisLogger.h"
 #include "Tools/Logger/SyntaxAnalysisLogger.h"
+#include "Tools/Logger/VerboseLogger.h"
 #include "antlr4-runtime.h"
 
 #include <filesystem>
@@ -24,82 +28,76 @@
 
 namespace tensorslow {
 void DefineOption() {
-  Schema::Accept(
-    {OptionConvention(
-       "file",
-       [](const std::string& value) {
-         if (value.empty())
-           return false;
-         bool file_exists = std::filesystem::exists(value);
-         std::string extension =
-           std::filesystem::path(value).extension().string();
-         bool is_py = extension == ".py" || extension == ".pyc";
-         bool is_regular = std::filesystem::is_regular_file(value);
-         return file_exists && is_py && is_regular;
-       },
-       "", "单文件模式，指定要解析的文件"
-     ),
-     OptionConvention(
-       "show_ast",
-       [](const std::string& value) {
-         return value == "true" || value.empty();
-       },
-       "true", "是否显示抽象语法树"
-     ),
-     OptionConvention(
-       "show_bc",
-       [](const std::string& value) {
-         return value == "true" || value.empty();
-       },
-       "true", "是否显示生成的code object"
-     ),
-     OptionConvention(
-       "show_tokens",
-       [](const std::string& value) {
-         return value == "true" || value.empty();
-       },
-       "true", "是否显示词法分析结果"
-     ),
-     OptionConvention(
-       "show_ir",
-       [](const std::string& value) {
-         return value == "true" || value.empty();
-       },
-       "true", "是否显示中间代码树"
-     ),
-     OptionConvention(
-       "show_result",
-       [](const std::string& value) {
-         return value == "true" || value.empty();
-       },
-       "true", "是否直接输出结果"
-     ),
-     OptionConvention(
-       "compile",
-       [](const std::string& value) {
-         return value == "true" || value.empty();
-       },
-       "true", "是否编译成字节码"
-     ),
-     OptionConvention(
-       "interpret",
-       [](const std::string& value) {
-         return value == "true" || value.empty();
-       },
-       "true", "是否直接解释执行源代码"
-     ),
-     OptionConvention(
-       "interpret_bytecode",
-       [](const std::string& value) {
-         return value == "true" || value.empty();
-       },
-       "true", "是否解释执行字节码"
-     ),
-     OptionConvention(
-       "source", [](const std::string& value) { return !value.empty(); }, "",
-       "字符串模式，指定要解析的源代码字符串"
-     )}
-  );
+  Schema::Accept({
+    OptionConvention(
+      "file",
+      [](const std::string& value) {
+        if (value.empty())
+          return false;
+        bool file_exists = std::filesystem::exists(value);
+        std::string extension =
+          std::filesystem::path(value).extension().string();
+        bool is_py = extension == ".py" || extension == ".pyc";
+        bool is_regular = std::filesystem::is_regular_file(value);
+        return file_exists && is_py && is_regular;
+      },
+      "", "单文件模式，指定要解析的文件"
+    ),
+    OptionConvention(
+      "show_ast",
+      [](const std::string& value) { return value == "true" || value.empty(); },
+      "true", "是否显示抽象语法树"
+    ),
+    OptionConvention(
+      "show_bc",
+      [](const std::string& value) { return value == "true" || value.empty(); },
+      "true", "是否显示生成的code object"
+    ),
+    OptionConvention(
+      "show_tokens",
+      [](const std::string& value) { return value == "true" || value.empty(); },
+      "true", "是否显示词法分析结果"
+    ),
+    OptionConvention(
+      "show_ir",
+      [](const std::string& value) { return value == "true" || value.empty(); },
+      "true", "是否显示中间代码树"
+    ),
+    OptionConvention(
+      "show_result",
+      [](const std::string& value) { return value == "true" || value.empty(); },
+      "true", "是否直接输出结果"
+    ),
+    OptionConvention(
+      "compile",
+      [](const std::string& value) { return value == "true" || value.empty(); },
+      "true", "是否编译成字节码"
+    ),
+    OptionConvention(
+      "interpret",
+      [](const std::string& value) { return value == "true" || value.empty(); },
+      "true", "是否直接解释执行源代码"
+    ),
+    OptionConvention(
+      "interpret_bytecode",
+      [](const std::string& value) { return value == "true" || value.empty(); },
+      "true", "是否解释执行字节码"
+    ),
+    OptionConvention(
+      "source", [](const std::string& value) { return !value.empty(); }, "",
+      "字符串模式，指定要解析的源代码字符串"
+    ),
+    OptionConvention(
+      "verbose",
+      [](const std::string& value) {
+        if (value.empty()) {
+          return true;
+        }
+        return value == "true";
+      },
+      "true", "开启调试模式，逐指令打印栈帧"
+    ),
+  });
 }
 
 void ValidateOptions() {
@@ -128,15 +126,6 @@ void ValidateOptions() {
   if (Config::Has("source") && Config::Has("interpret_bytecode")) {
     ConsoleLogger::getInstance().log(
       "错误: 当使用 --source 时，不能启用 --interpret_bytecode 模式\n"
-    );
-    Schema::PrintUsage();
-    exit(1);
-  }
-
-  // 检查 source 与 compile 的依赖
-  if (Config::Has("source") && !Config::Has("interpret")) {
-    ConsoleLogger::getInstance().log(
-      "错误: source 模式需要启用 --interpret 模式\n"
     );
     Schema::PrintUsage();
     exit(1);
@@ -208,7 +197,8 @@ Object::PyCodePtr Compile(antlr4::ANTLRInputStream* inputStream) {
   }
   if (Config::Has("show_ast")) {
     SyntaxAnalysisLogger::getInstance().log(tree->toStringTree(&parser));
-    ConsoleLogger::getInstance().log("\n抽象语法树生成完毕\n");
+    SyntaxAnalysisLogger::getInstance().log("\n");
+    ConsoleLogger::getInstance().log("抽象语法树生成完毕\n");
   }
   std::string moduleName = Config::Has("file")     ? Config::Get("file")
                            : Config::Has("source") ? "temporaryModule"
@@ -225,17 +215,28 @@ Object::PyCodePtr Compile(antlr4::ANTLRInputStream* inputStream) {
   }
   auto code = visitor.Code();
   if (Config::Has("show_bc")) {
+    VerboseLogger::getInstance().setCallback(
+      std::make_shared<ProxyLogStrategy>(&BytecodeLogger::getInstance())
+    );
     Object::PrintCode(code);
   }
   return code;
 }
 
 void Interpret(const tensorslow::Object::PyCodePtr& code) {
+  if (Config::Has("verbose")) {
+    VerboseLogger::getInstance().setCallback(
+      std::make_shared<ProxyLogStrategy>(&FrameLogger::getInstance())
+    );
+  }
   try {
     tensorslow::Runtime::Interpreter::Run(code);
   } catch (const std::exception& e) {
+    VerboseLogger::getInstance().setCallback(
+      std::make_shared<ProxyLogStrategy>(&ErrorLogger::getInstance())
+    );
     PrintFrame(tensorslow::Runtime::Interpreter::Instance().CurrentFrame());
-    std::cerr << "Caught exception: " << e.what() << std::endl;
+    ErrorLogger::getInstance().log(e.what());
     throw;
   }
 }
@@ -258,12 +259,13 @@ void HandleCompile() {
   auto inputStream = CreateANTLRInputStream();
   auto code = Compile(inputStream);
   DestroyANTLRInputStream(inputStream);
-
-  auto data = code->_serialize_()->as<tensorslow::Object::PyBytes>();
-  const auto& bytes = data->Value();
-  auto filePath = Config::Get("file");
-  auto writePath = std::filesystem::path(filePath).replace_extension(".pyc");
-  tensorslow::Collections::Write(bytes, writePath.string());
+  if (Config::Has("file")) {
+    auto data = code->_serialize_()->as<tensorslow::Object::PyBytes>();
+    const auto& bytes = data->Value();
+    auto filePath = Config::Get("file");
+    auto writePath = std::filesystem::path(filePath).replace_extension(".pyc");
+    tensorslow::Collections::Write(bytes, writePath.string());
+  }
 }
 
 void InitEnv(int argc, char** argv) {

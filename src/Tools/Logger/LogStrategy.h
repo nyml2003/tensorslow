@@ -9,9 +9,10 @@
 #include <iostream>
 #include <mutex>
 #include <string>
+#include <utility>
 
 namespace tensorslow {
-
+class Logger;
 class LogStrategy {
  public:
   virtual ~LogStrategy() = default;
@@ -41,6 +42,16 @@ class FileLogStrategy : public LogStrategy {
 class ErrorLogStrategy : public LogStrategy {
  public:
   void operator()(const std::string& msg) const override { std::cerr << msg; }
+};
+
+class ProxyLogStrategy : public LogStrategy {
+ public:
+  explicit ProxyLogStrategy(Logger* logger) : m_logger(logger) {}
+
+  void operator()(const std::string& msg) const override;
+
+ private:
+  Logger* m_logger;
 };
 
 }  // namespace tensorslow

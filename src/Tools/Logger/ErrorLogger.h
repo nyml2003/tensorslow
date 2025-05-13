@@ -16,12 +16,18 @@ class ErrorLogger : public Logger {
     return instance;
   }
 
-  void log(const std::string& msg) override { (*m_callback)(msg); }
+  void log(const std::string& msg) override {
+    if (m_callback) {
+      (*m_callback)("[ERROR] ");
+      (*m_callback)(msg);
+      (*m_callback)("\n");
+    }
+  }
+  ErrorLogger(const ErrorLogger&) = delete;
+  ErrorLogger& operator=(const ErrorLogger&) = delete;
 
  private:
   ErrorLogger() = default;
-  ErrorLogger(const ErrorLogger&) = delete;
-  ErrorLogger& operator=(const ErrorLogger&) = delete;
 };
 
 }  // namespace tensorslow

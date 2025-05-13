@@ -26,15 +26,15 @@ GetCodeFromList(const Object::PyObjPtr& codeList, const INodePtr& node) {
   return GetCodeFromList(codeList, node->Parent());
 }
 void PrintNode(const Object::PyObjPtr& node, const Object::PyStrPtr& text) {
-  tensorslow::IntermediateCodeLogger::getInstance().log(
+  IntermediateCodeLogger::getInstance().log(
     Function::Identity(Object::CreatePyList({node}))
       ->str()
       ->as<Object::PyString>()
       ->ToCppString()
   );
-  tensorslow::IntermediateCodeLogger::getInstance().log("[");
-  tensorslow::IntermediateCodeLogger::getInstance().log(text->ToCppString());
-  tensorslow::IntermediateCodeLogger::getInstance().log("]\n");
+  IntermediateCodeLogger::getInstance().log("[");
+  IntermediateCodeLogger::getInstance().log(text->ToCppString());
+  IntermediateCodeLogger::getInstance().log("]\n");
 }
 
 void PrintEdge(
@@ -42,25 +42,26 @@ void PrintEdge(
   const Object::PyObjPtr& child,
   const Object::PyStrPtr& text
 ) {
-  Function::Identity(Object::CreatePyList({parent}))
-    ->str()
-    ->as<Object::PyString>()
-    ->Print();
-  if (text == nullptr) {
-    Object::CreatePyString("--->")->Print();
-  } else {
-    Object::StringConcat(Object::CreatePyList(
-                           {Object::CreatePyString("--"), text,
-                            Object::CreatePyString("-->")}
-                         ))
+  IntermediateCodeLogger::getInstance().log(
+    Function::Identity(Object::CreatePyList({parent}))
+      ->str()
       ->as<Object::PyString>()
-      ->Print();
+      ->ToCppString()
+  );
+  if (text == nullptr) {
+    IntermediateCodeLogger::getInstance().log("--->");
+  } else {
+    IntermediateCodeLogger::getInstance().log("--");
+    IntermediateCodeLogger::getInstance().log(text->ToCppString());
+    IntermediateCodeLogger::getInstance().log("-->");
   }
-  Function::Identity(Object::CreatePyList({child}))
-    ->str()
-    ->as<Object::PyString>()
-    ->Print();
-  Object::CreatePyString("")->PrintLine();
+  IntermediateCodeLogger::getInstance().log(
+    Function::Identity(Object::CreatePyList({child}))
+      ->str()
+      ->as<Object::PyString>()
+      ->ToCppString()
+  );
+  IntermediateCodeLogger::getInstance().log("\n");
 }
 
 }  // namespace tensorslow::IR

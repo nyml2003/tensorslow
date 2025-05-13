@@ -32,12 +32,11 @@ class IntermediateCodeLogger : public Logger {
       m_initialized = false;  // 标记为未初始化，以便下次重新开始新的图表
     }
   }
+  IntermediateCodeLogger(const IntermediateCodeLogger&) = delete;
+  IntermediateCodeLogger& operator=(const IntermediateCodeLogger&) = delete;
 
  private:
   IntermediateCodeLogger() : m_initialized(false) {}
-
-  IntermediateCodeLogger(const IntermediateCodeLogger&) = delete;
-  IntermediateCodeLogger& operator=(const IntermediateCodeLogger&) = delete;
 
   bool m_initialized;
 };

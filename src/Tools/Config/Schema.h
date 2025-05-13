@@ -6,6 +6,7 @@
 #define TENSORSLOW_CONFIG_SCHEMA_H
 
 #include "OptionConvention.h"
+#include "Tools/Logger/ConsoleLogger.h"
 
 #include <iostream>
 #include <map>
@@ -37,19 +38,23 @@ class Schema {
     return parameter->second;
   }
   static void PrintUsage() {
-    std::cout << "Usage: program [options]" << std::endl;
-    std::cout << "Options:" << std::endl;
-
-    // 遍历 Schema 中的参数并打印
+    ConsoleLogger::getInstance().log(
+      "Invalid parameters, please check the usage.\n"
+    );
+    ConsoleLogger::getInstance().log("Options:\n");
     for (const auto& [name, param] : Instance().Parameters()) {
-      std::cout << "  --" << name
-                << "=<value>  (default: " << param.DefaultValue() << ")"
-                << " tip: " << param.Tip() << std::endl;
+      ConsoleLogger::getInstance().log("  --");
+      ConsoleLogger::getInstance().log(name);
+      ConsoleLogger::getInstance().log("=<value>  (default: ");
+      ConsoleLogger::getInstance().log(param.DefaultValue());
+      ConsoleLogger::getInstance().log(") tip: ");
+      ConsoleLogger::getInstance().log(param.Tip());
+      ConsoleLogger::getInstance().log("\n");
     }
-
-    // 打印默认参数
-    std::cout << "  --help  Display this help message" << std::endl;
-    std::cout << "  --version  Display version information" << std::endl;
+    ConsoleLogger::getInstance().log("  --help  Display this help message\n");
+    ConsoleLogger::getInstance().log(
+      "  --version  Display version information\n"
+    );
   }
 
   static void HandleDefaultParameters(const std::string& option) {
@@ -57,7 +62,7 @@ class Schema {
       PrintUsage();
       exit(0);
     } else if (option == "version") {
-      std::cout << "Version: 1.0.0" << std::endl;
+      ConsoleLogger::getInstance().log("Version: 1.0.0\n");
       exit(0);
     }
   }

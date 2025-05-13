@@ -15,11 +15,11 @@ class LexicalAnalysisLogger : public Logger {
       (*m_callback)(msg);
     }
   }
+  LexicalAnalysisLogger(const LexicalAnalysisLogger&) = delete;
+  LexicalAnalysisLogger& operator=(const LexicalAnalysisLogger&) = delete;
 
  private:
   LexicalAnalysisLogger() = default;
-  LexicalAnalysisLogger(const LexicalAnalysisLogger&) = delete;
-  LexicalAnalysisLogger& operator=(const LexicalAnalysisLogger&) = delete;
 };
 }  // namespace tensorslow
 
