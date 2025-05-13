@@ -17,7 +17,6 @@ fi
 test_passed=0
 test_not_passed_names=()
 echo "测试用例总数: $test_total"
-# remove \n
 echo "测试用例: $(echo $subdirs | tr '\n' ' ')"
 for subdir in $subdirs
 do
