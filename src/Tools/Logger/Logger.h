@@ -7,6 +7,7 @@
 
 #include "LogStrategy.h"
 
+#include <memory>
 #include <mutex>
 #include <utility>
 

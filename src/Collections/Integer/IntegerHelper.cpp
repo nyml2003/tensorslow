@@ -42,7 +42,7 @@ Integer CreateIntegerWithString(const String& str) {
     uint32_t buffer = 0;
     uint32_t count = 0;
     for (Index i = str.GetCodeUnitCount() - 1; i >= 2; i--) {
-      uint8_t value = ByteToHex(str.GetCodeUnit(i));
+      int8_t value = ByteToHex(str.GetCodeUnit(i));
       if (value == -1) {
         throw std::runtime_error("Invalid character in Hexadecimal");
       }

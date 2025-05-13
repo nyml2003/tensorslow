@@ -131,7 +131,9 @@ bool String::GreaterThan(const String& rhs) noexcept {
 }
 
 std::string String::ToCppString() const {
-  return {reinterpret_cast<const char*>(codeUnits.Data()), codeUnits.Size()};
+  return {
+    reinterpret_cast<const char*>(codeUnits.Data()),
+    static_cast<std::size_t>(codeUnits.Size())};
 }
 
 std::size_t String::HashValue() const {
