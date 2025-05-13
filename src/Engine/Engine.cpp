@@ -1,5 +1,15 @@
 #include "Init.h"
 #include "Tools/Config/Config.h"
+
+namespace tensorslow {
+void InitEnv(int argc, char** argv) {
+  DefineOption();
+  InitRuntimeSupport();
+  Config::Accept(argc, argv);
+  ValidateOptions();
+}
+}  // namespace tensorslow
+
 #ifdef _WIN32
 #include <Windows.h>
 #endif

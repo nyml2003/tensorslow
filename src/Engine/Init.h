@@ -268,13 +268,6 @@ void HandleCompile() {
   }
 }
 
-void InitEnv(int argc, char** argv) {
-  DefineOption();
-  InitRuntimeSupport();
-  Config::Accept(argc, argv);
-  ValidateOptions();
-}
-
 }  // namespace tensorslow
 
 #endif  // TENSORSLOW_ENGINE_INIT_H
