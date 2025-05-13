@@ -1,5 +1,4 @@
 include_directories(${tensorslow_dir}/src)
-message(STATUS "tensorslow_frontend_files: " ${tensorslow_frontend_files})
 include(${tensorslow_dir}/src/Generation/Generation.cmake)
 include(${tensorslow_dir}/src/Collections/Collections.cmake)
 include(${tensorslow_dir}/src/Object/Object.cmake)
