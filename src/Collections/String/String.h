@@ -1,10 +1,10 @@
 #ifndef TENSORSLOW_COLLECTIONS_STRING_H
 #define TENSORSLOW_COLLECTIONS_STRING_H
 
+#include <array>
+#include <cstdint>
 #include <mutex>
 #include "Collections/List.h"
-#include <cstdint>
-#include <array>
 namespace tensorslow::Collections {
 
 class String {
@@ -97,8 +97,8 @@ class String {
   explicit String(List<Byte>&& codeUnits)
     : codeUnits(std::move(codeUnits)), hashValue(0), hashed(false) {}
 
-  explicit String(const String& other) = default;
-  explicit String(String&& other) noexcept = default;
+  String(const String& other) = default;
+  String(String&& other) noexcept = default;
   String& operator=(const String& other) = default;
   String& operator=(String&& other) noexcept = default;
   ~String() = default;
@@ -164,4 +164,4 @@ class StringBuilder {
 };
 
 }  // namespace tensorslow::Collections
-#endif  // TORCHLIGHT_COLLECTIONS_STRING_H
+#endif  // TENSORSLOW_COLLECTIONS_STRING_H

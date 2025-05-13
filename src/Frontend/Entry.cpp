@@ -17,6 +17,10 @@
 #include <iostream>
 #include <string>
 #include "IR/AstHelper.h"
+#include "Tools/Logger/ConsoleLogger.h"
+#include "Tools/Logger/IntermediateCodeTreeLogger.h"
+#include "Tools/Logger/LexicalAnalysisLogger.h"
+#include "Tools/Logger/SyntaxAnalysisLogger.h"
 #include "Tools/Tools.h"
 #include "antlr4-runtime.h"
 namespace fs = std::filesystem;
@@ -39,22 +43,6 @@ void DefineOption() {
          return file_exists && is_py && is_regular;
        },
        "", "单文件模式，指定要解析的文件"
-     ),
-     OptionConvention(
-       "dir",
-       [](const std::string& value) {
-         if (value.empty()) {
-           return false;
-         }
-         // 文件系统里有没有这个文件夹
-         bool dir_exists = std::filesystem::exists(value);
-         // 文件是一个目录
-         bool is_dir = std::filesystem::is_directory(value);
-         return dir_exists && is_dir;
-       },
-       "",
-       "目录模式，指定要解析的目录, "
-       "认为目录下有且仅有包，将每个包下的所有.py文件都解析"
      ),
      OptionConvention(
        "show_ast",
@@ -104,8 +92,9 @@ void ParseAndGenerate(const fs::path& filePath) {
     std::cerr << "Failed to open file: " << filePath << std::endl;
     return;
   }
-  // std::cout << "正在解析文件: " << filePath << std::endl;
-
+  tensorslow::ConsoleLogger::getInstance().log("正在解析文件 ");
+  tensorslow::ConsoleLogger::getInstance().log(filePath.string());
+  tensorslow::ConsoleLogger::getInstance().log("\n");
   antlr4::ANTLRInputStream inputStream(stream);
   Python3Lexer lexer(&inputStream);
   antlr4::CommonTokenStream tokens(&lexer);
@@ -115,15 +104,17 @@ void ParseAndGenerate(const fs::path& filePath) {
 
   //  // 打印词法
   if (tensorslow::Config::Has("show_tokens")) {
-    std::cout << "词法分析结果: " << std::endl;
     for (const auto& token : tokens.getTokens()) {
-      std::cout << token->toString() << " ";
+      tensorslow::LexicalAnalysisLogger::getInstance().log(token->toString());
+      tensorslow::LexicalAnalysisLogger::getInstance().log("\n");
     }
-    std::cout << std::endl;
+    tensorslow::ConsoleLogger::getInstance().log("词法单元流生成完毕");
   }
   if (tensorslow::Config::Has("show_ast")) {
-    std::cout << "抽象语法树: " << std::endl;
-    std::cout << tree->toStringTree(&parser) << std::endl;
+    tensorslow::SyntaxAnalysisLogger::getInstance().log(
+      tree->toStringTree(&parser)
+    );
+    tensorslow::ConsoleLogger::getInstance().log("抽象语法树生成完毕");
   }
 
   tensorslow::Generation::Generator visitor(
@@ -136,11 +127,9 @@ void ParseAndGenerate(const fs::path& filePath) {
   visitor.Visit();
   visitor.Emit();
   if (tensorslow::Config::Has("show_ir")) {
-    std::cout << "中间代码树: " << std::endl;
-    std::cout << "```mermaid" << std::endl;
-    std::cout << "graph TD" << std::endl;
     visitor.Print();
-    std::cout << "```" << std::endl;
+    tensorslow::IntermediateCodeLogger::getInstance().terminate();
+    tensorslow::ConsoleLogger::getInstance().log("中间代码树生成完毕");
   }
   auto code = visitor.Code();
   if (tensorslow::Config::Has("show_code")) {
@@ -162,28 +151,6 @@ int main(int argc, char** argv) {
   tensorslow::DefineOption();
   tensorslow::Config::Accept(argc, argv);
   tensorslow::InitPyObj();
-
-  if (tensorslow::Config::Has("file")) {
-    ParseAndGenerate(tensorslow::Config::Get("file"));
-    return 0;
-  }
-  if (tensorslow::Config::Has("dir")) {
-    auto dir = tensorslow::Config::Get("dir");
-    std::vector<fs::path> subdirs;
-    for (const auto& entry : fs::directory_iterator(dir)) {
-      if (entry.is_directory()) {
-        subdirs.push_back(entry.path());
-      }
-    }
-    for (const auto& subdir : subdirs) {
-      auto files = tensorslow::GetFilesInDirectory(subdir.string(), ".py");
-      std::cout << "测试用例:" << subdir.filename().string() << std::endl;
-      for (const auto& file : files) {
-        ParseAndGenerate(file);
-      }
-    }
-    return 0;
-  }
   auto file = tensorslow::Config::Get("file");
   if (file.empty()) {
     tensorslow::Schema::PrintUsage();

@@ -97,7 +97,7 @@ Decimal Decimal::Subtract(const Decimal& rhs) const {
   if (sign == rhs.sign) {
     // 假定左值大于右值
     bool newSign = false;
-    Index size = 0;
+    Index size;
     List<int32_t> _lhs = parts.Copy();
     List<int32_t> _rhs = rhs.parts.Copy();
     _lhs.Reverse();

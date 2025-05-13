@@ -19,6 +19,7 @@
 #include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
 #include "Tools/Config/Config.h"
+#include "Tools/Logger/ConsoleLogger.h"
 
 namespace tensorslow::Object {
 
@@ -357,7 +358,11 @@ void PrintFrame(const PyFramePtr& frame) {
     CreatePyInteger(i)->repr()->as<PyString>()->Print();
     CreatePyString("  ")->as<PyString>()->Print();
     stack->GetItem(i)->repr()->as<PyString>()->Print();
-    std::cout << " ( " << stack->GetItem(i).get() << " ) " << std::endl;
+    tensorslow::ConsoleLogger::getInstance().log(" ( ");
+    tensorslow::ConsoleLogger::getInstance().log(
+      std::to_string(reinterpret_cast<uint64_t>(stack->GetItem(i).get()))
+    );
+    tensorslow::ConsoleLogger::getInstance().log(" ) ");
   }
   CreatePyString("Locals: ")->as<PyString>()->PrintLine();
   frame->CurrentLocals()->repr()->as<PyString>()->PrintLine();

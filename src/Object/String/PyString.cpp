@@ -13,6 +13,7 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "PyBytes.h"
+#include "Tools/Logger/ConsoleLogger.h"
 
 #include <iostream>
 
@@ -207,19 +208,20 @@ PyStrPtr PyString::Add(const PyStrPtr& other) {
 void PyString::Print(bool enableIndent) const {
   if (enableIndent) {
     for (Index i = 0; i < indent; i++) {
-      std::cout << "  " << std::flush;
+      tensorslow::ConsoleLogger::getInstance().log(" ");
     }
   }
-  std::cout << ToCppString() << std::flush;
+  tensorslow::ConsoleLogger::getInstance().log(ToCppString());
 }
 
 void PyString::PrintLine(bool enableIndent) const {
   if (enableIndent) {
     for (Index i = 0; i < indent; i++) {
-      std::cout << "  " << std::flush;
+      tensorslow::ConsoleLogger::getInstance().log(" ");
     }
   }
-  std::cout << ToCppString() << std::endl;
+  tensorslow::ConsoleLogger::getInstance().log(ToCppString());
+  tensorslow::ConsoleLogger::getInstance().log("\n");
 }
 
 std::string PyString::ToCppString() const {

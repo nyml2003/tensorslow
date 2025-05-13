@@ -5,8 +5,6 @@
 #include "Collections/String/String.h"
 namespace tensorslow::Collections {
 
-using BroadcastType = uint8_t;
-
 class Matrix {
  private:
   Index rows{};

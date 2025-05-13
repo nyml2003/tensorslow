@@ -1,5 +1,4 @@
 #include "Collections/String/String.h"
-#include <iostream>
 #include <stdexcept>
 #include "StringHelper.h"
 
@@ -132,9 +131,7 @@ bool String::GreaterThan(const String& rhs) noexcept {
 }
 
 std::string String::ToCppString() const {
-  return std::string(
-    reinterpret_cast<const char*>(codeUnits.Data()), codeUnits.Size()
-  );
+  return {reinterpret_cast<const char*>(codeUnits.Data()), codeUnits.Size()};
 }
 
 std::size_t String::HashValue() const {

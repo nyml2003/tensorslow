@@ -3,6 +3,7 @@
 #include "IR/ClassDef.h"
 #include "IR/FuncDef.h"
 #include "IR/Module.h"
+#include "Tools/Logger/IntermediateCodeTreeLogger.h"
 
 namespace tensorslow::IR {
 Object::PyCodePtr
@@ -25,13 +26,15 @@ GetCodeFromList(const Object::PyObjPtr& codeList, const INodePtr& node) {
   return GetCodeFromList(codeList, node->Parent());
 }
 void PrintNode(const Object::PyObjPtr& node, const Object::PyStrPtr& text) {
-  Function::Identity(Object::CreatePyList({node}))
-    ->str()
-    ->as<Object::PyString>()
-    ->Print();
-  Object::CreatePyString("[")->Print();
-  text->Print();
-  Object::CreatePyString("]\n")->Print();
+  tensorslow::IntermediateCodeLogger::getInstance().log(
+    Function::Identity(Object::CreatePyList({node}))
+      ->str()
+      ->as<Object::PyString>()
+      ->ToCppString()
+  );
+  tensorslow::IntermediateCodeLogger::getInstance().log("[");
+  tensorslow::IntermediateCodeLogger::getInstance().log(text->ToCppString());
+  tensorslow::IntermediateCodeLogger::getInstance().log("]\n");
 }
 
 void PrintEdge(

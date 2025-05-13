@@ -349,13 +349,6 @@ void Matrix::SetSlice(
   Index targetRows = rowStop - rowStart;
   Index targetCols = colStop - colStart;
   if (other.rows != targetRows || other.cols != targetCols) {
-    std::cout << "other.rows: " << other.rows << " targetRows: " << targetRows
-              << std::endl;
-    std::cout << "other.cols: " << other.cols << " targetCols: " << targetCols
-              << std::endl;
-    std::cout << "rowStart: " << rowStart << " colStart: " << colStart
-              << " rowStop: " << rowStop << " colStop: " << colStop
-              << std::endl;
     throw std::invalid_argument("Size mismatch between slice and other matrix");
   }
 

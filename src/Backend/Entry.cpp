@@ -2,6 +2,8 @@
 #include "Runtime/Interpreter.h"
 #include "Tools/Config/Config.h"
 #include "Tools/Config/Schema.h"
+#include "Tools/Logger/ConsoleLogger.h"
+#include "Tools/Logger/ErrorLogger.h"
 #include "Tools/Tools.h"
 
 #include <filesystem>
@@ -12,7 +14,7 @@
 #include <Windows.h>
 #endif
 using namespace tensorslow;
-RedirectCout redirectCout;
+
 void DefineOption() {
   Schema::Accept(
     {OptionConvention(
@@ -31,27 +33,11 @@ void DefineOption() {
        "", "单文件模式，指定要解析的文件"
      ),
      OptionConvention(
-       "dir",
-       [](const std::string& value) {
-         if (value.empty()) {
-           return false;
-         }
-         // 文件系统里有没有这个文件夹
-         bool dir_exists = std::filesystem::exists(value);
-         // 文件是一个目录
-         bool is_dir = std::filesystem::is_directory(value);
-         return dir_exists && is_dir;
-       },
-       "",
-       "目录模式，指定要解析的目录, "
-       "认为目录下有且仅有包，将每个包下的所有.py文件都解析"
-     ),
-     OptionConvention(
        "debug",
        [](const std::string& value) {
          return value == "true" || value.empty();
        },
-       "true", "是否开启调试模式"
+       "../log", "开启调试模式，并将结果输出到指定目录下"
      ),
      OptionConvention(
        "compare_result",
@@ -85,35 +71,45 @@ void HandleResultBegin(const fs::path& filename) {
     throw std::runtime_error("show_result 和 debug 不能同时为 true");
   }
   if (compare_result) {
-    // std::cout << "本次测试模式：和预期结果比较" << std::endl;
+    tensorslow::ConsoleLogger::getInstance().log(
+      "本次测试模式：和预期结果比较\n"
+    );
     auto filename_dir = filename.parent_path();
     auto write_filename =
       filename_dir / filename_dir.filename().replace_extension(".out");
-    // std::cout << "输出结果到: " << write_filename << std::endl;
-    redirectCout.redirectToFile(write_filename.string());
+    tensorslow::ConsoleLogger::getInstance().log("输出结果到: ");
+    tensorslow::ConsoleLogger::getInstance().log(write_filename.string());
+    tensorslow::ConsoleLogger::getInstance().log("\n");
+    tensorslow::ConsoleLogger::getInstance().setCallback(
+      std::make_shared<FileLogStrategy>(write_filename.string())
+    );
     return;
   }
   if (show_result) {
-    std::cout << "本次测试模式：直接输出结果" << std::endl;
+    tensorslow::ConsoleLogger::getInstance().log("本次测试模式：直接输出结果\n"
+    );
     return;
   }
   if (debug) {
-    std::cout << "本次测试模式：调试模式" << std::endl;
-    std::cout << "输出结果到:"
-              << (fs::path("../log") /
-                  (filename.stem().replace_extension(".log")).filename())
-              << std::endl;
-    redirectCout.redirectToFile(
-      (fs::path("../log") /
-       (filename.stem().replace_extension(".log")).filename())
-        .string()
+    auto debug_dir = Config::Get("debug");
+    auto log_file =
+      (fs::path(debug_dir) /
+       (filename.stem().replace_extension(".log")).filename());
+    tensorslow::ConsoleLogger::getInstance().log("本次测试模式：调试模式\n");
+    tensorslow::ConsoleLogger::getInstance().log("输出结果到: ");
+    tensorslow::ConsoleLogger::getInstance().log(log_file.string());
+    tensorslow::ConsoleLogger::getInstance().log("\n");
+    tensorslow::ConsoleLogger::getInstance().setCallback(
+      std::make_shared<FileLogStrategy>(log_file.string())
     );
     return;
   }
 }
 
 void HandleResultEnd(const fs::path& filename) {
-  redirectCout.restore();
+  tensorslow::ConsoleLogger::getInstance().setCallback(
+    std::make_shared<DefaultLogStrategy>()
+  );
   bool compare_result = Config::Has("compare_result");
   if (compare_result) {
     auto filename_dir = filename.parent_path();
@@ -129,18 +125,24 @@ void HandleResultEnd(const fs::path& filename) {
     while (std::getline(write_stream, write_line)) {
       std::getline(expected_stream, expected_line);
       if (write_line != expected_line) {
-        std::cout << "❌ 测试失败" << std::endl;
-        std::cout << "预期结果: " << expected_line << std::endl;
-        std::cout << "实际结果: " << write_line << std::endl;
+        tensorslow::ConsoleLogger::getInstance().log("❌ 测试失败\n");
+        tensorslow::ConsoleLogger::getInstance().log("预期结果: ");
+        tensorslow::ConsoleLogger::getInstance().log(expected_line);
+        tensorslow::ConsoleLogger::getInstance().log("\n");
+        tensorslow::ConsoleLogger::getInstance().log("实际结果: ");
+        tensorslow::ConsoleLogger::getInstance().log(write_line);
+        tensorslow::ConsoleLogger::getInstance().log("\n");
         exit(1);
       }
     }
-    // std::cout << "✅ 测试通过" << std::endl;
+    tensorslow::ConsoleLogger::getInstance().log("✅ 测试通过\n");
     return;
   }
 }
 void RunTest(const fs::path& filename) {
-  // std::cout << "解析字节码文件: " << filename << std::endl;
+  tensorslow::ConsoleLogger::getInstance().log("解析字节码文件: ");
+  tensorslow::ConsoleLogger::getInstance().log(filename.string());
+  tensorslow::ConsoleLogger::getInstance().log("\n");
   Runtime::BinaryFileParser parser(filename);
   auto code = parser.Parse();
 
@@ -149,7 +151,7 @@ void RunTest(const fs::path& filename) {
     Runtime::Interpreter::Run(code);
   } catch (const std::exception& e) {
     PrintFrame(Runtime::Interpreter::Instance().CurrentFrame());
-    std::cerr << "Caught exception: " << e.what() << std::endl;
+    tensorslow::ErrorLogger::getInstance().log(e.what());
     throw;
   }
 
@@ -162,31 +164,6 @@ int main(int argc, char** argv) {
 #endif
   DefineOption();
   Config::Accept(argc, argv);
-  if (Config::Has("dir")) {
-    auto dir = Config::Get("dir");
-    std::vector<fs::path> subdirs;
-    for (const auto& entry : fs::directory_iterator(dir)) {
-      if (entry.is_directory()) {
-        subdirs.push_back(entry.path());
-      }
-    }
-    for (const auto& subdir : subdirs) {
-      auto files = GetFilesInDirectory(subdir.string(), ".pyc");
-      std::cout << std::endl
-                << "测试用例:" << subdir.filename().string() << std::endl;
-      for (const auto& file : files) {
-        RunTest(file);
-      }
-    }
-    return 0;
-  }
-  if (Config::Has("file")) {
-    auto file = Config::Get("file");
-
-    RunTest(file);
-
-    return 0;
-  }
   auto file = Config::Get("file");
   if (!file.empty()) {
     RunTest(file);

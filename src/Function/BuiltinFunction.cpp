@@ -5,7 +5,6 @@
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyType.h"
 #include "Object/Function/PyFunction.h"
-#include "Object/Function/PyMethod.h"
 #include "Object/Function/PyNativeFunction.h"
 #include "Object/Iterator/PyGenerator.h"
 #include "Object/Matrix/PyMatrix.h"
@@ -14,6 +13,7 @@
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
 #include "Runtime/Interpreter.h"
+#include "Tools/Logger/ConsoleLogger.h"
 
 #include <iomanip>
 #include <iostream>
@@ -33,11 +33,17 @@ Object::PyObjPtr Identity(const Object::PyObjPtr& args) {
 }
 
 void DebugPrint(const Object::PyObjPtr& obj) {
+  tensorslow::ConsoleLogger::getInstance().log("[DEBUG] ");
   if (obj->is(Object::StringKlass::Self())) {
-    std::cout << obj->as<Object::PyString>()->ToCppString() << std::endl;
-    return;
+    tensorslow::ConsoleLogger::getInstance().log(
+      obj->as<Object::PyString>()->ToCppString()
+    );
+  } else {
+    tensorslow::ConsoleLogger::getInstance().log(
+      obj->str()->as<Object::PyString>()->ToCppString()
+    );
   }
-  std::cout << obj->str()->as<Object::PyString>()->ToCppString() << std::endl;
+  tensorslow::ConsoleLogger::getInstance().log("\n");
 }
 
 Object::PyObjPtr Print(const Object::PyObjPtr& args) {
@@ -48,9 +54,9 @@ Object::PyObjPtr Print(const Object::PyObjPtr& args) {
     return Object::CreatePyNone();
   }
   argList->GetItem(0)->str()->as<Object::PyString>()->Print();
-  auto sep = Object::CreatePyString(" ")->as<Object::PyString>()->ToCppString();
+  auto sep = Object::CreatePyString(" ")->as<Object::PyString>();
   for (Index i = 1; i < argList->Length(); i++) {
-    std::cout << sep;
+    sep->Print();
     auto arg = argList->GetItem(i);
     arg->str()->as<Object::PyString>()->Print();
   }
@@ -196,7 +202,9 @@ Object::PyObjPtr Time(const Object::PyObjPtr& args) {
   oss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");
   oss << '.' << std::setfill('0') << std::setw(9) << ns;  // 显示纳秒，补零到9位
 
-  std::cout << "Current time: " << oss.str() << std::endl;
+  tensorslow::ConsoleLogger::getInstance().log("Current time: ");
+  tensorslow::ConsoleLogger::getInstance().log(oss.str());
+  tensorslow::ConsoleLogger::getInstance().log("\n");
   return Object::CreatePyNone();
 }
 /*

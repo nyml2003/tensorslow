@@ -297,11 +297,9 @@ void PrintCode(const PyCodePtr& code) {
   codeObj->VarNames()->str()->as<PyString>()->PrintLine(false);
   CreatePyString("instructions:")->as<PyString>()->PrintLine();
   PyString::IncreaseIndent();
-  //  ForEach(codeObj->Instructions(), [](const PyObjPtr& inst) {
-  //    inst->str()->as<PyString>()->PrintLine();
-  //  });
   for (Index i = 0; i < codeObj->Instructions()->Length(); i++) {
-    std::cout << i << ": " << std::flush;
+    CreatePyString(std::to_string(i))->Print(false);
+    CreatePyString(": ")->Print(false);
     auto inst = codeObj->Instructions()->GetItem(i);
     inst->str()->as<PyString>()->PrintLine(false);
   }

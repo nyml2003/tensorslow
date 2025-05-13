@@ -180,7 +180,8 @@ tensorslow::Object::PyCodePtr Compile(ANTLRInputStream* inputStream) {
   // 打印词法
   if (Config::Has("show_tokens")) {
     std::cout << "词法分析结果: " << std::endl;
-    for (const auto& token : tokens.getTokens()) {
+    tensorslow::ConsoleLogger::getInstance for (const auto& token :
+                                                tokens.getTokens()) {
       std::cout << token->toString() << " ";
     }
     std::cout << std::endl;

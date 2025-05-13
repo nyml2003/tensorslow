@@ -70,7 +70,7 @@ Object::PyDictPtr Genesis() {
   builtins->Put(
     Object::CreatePyString("whoami"),
     Object::CreatePyString("版权所有 © 2025 蒋钦禹. 保留所有权利。")
-    );
+  );
 
   // 内置全局对象
   builtins->Put(
@@ -184,59 +184,5 @@ Object::PyDictPtr Genesis() {
   );
   return builtins;
 }
-
-// Object::PyObjPtr BuiltinMatrix() {
-//   auto matrix =
-//   std::make_shared<Object::PyObject>(Object::ObjectKlass::Self()); auto attr
-//   = matrix->Attributes(); attr->Put(
-//     Object::CreatePyString("array"),
-//     Object::CreatePyNativeFunction(Object::Matrix)
-//   );
-//   attr->Put(
-//     Object::CreatePyString("eye"),
-//     Object::CreatePyNativeFunction(Object::Eye)
-//   );
-//   attr->Put(
-//     Object::CreatePyString("zeros"),
-//     Object::CreatePyNativeFunction(Object::Zeros)
-//   );
-//   attr->Put(
-//     Object::CreatePyString("ones"),
-//     Object::CreatePyNativeFunction(Object::Ones)
-//   );
-//   attr->Put(
-//     Object::CreatePyString("diag"),
-//     Object::CreatePyNativeFunction(Object::Diagnostic)
-//   );
-//   attr->Put(
-//     Object::CreatePyString("transpose"),
-//     Object::CreatePyNativeFunction(Object::Transpose)
-//   );
-//   attr->Put(
-//     Object::CreatePyString("reshape"),
-//     Object::CreatePyNativeFunction(Object::Reshape)
-//   );
-//   attr->Put(
-//     Object::CreatePyString("shape"),
-//     Object::CreatePyNativeFunction(Object::Shape)
-//   );
-//   attr->Put(
-//     Object::CreatePyString("concatenate"),
-//     Object::CreatePyNativeFunction(Object::Concatenate)
-//   );
-//   attr->Put(
-//     Object::CreatePyString("ravel"),
-//     Object::CreatePyNativeFunction(Object::Ravel)
-//   );
-//   attr->Put(
-//     Object::CreatePyString("normal"),
-//     Object::CreatePyNativeFunction(Function::Normal)
-//   );
-//   attr->Put(
-//     Object::CreatePyString("shuffle"),
-//     Object::CreatePyNativeFunction(Function::Shuffle)
-//   );
-//   return matrix;
-// }
 
 }  // namespace tensorslow::Runtime

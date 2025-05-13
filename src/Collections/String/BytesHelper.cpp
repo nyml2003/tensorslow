@@ -2,8 +2,8 @@
 #include "Collections/Integer/DecimalHelper.h"
 #include "Collections/Integer/IntegerHelper.h"
 #include "Collections/String/StringHelper.h"
+#include "Tools/Logger/ConsoleLogger.h"
 
-#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
@@ -14,10 +14,7 @@ String ReprByte(Byte byte) {
   std::snprintf(buffer, sizeof(buffer), "\\x%02X", byte);
   return CreateStringWithCString(buffer);
 }
-String CreateBytesWithCString(const char* str) {
-  Byte* data = reinterpret_cast<Byte*>(const_cast<char*>(str));
-  return String(List<Byte>(static_cast<Index>(std::strlen(str)), data));
-}
+
 void Write(const String& bytes, const String& filename) {
   std::string data = bytes.ToCppString();
   std::string filenameCppString = filename.ToCppString();
@@ -29,9 +26,14 @@ void Write(const String& bytes, const String& filename) {
     std::cerr << "无法打开文件：" << filenameCppString << std::endl;
     return;
   }
-  file.write(data.data(), data.size());
-  std::cout << "写入文件：" << filenameCppString << std::endl;
-  std::cout << "文件大小：" << data.size() << " 字节" << std::endl;
+  file.write(data.data(), std::streamsize(data.size()));
+  tensorslow::ConsoleLogger::getInstance().log("写入文件：");
+  tensorslow::ConsoleLogger::getInstance().log(filenameCppString);
+  tensorslow::ConsoleLogger::getInstance().log("\n");
+  tensorslow::ConsoleLogger::getInstance().log("文件大小：");
+  tensorslow::ConsoleLogger::getInstance().log(std::to_string(data.size()));
+  tensorslow::ConsoleLogger::getInstance().log("字节");
+  tensorslow::ConsoleLogger::getInstance().log("\n");
   if (!file) {
     std::cerr << "写入文件时出错：" << filenameCppString << std::endl;
   }
@@ -61,12 +63,6 @@ String Serialize(const String& value) {
   bytesWithSize.Append(value);
   return bytesWithSize.ToString();
 }
-double DeserializeDouble(const List<Byte>& bytes) {
-  if (bytes.Size() != sizeof(double)) {
-    throw std::runtime_error("Invalid byte size for double");
-  }
-  return *reinterpret_cast<const double*>(bytes.Data());
-}
 uint64_t DeserializeU64(const List<Byte>& bytes) {
   if (bytes.Size() != sizeof(uint64_t)) {
     throw std::runtime_error("Invalid byte size for uint64_t");
@@ -78,29 +74,14 @@ uint64_t DeserializeU64(const List<Byte>& bytes, Index& offset) {
   offset += sizeof(uint64_t);
   return value;
 }
-int64_t DeserializeI64(const List<Byte>& bytes) {
-  return static_cast<int64_t>(DeserializeU64(bytes));
-}
 int64_t DeserializeI64(const List<Byte>& bytes, Index& offset) {
   return static_cast<int64_t>(DeserializeU64(bytes, offset));
-}
-uint32_t DeserializeU32(const List<Byte>& bytes) {
-  if (bytes.Size() != sizeof(uint32_t)) {
-    throw std::runtime_error("Invalid byte size for uint32_t");
-  }
-  return *reinterpret_cast<const uint32_t*>(bytes.Data());
-}
-int32_t DeserializeI32(const List<Byte>& bytes) {
-  return static_cast<int32_t>(DeserializeU32(bytes));
 }
 uint16_t DeserializeU16(const List<Byte>& bytes) {
   if (bytes.Size() != sizeof(uint16_t)) {
     throw std::runtime_error("Invalid byte size for uint16_t");
   }
   return *reinterpret_cast<const uint16_t*>(bytes.Data());
-}
-String DeserializeString(const List<Byte>& bytes) {
-  return String(bytes.Slice(sizeof(uint64_t), bytes.Size()));
 }
 String Serialize(const Decimal& value) {
   if (value.IsZero()) {
@@ -116,31 +97,6 @@ String Serialize(const Decimal& value) {
     result.Append(DecToByte(data.Get(i)));
   }
   return result.ToString();
-}
-Decimal DeserializeDecimal(const List<Byte>& bytes) {
-  if (bytes.Size() == 0) {
-    return CreateDecimalZero();
-  }
-  Index i = 0;
-  Index size = DeserializeU64(bytes.Slice(i, i + sizeof(uint64_t)));
-  i += sizeof(uint64_t);
-  bool sign = false;
-  switch (bytes.Get(i)) {
-    case '+':
-      sign = false;
-      break;
-    case '-':
-      sign = true;
-      break;
-    default:
-      throw std::runtime_error("Invalid sign for Decimal");
-  }
-  i++;
-  List<int32_t> data;
-  for (Index j = 0; j < size; j++) {
-    data.Push(ByteToDec(bytes.Get(i + j)));
-  }
-  return Decimal(data, sign);
 }
 String Serialize(const Integer& value) {
   if (value.IsZero()) {
@@ -164,7 +120,7 @@ Integer DeserializeInteger(const List<Byte>& bytes) {
   Index i = 0;
   Index size = DeserializeU64(bytes.Slice(i, i + sizeof(uint64_t)));
   i += sizeof(uint64_t);
-  bool sign = false;
+  bool sign;
   switch (bytes.Get(i)) {
     case '+':
       sign = false;

@@ -117,7 +117,7 @@ Integer Integer::Subtract(const Integer& rhs) const {
   if (sign == rhs.sign) {
     // 假定左值大于右值
     bool _sign = false;
-    Index size = 0;
+    Index size;
     List<uint32_t> _lhs = parts.Copy();
     _lhs.Reverse();
     List<uint32_t> _rhs = rhs.parts.Copy();
@@ -150,7 +150,7 @@ Integer Integer::Subtract(const Integer& rhs) const {
     List<uint32_t> result(size);
     bool borrow = false;
     for (Index i = 0; i < size; i++) {
-      uint32_t diff = 0;
+      uint32_t diff;
       uint32_t sub = _rhs.Get(i) + (borrow ? 1 : 0);
       if (_lhs.Get(i) < sub) {
         diff = 0x10000 + _lhs.Get(i) - sub;

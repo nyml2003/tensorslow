@@ -35,4 +35,4 @@ class Decimal {
   [[nodiscard]] Decimal Copy() const;
 };
 }  // namespace tensorslow::Collections
-#endif  // TENSORSLOW_UTIL_Decimal_H
+#endif  // TENSORSLOW_COLLECTIONS_DECIMAL_H
