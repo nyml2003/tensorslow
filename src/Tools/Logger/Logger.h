@@ -25,7 +25,10 @@ class Logger {
   virtual void log(const std::string& msg) = 0;
 
  protected:
-  Logger() : m_callback(std::make_shared<DefaultLogStrategy>()) {}
+  explicit Logger();
+  explicit Logger(std::shared_ptr<LogStrategy> callback)
+    : m_callback(std::move(callback)) {}
+
   std::mutex m_mutex;
   std::shared_ptr<LogStrategy> m_callback;
 };

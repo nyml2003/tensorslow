@@ -30,7 +30,7 @@ class ConsoleLogger : public Logger {
   ConsoleLogger& operator=(const ConsoleLogger&) = delete;
 
  private:
-  ConsoleLogger() = default;
+  ConsoleLogger() : Logger(std::make_shared<DefaultLogStrategy>()) {}
 };
 
 }  // namespace tensorslow
