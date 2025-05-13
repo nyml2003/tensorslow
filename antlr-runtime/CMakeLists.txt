@@ -6,7 +6,9 @@ option(ANTLR_BUILD_STATIC "Build the static library of the ANTLR runtime" ON)
 if (NOT ANTLR_BUILD_SHARED AND NOT ANTLR_BUILD_STATIC)
     message(FATAL_ERROR "Options ANTLR_BUILD_SHARED and ANTLR_BUILD_STATIC can't both be OFF")
 endif ()
-set(ANTLR_SOURCE_DIR ${CMAKE_SOURCE_DIR}/antlr-runtime/src)
+if ("${ANTLR_SOURCE_DIR}" STREQUAL "")
+    set(ANTLR_SOURCE_DIR "${CMAKE_SOURCE_DIR}/antlr-runtime/src")
+endif ()
 set(libantlrcpp_INCLUDE_INSTALL_DIR "include/antlr4-runtime")
 set(libantlrcpp_INCLUDE_DIRS
         ${ANTLR_SOURCE_DIR}

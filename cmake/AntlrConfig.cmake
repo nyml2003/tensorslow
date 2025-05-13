@@ -1,12 +1,11 @@
 set(tensorslow_antlr4_grammar_dir ${tensorslow_dir}/grammar)
 set(tensorslow_antlr4_generated_dir ${tensorslow_dir}/generated)
-set(ANTLR_SOURCE_DIR ${tensorslow_dir}/antlr-runtime)
-add_subdirectory(${ANTLR_SOURCE_DIR} ${CMAKE_BINARY_DIR}/antlr4_build)
+add_subdirectory(${tensorslow_dir}/antlr-runtime ${CMAKE_BINARY_DIR}/antlr4_build)
 include_directories(${tensorslow_antlr4_generated_dir})
-include_directories(${ANTLR_SOURCE_DIR}/src)
+include_directories(${tensorslow_dir}/antlr-runtime/src)
 set(ANTLR_GENERATION_COMPLETE_FLAG ${tensorslow_antlr4_generated_dir}/.antlr4_generation_complete)
 
-if(CMAKE_SYSTEM_NAME MATCHES "Windows")
+if (CMAKE_SYSTEM_NAME MATCHES "Windows")
     # Windows 使用 PowerShell 执行
     add_custom_command(
             OUTPUT ${ANTLR_GENERATION_COMPLETE_FLAG}
@@ -19,7 +18,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
             COMMENT "Generating ANTLR files using local JAR (only once)"
             VERBATIM
     )
-else()
+else ()
     # Linux/Mac 使用直接命令
     add_custom_command(
             OUTPUT ${ANTLR_GENERATION_COMPLETE_FLAG}
@@ -37,7 +36,7 @@ else()
             COMMENT "Generating ANTLR files using local JAR (only once)"
             VERBATIM
     )
-endif()
+endif ()
 
 add_custom_target(antlr4_generate ALL DEPENDS ${ANTLR_GENERATION_COMPLETE_FLAG})
 file(GLOB_RECURSE tensorslow_antlr4_generated_files ${tensorslow_antlr4_generated_dir}/*.cpp ${tensorslow_antlr4_generated_dir}/*.h)
