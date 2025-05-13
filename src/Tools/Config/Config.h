@@ -40,6 +40,16 @@ class Config {
     Instance().SetParameters(parameters);
   }
 
+  static void Accept(const std::map<std::string, std::string>& parameters) {
+    for (const auto& [option, value] : parameters) {
+      const auto& param = Schema::Find(option);
+      if (!param.validate(value)) {
+        throw std::invalid_argument("Invalid value for parameter: " + option);
+      }
+    }
+    Instance().SetParameters(parameters);
+  }
+
   static std::string Get(const std::string& option) {
     const auto& parameters = Config::Instance().Parameters();
     auto it = parameters.find(option);
