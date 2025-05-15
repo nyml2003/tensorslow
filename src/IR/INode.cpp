@@ -51,9 +51,9 @@ void PrintEdge(
   if (text == nullptr) {
     IntermediateCodeLogger::getInstance().log("--->");
   } else {
-    IntermediateCodeLogger::getInstance().log("--");
+    IntermediateCodeLogger::getInstance().log("-- ");
     IntermediateCodeLogger::getInstance().log(text->ToCppString());
-    IntermediateCodeLogger::getInstance().log("-->");
+    IntermediateCodeLogger::getInstance().log(" -->");
   }
   IntermediateCodeLogger::getInstance().log(
     Function::Identity(Object::CreatePyList({child}))
