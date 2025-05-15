@@ -1,4 +1,5 @@
 #include "IR/MemberAccess.h"
+#include "IR/Expression/Atom.h"
 #include "Object/Core/PyNone.h"
 
 namespace tensorslow::IR {
@@ -40,6 +41,7 @@ Object::PyObjPtr MemberAccessKlass::print(const Object::PyObjPtr& obj) {
   auto member = memberAccess->Member();
   PrintNode(memberAccess, Object::CreatePyString("MemberAccess"));
   object->print();
+  CreateAtom(member, nullptr)->print();
   PrintEdge(memberAccess, object, Object::CreatePyString("object"));
   PrintEdge(memberAccess, member, Object::CreatePyString("member"));
   return Object::CreatePyNone();
