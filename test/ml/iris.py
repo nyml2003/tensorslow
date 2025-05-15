@@ -488,19 +488,20 @@ def train():
 
     for epoch in range(50):
         batch_counter = 0
+        epoch_loss = 0.0
         for i in range(len(train_set)):
             features = train_set[i, :-3].T.reshape([4, 1])
             l = Array(train_set[i, -3:]).T.reshape([3, 1])
             x.set_value(features)
             label.set_value(l)
             optimizer.step()
+            epoch_loss += loss.value[0, 0]
             batch_counter += 1
             if batch_counter == batch_size:
                 optimizer.update()
                 batch_counter = 0
         accuracy = predict_and_evaluate(train_set, predict, x)
-        if epoch % 10 == 1 or epoch == 50:
-            print("epoch: ", epoch, "train accuracy: ", accuracy)
+        print("epoch: ", epoch, "train accuracy: ", accuracy, "loss: ", epoch_loss / float(len(train_set)))
     accuracy = predict_and_evaluate(test_set, predict, x)
     print("test accuracy: ", accuracy)
 

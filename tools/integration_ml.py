@@ -18,8 +18,8 @@ else:
 
 # print(f"Build directory: {build_dir}")
 test_dir = r"D:\code\project\tensorslow\test\ml_base"
-frontend_exe = os.path.join(build_dir, "tensorslow_frontend.exe")
-backend_exe = os.path.join(build_dir, "tensorslow_backend.exe")
+frontend_exe = os.path.join(build_dir, "tensorslow_compiler.exe")
+backend_exe = os.path.join(build_dir, "tensorslow_interpreter.exe")
 
 # 获取测试目录下的所有子目录
 subdirs = [d for d in os.listdir(test_dir) if os.path.isdir(os.path.join(test_dir, d))]

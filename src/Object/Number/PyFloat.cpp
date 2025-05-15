@@ -26,6 +26,9 @@ PyObjPtr FloatKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {
     );
   }
   auto value = argList->GetItem(0);
+  if (value->is(IntegerKlass::Self())) {
+    return CreatePyFloat(static_cast<double>(value->as<PyInteger>()->ToU64()));
+  }
   if (!value->is(Self())) {
     throw std::runtime_error("PyFloat::init(): value is not a float");
   }
