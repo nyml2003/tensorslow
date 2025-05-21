@@ -335,7 +335,7 @@ PyObjPtr FrameKlass::repr(const PyObjPtr& obj) {
   }
   auto frame = obj->as<PyFrame>();
   return StringConcat(CreatePyList(
-    {CreatePyString("<frame at ")->as<PyString>(),
+    {CreatePyString("<frame object at ")->as<PyString>(),
      Function::Identity(CreatePyList({obj}))->as<PyString>(),
      CreatePyString(">")->as<PyString>()}
   ));
@@ -408,6 +408,7 @@ void PrintFrame(const PyFramePtr& frame) {
   } else {
     VerboseLogger::getInstance().log("This is the top frame\n");
   }
+  VerboseLogger::getInstance().log("</frame>\n");
 }
 PyFramePtr PyFrame::Caller() const {
   return caller;
