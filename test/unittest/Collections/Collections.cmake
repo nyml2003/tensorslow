@@ -1,0 +1,5 @@
+include(${tensorslow_dir}/test/unittest/Collections/List.cmake)
+include(${tensorslow_dir}/test/unittest/Collections/String.cmake)
+include(${tensorslow_dir}/test/unittest/Collections/Integer.cmake)
+include(${tensorslow_dir}/test/unittest/Collections/Decimal.cmake)
+include(${tensorslow_dir}/test/unittest/Collections/Matrix.cmake)
