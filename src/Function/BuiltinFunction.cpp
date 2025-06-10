@@ -12,7 +12,7 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
-#include "Runtime/Interpreter.h"
+#include "Runtime/VirtualMachine.h"
 #include "Tools/Logger/ConsoleLogger.h"
 
 #include <iomanip>
@@ -283,14 +283,14 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
 
   // 创建执行环境
   auto globals = function->Globals();
-  auto preFrame = Runtime::Interpreter::Instance().CurrentFrame();
+  auto preFrame = Runtime::VirtualMachine::Instance().CurrentFrame();
   auto __name__ = globals->getitem(Object::CreatePyString("__name__"));
   // 保存当前帧
   // 创建新帧并执行类定义函数
   auto frame =
     Object::CreateFrameWithPyFunction(function, Object::CreatePyList());
   auto result = frame->Eval();
-  Runtime::Interpreter::Instance().BackToParentFrame();
+  Runtime::VirtualMachine::Instance().BackToParentFrame();
   if (!result->is(Object::NoneKlass::Self())) {
     throw std::runtime_error("Class definition failed");
   }

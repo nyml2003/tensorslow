@@ -1,4 +1,4 @@
-#include <future>
+
 #include <memory>
 #include "../test_default.h"
 

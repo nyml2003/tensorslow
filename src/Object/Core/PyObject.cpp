@@ -6,7 +6,7 @@
 #include "Object/Function/PyNativeFunction.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
-#include "Runtime/Interpreter.h"
+#include "Runtime/VirtualMachine.h"
 
 namespace tensorslow::Object {
 
@@ -87,7 +87,9 @@ bool operator!=(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 bool operator<(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   auto ltFunc = lhs->getattr(CreatePyString("__lt__")->as<PyString>());
   if (ltFunc != nullptr) {
-    return Runtime::Interpreter::Eval(ltFunc, CreatePyList({rhs})->as<PyList>())
+    return Runtime::VirtualMachine::Eval(
+             ltFunc, CreatePyList({rhs})->as<PyList>()
+    )
       ->as<PyBoolean>()
       ->Value();
   }

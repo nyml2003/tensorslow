@@ -4,7 +4,7 @@
 #include "Object/Core/PyObject.h"
 #include "Object/Iterator/Iterator.h"
 #include "Object/Runtime/PyFrame.h"
-#include "Runtime/Interpreter.h"
+#include "Runtime/VirtualMachine.h"
 
 namespace tensorslow::Object {
 class PyGenerator;
@@ -43,9 +43,9 @@ class PyGenerator : public PyObject {
     : PyObject(GeneratorKlass::Self()), frame(std::move(_frame)) {
     func = [](const PyGeneratorPtr& self) {
       auto result = self->frame->StackTop();
-      auto lastFrame = Runtime::Interpreter::Instance().CurrentFrame();
+      auto lastFrame = Runtime::VirtualMachine::Instance().CurrentFrame();
       auto newGenerator = self->frame->Eval();
-      Runtime::Interpreter::Instance().SetFrame(lastFrame);
+      Runtime::VirtualMachine::Instance().SetFrame(lastFrame);
       if (!newGenerator->is(GeneratorKlass::Self())) {
         // 说明是return
         self->isExhausted = true;

@@ -17,7 +17,7 @@
 #include "Object/Runtime/PyCode.h"
 #include "Object/Runtime/PyInst.h"
 #include "Object/String/PyString.h"
-#include "Runtime/Interpreter.h"
+#include "Runtime/VirtualMachine.h"
 #include "Tools/Config/Config.h"
 #include "Tools/Logger/BytecodeLogger.h"
 #include "Tools/Logger/ConsoleLogger.h"
@@ -50,7 +50,7 @@ PyFramePtr CreateModuleEntryFrame(const PyCodePtr& code) {
   auto caller = nullptr;
   auto frame =
     std::make_shared<PyFrame>(code, locals, globals, fastLocals, caller);
-  Runtime::Interpreter::Instance().SetFrame(frame);
+  Runtime::VirtualMachine::Instance().SetFrame(frame);
   return frame;
 }
 
@@ -65,10 +65,10 @@ PyFramePtr CreateFrameWithPyFunction(
   for (Index i = arguments->Length(); i < nLocals; i++) {
     arguments->Append(PyNone::Instance());
   }
-  auto caller = Runtime::Interpreter::Instance().CurrentFrame();
+  auto caller = Runtime::VirtualMachine::Instance().CurrentFrame();
   auto frame =
     std::make_shared<PyFrame>(code, locals, globals, arguments, caller);
-  Runtime::Interpreter::Instance().SetFrame(frame);
+  Runtime::VirtualMachine::Instance().SetFrame(frame);
   return frame;
 }
 
@@ -673,7 +673,7 @@ PyObjPtr PyFrame::Eval() {
         auto argumentCount = std::get<Index>(inst->Operand());
         auto argList = CreatePyList(stack.Top(argumentCount))->as<PyList>();
         auto func = stack.Pop();
-        auto result = Runtime::Interpreter::Eval(func, argList);
+        auto result = Runtime::VirtualMachine::Eval(func, argList);
         stack.Push(result);
         NextProgramCounter();
         break;
@@ -687,9 +687,11 @@ PyObjPtr PyFrame::Eval() {
           found = true;
           value = globals->getitem(key);
         }
-        if (!found && IsTrue(Runtime::Interpreter::Instance().Builtins()->contains(key))) {
+        if (!found &&
+            IsTrue(Runtime::VirtualMachine::Instance().Builtins()->contains(key)
+            )) {
           found = true;
-          value = Runtime::Interpreter::Instance().Builtins()->getitem(key);
+          value = Runtime::VirtualMachine::Instance().Builtins()->getitem(key);
         }
         if (!found) {
           auto errorMessage = StringConcat(CreatePyList(
@@ -725,9 +727,11 @@ PyObjPtr PyFrame::Eval() {
           found = true;
           value = globals->getitem(key);
         }
-        if (!found && IsTrue(Runtime::Interpreter::Instance().Builtins()->contains(key))) {
+        if (!found &&
+            IsTrue(Runtime::VirtualMachine::Instance().Builtins()->contains(key)
+            )) {
           found = true;
-          value = Runtime::Interpreter::Instance().Builtins()->getitem(key);
+          value = Runtime::VirtualMachine::Instance().Builtins()->getitem(key);
         }
         if (!found) {
           throw std::runtime_error(
@@ -827,7 +831,7 @@ PyObjPtr PyFrame::Eval() {
         break;
       }
       case ByteCode::LOAD_BUILD_CLASS: {
-        stack.Push(Runtime::Interpreter::Instance().Builtins()->getitem(
+        stack.Push(Runtime::VirtualMachine::Instance().Builtins()->getitem(
           CreatePyString("__build_class__")
         ));
         NextProgramCounter();
@@ -873,7 +877,7 @@ PyObjPtr PyFrame::Eval() {
 
 PyObjPtr PyFrame::EvalWithDestory() {
   auto result = Eval();
-  Runtime::Interpreter::Instance().BackToParentFrame();
+  Runtime::VirtualMachine::Instance().BackToParentFrame();
   return result;
 }
 

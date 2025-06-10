@@ -10,7 +10,7 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
-#include "Runtime/Interpreter.h"
+#include "Runtime/VirtualMachine.h"
 #include "Tools/Config/Config.h"
 
 namespace tensorslow::Object {
@@ -243,7 +243,9 @@ PyObjPtr MatrixKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
         rowValue = row->ToU64();
       }
       if (row->GetSign() == Collections::Integer::IntSign::Negative) {
-        int64_t temp = static_cast<int64_t>(matrix->Rows()->as<PyInteger>()->ToU64()) + row->ToI64();
+        int64_t temp =
+          static_cast<int64_t>(matrix->Rows()->as<PyInteger>()->ToU64()) +
+          row->ToI64();
         assert(temp >= 0 && "Negative index not allowed");
         rowValue = static_cast<Index>(temp);
       }

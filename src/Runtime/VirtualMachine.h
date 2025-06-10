@@ -1,5 +1,5 @@
-#ifndef TENSORSLOW_RUNTIME_INTERPRETER_H
-#define TENSORSLOW_RUNTIME_INTERPRETER_H
+#ifndef TENSORSLOW_RUNTIME_VIRTUAL_MACHINE_H
+#define TENSORSLOW_RUNTIME_VIRTUAL_MACHINE_H
 
 #include "Object/Function/PyMethod.h"
 #include "Object/Function/PyNativeFunction.h"
@@ -9,14 +9,14 @@
 
 namespace tensorslow::Runtime {
 
-class Interpreter {
+class VirtualMachine {
  private:
   Object::PyFramePtr frame;
   Object::PyDictPtr builtins;
-  explicit Interpreter();
+  explicit VirtualMachine();
 
  public:
-  static Interpreter& Instance();
+  static VirtualMachine& Instance();
 
   static void Run(const Object::PyCodePtr& code);
 

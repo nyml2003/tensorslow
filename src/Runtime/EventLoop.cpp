@@ -14,6 +14,7 @@ void EventLoop::Run() {
   while (running) {
     std::unique_lock<std::mutex> lock(queueMutex);
 
+
     // Process microtasks first
     while (!microTaskQueue.empty()) {
       auto task = microTaskQueue.front();
@@ -53,5 +54,6 @@ void EventLoop::EnqueueMicroTask(const Object::PyNativeFunctionPtr& task) {
   microTaskQueue.push(task);
   taskConditionVar.notify_one();
 }
+
 
 }  // namespace tensorslow::Runtime

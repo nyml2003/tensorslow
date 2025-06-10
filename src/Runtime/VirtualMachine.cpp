@@ -1,4 +1,3 @@
-#include "Runtime/Interpreter.h"
 #include "Object/Container/PyDictionary.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"
@@ -10,42 +9,43 @@
 #include "Object/Runtime/PyCode.h"
 #include "Object/Runtime/PyFrame.h"
 #include "Runtime/Genesis.h"
+#include "Runtime/VirtualMachine.h"
 
 namespace tensorslow::Runtime {
 
-Interpreter::Interpreter() {
+VirtualMachine::VirtualMachine() {
   frame = nullptr;
   builtins = Genesis();
 }
 
-Interpreter& Interpreter::Instance() {
-  static Interpreter instance;
+VirtualMachine& VirtualMachine::Instance() {
+  static VirtualMachine instance;
   return instance;
 }
 
-Object::PyFramePtr Interpreter::CurrentFrame() const {
+Object::PyFramePtr VirtualMachine::CurrentFrame() const {
   return frame;
 }
 
-void Interpreter::SetFrame(const Object::PyFramePtr& child) {
+void VirtualMachine::SetFrame(const Object::PyFramePtr& child) {
   frame = child;
 }
 
-void Interpreter::Run(const Object::PyCodePtr& code) {
+void VirtualMachine::Run(const Object::PyCodePtr& code) {
   auto result = CreateModuleEntryFrame(code)->EvalWithDestory();
   if (!result->is(Object::NoneKlass::Self())) {
     throw std::runtime_error("Module code did not return None");
   }
 }
 
-Object::PyObjPtr Interpreter::EvalConstructor(
+Object::PyObjPtr VirtualMachine::EvalConstructor(
   const Object::PyTypePtr& type,
   const Object::PyListPtr& arguments
 ) {
   return type->Owner()->init(type, arguments);
 }
 
-Object::PyObjPtr Interpreter::EvalMethod(
+Object::PyObjPtr VirtualMachine::EvalMethod(
   const Object::PyMethodPtr& func,
   const Object::PyListPtr& arguments
 ) {
@@ -54,21 +54,21 @@ Object::PyObjPtr Interpreter::EvalMethod(
   return Eval(function, arguments->Prepend(owner)->as<Object::PyList>());
 }
 
-Object::PyObjPtr Interpreter::EvalPyFunction(
+Object::PyObjPtr VirtualMachine::EvalPyFunction(
   const Object::PyFunctionPtr& func,
   const Object::PyListPtr& arguments
 ) {
   return CreateFrameWithPyFunction(func, arguments)->EvalWithDestory();
 }
 
-Object::PyObjPtr Interpreter::EvalNativeFunction(
+Object::PyObjPtr VirtualMachine::EvalNativeFunction(
   const Object::PyNativeFunctionPtr& func,
   const Object::PyListPtr& arguments
 ) {
   return func->Call(arguments);
 }
 
-Object::PyObjPtr Interpreter::Eval(
+Object::PyObjPtr VirtualMachine::Eval(
   const Object::PyObjPtr& func,
   const Object::PyListPtr& arguments
 ) {
@@ -92,11 +92,11 @@ Object::PyObjPtr Interpreter::Eval(
   throw std::runtime_error("Unknown function type");
 }
 
-Object::PyDictPtr Interpreter::Builtins() const {
+Object::PyDictPtr VirtualMachine::Builtins() const {
   return builtins;
 }
 
-void Interpreter::BackToParentFrame() {
+void VirtualMachine::BackToParentFrame() {
   if (!frame->is(Object::FrameKlass::Self())) {
     throw std::runtime_error("Cannot destroy non-frame object");
   }

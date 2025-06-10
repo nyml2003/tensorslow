@@ -12,7 +12,7 @@
 #include "Object/Number/PyFloat.h"
 #include "Object/Number/PyInteger.h"
 #include "Object/String/PyBytes.h"
-#include "Runtime/Interpreter.h"
+#include "Runtime/VirtualMachine.h"
 
 namespace tensorslow::Object {
 void LoadClass(const PyStrPtr& name, const KlassPtr& klass) {
@@ -59,7 +59,7 @@ Invoke(const PyObjPtr& obj, const PyObjPtr& methodName, const PyListPtr& args) {
                          ->as<PyString>();
     throw std::runtime_error(errorMessge->ToCppString());
   }
-  return Runtime::Interpreter::Eval(func, args);
+  return Runtime::VirtualMachine::Eval(func, args);
 }
 
 PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept {

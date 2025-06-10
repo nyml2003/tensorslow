@@ -5,7 +5,7 @@
 #ifndef TENSORSLOW_BACKEND_INIT_H
 #define TENSORSLOW_BACKEND_INIT_H
 #include "Runtime/BinaryFileParser.h"
-#include "Runtime/Interpreter.h"
+#include "Runtime/VirtualMachine.h"
 #include "Tools/Config/Config.h"
 #include "Tools/Config/Schema.h"
 #include "Tools/Logger/ConsoleLogger.h"
@@ -150,12 +150,12 @@ void RunTest(const std::filesystem::path& filename) {
 
   BeforeRun(filename);
   try {
-    Runtime::Interpreter::Run(code);
+    Runtime::VirtualMachine::Run(code);
   } catch (const std::exception& e) {
     VerboseLogger::getInstance().setCallback(
       std::make_shared<ProxyLogStrategy>(&ErrorLogger::getInstance())
     );
-    PrintFrame(Runtime::Interpreter::Instance().CurrentFrame());
+    PrintFrame(Runtime::VirtualMachine::Instance().CurrentFrame());
     ErrorLogger::getInstance().log(e.what());
     throw;
   }

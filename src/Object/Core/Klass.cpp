@@ -10,7 +10,7 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
-#include "Runtime/Interpreter.h"
+#include "Runtime/VirtualMachine.h"
 
 namespace tensorslow::Object {
 
@@ -145,7 +145,7 @@ PyObjPtr Klass::repr(const PyObjPtr& self) {
   }
   auto reprFunc = GetAttr(self, CreatePyString("__repr__")->as<PyString>());
   if (reprFunc != nullptr) {
-    return Runtime::Interpreter::Eval(
+    return Runtime::VirtualMachine::Eval(
       reprFunc, CreatePyList({self})->as<PyList>()
     );
   }
@@ -164,7 +164,7 @@ PyObjPtr Klass::hash(const PyObjPtr& obj) {
   auto hashFunc = obj->getattr(CreatePyString("__hash__")->as<PyString>());
   if (hashFunc != nullptr) {
     auto pyHashValue =
-      Runtime::Interpreter::Eval(hashFunc, CreatePyList()->as<PyList>());
+      Runtime::VirtualMachine::Eval(hashFunc, CreatePyList()->as<PyList>());
     if (!pyHashValue->is(IntegerKlass::Self())) {
       throw std::runtime_error("Hash value must be an integer");
     }
@@ -208,12 +208,14 @@ PyObjPtr Klass::ne(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 PyObjPtr Klass::boolean(const PyObjPtr& obj) {
   auto boolFunc = obj->getattr(CreatePyString("__bool__")->as<PyString>());
   if (boolFunc != nullptr) {
-    return Runtime::Interpreter::Eval(boolFunc, CreatePyList()->as<PyList>());
+    return Runtime::VirtualMachine::Eval(
+      boolFunc, CreatePyList()->as<PyList>()
+    );
   }
   auto lenFunc = obj->getattr(CreatePyString("__len__")->as<PyString>());
   if (lenFunc != nullptr) {
     auto len =
-      Runtime::Interpreter::Eval(lenFunc, CreatePyList()->as<PyList>());
+      Runtime::VirtualMachine::Eval(lenFunc, CreatePyList()->as<PyList>());
     return len->ne(CreatePyInteger(0ull));
   }
   return CreatePyBoolean(true);
@@ -255,7 +257,7 @@ PyObjPtr Klass::getattr(const PyObjPtr& obj, const PyObjPtr& key) {
   if (!isNative) {
     auto attr = GetAttr(obj, CreatePyString("__getattr__")->as<PyString>());
     if (attr != nullptr) {
-      return Runtime::Interpreter::Eval(
+      return Runtime::VirtualMachine::Eval(
         attr, CreatePyList({key})->as<PyList>()
       );
     }
@@ -275,7 +277,9 @@ PyObjPtr Klass::getattr(const PyObjPtr& obj, const PyObjPtr& key) {
   // 如果getattr被重载，那么调用重载的函数
   auto attr = GetAttr(obj, CreatePyString("__getattr__")->as<PyString>());
   if (attr != nullptr) {
-    return Runtime::Interpreter::Eval(attr, CreatePyList({key})->as<PyList>());
+    return Runtime::VirtualMachine::Eval(
+      attr, CreatePyList({key})->as<PyList>()
+    );
   }
   // 对象属性内部没有找到，查找父类
   attr = GetAttr(obj, keyStr);
@@ -294,7 +298,7 @@ PyObjPtr Klass::setattr(
   if (!isNative) {
     auto attr = GetAttr(obj, CreatePyString("__setattr__")->as<PyString>());
     if (attr != nullptr) {
-      return Runtime::Interpreter::Eval(
+      return Runtime::VirtualMachine::Eval(
         attr, CreatePyList({key, value})->as<PyList>()
       );
     }
@@ -309,11 +313,13 @@ PyObjPtr Klass::str(const PyObjPtr& self) {
   }
   auto strFunc = self->getattr(CreatePyString("__str__")->as<PyString>());
   if (strFunc != nullptr) {
-    return Runtime::Interpreter::Eval(strFunc, CreatePyList()->as<PyList>());
+    return Runtime::VirtualMachine::Eval(strFunc, CreatePyList()->as<PyList>());
   }
   auto reprFunc = self->getattr(CreatePyString("__repr__")->as<PyString>());
   if (reprFunc != nullptr) {
-    return Runtime::Interpreter::Eval(reprFunc, CreatePyList()->as<PyList>());
+    return Runtime::VirtualMachine::Eval(
+      reprFunc, CreatePyList()->as<PyList>()
+    );
   }
   return repr(self);
 }

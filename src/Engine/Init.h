@@ -10,7 +10,7 @@
 #include "Python3Lexer.h"
 #include "Python3Parser.h"
 #include "Runtime/BinaryFileParser.h"
-#include "Runtime/Interpreter.h"
+#include "Runtime/VirtualMachine.h"
 #include "Tools/Config/Config.h"
 #include "Tools/Config/Schema.h"
 #include "Tools/Logger/BytecodeLogger.h"
@@ -145,7 +145,9 @@ void ValidateOptions() {
     else
       mode = "compile";
 
-    if ((mode == "interpret" && ext != ".py") || (mode == "interpret_bytecode" && ext != ".pyc") || (mode == "compile" && ext != ".py")) {
+    if ((mode == "interpret" && ext != ".py") ||
+        (mode == "interpret_bytecode" && ext != ".pyc") ||
+        (mode == "compile" && ext != ".py")) {
       ConsoleLogger::getInstance().log(
         "错误: " + mode +
         " 模式要求文件扩展名为 .py（interpret/compile）或 "
@@ -230,12 +232,12 @@ void Interpret(const tensorslow::Object::PyCodePtr& code) {
     );
   }
   try {
-    tensorslow::Runtime::Interpreter::Run(code);
+    tensorslow::Runtime::VirtualMachine::Run(code);
   } catch (const std::exception& e) {
     VerboseLogger::getInstance().setCallback(
       std::make_shared<ProxyLogStrategy>(&ErrorLogger::getInstance())
     );
-    PrintFrame(tensorslow::Runtime::Interpreter::Instance().CurrentFrame());
+    PrintFrame(tensorslow::Runtime::VirtualMachine::Instance().CurrentFrame());
     ErrorLogger::getInstance().log(e.what());
     throw;
   }
