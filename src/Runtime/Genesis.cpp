@@ -9,8 +9,8 @@
 #include "Object/Core/PyType.h"
 #include "Object/Function/PyNativeFunction.h"
 #include "Object/Matrix/MatrixFunction.h"
-#include "Object/Matrix/PyMatrix.h"
 #include "Object/Number/PyFloat.h"
+#include "Object/Number/PyInteger.h"
 #include "Object/String/PyString.h"
 
 namespace tensorslow::Runtime {

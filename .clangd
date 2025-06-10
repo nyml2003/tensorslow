@@ -6,6 +6,8 @@ InlayHints:
   DeducedTypes: true
   TypeNameLimit: 24
 
+
+
 Diagnostics:
   UnusedIncludes: Strict
   ClangTidy:

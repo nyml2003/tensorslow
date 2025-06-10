@@ -1,7 +1,11 @@
+#include "Collections/Integer/Decimal.h"
 #include "Collections/Integer/DecimalHelper.h"
 #include "Collections/Integer/IntegerHelper.h"
 #include "Collections/String/StringHelper.h"
 namespace tensorslow::Collections {
+
+
+
 String Decimal::ToString() const {
   if (IsZero()) {
     return CreateStringWithCString("0");
@@ -28,18 +32,18 @@ Decimal Decimal::Add(const Decimal& rhs) const {
     List<int32_t> result(size + 1);
     int32_t carry = 0;
     for (Index lhsIndex = parts.Size() - 1, rhsIndex = rhs.parts.Size() - 1;
-         ~lhsIndex || ~rhsIndex;) {
+         ((~lhsIndex) != 0U) || ((~rhsIndex) != 0U);) {
       int32_t sum = carry;
-      if (~lhsIndex) {
+      if ((~lhsIndex) != 0U) {
         sum += parts.Get(lhsIndex);
         lhsIndex--;
       }
-      if (~rhsIndex) {
+      if ((~rhsIndex) != 0U) {
         sum += rhs.parts.Get(rhsIndex);
         rhsIndex--;
       }
-      carry = sum / 10;
-      sum %= 10;
+      carry = sum / Decimal::radix;
+      sum %= Decimal::radix;
       result.Push(sum);
     }
     if (carry != 0) {
@@ -97,7 +101,7 @@ Decimal Decimal::Subtract(const Decimal& rhs) const {
   if (sign == rhs.sign) {
     // 假定左值大于右值
     bool newSign = false;
-    Index size;
+    Index size = 0;
     List<int32_t> _lhs = parts.Copy();
     List<int32_t> _rhs = rhs.parts.Copy();
     _lhs.Reverse();
@@ -113,7 +117,7 @@ Decimal Decimal::Subtract(const Decimal& rhs) const {
     } else {
       size = _lhs.Size();
       for (Index lhsIndex = _lhs.Size() - 1, rhsIndex = _rhs.Size() - 1;
-           ~lhsIndex && ~rhsIndex; lhsIndex--, rhsIndex--) {
+           ((~lhsIndex) != 0U) && ((~rhsIndex) != 0U); lhsIndex--, rhsIndex--) {
         if (_lhs.Get(lhsIndex) > _rhs.Get(rhsIndex)) {
           break;
         }
@@ -130,7 +134,7 @@ Decimal Decimal::Subtract(const Decimal& rhs) const {
          lhsIndex++, rhsIndex++) {
       int32_t diff = borrow + _lhs.Get(lhsIndex);
       if (diff < _rhs.Get(rhsIndex)) {
-        diff += 10;
+        diff += Decimal::radix;
         borrow = -1;
       } else {
         borrow = 0;
@@ -160,8 +164,8 @@ Decimal Decimal::Multiply(const Decimal& rhs) const {
       int32_t product = _lhs.Get(i) * _rhs.Get(j);
       Index index = i + j;
       result.Set(index, result.Get(index) + product);
-      result.Set(index + 1, result.Get(index + 1) + result.Get(index) / 10);
-      result.Set(index, result.Get(index) % 10);
+      result.Set(index + 1, result.Get(index + 1) + result.Get(index) / Decimal::radix);
+      result.Set(index, result.Get(index) % Decimal::radix);
     }
   }
   TrimTrailingZero(result);

@@ -13,7 +13,6 @@ add_library(tensorslow_common STATIC ${tensorslow_common_files})
 add_dependencies(tensorslow_common antlr4_generate)
 target_compile_options(tensorslow_common PRIVATE ${tensorslow_cxx_flags})
 target_link_directories(tensorslow_common PUBLIC ${tensorslow_include_directories})
-# set_property(TARGET tensorslow_common PROPERTY CXX_CLANG_TIDY "clang-tidy")
 
 add_executable(
         tensorslow_compiler

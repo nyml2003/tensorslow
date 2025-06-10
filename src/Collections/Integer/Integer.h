@@ -13,6 +13,7 @@ class Integer {
   bool sign = false;
 
  public:
+  static const uint32_t radix = 16;
   enum class IntSign { Positive = 0, Negative = 1 };
   explicit Integer();
   explicit Integer(const List<uint32_t>& _parts, bool _sign);

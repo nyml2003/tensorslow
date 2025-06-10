@@ -3,10 +3,10 @@
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
+#include "Object/Core/PyPromise.h"
 #include "Object/Core/PyType.h"
 #include "Object/Function/PyIife.h"
 #include "Object/Iterator/Iterator.h"
-#include "Object/Iterator/IteratorHelper.h"
 #include "Object/Iterator/PyGenerator.h"
 #include "Object/Matrix/PyMatrix.h"
 #include "Object/Number/PyFloat.h"
@@ -66,7 +66,8 @@ PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept {
   if (obj->Klass()->Attributes()->Contains(attrName)) {
     return obj->Klass()->Attributes()->Get(attrName);
   }
-  if (obj->Klass()->Super()->Length() == 0 && obj->Klass() == ObjectKlass::Self()) {
+  if (obj->Klass()->Super()->Length() == 0 &&
+      obj->Klass() == ObjectKlass::Self()) {
     return nullptr;
   }
   for (Index i = 1; i < obj->Klass()->Mro()->Length(); i++) {
@@ -343,6 +344,7 @@ void LoadBootstrapClasses() {
   IterDoneKlass::Self()->Initialize();
 }
 
+// 加载运行时支持类
 void LoadRuntimeSupportClasses() {
   NoneKlass::Self()->Initialize();
   ObjectKlass::Self()->Initialize();
@@ -359,6 +361,7 @@ void LoadRuntimeSupportClasses() {
   BytesKlass::Self()->Initialize();
   MatrixKlass::Self()->Initialize();
   SliceKlass::Self()->Initialize();
+  PromiseKlass::Self()->Initialize();
 }
 
 }  // namespace tensorslow::Object

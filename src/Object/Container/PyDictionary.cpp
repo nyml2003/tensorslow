@@ -6,7 +6,6 @@
 #include "Object/Function/PyNativeFunction.h"
 #include "Object/Iterator/Iterator.h"
 #include "Object/Iterator/IteratorHelper.h"
-#include "Object/Iterator/PyGenerator.h"
 #include "Object/Number/PyInteger.h"
 #include "Object/String/PyString.h"
 

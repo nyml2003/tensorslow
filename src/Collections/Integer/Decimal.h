@@ -3,6 +3,9 @@
 #include "Collections/List.h"
 #include "Collections/String/String.h"
 namespace tensorslow::Collections {
+
+const uint32_t MaxDecimalPart = 0x10000;
+
 class Decimal {
   friend class List<Decimal>;
   friend class Integer;
@@ -12,6 +15,7 @@ class Decimal {
   bool sign = false;
 
  public:
+  static const int32_t radix = 10;  
   explicit Decimal();
   explicit Decimal(const List<int32_t>& parts, bool sign);
   [[nodiscard]] String ToString() const;

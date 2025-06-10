@@ -36,6 +36,7 @@ list(APPEND tensorslow_cxx_flags
     -Wdouble-promotion -Wformat=2 -Wnull-dereference
     -Wold-style-cast -Woverloaded-virtual -Wunused -Wunreachable-code
     -Wdeprecated -Winvalid-pch -Wstrict-aliasing -Wstrict-overflow=5 -Wcast-align
+    -Wunused
     -Wmissing-declarations -fstack-protector-strong -D_FORTIFY_SOURCE=2)
 
 # 可选安全选项

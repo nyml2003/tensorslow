@@ -35,7 +35,7 @@ class PyNativeFunction : public PyObject {
 
 using PyNativeFunctionPtr = std::shared_ptr<PyNativeFunction>;
 
-inline PyObjPtr CreatePyNativeFunction(TypeFunction nativeFunction) {
+inline PyNativeFunctionPtr CreatePyNativeFunction(TypeFunction nativeFunction) {
   return std::make_shared<PyNativeFunction>(std::move(nativeFunction));
 }
 

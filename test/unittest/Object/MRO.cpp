@@ -9,8 +9,8 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/String/PyString.h"
 
-using namespace tensorslow::Object;
-using namespace tensorslow::Collections;
+using namespace tensorslow::Object;       // NOLINT
+using namespace tensorslow::Collections;  // NOLINT
 
 class MROTest : public ::testing::Test {
  protected:

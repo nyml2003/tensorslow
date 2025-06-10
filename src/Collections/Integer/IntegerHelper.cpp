@@ -1,5 +1,7 @@
 #include "Collections/Integer/IntegerHelper.h"
+#include "Collections/Integer/Decimal.h"
 #include "Collections/Integer/DecimalHelper.h"
+#include "Collections/Integer/Integer.h"
 #include "Collections/String/StringHelper.h"
 #include "Common.h"
 
@@ -10,10 +12,10 @@ int8_t ByteToHex(Byte byte) noexcept {
     return static_cast<int8_t>(byte - Byte_0);
   }
   if (byte >= Byte_A && byte <= Byte_F) {
-    return static_cast<int8_t>(byte - Byte_A + 10);
+    return static_cast<int8_t>(byte - Byte_A + HexOffset);
   }
   if (byte >= Byte_a && byte <= Byte_f) {
-    return static_cast<int8_t>(byte - Byte_a + 10);
+    return static_cast<int8_t>(byte - Byte_a + HexOffset);
   }
   return -1;
 }
@@ -27,17 +29,18 @@ int8_t ByteToHex(Byte byte) noexcept {
 //   return 0;
 // }
 Byte HexToByte(uint8_t hex) noexcept {
-  if (hex <= 9) {
+  if (hex < HexOffset) {
     return static_cast<Byte>(hex + Byte_0);
   }
-  if (hex >= 10 && hex <= 15) {
-    return static_cast<Byte>(hex - 10 + Byte_A);
+  if (hex >= HexOffset && hex < MaxHexValue) {
+    return static_cast<Byte>(hex - HexOffset + Byte_A);
   }
   return 0;
 }
 
 Integer CreateIntegerWithString(const String& str) {
-  if (str.GetCodeUnitCount() > 2 && str.GetCodeUnit(0) == Byte_0 && (str.GetCodeUnit(1) == Byte_x || str.GetCodeUnit(1) == Byte_X)) {
+  if (str.GetCodeUnitCount() > 2 && str.GetCodeUnit(0) == Byte_0 &&
+      (str.GetCodeUnit(1) == Byte_x || str.GetCodeUnit(1) == Byte_X)) {
     List<uint32_t> parts;
     uint32_t buffer = 0;
     uint32_t count = 0;
@@ -70,7 +73,7 @@ Decimal CreateDecimalWithInteger(const Integer& integer) {
   const auto& parts = integer.Data();
   for (Index i = 0; i < parts.Size(); i++) {
     Decimal temp = CreateDecimalWithU32(parts.Get(i));
-    decimal = decimal.Multiply(CreateDecimalWithU32(0x10000)).Add(temp);
+    decimal = decimal.Multiply(CreateDecimalWithU32(MaxDecimalPart)).Add(temp);
   }
   return Decimal(decimal.Data(), integer.Sign());
 }
@@ -84,7 +87,7 @@ Integer CreateIntegerWithDecimal(const Decimal& decimal) {
     Decimal remainder = divmod.Get(1);
     int32_t value = 0;
     for (Index i = 0; i < remainder.Data().Size(); i++) {
-      value = value * 10 + remainder.Data().Get(i);
+      value = value * Decimal::radix + remainder.Data().Get(i);
     }
     parts.Push(static_cast<uint32_t>(value));
   }
@@ -93,7 +96,7 @@ Integer CreateIntegerWithDecimal(const Decimal& decimal) {
   return result;
 }
 void TrimTrailingZero(List<uint32_t>& parts) {
-  for (Index i = parts.Size() - 1; ~i; i--) {
+  for (Index i = parts.Size() - 1; (~i) != 0U; i--) {
     if (parts.Get(i) != 0 || i == 0) {
       parts = parts.Slice(0, i + 1);
       break;
@@ -134,7 +137,7 @@ uint64_t ToU64(const Integer& integer) {
   }
   Index result = 0;
   for (Index i = 0; i < data.Size(); i++) {
-    result = (result << 16) | data.Get(i);
+    result = (result << Integer::radix) | data.Get(i);
   }
   return result;
 }
@@ -142,7 +145,7 @@ Integer CreateIntegerWithU64(uint64_t value, bool sign) {
   List<uint32_t> parts;
   while (value != 0) {
     parts.Push(value & 0x0000FFFF);
-    value >>= 16;
+    value >>= Integer::radix;
   }
   parts.Reverse();
   return Integer(parts, sign);
@@ -170,7 +173,7 @@ int64_t ToI64(const Integer& integer) {
   }
   int64_t result = 0;
   for (Index i = 0; i < integer.Data().Size(); i++) {
-    result = (result << 16) | integer.Data().Get(i);
+    result = (result << Integer::radix) | integer.Data().Get(i);
   }
   return integer.Sign() ? -static_cast<int64_t>(result) : result;
 }
