@@ -1,3 +1,4 @@
+#include "Runtime/VirtualMachine.h"
 #include "Object/Container/PyDictionary.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"
@@ -9,7 +10,6 @@
 #include "Object/Runtime/PyCode.h"
 #include "Object/Runtime/PyFrame.h"
 #include "Runtime/Genesis.h"
-#include "Runtime/VirtualMachine.h"
 
 namespace tensorslow::Runtime {
 
@@ -32,65 +32,65 @@ void VirtualMachine::SetFrame(const Object::PyFramePtr& child) {
 }
 
 void VirtualMachine::Run(const Object::PyCodePtr& code) {
-  auto result = CreateModuleEntryFrame(code)->EvalWithDestory();
+  auto result = CreateModuleEntryFrame(code)->EvalAndDestroy();
   if (!result->is(Object::NoneKlass::Self())) {
     throw std::runtime_error("Module code did not return None");
   }
 }
 
-Object::PyObjPtr VirtualMachine::EvalConstructor(
-  const Object::PyTypePtr& type,
-  const Object::PyListPtr& arguments
-) {
-  return type->Owner()->init(type, arguments);
-}
-
-Object::PyObjPtr VirtualMachine::EvalMethod(
-  const Object::PyMethodPtr& func,
-  const Object::PyListPtr& arguments
-) {
-  auto owner = func->Owner();
-  auto function = func->Method();
-  return Eval(function, arguments->Prepend(owner)->as<Object::PyList>());
-}
-
-Object::PyObjPtr VirtualMachine::EvalPyFunction(
-  const Object::PyFunctionPtr& func,
-  const Object::PyListPtr& arguments
-) {
-  return CreateFrameWithPyFunction(func, arguments)->EvalWithDestory();
-}
-
-Object::PyObjPtr VirtualMachine::EvalNativeFunction(
+namespace Evaluator {
+Object::PyObjPtr CallNativeFunction(
   const Object::PyNativeFunctionPtr& func,
   const Object::PyListPtr& arguments
 ) {
   return func->Call(arguments);
 }
-
-Object::PyObjPtr VirtualMachine::Eval(
+Object::PyObjPtr CallMethod(
+  const Object::PyMethodPtr& func,
+  const Object::PyListPtr& arguments
+) {
+  auto owner = func->Owner();
+  auto function = func->Method();
+  return InvokeCallable(
+    function, arguments->Prepend(owner)->as<Object::PyList>()
+  );
+}
+Object::PyObjPtr InstantiateObject(
+  const Object::PyTypePtr& type,
+  const Object::PyListPtr& arguments
+) {
+  return type->Owner()->init(type, arguments);
+}
+Object::PyObjPtr UserFunction(
+  const Object::PyFunctionPtr& func,
+  const Object::PyListPtr& arguments
+) {
+  return CreateFrameWithPyFunction(func, arguments)->EvalAndDestroy();
+}
+Object::PyObjPtr InvokeCallable(
   const Object::PyObjPtr& func,
   const Object::PyListPtr& arguments
 ) {
   if (func->is(Object::MethodKlass::Self())) {
     auto method = func->as<Object::PyMethod>();
-    return EvalMethod(method, arguments);
+    return CallMethod(method, arguments);
   }
   if (func->is(Object::FunctionKlass::Self())) {
     auto pyFunction = func->as<Object::PyFunction>();
-    return EvalPyFunction(pyFunction, arguments);
+    return UserFunction(pyFunction, arguments);
   }
   if (func->is(Object::NativeFunctionKlass::Self())) {
     auto nativeFunction = func->as<Object::PyNativeFunction>();
-    return EvalNativeFunction(nativeFunction, arguments);
+    return CallNativeFunction(nativeFunction, arguments);
   }
   if (func->is(Object::TypeKlass::Self())) {
     auto type = func->as<Object::PyType>();
-    return EvalConstructor(type, arguments);
+    return InstantiateObject(type, arguments);
   }
   Function::DebugPrint(func);
   throw std::runtime_error("Unknown function type");
 }
+}  // namespace Evaluator
 
 Object::PyDictPtr VirtualMachine::Builtins() const {
   return builtins;

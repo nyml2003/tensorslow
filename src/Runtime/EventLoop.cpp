@@ -13,7 +13,7 @@ void EventLoop::Run() {
   running = true;
   while (running) {
     std::unique_lock<std::mutex> lock(queueMutex);
-
+    
 
     // Process microtasks first
     while (!microTaskQueue.empty()) {

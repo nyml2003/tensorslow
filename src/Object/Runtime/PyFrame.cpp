@@ -96,7 +96,7 @@ PyListPtr PyFrame::CurrentFastLocals() const {
   return fastLocals;
 }
 
-PyListPtr PyFrame::CurrentStack() const {
+PyListPtr PyFrame::DumpStack() const {
   return CreatePyList(stack.GetContent())->as<PyList>();
 }
 
@@ -368,7 +368,7 @@ void PrintFrame(const PyFramePtr& frame) {
 
   // Stack
   VerboseLogger::getInstance().log("\nStack(*ptr):\n");
-  auto stack = frame->CurrentStack();
+  auto stack = frame->DumpStack();
   for (Index i = 0; i < stack->Length(); i++) {
     auto index_repr = CreatePyInteger(i)->repr()->as<PyString>()->ToCppString();
     VerboseLogger::getInstance().log(index_repr);
@@ -673,7 +673,7 @@ PyObjPtr PyFrame::Eval() {
         auto argumentCount = std::get<Index>(inst->Operand());
         auto argList = CreatePyList(stack.Top(argumentCount))->as<PyList>();
         auto func = stack.Pop();
-        auto result = Runtime::VirtualMachine::Eval(func, argList);
+        auto result = Runtime::Evaluator::InvokeCallable(func, argList);
         stack.Push(result);
         NextProgramCounter();
         break;
@@ -875,7 +875,7 @@ PyObjPtr PyFrame::Eval() {
   return CreatePyNone();
 }
 
-PyObjPtr PyFrame::EvalWithDestory() {
+PyObjPtr PyFrame::EvalAndDestroy() {
   auto result = Eval();
   Runtime::VirtualMachine::Instance().BackToParentFrame();
   return result;

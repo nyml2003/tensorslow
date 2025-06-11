@@ -87,7 +87,7 @@ bool operator!=(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 bool operator<(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   auto ltFunc = lhs->getattr(CreatePyString("__lt__")->as<PyString>());
   if (ltFunc != nullptr) {
-    return Runtime::VirtualMachine::Eval(
+    return Runtime::Evaluator::InvokeCallable(
              ltFunc, CreatePyList({rhs})->as<PyList>()
     )
       ->as<PyBoolean>()

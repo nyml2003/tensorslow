@@ -47,7 +47,7 @@ class PyFrame : public PyObject {
 
   [[nodiscard]] PyInstPtr Instruction() const;
 
-  PyListPtr CurrentStack() const;
+  PyListPtr DumpStack() const;
 
   PyObjPtr StackTop() const { return stack.Top(); }
 
@@ -65,7 +65,7 @@ class PyFrame : public PyObject {
 
   [[nodiscard]] PyObjPtr Eval();
 
-  [[nodiscard]] PyObjPtr EvalWithDestory();
+  [[nodiscard]] PyObjPtr EvalAndDestroy();
 };
 
 using PyFramePtr = std::shared_ptr<PyFrame>;

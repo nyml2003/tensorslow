@@ -59,7 +59,7 @@ Invoke(const PyObjPtr& obj, const PyObjPtr& methodName, const PyListPtr& args) {
                          ->as<PyString>();
     throw std::runtime_error(errorMessge->ToCppString());
   }
-  return Runtime::VirtualMachine::Eval(func, args);
+  return Runtime::Evaluator::InvokeCallable(func, args);
 }
 
 PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept {
