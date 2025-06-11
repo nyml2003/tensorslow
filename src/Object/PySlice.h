@@ -1,7 +1,6 @@
 #ifndef TENSORSLOW_OBJECT_PYSLICE_H
 #define TENSORSLOW_OBJECT_PYSLICE_H
 
-#include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Object.h"

@@ -79,9 +79,11 @@ Object::PyObjPtr RandInt(const Object::PyObjPtr& args) {
   auto argList = args->as<Object::PyList>();
   auto left = argList->GetItem(0)->as<Object::PyInteger>();
   auto right = argList->GetItem(1)->as<Object::PyInteger>();
-  if (IsTrue(left->ge(Object::CreatePyInteger(static_cast<uint64_t>(0x7fffffff))
-      )) ||
-      IsTrue(right->ge(Object::CreatePyInteger(static_cast<uint64_t>(0x7fffffff)
+  if (IsTrue(left->ge(Object::CreatePyInteger(
+        static_cast<uint64_t>(std::numeric_limits<int32_t>::max())
+      ))) ||
+      IsTrue(right->ge(Object::CreatePyInteger(
+        static_cast<uint64_t>(std::numeric_limits<int32_t>::max())
       ))) ||
       IsTrue(left->ge(right))) {
     throw std::runtime_error(
@@ -90,8 +92,8 @@ Object::PyObjPtr RandInt(const Object::PyObjPtr& args) {
   }
   auto cppLeft = left->ToU64();
   auto cppRight = right->ToU64();
-  std::random_device rd;   // 随机数设备，用于生成种子
-  std::mt19937 gen(rd());  // 使用 Mersenne Twister 算法生成随机数
+  std::random_device randomDevice;
+  std::mt19937 gen(randomDevice());  // 使用 Mersenne Twister 算法生成随机数
   std::uniform_int_distribution<unsigned int>
     dis(  // 生成 [cppLeft, cppRight] 之间的均匀分布
       static_cast<std::mt19937::result_type>(cppLeft),
@@ -106,7 +108,7 @@ Object::PyObjPtr Sleep(const Object::PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   auto seconds =
     args->as<Object::PyList>()->GetItem(0)->as<Object::PyInteger>();
-  if (IsTrue(seconds->lt(Object::CreatePyInteger(0ull)))) {
+  if (IsTrue(seconds->lt(Object::CreatePyInteger(0ULL)))) {
     seconds->str()->as<Object::PyString>()->PrintLine();
     throw std::runtime_error("Sleep function need non-negative argument");
   }
@@ -191,7 +193,7 @@ Object::PyObjPtr Time(const Object::PyObjPtr& args) {
       .count();
 
   time_t nowTime = std::chrono::system_clock::to_time_t(now);
-  tm localTime;
+  tm localTime{};
 #if defined(_WIN32) || defined(_WIN64)
   // Windows 平台使用 localtime_s
   localtime_s(&localTime, &nowTime);
@@ -270,7 +272,7 @@ Object::PyObjPtr Range(const Object::PyObjPtr& args) {
 
 Object::PyObjPtr Type(const Object::PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
-  auto obj = args->getitem(Object::CreatePyInteger(0ull));
+  auto obj = args->getitem(Object::CreatePyInteger(0ULL));
   return obj->Klass()->Type();
 }
 
@@ -284,7 +286,7 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
   // 创建执行环境
   auto globals = function->Globals();
   auto preFrame = Runtime::VirtualMachine::Instance().CurrentFrame();
-  auto __name__ = globals->getitem(Object::CreatePyString("__name__"));
+  auto _name_ = globals->getitem(Object::CreatePyString("__name__"));
   // 保存当前帧
   // 创建新帧并执行类定义函数
   auto frame =
@@ -299,7 +301,7 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
   // 创建新的类型对象
   auto typeName =
     StringConcat(
-      Object::CreatePyList({__name__, Object::CreatePyString("."), name})
+      Object::CreatePyList({_name_, Object::CreatePyString("."), name})
     )
       ->as<Object::PyString>();
   auto klass = Object::CreatePyKlass(typeName, classDict, bases);
@@ -311,7 +313,7 @@ auto LogisticLoss(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
   auto argList = args->as<Object::PyList>();
   auto matrix = argList->GetItem(0)->as<Object::PyMatrix>();
   const Collections::List<double>& values = matrix->Ravel();
-  Collections::List<double> result(values.Size(), double(0));
+  Collections::List<double> result(values.Size(), static_cast<double>(0));
   for (Index i = 0; i < values.Size(); i++) {
     double value = values[i];
     if (-value > 1e2) {
@@ -329,7 +331,7 @@ auto LogisticLossDerivative(const Object::PyObjPtr& args
   auto argList = args->as<Object::PyList>();
   auto matrix = argList->GetItem(0)->as<Object::PyMatrix>();
   const Collections::List<double>& values = matrix->Ravel();
-  Collections::List<double> result(values.Size(), double(0));
+  Collections::List<double> result(values.Size(), static_cast<double>(0));
   for (Index i = 0; i < values.Size(); i++) {
     double value = values[i];
     if (-value > 1e2) {
@@ -357,7 +359,7 @@ auto Log(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
   auto argList = args->as<Object::PyList>();
   auto matrix = argList->GetItem(0)->as<Object::PyMatrix>();
   const Collections::List<double>& values = matrix->Ravel();
-  Collections::List<double> result(values.Size(), double(0));
+  Collections::List<double> result(values.Size(), static_cast<double>(0));
   for (Index i = 0; i < values.Size(); i++) {
     double value = values[i];
     result[i] = std::log(value);
@@ -371,7 +373,7 @@ auto SoftMax(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
   auto argList = args->as<Object::PyList>();
   auto matrix = argList->GetItem(0)->as<Object::PyMatrix>();
   const Collections::List<double>& values = matrix->Ravel();
-  Collections::List<double> result(values.Size(), double(0));
+  Collections::List<double> result(values.Size(), static_cast<double>(0));
   double sum = 0;
   for (Index i = 0; i < values.Size(); i++) {
     double value = values[i];

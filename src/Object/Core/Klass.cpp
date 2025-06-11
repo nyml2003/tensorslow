@@ -169,11 +169,11 @@ PyObjPtr Klass::hash(const PyObjPtr& obj) {
     if (!pyHashValue->is(IntegerKlass::Self())) {
       throw std::runtime_error("Hash value must be an integer");
     }
-    Index hashValue = reinterpret_cast<uint64_t>(obj.get());
+    auto hashValue = reinterpret_cast<uint64_t>(obj.get());
     obj->SetHashValue(hashValue);
     return CreatePyInteger(hashValue);
   }
-  Index hashValue = reinterpret_cast<uint64_t>(obj.get());
+  auto hashValue = reinterpret_cast<uint64_t>(obj.get());
   obj->SetHashValue(hashValue);
   return CreatePyInteger(hashValue);
 }
@@ -217,7 +217,7 @@ PyObjPtr Klass::boolean(const PyObjPtr& obj) {
   if (lenFunc != nullptr) {
     auto len =
       Runtime::Evaluator::InvokeCallable(lenFunc, CreatePyList()->as<PyList>());
-    return len->ne(CreatePyInteger(0ull));
+    return len->ne(CreatePyInteger(0ULL));
   }
   return CreatePyBoolean(true);
 }

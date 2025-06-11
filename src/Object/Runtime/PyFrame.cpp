@@ -19,9 +19,6 @@
 #include "Object/String/PyString.h"
 #include "Runtime/VirtualMachine.h"
 #include "Tools/Config/Config.h"
-#include "Tools/Logger/BytecodeLogger.h"
-#include "Tools/Logger/ConsoleLogger.h"
-#include "Tools/Logger/ErrorLogger.h"
 #include "Tools/Logger/VerboseLogger.h"
 
 namespace tensorslow::Object {

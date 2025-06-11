@@ -1,5 +1,5 @@
 #include "Object/Function/PyFunction.h"
-#include "Object/String/PyString.h"
+#include "Function/BuiltinFunction.h"
 
 namespace tensorslow::Object {
 

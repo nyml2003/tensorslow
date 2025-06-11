@@ -1,6 +1,6 @@
 #ifndef TENSORSLOW_OBJECT_CORE_HELPER_H
 #define TENSORSLOW_OBJECT_CORE_HELPER_H
-#include "Object/Core/Klass.h"
+
 #include "Object/String/PyString.h"
 namespace tensorslow::Object {
 

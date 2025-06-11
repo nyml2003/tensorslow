@@ -1,7 +1,7 @@
 #ifndef TENSORSLOW_OBJECT_PYNONE_H
 #define TENSORSLOW_OBJECT_PYNONE_H
 
-#include "Function/BuiltinFunction.h"
+
 #include "Object/Core/CoreHelper.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"

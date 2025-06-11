@@ -1,7 +1,6 @@
 #ifndef TENSORSLOW_OBJECT_PYMETHOD_H
 #define TENSORSLOW_OBJECT_PYMETHOD_H
 
-#include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/String/PyString.h"
 namespace tensorslow::Object {

@@ -26,45 +26,48 @@ class BinaryFileParser {
   }
 
   Object::PyCodePtr Parse() {
-    return ReadObject()->as<Object::PyCode>();
+    auto code = ReadObject()->as<Object::PyCode>();
     fileStream.close();
+    return code;
   }
 
  private:
   std::ifstream fileStream;
   uint64_t ReadSize() {
     std::streampos originalPosition = fileStream.tellg();
-    uint64_t size;
+    uint64_t size = 0;
     fileStream.read(reinterpret_cast<char*>(&size), sizeof(size));
     fileStream.seekg(originalPosition);
     return size;
   }
   double ReadDouble() {
-    double value;
+    double value = NAN;
     fileStream.read(reinterpret_cast<char*>(&value), sizeof(value));
     return value;
   }
   int64_t ReadI64() {
-    int64_t value;
+    int64_t value = 0;
     fileStream.read(reinterpret_cast<char*>(&value), sizeof(value));
     return value;
   }
   uint64_t ReadU64() {
-    uint64_t value;
+    uint64_t value = 0;
     fileStream.read(reinterpret_cast<char*>(&value), sizeof(value));
     return value;
   }
   Object::PyStrPtr ReadString() {
     uint64_t size = ReadU64();
     auto buffer = std::make_unique<char[]>(size + 1);
-    fileStream.read(reinterpret_cast<char*>(buffer.get()), size);
+    fileStream.read(
+      reinterpret_cast<char*>(buffer.get()), static_cast<std::streamsize>(size)
+    );
     return Object::CreatePyString(
       Collections::CreateStringWithCString(buffer.get())
     );
   }
   Collections::List<Byte> ReadBytes(uint64_t size) {
     auto buffer = std::make_unique<unsigned char[]>(size);
-    fileStream.read(reinterpret_cast<char*>(buffer.get()), size);
+    fileStream.read(reinterpret_cast<char*>(buffer.get()), static_cast<std::streamsize>(size));
     return Collections::List<Byte>(size, std::move(buffer));
   }
   Object::PyBytesPtr ReadBytes() {
@@ -90,14 +93,14 @@ class BinaryFileParser {
     return Object::CreatePyList(std::move(list));
   }
   uint8_t ReadU8() {
-    uint8_t value;
+    uint8_t value = 0;
     fileStream.read(reinterpret_cast<char*>(&value), sizeof(value));
     return value;
   }
   Object::PyObjPtr ReadObject() {
     Byte type = ReadU8();
-    auto e = static_cast<Object::Literal>(type);
-    switch (e) {
+    auto literalEnum = static_cast<Object::Literal>(type);
+    switch (literalEnum) {
       case Object::Literal::STRING:
         return ReadString();
       case Object::Literal::INTEGER:
@@ -113,7 +116,7 @@ class BinaryFileParser {
       case Object::Literal::NONE:
         return Object::CreatePyNone();
       case Object::Literal::ZERO:
-        return Object::CreatePyInteger(0ull);
+        return Object::CreatePyInteger(0ULL);
       case Object::Literal::CODE:
         return ReadCode();
       case Object::Literal::BYTES:

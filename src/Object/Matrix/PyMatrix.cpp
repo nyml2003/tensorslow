@@ -1,17 +1,17 @@
 #include "PyMatrix.h"
 #include <cassert>
-#include "Collections/Matrix.h"
+
 #include "MatrixFunction.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
+#include "Object/Function/PyIife.h"
 #include "Object/Function/PyNativeFunction.h"
 #include "Object/Number/PyFloat.h"
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
-#include "Runtime/VirtualMachine.h"
-#include "Tools/Config/Config.h"
+
 
 namespace tensorslow::Object {
 PyObjPtr MatrixKlass::repr(const PyObjPtr& obj) {
@@ -320,8 +320,8 @@ PyObjPtr MatrixKlass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   auto result = Eye(CreatePyList({lhs->as<PyMatrix>()->Shape()->GetItem(0)}))
                   ->as<PyMatrix>();
   // 快速幂算法
-  while (n) {
-    if (n & 1) {
+  while (n != 0) {
+    if ((n & 1) != 0) {
       result = result->MatrixMultiply(matrix);
     }
     matrix = matrix->MatrixMultiply(matrix);

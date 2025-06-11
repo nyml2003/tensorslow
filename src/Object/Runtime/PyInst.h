@@ -2,7 +2,6 @@
 #define TENSORSLOW_OBJECT_PYINST_H
 
 #include "ByteCode/ByteCode.h"
-#include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"

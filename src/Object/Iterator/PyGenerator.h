@@ -1,6 +1,5 @@
 #ifndef TENSORSLOW_OBJECT_PYGENERATOR_H
 #define TENSORSLOW_OBJECT_PYGENERATOR_H
-#include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Iterator/Iterator.h"
 #include "Object/Runtime/PyFrame.h"

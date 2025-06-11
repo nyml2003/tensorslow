@@ -1,19 +1,28 @@
 #ifndef TENSORSLOW_OBJECT_FUNCTIONFORWARD_H
 #define TENSORSLOW_OBJECT_FUNCTIONFORWARD_H
 
+#include <functional>
 #include "Object/Container/PyList.h"
 namespace tensorslow::Object {
 using TypeFunction = std::function<PyObjPtr(PyObjPtr)>;
 // 外部定义的辅助函数模板（可放在头文件或命名空间中）
 // 外部辅助函数：处理索引序列并赋值到 params
 template <typename Tuple, typename ArgList, size_t... I>
-void assign_indices(Tuple& params, const ArgList& arg_list, std::index_sequence<I...>) {
+void assign_indices(
+  Tuple& params,
+  const ArgList& arg_list,
+  std::index_sequence<I...> /*unused*/
+) {
   (void(std::get<I>(params) = arg_list.GetItem(I)), ...);
 }
 
 // 外部辅助函数：展开索引序列
 template <typename F, typename... Args, size_t... I>
-void expand_indices(std::index_sequence<I...>, F&& func, Args&&...) {
+void expand_indices(
+  std::index_sequence<I...> /*unused*/,
+  F&& func,
+  Args&&... /*unused*/
+) {
   std::forward<F>(func)(std::integral_constant<size_t, I>{}...);
 }
 

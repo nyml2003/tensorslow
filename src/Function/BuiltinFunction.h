@@ -1,10 +1,8 @@
 #ifndef TENSORSLOW_BUILTIN_FUNCTION_H
 #define TENSORSLOW_BUILTIN_FUNCTION_H
-#include "Common.h"
+
 #include "Object/Core/PyObject.h"
 #include "Object/Object.h"
-
-#include <functional>
 
 namespace tensorslow::Function {
 Object::PyObjPtr Identity(const Object::PyObjPtr& args);
@@ -23,8 +21,8 @@ Object::PyObjPtr Range(const Object::PyObjPtr& args);
 Object::PyObjPtr Type(const Object::PyObjPtr& args);
 Object::PyObjPtr BuildClass(const Object::PyObjPtr& args);
 auto LogisticLoss(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
-auto LogisticLossDerivative(const Object::PyObjPtr& args) noexcept
-  -> Object::PyObjPtr;
+auto LogisticLossDerivative(const Object::PyObjPtr& args
+) noexcept -> Object::PyObjPtr;
 auto Sum(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
 auto Log(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;
 auto SoftMax(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr;

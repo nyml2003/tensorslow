@@ -3,10 +3,9 @@
 
 #include "Collections/Integer/Integer.h"
 #include "Collections/Integer/IntegerHelper.h"
-#include "Function/BuiltinFunction.h"
 #include "Object/Core/Klass.h"
 #include "Object/Object.h"
-#include "Object/String/PyString.h"
+#include "Object/Core/PyObject.h"
 
 namespace tensorslow::Object {
 
@@ -69,13 +68,13 @@ class PyInteger : public PyObject {
     return Collections::IsBigNumber(value);
   }
 
-  Collections::Integer::IntSign GetSign() const { return value.GetSign(); }
+  [[nodiscard]] Collections::Integer::IntSign GetSign() const { return value.GetSign(); }
 
-  int64_t ToI64() const { return Collections::ToI64(value); }
+  [[nodiscard]] int64_t ToI64() const { return Collections::ToI64(value); }
 
-  bool LessThan(const PyObjPtr& other) const;
+  [[nodiscard]] bool LessThan(const PyObjPtr& other) const;
 
-  bool Equal(const PyObjPtr& other) const;
+  [[nodiscard]] bool Equal(const PyObjPtr& other) const;
 };
 
 }  // namespace tensorslow::Object

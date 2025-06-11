@@ -29,7 +29,7 @@ PyObjPtr ListIteratorKlass::repr(const PyObjPtr& obj) {
 PyObjPtr ListReverseIteratorKlass::next(const PyObjPtr& obj) {
   auto iterator = obj->as<ListReverseIterator>();
   auto list = iterator->List();
-  if (!~(iterator->CurrentIndex())) {
+  if ((~(iterator->CurrentIndex())) == 0U) {
     return CreateIterDone();
   }
   auto value = list->GetItem(iterator->CurrentIndex());

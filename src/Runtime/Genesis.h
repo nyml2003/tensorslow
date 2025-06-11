@@ -1,7 +1,7 @@
 #ifndef TENSORSLOW_RUNTIME_GENESIS_H
 #define TENSORSLOW_RUNTIME_GENESIS_H
 
-#include "Object/Core/PyObject.h"
+#include "Object/Container/PyDictionary.h"
 
 namespace tensorslow::Runtime {
 

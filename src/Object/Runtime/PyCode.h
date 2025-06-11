@@ -1,7 +1,6 @@
 #ifndef TENSORSLOW_OBJECT_PYCODE_H
 #define TENSORSLOW_OBJECT_PYCODE_H
 
-#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Core/Klass.h"
@@ -39,7 +38,6 @@ class PyCode : public PyObject {
   void SetNLocals(Index nLocals);
 
   void SetScope(Scope scope);
-
 
   PyBytesPtr ByteCode() const;
 

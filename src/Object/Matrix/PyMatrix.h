@@ -2,13 +2,9 @@
 #define TENSORSLOW_OBJECT_PYMATRIX_H
 
 #include "Collections/Matrix.h"
-#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyList.h"
-#include "Object/Core/CoreHelper.h"
 #include "Object/Core/Klass.h"
 #include "Object/Core/PyObject.h"
-#include "Object/Function/PyIife.h"
-#include "Object/Function/PyNativeFunction.h"
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"

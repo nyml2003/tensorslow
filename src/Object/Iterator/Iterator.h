@@ -1,7 +1,6 @@
 #ifndef TENSORSLOW_OBJECT_ITERATOR_H
 #define TENSORSLOW_OBJECT_ITERATOR_H
 
-#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyDictionary.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/CoreHelper.h"
@@ -107,10 +106,8 @@ class ListReverseIterator : public PyObject {
 
  public:
   explicit ListReverseIterator(const PyObjPtr& list)
-    : PyObject(ListReverseIteratorKlass::Self()) {
-    this->list = list->as<PyList>();
-    index = this->list->Length() - 1;
-  }
+    : PyObject(ListReverseIteratorKlass::Self()), list(list->as<PyList>()), index(this->list->Length() - 1) {}
+
   [[nodiscard]] PyListPtr List() const { return list; }
   [[nodiscard]] Index CurrentIndex() const { return index; }
   void Next() { index--; }

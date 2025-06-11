@@ -1,6 +1,5 @@
 #include "Object/Matrix/MatrixFunction.h"
 #include "Object/Container/PyList.h"
-#include "Object/Core/CoreHelper.h"
 #include "Object/Function/PyNativeFunction.h"
 #include "Object/Matrix/PyMatrix.h"
 #include "Object/Number/PyFloat.h"

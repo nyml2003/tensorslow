@@ -52,7 +52,7 @@ Decimal CreateDecimalWithString(const String& str) {
   return Decimal(parts, sign);
 }
 void TrimTrailingZero(List<int32_t>& parts) {
-  for (Index i = parts.Size() - 1; ~i; --i) {
+  for (Index i = parts.Size() - 1; (~i) != 0U; --i) {
     if (parts[i] != 0 || i == 0) {
       parts = parts.Slice(0, i + 1);
       break;

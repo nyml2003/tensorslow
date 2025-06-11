@@ -1,9 +1,10 @@
 #ifndef TENSORSLOW_OBJECT_PYOBJECT_H
 #define TENSORSLOW_OBJECT_PYOBJECT_H
 
-#include <typeindex>
+
 #include "Object/Core/Klass.h"
 #include "Object/Object.h"
+#include "Common.h"
 
 namespace tensorslow::Object {
 
@@ -12,7 +13,7 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   KlassPtr klass;
   PyDictPtr attributes;  // 不需要bound的属性
   PyDictPtr methods;     // 需要bound的属性
-  Index hashValue;
+  Index hashValue{};
   bool hashed = false;
 
  public:
@@ -119,9 +120,8 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   PyObjPtr iter() { return klass->iter(shared_from_this()); }
   PyObjPtr next() { return klass->next(shared_from_this()); }
   PyObjPtr reversed() { return klass->reversed(shared_from_this()); }
-  // TODO
   PyObjPtr _serialize_() { return klass->_serialize_(shared_from_this()); }
-  bool is(KlassPtr _klass) { return klass == _klass; }
+  bool is(const KlassPtr& _klass) { return klass == _klass; }
 
   template <typename T>
   std::shared_ptr<T> as() {

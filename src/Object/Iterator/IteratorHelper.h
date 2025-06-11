@@ -2,7 +2,6 @@
 #define TENSORSLOW_OBJECT_ITERATOR_HELPER_H
 
 #include <functional>
-#include "Common.h"
 #include "Object/Object.h"
 
 namespace tensorslow::Object {

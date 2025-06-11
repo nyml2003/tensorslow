@@ -1,7 +1,6 @@
 #ifndef TENSORSLOW_OBJECT_PYFUNCTION_H
 #define TENSORSLOW_OBJECT_PYFUNCTION_H
 
-#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyDictionary.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Runtime/PyCode.h"

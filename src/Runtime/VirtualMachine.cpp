@@ -1,4 +1,5 @@
 #include "Runtime/VirtualMachine.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyDictionary.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"

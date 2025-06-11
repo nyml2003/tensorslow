@@ -2,8 +2,7 @@
 #include "ByteCode/ByteCode.h"
 #include "Collections/String/BytesHelper.h"
 #include "Collections/String/StringHelper.h"
-#include "Object/Container/PyList.h"
-#include "Object/Core/PyBoolean.h"
+
 #include "Object/Core/PyObject.h"
 #include "Object/String/PyString.h"
 

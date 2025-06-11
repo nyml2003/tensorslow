@@ -5,8 +5,6 @@
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyObject.h"
-#include "Object/Iterator/IteratorHelper.h"
-#include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "Object/Runtime/PyInst.h"
 #include "Object/String/PyBytes.h"
