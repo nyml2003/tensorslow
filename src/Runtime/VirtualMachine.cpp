@@ -10,6 +10,7 @@
 #include "Object/Object.h"
 #include "Object/Runtime/PyCode.h"
 #include "Object/Runtime/PyFrame.h"
+#include "Runtime/EventLoop.h"
 #include "Runtime/Genesis.h"
 
 namespace tensorslow::Runtime {
@@ -37,6 +38,7 @@ void VirtualMachine::Run(const Object::PyCodePtr& code) {
   if (!result->is(Object::NoneKlass::Self())) {
     throw std::runtime_error("Module code did not return None");
   }
+  EventLoop::Instance().Run();
 }
 
 namespace Evaluator {

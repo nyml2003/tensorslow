@@ -6,6 +6,7 @@
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"
+#include "Object/Core/PyPromise.h"
 #include "Object/Core/PyType.h"
 #include "Object/Function/PyNativeFunction.h"
 #include "Object/Matrix/MatrixFunction.h"
@@ -174,13 +175,12 @@ Object::PyDictPtr Genesis() {
   );
   builtins->Put(
     Object::CreatePyString("dict"), Object::DictionaryKlass::Self()->Type()
-
   );
   builtins->Put(
-    Object::CreatePyString("object"),
-
-    Object::ObjectKlass::Self()->Type()
-
+    Object::CreatePyString("Promise"), Object::PromiseKlass::Self()->Type()
+  );
+  builtins->Put(
+    Object::CreatePyString("object"), Object::ObjectKlass::Self()->Type()
   );
   return builtins;
 }

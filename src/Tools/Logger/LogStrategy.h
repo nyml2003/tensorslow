@@ -10,6 +10,10 @@
 #include <mutex>
 #include <string>
 #include <utility>
+#include "Object/Core/PyNone.h"
+#include "Object/Function/PyNativeFunction.h"
+#include "Object/Object.h"
+#include "Runtime/EventLoop.h"
 
 namespace tensorslow {
 class Logger;
@@ -21,7 +25,14 @@ class LogStrategy {
 
 class DefaultLogStrategy : public LogStrategy {
  public:
-  void operator()(const std::string& msg) const override { std::cout << msg; }
+  void operator()(const std::string& msg) const override {
+    Runtime::EventLoop::Instance().EnqueueTask(
+      Object::CreatePyNativeFunction([msg](const Object::PyObjPtr&) {
+        std::cout << msg;
+        return Object::CreatePyNone();
+      })
+    );
+  }  // 将日志消息添加到事件循环的宏任务队列中
 };
 
 class FileLogStrategy : public LogStrategy {
@@ -29,10 +40,15 @@ class FileLogStrategy : public LogStrategy {
   explicit FileLogStrategy(const std::string& filename);
 
   void operator()(const std::string& msg) const override {
-    if (m_stream.is_open()) {
-      m_stream << msg;
-    }
     // 如果文件未成功打开，则静默忽略，不做任何输出
+    Runtime::EventLoop::Instance().EnqueueTask(
+      Object::CreatePyNativeFunction([=](const Object::PyObjPtr&) {
+        if (m_stream.is_open()) {
+          m_stream << msg;
+        }
+        return Object::CreatePyNone();
+      })
+    );
   }
 
  private:
@@ -41,7 +57,14 @@ class FileLogStrategy : public LogStrategy {
 
 class ErrorLogStrategy : public LogStrategy {
  public:
-  void operator()(const std::string& msg) const override { std::cerr << msg; }
+  void operator()(const std::string& msg) const override {
+    Runtime::EventLoop::Instance().EnqueueTask(
+      Object::CreatePyNativeFunction([msg](const Object::PyObjPtr&) {
+        std::cerr << msg;
+        return Object::CreatePyNone();
+      })
+    );
+  }
 };
 
 class ProxyLogStrategy : public LogStrategy {

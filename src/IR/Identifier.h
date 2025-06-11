@@ -1,9 +1,6 @@
 #ifndef TENSORSLOW_AST_IDENTIFIER_H
 #define TENSORSLOW_AST_IDENTIFIER_H
 
-#include <utility>
-
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 #include "Object/String/PyString.h"
 
@@ -38,8 +35,7 @@ class Identifier : public INode {
  public:
   explicit Identifier(Object::PyStrPtr _name, INodePtr parent)
     : INode(IdentifierKlass::Self(), std::move(parent)),
-      name(std::move(_name)) {
-  }
+      name(std::move(_name)) {}
 
   [[nodiscard]] Object::PyStrPtr Name() const { return name; }
   void SetStoreMode() { mode = STOREORLOAD::STORE; }
@@ -88,7 +84,8 @@ class Identifier : public INode {
        Object::CreatePyString("hash"),
        Object::CreatePyString("time"),
        Object::CreatePyString("range"),
-       Object::CreatePyString("iter")}
+       Object::CreatePyString("iter"),
+       Object::CreatePyString("Promise")}
     );
     return builtins;
   }

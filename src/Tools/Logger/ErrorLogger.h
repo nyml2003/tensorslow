@@ -18,9 +18,7 @@ class ErrorLogger : public Logger {
 
   void log(const std::string& msg) override {
     if (m_callback) {
-      (*m_callback)("[ERROR] ");
-      (*m_callback)(msg);
-      (*m_callback)("\n");
+      (*m_callback)("[ERROR] " + msg + "\n");
     }
   }
   ErrorLogger(const ErrorLogger&) = delete;

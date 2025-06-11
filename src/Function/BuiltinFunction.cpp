@@ -61,6 +61,7 @@ Object::PyObjPtr Print(const Object::PyObjPtr& args) {
     arg->str()->as<Object::PyString>()->Print();
   }
   Object::CreatePyString("\n")->Print();
+  
   return Object::CreatePyNone();
 }
 
