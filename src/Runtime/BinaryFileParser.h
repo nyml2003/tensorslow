@@ -67,7 +67,9 @@ class BinaryFileParser {
   }
   Collections::List<Byte> ReadBytes(uint64_t size) {
     auto buffer = std::make_unique<unsigned char[]>(size);
-    fileStream.read(reinterpret_cast<char*>(buffer.get()), static_cast<std::streamsize>(size));
+    fileStream.read(
+      reinterpret_cast<char*>(buffer.get()), static_cast<std::streamsize>(size)
+    );
     return Collections::List<Byte>(size, std::move(buffer));
   }
   Object::PyBytesPtr ReadBytes() {
@@ -130,9 +132,11 @@ class BinaryFileParser {
     auto varNames = ReadObject()->as<Object::PyList>();
     auto name = ReadObject()->as<Object::PyString>();
     auto nLocals = ReadU64();
+    auto isGenerator =
+      static_cast<Object::Literal>(ReadU8()) == Object::Literal::TRUE_LITERAL;
     auto byteCode = ReadObject()->as<Object::PyBytes>();
     return std::make_shared<Object::PyCode>(
-      byteCode, consts, names, varNames, name, nLocals
+      byteCode, consts, names, varNames, name, nLocals, isGenerator
     );
   }
 };

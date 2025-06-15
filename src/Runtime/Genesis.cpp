@@ -32,6 +32,10 @@ Object::PyDictPtr Genesis() {
     Object::CreatePyString("print"), CreatePyNativeFunction(Function::Print)
   );
   builtins->Put(
+    Object::CreatePyString("readFile"),
+    CreatePyNativeFunction(Function::ReadFile)
+  );
+  builtins->Put(
     Object::CreatePyString("len"), CreatePyNativeFunction(Function::Len)
   );
   builtins->Put(
@@ -72,6 +76,10 @@ Object::PyDictPtr Genesis() {
     Object::CreatePyString("whoami"),
     Object::CreatePyString("版权所有 © 2025 蒋钦禹. 保留所有权利。")
   );
+  // builtins->Put(
+  //   Object::CreatePyString("co"),
+  //   Object::CreatePyNativeFunction(Function::Coroutine)
+  // );
 
   // 内置全局对象
   builtins->Put(

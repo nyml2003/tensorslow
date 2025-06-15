@@ -1,35 +1,35 @@
-#include "IR/Statement/YieldStmt.h"
+#include "IR/Expression/YieldExpr.h"
 #include "Object/Core/PyNone.h"
 
 namespace tensorslow::IR {
 
-Object::PyObjPtr YieldStmtKlass::visit(
+Object::PyObjPtr YieldExprKlass::visit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto stmt = obj->as<YieldStmt>();
+  auto stmt = obj->as<YieldExpr>();
   auto content = stmt->Content();
   content->visit(codeList);
   return Object::CreatePyNone();
 }
 
-Object::PyObjPtr YieldStmtKlass::emit(
+Object::PyObjPtr YieldExprKlass::emit(
   const Object::PyObjPtr& obj,
   const Object::PyObjPtr& codeList
 ) {
-  auto stmt = obj->as<YieldStmt>();
+  auto stmt = obj->as<YieldExpr>();
   auto content = stmt->Content();
   content->emit(codeList);
   auto code = GetCodeFromList(codeList, stmt);
+  code->EnableGenerator();
   code->YieldValue();
-  code->PopTop();
   return Object::CreatePyNone();
 }
 
-Object::PyObjPtr YieldStmtKlass::print(const Object::PyObjPtr& obj) {
-  auto stmt = obj->as<YieldStmt>();
+Object::PyObjPtr YieldExprKlass::print(const Object::PyObjPtr& obj) {
+  auto stmt = obj->as<YieldExpr>();
   auto content = stmt->Content();
-  PrintNode(stmt, Object::CreatePyString("YieldStmt"));
+  PrintNode(stmt, Object::CreatePyString("YieldExpr"));
   content->print();
   PrintEdge(stmt, content);
   return Object::CreatePyNone();

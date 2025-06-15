@@ -1,24 +1,24 @@
-#ifndef TENSORSLOW_AST_YIELD_STATEMENT_H
-#define TENSORSLOW_AST_YIELD_STATEMENT_H
+#ifndef TENSORSLOW_AST_YIELD_EXPRESSION_H
+#define TENSORSLOW_AST_YIELD_EXPRESSION_H
 
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class YieldStmtKlass : public INodeKlass {
+class YieldExprKlass : public INodeKlass {
  public:
-  explicit YieldStmtKlass() = default;
+  explicit YieldExprKlass() = default;
 
   void Initialize() override {
     if (this->isInitialized) {
       return;
     }
-    InitKlass(Object::CreatePyString("ast_yieldstmt"), Self());
+    InitKlass(Object::CreatePyString("ast_YieldExpr"), Self());
     this->isInitialized = true;
   }
 
   static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<YieldStmtKlass>();
+    static auto instance = std::make_shared<YieldExprKlass>();
     return instance;
   }
 
@@ -31,10 +31,10 @@ class YieldStmtKlass : public INodeKlass {
   Object::PyObjPtr print(const Object::PyObjPtr& obj) override;
 };
 
-class YieldStmt : public INode {
+class YieldExpr : public INode {
  public:
-  explicit YieldStmt(INodePtr content, INodePtr parent)
-    : INode(YieldStmtKlass::Self(), std::move(parent)),
+  explicit YieldExpr(INodePtr content, INodePtr parent)
+    : INode(YieldExprKlass::Self(), std::move(parent)),
       content(std::move(content)) {}
 
   [[nodiscard]] INodePtr Content() const { return content; }
@@ -43,8 +43,8 @@ class YieldStmt : public INode {
   INodePtr content;
 };
 
-inline INodePtr CreateYieldStmt(INodePtr content, INodePtr parent) {
-  return std::make_shared<YieldStmt>(std::move(content), std::move(parent));
+inline INodePtr CreateYieldExpr(INodePtr content, INodePtr parent) {
+  return std::make_shared<YieldExpr>(std::move(content), std::move(parent));
 }
 
 }  // namespace tensorslow::IR

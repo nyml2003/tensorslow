@@ -47,6 +47,9 @@ class PromiseKlass : public Klass {
   PyObjPtr init(const PyObjPtr& typeObj, const PyObjPtr& args) override;
 };
 
+auto PromiseResolve(const PyObjPtr& args) -> PyObjPtr;
+auto PromiseReject(const PyObjPtr& args) -> PyObjPtr;
+
 }  // namespace tensorslow::Object
 
 #endif  // TENSORSLOW_OBJECT_PYPROMISE_H

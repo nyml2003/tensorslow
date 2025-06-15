@@ -52,6 +52,15 @@ list(APPEND tensorslow_cxx_flags
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} --coverage")
 #set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS} --coverage")
 
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipo_result OUTPUT ipo_output)
+if (NOT ipo_result)
+    message(WARNING "IPO / LTO is not supported: ${ipo_output}")
+else()
+    message(STATUS "IPO / LTO is supported. Enabling for targets.")
+endif()
+
+
 
 # 生成 compile_commands.json 文件
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)

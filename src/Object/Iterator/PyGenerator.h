@@ -1,5 +1,6 @@
 #ifndef TENSORSLOW_OBJECT_PYGENERATOR_H
 #define TENSORSLOW_OBJECT_PYGENERATOR_H
+#include "Object/Core/PyNone.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Iterator/Iterator.h"
 #include "Object/Runtime/PyFrame.h"
@@ -15,14 +16,7 @@ class GeneratorKlass : public Klass {
     return instance;
   }
 
-  void Initialize() override {
-    if (this->isInitialized) {
-      return;
-    }
-    LoadClass(CreatePyString("generator")->as<PyString>(), Self());
-    ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
-  }
+  void Initialize() override;
 
   PyObjPtr iter(const PyObjPtr& obj) override { return obj; }
   PyObjPtr next(const PyObjPtr& obj) override;
@@ -40,30 +34,39 @@ class PyGenerator : public PyObject {
  public:
   explicit PyGenerator(PyFramePtr _frame)
     : PyObject(GeneratorKlass::Self()), frame(std::move(_frame)) {
-    func = [](const PyGeneratorPtr& self) {
-      auto result = self->frame->StackTop();
+    func = [](const PyGeneratorPtr& self) -> PyObjPtr {
       auto lastFrame = Runtime::VirtualMachine::Instance().CurrentFrame();
-      auto newGenerator = self->frame->Eval();
+      Runtime::VirtualMachine::Instance().SetFrame(self->frame);
+      auto newGenerator = self->frame->Eval();  // 执行到YIELD_VALUE
       Runtime::VirtualMachine::Instance().SetFrame(lastFrame);
       if (!newGenerator->is(GeneratorKlass::Self())) {
         // 说明是return
         self->isExhausted = true;
+        return CreateIterDone();
       }
-      return result;
+      return self->frame->StackPop();
     };
   }
 
-  explicit PyGenerator(std::function<PyObjPtr(const PyGeneratorPtr&)> func)
-    : PyObject(GeneratorKlass::Self()), func(std::move(func)) {}
+  explicit PyGenerator(std::function<PyObjPtr(const PyGeneratorPtr&)> _func)
+    : PyObject(GeneratorKlass::Self()),
+      
+      func(std::move(_func)) {}
   [[nodiscard]] PyFramePtr Frame() const { return frame; }
   [[nodiscard]] bool IsExhausted() const { return isExhausted; }
   void SetExhausted() { isExhausted = true; }
-  PyObjPtr Next() {
+  PyObjPtr Send(const PyObjPtr& value) {
     if (isExhausted) {
       return CreateIterDone();
     }
+    if (frame) {
+      frame->StackPush(value);  // 先压栈
+    }
+
     return func(shared_from_this()->as<PyGenerator>());
   }
+
+  PyObjPtr Next() { return Send(CreatePyNone()); }
 };
 
 inline PyObjPtr CreatePyGenerator(const PyFramePtr& frame) {

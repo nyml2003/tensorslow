@@ -16,6 +16,7 @@ class PyCode;
 
 using PyCodePtr = std::shared_ptr<PyCode>;
 enum class Scope { ERR = 0, LOCAL, GLOBAL, Closure };
+
 class PyCode : public PyObject {
   friend class CodeKlass;
 
@@ -26,7 +27,8 @@ class PyCode : public PyObject {
     PyListPtr names,
     PyListPtr varNames,
     PyStrPtr name,
-    Index nLocals
+    Index nLocals,
+    bool isGenerator
   );
 
   [[nodiscard]] PyListPtr Instructions();
@@ -52,6 +54,10 @@ class PyCode : public PyObject {
   [[nodiscard]] Index NLocals() const;
 
   [[nodiscard]] Scope GetScope() const;
+
+  void EnableGenerator() { isGenerator = true; }
+
+  bool IsGenerator() const { return isGenerator; }
 
   Index IndexOfConst(const PyObjPtr& obj);
 
@@ -148,6 +154,7 @@ class PyCode : public PyObject {
   PyListPtr varNames;
   PyStrPtr name;
   Index nLocals;
+  bool isGenerator = false;
   enum Scope scope = Scope::ERR;
 };
 
@@ -187,10 +194,11 @@ inline PyObjPtr CreatePyCode(
   const PyListPtr& names,
   const PyListPtr& varNames,
   const PyStrPtr& name,
-  Index nLocals
+  Index nLocals,
+  bool isGenerator
 ) {
   return std::make_shared<PyCode>(
-    byteCode, consts, names, varNames, name, nLocals
+    byteCode, consts, names, varNames, name, nLocals,isGenerator
   );
 }
 

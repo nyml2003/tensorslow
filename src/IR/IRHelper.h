@@ -10,6 +10,7 @@
 #include "IR/Expression/Map.h"
 #include "IR/Expression/Slice.h"
 #include "IR/Expression/Unary.h"
+#include "IR/Expression/YieldExpr.h"
 #include "IR/FuncDef.h"
 #include "IR/Identifier.h"
 #include "IR/MemberAccess.h"
@@ -20,7 +21,6 @@
 #include "IR/Statement/PassStmt.h"
 #include "IR/Statement/ReturnStmt.h"
 #include "IR/Statement/WhileStmt.h"
-#include "IR/Statement/YieldStmt.h"
 
 namespace tensorslow::IR {
 
@@ -38,7 +38,7 @@ inline void RegisterIRClasses() {
   PassStmtKlass::Self()->Initialize();
   ReturnStmtKlass::Self()->Initialize();
   WhileStmtKlass::Self()->Initialize();
-  YieldStmtKlass::Self()->Initialize();
+  YieldExprKlass::Self()->Initialize();
   AssignStmtKlass::Self()->Initialize();
   ClassDefKlass::Self()->Initialize();
   FuncDefKlass::Self()->Initialize();

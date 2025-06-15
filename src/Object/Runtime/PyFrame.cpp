@@ -1,4 +1,5 @@
 #include "Object/Runtime/PyFrame.h"
+#include <string>
 #include "ByteCode/ByteCode.h"
 #include "Collections/Stack.h"
 #include "Collections/String/BytesHelper.h"
@@ -367,14 +368,13 @@ void PrintFrame(const PyFramePtr& frame) {
   VerboseLogger::getInstance().log("\nStack(*ptr):\n");
   auto stack = frame->DumpStack();
   for (Index i = 0; i < stack->Length(); i++) {
-    auto index_repr = CreatePyInteger(i)->repr()->as<PyString>()->ToCppString();
-    VerboseLogger::getInstance().log(index_repr);
+    VerboseLogger::getInstance().log(std::to_string(i) + ": ");
     VerboseLogger::getInstance().log("  ");
     auto item = stack->GetItem(i);
     auto item_repr = item->repr()->as<PyString>()->ToCppString();
-    VerboseLogger::getInstance().log(item_repr);
+    VerboseLogger::getInstance().log(item_repr );
     auto ptr = reinterpret_cast<uint64_t>(item.get());
-    std::string ptr_str = " ( " + std::to_string(ptr) + " ) ";
+    std::string ptr_str = " ( " + std::to_string(ptr) + " ) \n";
     VerboseLogger::getInstance().log(ptr_str);
   }
 

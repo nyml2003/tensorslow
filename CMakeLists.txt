@@ -52,6 +52,28 @@ target_link_libraries(
 
 add_dependencies(tensorslow_engine antlr4_static tensorslow_common)
 
+if (ipo_result)
+    foreach(target tensorslow_compiler tensorslow_interpreter tensorslow_engine)
+        set_property(TARGET ${target} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    endforeach()
+endif()
+
+foreach(target tensorslow_compiler tensorslow_interpreter tensorslow_engine)
+    target_compile_options(${target} PRIVATE
+        $<$<CXX_COMPILER_ID:GNU,Clang>:-ffunction-sections>
+        $<$<CXX_COMPILER_ID:MSVC>:/Gy>
+    )
+endforeach()
+
+# 删除未使用的函数（按平台）
+foreach(target tensorslow_compiler tensorslow_interpreter tensorslow_engine)
+    target_link_options(${target} PRIVATE
+        $<$<CXX_COMPILER_ID:GNU,Clang>:-Wl,/OPT:REF>
+        $<$<AND:$<CXX_COMPILER_ID:Clang>,$<PLATFORM_ID:Windows>>:-Wl,/OPT:REF>
+        $<$<CXX_COMPILER_ID:MSVC>:/OPT:REF>
+    )
+endforeach()
+
 include(cmake/tools.cmake)
 
 include(test/unittest/unittest.cmake)

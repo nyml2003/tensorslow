@@ -26,12 +26,8 @@ class LogStrategy {
 class DefaultLogStrategy : public LogStrategy {
  public:
   void operator()(const std::string& msg) const override {
-    Runtime::EventLoop::Instance().EnqueueTask(
-      Object::CreatePyNativeFunction([msg](const Object::PyObjPtr&) {
-        std::cout << msg;
-        return Object::CreatePyNone();
-      })
-    );
+    std::cout << msg;
+
   }  // 将日志消息添加到事件循环的宏任务队列中
 };
 
@@ -41,14 +37,10 @@ class FileLogStrategy : public LogStrategy {
 
   void operator()(const std::string& msg) const override {
     // 如果文件未成功打开，则静默忽略，不做任何输出
-    Runtime::EventLoop::Instance().EnqueueTask(
-      Object::CreatePyNativeFunction([=](const Object::PyObjPtr&) {
-        if (m_stream.is_open()) {
-          m_stream << msg;
-        }
-        return Object::CreatePyNone();
-      })
-    );
+
+    if (m_stream.is_open()) {
+      m_stream << msg;
+    }
   }
 
  private:

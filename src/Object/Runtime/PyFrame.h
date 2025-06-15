@@ -51,6 +51,10 @@ class PyFrame : public PyObject {
 
   PyObjPtr StackTop() const { return stack.Top(); }
 
+  void StackPush(const PyObjPtr& obj) { stack.Push(obj); }
+
+  PyObjPtr StackPop() { return stack.Pop(); }
+
   PyDictPtr CurrentLocals() const;
 
   PyDictPtr CurrentGlobals() const;

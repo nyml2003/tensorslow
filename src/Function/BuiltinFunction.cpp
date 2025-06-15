@@ -3,6 +3,7 @@
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
+#include "Object/Core/PyPromise.h"
 #include "Object/Core/PyType.h"
 #include "Object/Function/PyFunction.h"
 #include "Object/Function/PyNativeFunction.h"
@@ -61,7 +62,7 @@ Object::PyObjPtr Print(const Object::PyObjPtr& args) {
     arg->str()->as<Object::PyString>()->Print();
   }
   Object::CreatePyString("\n")->Print();
-  
+
   return Object::CreatePyNone();
 }
 
@@ -176,6 +177,84 @@ Object::PyObjPtr Input(const Object::PyObjPtr& args) {
   std::cin >> input;
   return Object::CreatePyString(input);
 }
+
+auto ReadFile(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
+  CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
+  auto argList = args->as<Object::PyList>();
+  auto filePath = argList->GetItem(0)->as<Object::PyString>()->ToCppString();
+  return Object::CreatePyPromise(
+    Object::CreatePyNativeFunction([filePath](const Object::PyObjPtr& args) {
+      auto resolve = args->as<Object::PyList>()->GetItem(0);
+      auto reject = args->as<Object::PyList>()->GetItem(1);
+      try {
+        std::ifstream file(filePath);
+        if (!file.is_open()) {
+          throw std::runtime_error("File not found: " + filePath);
+        }
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        file.close();
+        auto content = Object::CreatePyString(buffer.str());
+        Runtime::Evaluator::InvokeCallable(
+          resolve, Object::CreatePyList({content})
+        );
+      } catch (const std::exception& e) {
+        Runtime::Evaluator::InvokeCallable(
+          reject, Object::CreatePyList({Object::CreatePyString(e.what())})
+        );
+      }
+      return Object::CreatePyNone();
+    })
+  );
+}
+
+// auto Coroutine(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
+//   auto argList = args->as<Object::PyList>();
+//   auto generator = argList->GetItem(0);
+//   auto gen =
+//     Runtime::Evaluator::InvokeCallable(generator, Object::CreatePyList({}))
+//       ->as<Object::PyGenerator>();
+//   auto executor =
+//     Object::CreatePyNativeFunction([gen](const Object::PyObjPtr& args) {
+//       auto argsList = args->as<Object::PyList>();
+//       auto resolve = argsList->GetItem(0);
+//       auto reject = argsList->GetItem(1);
+
+//       Object::PyNativeFunctionPtr onFullilled =
+//         Object::CreatePyNativeFunction([](const Object::PyObjPtr&) {
+//           return Object::CreatePyNone();
+//         });
+
+//       onFullilled = Object::CreatePyNativeFunction(
+//         [resolve, reject, gen,
+//          onFullilled](const Object::PyObjPtr& args) -> Object::PyObjPtr {
+//           Object::PyObjPtr ret = Object::CreatePyNone();
+//           auto result = args->as<Object::PyList>()->GetItem(0);
+//           try {
+//             ret = gen->Send(result);
+//           } catch (const std::exception& e) {
+//             return Runtime::Evaluator::InvokeCallable(
+//               reject, Object::CreatePyList({Object::CreatePyString(e.what())})
+//             );
+//           }
+//           if (ret->Klass() == Object::GeneratorKlass::Self()) {
+//             ret->as<Object::PyPromise>()->Then(onFullilled);
+//           } else {
+//             Object::PromiseResolve(Object::CreatePyList({ret}))
+//               ->as<Object::PyPromise>()
+//               ->Then(onFullilled);
+//           }
+
+//           return Object::CreatePyNone();
+//         }
+//       );
+//       Runtime::Evaluator::InvokeCallable(
+//         onFullilled, Object::CreatePyList({Object::CreatePyNone()})
+//       );
+//       return Object::CreatePyNone();
+//     });
+//   return Object::CreatePyPromise(executor);
+// }
 
 Object::PyObjPtr Iter(const Object::PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);

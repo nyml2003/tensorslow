@@ -7,6 +7,7 @@
 #include "Object/Function/PyFunction.h"
 #include "Object/Function/PyMethod.h"
 #include "Object/Function/PyNativeFunction.h"
+#include "Object/Iterator/PyGenerator.h"
 #include "Object/Object.h"
 #include "Object/Runtime/PyCode.h"
 #include "Object/Runtime/PyFrame.h"
@@ -68,7 +69,12 @@ Object::PyObjPtr UserFunction(
   const Object::PyFunctionPtr& func,
   const Object::PyListPtr& arguments
 ) {
-  return CreateFrameWithPyFunction(func, arguments)->EvalAndDestroy();
+  auto frame = CreateFrameWithPyFunction(func, arguments);
+  if (func->Code()->IsGenerator()) {
+    Runtime::VirtualMachine::Instance().BackToParentFrame();
+    return Object::CreatePyGenerator(frame);
+  }
+  return frame->EvalAndDestroy();
 }
 Object::PyObjPtr InvokeCallable(
   const Object::PyObjPtr& func,

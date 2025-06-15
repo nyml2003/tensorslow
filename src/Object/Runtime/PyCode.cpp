@@ -19,7 +19,8 @@ PyCode::PyCode(
   PyListPtr names,
   PyListPtr varNames,
   PyStrPtr name,
-  Index nLocals
+  Index nLocals,
+  bool isGenerator
 )
   : PyObject(CodeKlass::Self()),
     byteCode(std::move(byteCodes)),
@@ -28,7 +29,8 @@ PyCode::PyCode(
     names(std::move(names)),
     varNames(std::move(varNames)),
     name(std::move(name)),
-    nLocals(nLocals) {}
+    nLocals(nLocals),
+    isGenerator(isGenerator) {}
 
 PyListPtr PyCode::Instructions() {
   return instructions;
@@ -124,6 +126,9 @@ PyObjPtr CodeKlass::_serialize_(const PyObjPtr& self) {
   result.Append(code->VarNames()->_serialize_()->as<PyBytes>()->Value());
   result.Append(code->Name()->_serialize_()->as<PyBytes>()->Value());
   result.Append(Collections::Serialize(code->NLocals()));
+  result.Append(Collections::Serialize(
+    code->IsGenerator() ? Literal::TRUE_LITERAL : Literal::FALSE_LITERAL
+  ));
   result.Append(
     code->Instructions()->_serialize_()->_serialize_()->as<PyBytes>()->Value()
   );
@@ -279,7 +284,7 @@ PyCodePtr CreatePyCode(const PyStrPtr& name) {
   auto consts = CreatePyList()->as<PyList>();
   auto names = CreatePyList()->as<PyList>();
   auto varNames = CreatePyList()->as<PyList>();
-  return std::make_shared<PyCode>(byteCode, consts, names, varNames, name, 0);
+  return std::make_shared<PyCode>(byteCode, consts, names, varNames, name, 0, false);
 }
 
 void PrintCode(const PyCodePtr& code) {

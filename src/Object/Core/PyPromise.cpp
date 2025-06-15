@@ -96,6 +96,10 @@ PyPromisePtr PyPromise::Then(const PyObjPtr& onFulfilled) {
       });
       if (self->state == State::FULFILLED) {
         Runtime::EventLoop::Instance().EnqueueMicroTask(callback);
+      } else if (self->state == State::REJECTED) {
+        Runtime::Evaluator::InvokeCallable(
+          reject, CreatePyList({self->GetValue()})
+        );
       } else {
         self->onFulfilledCallbacks->Append(callback);
       }
@@ -109,15 +113,23 @@ PyPromisePtr PyPromise::Catch(const PyObjPtr& onRejected) {
   auto new_executor =
     CreatePyNativeFunction([self, onRejected](const PyObjPtr& args) {
       auto argList = args->as<PyList>();
+      auto resolve = argList->GetItem(0);
       auto reject = argList->GetItem(1);
-      auto callback =
-        CreatePyNativeFunction([self, onRejected, reject](const PyObjPtr&) {
+      auto callback = CreatePyNativeFunction([self, onRejected, reject,
+                                              resolve](const PyObjPtr&) {
+        try {
           auto result = Runtime::Evaluator::InvokeCallable(
-            onRejected, CreatePyList({self->value})
+            onRejected, CreatePyList({self->GetValue()})
           );
-          Runtime::Evaluator::InvokeCallable(reject, CreatePyList({result}));
+          Runtime::Evaluator::InvokeCallable(resolve, CreatePyList({result}));
           return CreatePyNone();
-        });
+        } catch (const std::exception& e) {
+          Runtime::Evaluator::InvokeCallable(
+            reject, CreatePyList({CreatePyString(e.what())})
+          );
+        }
+        return CreatePyNone();
+      });
       if (self->state == State::REJECTED) {
         Runtime::EventLoop::Instance().EnqueueMicroTask(callback);
       } else {
@@ -157,6 +169,11 @@ void PromiseKlass::Initialize() {
       return promise->Catch(onRejected);
     })
   );
+  AddAttribute(
+    CreatePyString("resolve"), CreatePyNativeFunction(PromiseResolve)
+  );
+  AddAttribute(CreatePyString("reject"), CreatePyNativeFunction(PromiseReject));
+
   isInitialized = true;
 }
 
@@ -165,6 +182,31 @@ PyObjPtr PromiseKlass::init(const PyObjPtr& /*typeObj*/, const PyObjPtr& args) {
     throw std::runtime_error("Promise constructor requires one argument");
   }
   auto executor = args->as<PyList>()->GetItem(0);
+  return CreatePyPromise(executor);
+}
+
+auto PromiseResolve(const PyObjPtr& args) -> PyObjPtr {
+  auto argList = args->as<PyList>();
+  auto value = argList->GetItem(0);
+  if (value->Klass() == PromiseKlass::Self()) {
+    return value;
+  }
+  auto executor = CreatePyNativeFunction([value](const PyObjPtr& args) {
+    auto argList = args->as<PyList>();
+    auto resolve = argList->GetItem(0);
+    return Runtime::Evaluator::InvokeCallable(resolve, CreatePyList({value}));
+  });
+  return CreatePyPromise(executor);
+}
+
+auto PromiseReject(const PyObjPtr& args) -> PyObjPtr {
+  auto argList = args->as<PyList>();
+  auto reason = argList->GetItem(0);
+  auto executor = CreatePyNativeFunction([reason](const PyObjPtr& args) {
+    auto argList = args->as<PyList>();
+    auto reject = argList->GetItem(0);
+    return Runtime::Evaluator::InvokeCallable(reject, CreatePyList({reason}));
+  });
   return CreatePyPromise(executor);
 }
 

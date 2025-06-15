@@ -8,6 +8,7 @@
 #include "IR/Expression/Map.h"
 #include "IR/Expression/Slice.h"
 #include "IR/Expression/Unary.h"
+#include "IR/Expression/YieldExpr.h"
 #include "IR/FuncDef.h"
 #include "IR/INode.h"
 #include "IR/Identifier.h"
@@ -19,7 +20,6 @@
 #include "IR/Statement/PassStmt.h"
 #include "IR/Statement/ReturnStmt.h"
 #include "IR/Statement/WhileStmt.h"
-#include "IR/Statement/YieldStmt.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
@@ -110,7 +110,12 @@ antlrcpp::Any Generator::visitTestlist_comp(
 
 antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
   if (ctx->OPEN_PAREN() != nullptr) {
-    return visitTest(ctx->testlist_comp()->test(0));
+    if (ctx->testlist_comp() != nullptr) {
+      return visitTest(ctx->testlist_comp()->test(0));
+    }
+    if (ctx->yield_expr() != nullptr) {
+      return visitYield_expr(ctx->yield_expr());
+    }
   }
   if (ctx->OPEN_BRACK() != nullptr) {
     // 情况 2: '[' testlist_comp? ']'
@@ -121,7 +126,8 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
       std::any_cast<Object::PyListPtr>(visitTestlist_comp(ctx->testlist_comp())
       );
     return IR::CreateList(testlist_comp, context);
-  } else if (ctx->OPEN_BRACE() != nullptr) {
+  }
+  if (ctx->OPEN_BRACE() != nullptr) {
     auto dictorsetmaker = ctx->dictorsetmaker();
     if (dictorsetmaker == nullptr) {
       return IR::CreateMap(
@@ -143,13 +149,15 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
     return IR::CreateMap(
       Object::CreatePyList(keys), Object::CreatePyList(values), context
     );
-  } else if (ctx->name() != nullptr) {
+  }
+  if (ctx->name() != nullptr) {
     // 情况 4: name
     return IR::CreateIdentifier(
       Object::CreatePyString(ctx->name()->getText().c_str()), context
     );
     // visitName(ctx->name());
-  } else if (ctx->NUMBER() != nullptr) {
+  }
+  if (ctx->NUMBER() != nullptr) {
     // 情况 5: NUMBER
     std::string numberText = ctx->NUMBER()->getText();
 
@@ -167,8 +175,8 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
       ),
       context
     );
-
-  } else if (!ctx->STRING().empty()) {
+  }
+  if (!ctx->STRING().empty()) {
     // 情况 6: STRING+
     Object::PyObjPtr str = Object::CreatePyString("");
     for (auto* string : ctx->STRING()) {
@@ -177,10 +185,11 @@ antlrcpp::Any Generator::visitAtom(Python3Parser::AtomContext* ctx) {
       str = str->add(Object::CreatePyString(rawString));
     }
     return IR::CreateAtom(str, context);
-  } else if (ctx->ELLIPSIS() != nullptr) {
+  }
+  if (ctx->ELLIPSIS() != nullptr) {
     // 情况 7: '...'
     std::cout << "atom: '...'" << std::endl;
-    
+
   } else if (ctx->NONE() != nullptr) {
     // 情况 8: 'None'
     return IR::CreateAtom(Object::CreatePyNone(), context);
@@ -406,9 +415,15 @@ antlrcpp::Any Generator::visitExpr_stmt(Python3Parser::Expr_stmtContext* ctx) {
 
   // 处理普通赋值或多重赋值
   if (!ctx->ASSIGN().empty()) {
-    auto source = std::any_cast<IR::INodePtr>(
-      visitTestlist_star_expr(ctx->testlist_star_expr(1))
-    );
+    IR::INodePtr source = nullptr;
+    if (ctx->testlist_star_expr().size() == 2) {
+      source = std::any_cast<IR::INodePtr>(
+        visitTestlist_star_expr(ctx->testlist_star_expr(1))
+      );
+    } else if (ctx->testlist_star_expr().size() == 1) {
+      source = std::any_cast<IR::INodePtr>(visitYield_expr(ctx->yield_expr(0)));
+    }
+
     auto target = std::any_cast<IR::INodePtr>(
       visitTestlist_star_expr(ctx->testlist_star_expr(0))
     );
@@ -544,7 +559,8 @@ antlrcpp::Any Generator::visitComparison(Python3Parser::ComparisonContext* ctx
   if (ctx->comp_op(0)->EQUALS() != nullptr) {
     return CreateBinary(IR::Binary::Operator::EQ, left, right, context);
   }
-  if ((ctx->comp_op(0)->NOT_EQ_1() != nullptr) || (ctx->comp_op(0)->NOT_EQ_2() != nullptr)) {
+  if ((ctx->comp_op(0)->NOT_EQ_1() != nullptr) ||
+      (ctx->comp_op(0)->NOT_EQ_2() != nullptr)) {
     return CreateBinary(IR::Binary::Operator::NE, left, right, context);
   }
   if (ctx->comp_op(0)->LESS_THAN() != nullptr) {
@@ -789,7 +805,8 @@ antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx
     auto* test = ctx->test(0);
     auto* colon = ctx->COLON();
     auto value = std::any_cast<IR::INodePtr>(visitTest(test));
-    if (colon->getSymbol()->getTokenIndex() < test->getStart()->getTokenIndex()) {
+    if (colon->getSymbol()->getTokenIndex() <
+        test->getStart()->getTokenIndex()) {
       return IR::CreateSlice(
         Object::CreatePyList({none, value, step}), context
       );
@@ -850,7 +867,7 @@ antlrcpp::Any Generator::visitImport_stmt(
 
 antlrcpp::Any Generator::visitYield_stmt(Python3Parser::Yield_stmtContext* ctx
 ) {
-  return IR::CreateYieldStmt(
+  return IR::CreateExprStmt(
     std::any_cast<IR::INodePtr>(visitYield_expr(ctx->yield_expr())), context
   );
 }
@@ -858,9 +875,14 @@ antlrcpp::Any Generator::visitYield_stmt(Python3Parser::Yield_stmtContext* ctx
 antlrcpp::Any Generator::visitYield_expr(Python3Parser::Yield_exprContext* ctx
 ) {
   if (ctx->yield_arg()->testlist() != nullptr) {
-    return visitTestlist(ctx->yield_arg()->testlist());
+    return IR::CreateYieldExpr(
+      std::any_cast<IR::INodePtr>(visitTestlist(ctx->yield_arg()->testlist())),
+      context
+    );
   }
-  return IR::CreateAtom(Object::CreatePyNone(), context);
+  return IR::CreateYieldExpr(
+    IR::CreateAtom(Object::CreatePyNone(), context), context
+  );
 }
 
 }  // namespace tensorslow::Generation
