@@ -745,11 +745,11 @@ PyObjPtr PyFrame::Eval() {
         auto obj = stack.Pop();
         auto value = obj->getattr(key);
         if (value == nullptr) {
-          std::cout << "object attributes: " << std::endl;
+          std::cout << "object attributes: " << '\n';
           obj->Attributes()->str()->as<PyString>()->PrintLine();
-          std::cout << "class attributes: " << std::endl;
+          std::cout << "class attributes: " << '\n';
           obj->Klass()->Attributes()->str()->as<PyString>()->PrintLine();
-          std::cout << "mro: " << std::endl;
+          std::cout << "mro: " << '\n';
           obj->Klass()->Mro()->str()->as<PyString>()->PrintLine();
           for (Index i = 0; i < obj->Klass()->Mro()->Length(); i++) {
             auto mro = obj->Klass()->Mro()->GetItem(i)->as<PyType>();
