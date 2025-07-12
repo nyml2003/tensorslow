@@ -1,4 +1,5 @@
 #include "IR/Expression/Binary.h"
+#include "ByteCode/ByteCode.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Runtime/PyInst.h"
 
@@ -27,79 +28,79 @@ Object::PyObjPtr BinaryKlass::emit(
   Object::PyObjPtr inst = nullptr;
   switch (binary->Oprt()) {
     case Binary::Operator::ADD:
-      inst = Object::CreateBinaryAdd();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_ADD>();
       break;
     case Binary::Operator::SUB:
-      inst = Object::CreateBinarySubtract();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_SUBTRACT>();
       break;
     case Binary::Operator::MUL:
-      inst = Object::CreateBinaryMultiply();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_MULTIPLY>();
       break;
     case Binary::Operator::MATMUL:
-      inst = Object::CreateBinaryMatrixMultiply();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_MATRIX_MULTIPLY>();
       break;
     case Binary::Operator::EQ:
-      inst = Object::CreateCompareOp(Object::CompareOp::EQUAL);
+      inst = Object::MakeInst<Object::ByteCode::COMPARE_OP>(Object::CompareOp::EQUAL);
       break;
     case Binary::Operator::GE:
-      inst = Object::CreateCompareOp(Object::CompareOp::GREATER_THAN_EQUAL);
+      inst = Object::MakeInst<Object::ByteCode::COMPARE_OP>(Object::CompareOp::GREATER_THAN_EQUAL);
       break;
     case Binary::Operator::LE:
-      inst = Object::CreateCompareOp(Object::CompareOp::LESS_THAN_EQUAL);
+      inst = Object::MakeInst<Object::ByteCode::COMPARE_OP>(Object::CompareOp::LESS_THAN_EQUAL);
       break;
     case Binary::Operator::NE:
-      inst = Object::CreateCompareOp(Object::CompareOp::NOT_EQUAL);
+      inst = Object::MakeInst<Object::ByteCode::COMPARE_OP>(Object::CompareOp::NOT_EQUAL);
       break;
     case Binary::Operator::LT:
-      inst = Object::CreateCompareOp(Object::CompareOp::LESS_THAN);
+      inst = Object::MakeInst<Object::ByteCode::COMPARE_OP>(Object::CompareOp::LESS_THAN);
       break;
     case Binary::Operator::GT:
-      inst = Object::CreateCompareOp(Object::CompareOp::GREATER_THAN);
+      inst = Object::MakeInst<Object::ByteCode::COMPARE_OP>(Object::CompareOp::GREATER_THAN);
       break;
     case Binary::Operator::IS:
-      inst = Object::CreateCompareOp(Object::CompareOp::IS);
+      inst = Object::MakeInst<Object::ByteCode::COMPARE_OP>(Object::CompareOp::IS);
       break;
     case Binary::Operator::IS_NOT:
-      inst = Object::CreateCompareOp(Object::CompareOp::IS_NOT);
+      inst = Object::MakeInst<Object::ByteCode::COMPARE_OP>(Object::CompareOp::IS_NOT);
       break;
     case Binary::Operator::IN_OP:
-      inst = Object::CreateCompareOp(Object::CompareOp::IN);
+      inst = Object::MakeInst<Object::ByteCode::COMPARE_OP>(Object::CompareOp::IN);
       break;
     case Binary::Operator::NOT_IN:
-      inst = Object::CreateCompareOp(Object::CompareOp::NOT_IN);
+      inst = Object::MakeInst<Object::ByteCode::COMPARE_OP>(Object::CompareOp::NOT_IN);
       break;
     case Binary::Operator::SUBSCR:
-      inst = Object::CreateBinarySubscr();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_SUBSCR>();
       break;
     case Binary::Operator::STORE_SUBSCR:
-      inst = Object::CreateStoreSubscr();
+      inst = Object::MakeInst<Object::ByteCode::STORE_SUBSCR>();
       break;
     case Binary::Operator::FLOOR_DIV:
-      inst = Object::CreateBinaryFloorDivide();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_FLOOR_DIVIDE>();
       break;
     case Binary::Operator::DIV:
-      inst = Object::CreateBinaryTrueDivide();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_TRUE_DIVIDE>();
       break;
     case Binary::Operator::MOD:
-      inst = Object::CreateBinaryModulo();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_MODULO>();
       break;
     case Binary::Operator::AND:
-      inst = Object::CreateBinaryAnd();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_AND>();
       break;
     case Binary::Operator::OR:
-      inst = Object::CreateBinaryOr();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_OR>();
       break;
     case Binary::Operator::XOR:
-      inst = Object::CreateBinaryXor();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_XOR>();
       break;
     case Binary::Operator::LSHIFT:
-      inst = Object::CreateBinaryLShift();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_LSHIFT>();
       break;
     case Binary::Operator::RSHIFT:
-      inst = Object::CreateBinaryRShift();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_RSHIFT>();
       break;
     case Binary::Operator::POWER:
-      inst = Object::CreateBinaryPower();
+      inst = Object::MakeInst<Object::ByteCode::BINARY_POWER>();
       break;
   }
   if (inst == nullptr) {
@@ -117,10 +118,12 @@ Object::PyObjPtr BinaryKlass::print(const Object::PyObjPtr& obj) {
   auto leftStr = left->print();
   auto rightStr = right->print();
   PrintNode(
-    binary, Object::StringConcat(Object::CreatePyList({
-                                   Object::CreatePyString("Binary "),
-                                   Stringify(binary->Oprt()),
-                                 }))
+    binary, Object::StringConcat(
+              Object::CreatePyList({
+                Object::CreatePyString("Binary "),
+                Stringify(binary->Oprt()),
+              })
+            )
               ->as<Object::PyString>()
   );
   PrintEdge(binary, left);

@@ -1,4 +1,5 @@
 #include "IR/Statement/IfStmt.h"
+#include "ByteCode/ByteCode.h"
 #include "IR/INode.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Iterator/IteratorHelper.h"
@@ -25,7 +26,7 @@ Object::PyObjPtr IfStmtKlass::visit(
     elif->as<INode>()->visit(codeList);
   });
   Object::ForEach(elifs, [&codeList](const Object::PyObjPtr& elif) {
-    auto elifStms = elif;
+    const auto& elifStms = elif;
     Object::ForEach(elifStms, [&codeList](const Object::PyObjPtr& stmt) {
       stmt->as<INode>()->visit(codeList);
     });
@@ -61,9 +62,10 @@ Object::PyObjPtr IfStmtKlass::emit(
   // then 块结束后，添加 JUMP_FORWARD 跳转到整个 if 结束的位置
   Index thenBlockEnd = code->JumpForward();
   code->Instructions()->SetItem(
-    thenConditionEnd - 1, Object::CreatePopJumpIfFalse(static_cast<int64_t>(
-                            thenBlockEnd - thenConditionEnd + 1
-                          ))
+    thenConditionEnd - 1,
+    Object::MakeInst<Object::ByteCode::POP_JUMP_IF_FALSE>(
+      static_cast<int64_t>(thenBlockEnd - thenConditionEnd + 1)
+    )
   );
   Collections::List<Index> elifBlockEnds;
   // 处理 elif 部分
@@ -77,16 +79,17 @@ Object::PyObjPtr IfStmtKlass::emit(
     Index elfiConditionEnd = code->PopJumpIfFalse();
 
     // 生成 elif 块的字节码
-    auto elifStms = elifBlock;
+    const auto& elifStms = elifBlock;
     Object::ForEach(elifStms, [&codeList](const Object::PyObjPtr& stmt) {
       stmt->as<IR::INode>()->emit(codeList);
     });
     // elif 块结束后，添加 JUMP_FORWARD 跳转到整个 if 结束的位置
     Index elifBlockEnd = code->JumpForward();
     code->Instructions()->SetItem(
-      elfiConditionEnd - 1, Object::CreatePopJumpIfFalse(static_cast<int64_t>(
-                              elifBlockEnd - elfiConditionEnd + 1
-                            ))
+      elfiConditionEnd - 1,
+      Object::MakeInst<Object::ByteCode::POP_JUMP_IF_FALSE>(
+        static_cast<int64_t>(elifBlockEnd - elfiConditionEnd + 1)
+      )
     );
     elifBlockEnds.Push(elifBlockEnd);
   }
@@ -103,13 +106,15 @@ Object::PyObjPtr IfStmtKlass::emit(
   Index ifEnd = code->Instructions()->Length();
   for (Index i = 0; i < elifBlockEnds.Size(); ++i) {
     code->Instructions()->SetItem(
-      elifBlockEnds[i] - 1,
-      Object::CreateJumpForward(ifEnd - elifBlockEnds[i] + 1)
+      elifBlockEnds[i] - 1, Object::MakeInst<Object::ByteCode::JUMP_FORWARD>(
+                              ifEnd - elifBlockEnds[i] + 1
+                            )
     );
   }
 
   code->Instructions()->SetItem(
-    thenBlockEnd - 1, Object::CreateJumpForward(ifEnd - thenBlockEnd + 1)
+    thenBlockEnd - 1,
+    Object::MakeInst<Object::ByteCode::JUMP_FORWARD>(ifEnd - thenBlockEnd + 1)
   );
   return Object::CreatePyNone();
 }
@@ -133,7 +138,7 @@ Object::PyObjPtr IfStmtKlass::print(const Object::PyObjPtr& obj) {
     PrintEdge(ifStmt, elif, Object::CreatePyString("elifCondition"));
   });
   Object::ForEach(elifs, [&](const Object::PyObjPtr& elif) {
-    auto elifStms = elif;
+    const auto& elifStms = elif;
     Object::ForEach(elifStms, [&](const Object::PyObjPtr& stmt) {
       stmt->as<INode>()->print();
       PrintEdge(ifStmt, stmt, Object::CreatePyString("elif"));

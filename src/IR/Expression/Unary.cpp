@@ -1,4 +1,5 @@
 #include "IR/Expression/Unary.h"
+#include "ByteCode/ByteCode.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Runtime/PyInst.h"
 
@@ -23,16 +24,16 @@ Object::PyObjPtr UnaryKlass::emit(
   Object::PyObjPtr inst = nullptr;
   switch (unary->Oprt()) {
     case Unary::Operator::PLUS:
-      inst = Object::CreateUnaryPositive();
+      inst = Object::MakeInst<Object::ByteCode::UNARY_POSITIVE>();
       break;
     case Unary::Operator::MINUS:
-      inst = Object::CreateUnaryNegative();
+      inst = Object::MakeInst<Object::ByteCode::UNARY_NEGATIVE>();
       break;
     case Unary::Operator::INVERT:
-      inst = Object::CreateUnaryInvert();
+      inst = Object::MakeInst<Object::ByteCode::UNARY_INVERT>();
       break;
     case Unary::Operator::NOT:
-      inst = Object::CreateUnaryNot();
+      inst = Object::MakeInst<Object::ByteCode::UNARY_NOT>();
       break;
   }
   if (inst == nullptr) {

@@ -1,4 +1,5 @@
 #include "IR/Statement/WhileStmt.h"
+#include "ByteCode/ByteCode.h"
 #include "Object/Core/PyNone.h"
 #include "Object/Iterator/IteratorHelper.h"
 namespace tensorslow::IR {
@@ -35,7 +36,7 @@ Object::PyObjPtr WhileStmtKlass::emit(
   auto jumpEnd = code->Instructions()->Length();
   auto offset = static_cast<int64_t>(jumpEnd - jumpStart + 1);
   code->Instructions()->SetItem(
-    jumpStart - 1, Object::CreatePopJumpIfFalse(offset)
+    jumpStart - 1, Object::MakeInst<Object::ByteCode::POP_JUMP_IF_FALSE>(offset)
   );
   return Object::CreatePyNone();
 }

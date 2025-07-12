@@ -136,193 +136,181 @@ void ParseByteCode(const PyCodePtr& code) {
   auto insts = Collections::List<PyObjPtr>(size);
   while ((size--) != 0U) {
     auto byte = bytes[iter++];
+    insts.Push([byte, &iter, &bytes]() {
     switch (static_cast<ByteCode>(byte)) {
       case ByteCode::LOAD_CONST: {
-        insts.Push(CreateLoadConst(Collections::DeserializeU64(bytes, iter)));
-        break;
+          return MakeInst<ByteCode::LOAD_CONST>(
+            Collections::DeserializeU64(bytes, iter)
+          );
       }
       case ByteCode::BINARY_ADD: {
-        insts.Push(CreateBinaryAdd());
-        break;
+          return MakeInst<ByteCode::BINARY_ADD>();
       }
       case ByteCode::BINARY_MULTIPLY: {
-        insts.Push(CreateBinaryMultiply());
-        break;
+          return MakeInst<ByteCode::BINARY_MULTIPLY>();
       }
       case ByteCode::BINARY_SUBTRACT: {
-        insts.Push(CreateBinarySubtract());
-        break;
+          return MakeInst<ByteCode::BINARY_SUBTRACT>();
       }
       case ByteCode::STORE_FAST: {
-        insts.Push(CreateStoreFast(Collections::DeserializeU64(bytes, iter)));
-        break;
+          return MakeInst<ByteCode::STORE_FAST>(
+            Collections::DeserializeU64(bytes, iter)
+          );
       }
       case ByteCode::LOAD_FAST: {
-        insts.Push(CreateLoadFast(Collections::DeserializeU64(bytes, iter)));
-        break;
+          return MakeInst<ByteCode::LOAD_FAST>(
+            Collections::DeserializeU64(bytes, iter)
+          );
       }
       case ByteCode::COMPARE_OP: {
         auto compareOp = bytes[iter++];
-        insts.Push(CreateCompareOp(static_cast<CompareOp>(compareOp)));
-        break;
+          return MakeInst<ByteCode::COMPARE_OP>(static_cast<CompareOp>(compareOp
+          ));
       }
       case ByteCode::POP_JUMP_IF_FALSE: {
-        insts.Push(CreatePopJumpIfFalse(Collections::DeserializeI64(bytes, iter)
-        ));
-        break;
+          return MakeInst<ByteCode::POP_JUMP_IF_FALSE>(
+            Collections::DeserializeI64(bytes, iter)
+          );
       }
       case ByteCode::POP_JUMP_IF_TRUE: {
-        insts.Push(CreatePopJumpIfTrue(Collections::DeserializeI64(bytes, iter))
+          return MakeInst<ByteCode::POP_JUMP_IF_TRUE>(
+            Collections::DeserializeI64(bytes, iter)
         );
-        break;
       }
       case ByteCode::MAKE_FUNCTION: {
-        insts.Push(CreateMakeFunction());
-        break;
+          return MakeInst<ByteCode::MAKE_FUNCTION>();
       }
       case ByteCode::CALL_FUNCTION: {
-        insts.Push(CreateCallFunction(Collections::DeserializeU64(bytes, iter))
+          return MakeInst<ByteCode::CALL_FUNCTION>(
+            Collections::DeserializeU64(bytes, iter)
         );
-        break;
       }
       case ByteCode::RETURN_VALUE: {
-        insts.Push(CreateReturnValue());
-        break;
+          return MakeInst<ByteCode::RETURN_VALUE>();
       }
       case ByteCode::LOAD_NAME: {
-        insts.Push(CreateLoadName(Collections::DeserializeU64(bytes, iter)));
-        break;
+          return MakeInst<ByteCode::LOAD_NAME>(
+            Collections::DeserializeU64(bytes, iter)
+          );
       }
       case ByteCode::STORE_NAME: {
-        insts.Push(CreateStoreName(Collections::DeserializeU64(bytes, iter)));
-        break;
+          return MakeInst<ByteCode::STORE_NAME>(
+            Collections::DeserializeU64(bytes, iter)
+          );
       }
       case ByteCode::LOAD_GLOBAL: {
-        insts.Push(CreateLoadGlobal(Collections::DeserializeU64(bytes, iter)));
-        break;
+          return MakeInst<ByteCode::LOAD_GLOBAL>(
+            Collections::DeserializeU64(bytes, iter)
+          );
       }
       case ByteCode::POP_TOP: {
-        insts.Push(CreatePopTop());
-        break;
+          return MakeInst<ByteCode::POP_TOP>();
       }
       case ByteCode::LOAD_ATTR: {
-        insts.Push(CreateLoadAttr(Collections::DeserializeU64(bytes, iter)));
-        break;
+          return MakeInst<ByteCode::LOAD_ATTR>(
+            Collections::DeserializeU64(bytes, iter)
+          );
       }
       case ByteCode::BUILD_LIST: {
-        insts.Push(CreateBuildList(Collections::DeserializeU64(bytes, iter)));
-        break;
+          return MakeInst<ByteCode::BUILD_LIST>(
+            Collections::DeserializeU64(bytes, iter)
+          );
       }
       case ByteCode::BUILD_SLICE: {
-        insts.Push(CreateBuildSlice());
-        break;
+          return MakeInst<ByteCode::BUILD_SLICE>();
       }
       case ByteCode::BUILD_MAP: {
-        insts.Push(CreateBuildMap(Collections::DeserializeU64(bytes, iter)));
-        break;
+          return MakeInst<ByteCode::BUILD_MAP>(
+            Collections::DeserializeU64(bytes, iter)
+          );
       }
       case ByteCode::BINARY_MATRIX_MULTIPLY: {
-        insts.Push(CreateBinaryMatrixMultiply());
-        break;
+          return MakeInst<ByteCode::BINARY_MATRIX_MULTIPLY>();
       }
       case ByteCode::JUMP_ABSOLUTE: {
-        insts.Push(CreateJumpAbsolute(Collections::DeserializeU64(bytes, iter))
+          return MakeInst<ByteCode::JUMP_ABSOLUTE>(
+            Collections::DeserializeU64(bytes, iter)
         );
-        break;
       }
       case ByteCode::BINARY_SUBSCR: {
-        insts.Push(CreateBinarySubscr());
-        break;
+          return MakeInst<ByteCode::BINARY_SUBSCR>();
       }
       case ByteCode::STORE_SUBSCR: {
-        insts.Push(CreateStoreSubscr());
-        break;
+          return MakeInst<ByteCode::STORE_SUBSCR>();
       }
       case ByteCode::GET_ITER: {
-        insts.Push(CreateGetIter());
-        break;
+          return MakeInst<ByteCode::GET_ITER>();
       }
       case ByteCode::FOR_ITER: {
-        insts.Push(CreateForIter(Collections::DeserializeU64(bytes, iter)));
-        break;
+          return MakeInst<ByteCode::FOR_ITER>(
+            Collections::DeserializeU64(bytes, iter)
+          );
       }
       case ByteCode::LOAD_BUILD_CLASS: {
-        insts.Push(CreateLoadBuildClass());
-        break;
+          return MakeInst<ByteCode::LOAD_BUILD_CLASS>();
       }
       case ByteCode::STORE_ATTR: {
-        insts.Push(CreateStoreAttr(Collections::DeserializeU64(bytes, iter)));
-        break;
+          return MakeInst<ByteCode::STORE_ATTR>(
+            Collections::DeserializeU64(bytes, iter)
+          );
       }
       case ByteCode::NOP: {
-        insts.Push(CreateNop());
-        break;
+          return MakeInst<ByteCode::NOP>();
       }
       case ByteCode::UNARY_POSITIVE: {
-        insts.Push(CreateUnaryPositive());
-        break;
+          return MakeInst<ByteCode::UNARY_POSITIVE>();
       }
       case ByteCode::UNARY_NEGATIVE: {
-        insts.Push(CreateUnaryNegative());
-        break;
+          return MakeInst<ByteCode::UNARY_NEGATIVE>();
       }
       case ByteCode::UNARY_NOT: {
-        insts.Push(CreateUnaryNot());
-        break;
+          return MakeInst<ByteCode::UNARY_NOT>();
       }
       case ByteCode::UNARY_INVERT: {
-        insts.Push(CreateUnaryInvert());
-        break;
+          return MakeInst<ByteCode::UNARY_INVERT>();
       }
       case ByteCode::BINARY_POWER: {
-        insts.Push(CreateBinaryPower());
-        break;
+          return MakeInst<ByteCode::BINARY_POWER>();
       }
       case ByteCode::BINARY_MODULO: {
-        insts.Push(CreateBinaryModulo());
-        break;
+          return MakeInst<ByteCode::BINARY_MODULO>();
       }
       case ByteCode::BINARY_FLOOR_DIVIDE: {
-        insts.Push(CreateBinaryFloorDivide());
-        break;
+          return MakeInst<ByteCode::BINARY_FLOOR_DIVIDE>();
       }
       case ByteCode::BINARY_TRUE_DIVIDE: {
-        insts.Push(CreateBinaryTrueDivide());
-        break;
+          return MakeInst<ByteCode::BINARY_TRUE_DIVIDE>();
       }
       case ByteCode::BINARY_LSHIFT: {
-        insts.Push(CreateBinaryLShift());
-        break;
+          return MakeInst<ByteCode::BINARY_LSHIFT>();
       }
       case ByteCode::BINARY_RSHIFT: {
-        insts.Push(CreateBinaryRShift());
-        break;
+          return MakeInst<ByteCode::BINARY_RSHIFT>();
       }
       case ByteCode::BINARY_AND: {
-        insts.Push(CreateBinaryAnd());
-        break;
+          return MakeInst<ByteCode::BINARY_AND>();
       }
       case ByteCode::BINARY_XOR: {
-        insts.Push(CreateBinaryXor());
-        break;
+          return MakeInst<ByteCode::BINARY_XOR>();
       }
       case ByteCode::BINARY_OR: {
-        insts.Push(CreateBinaryOr());
-        break;
+          return MakeInst<ByteCode::BINARY_OR>();
       }
       case ByteCode::YIELD_VALUE: {
-        insts.Push(CreateYieldValue());
-        break;
+          return MakeInst<ByteCode::YIELD_VALUE>();
       }
       case ByteCode::JUMP_FORWARD: {
-        insts.Push(CreateJumpForward(Collections::DeserializeU64(bytes, iter)));
-        break;
-      }
-      default:
-        throw std::runtime_error(
-          "Unknown byte code:" + std::to_string(static_cast<int>(bytes[iter]))
+          return MakeInst<ByteCode::JUMP_FORWARD>(
+            Collections::DeserializeU64(bytes, iter)
+          );
+        }
+        case ByteCode::STORE_GLOBAL: {
+          return MakeInst<ByteCode::STORE_GLOBAL>(
+            Collections::DeserializeU64(bytes, iter)
         );
     }
+      }
+    }());
   }
   code->SetInstructions(std::make_shared<PyList>(insts));
 }
@@ -372,7 +360,7 @@ void PrintFrame(const PyFramePtr& frame) {
     VerboseLogger::getInstance().log("  ");
     auto item = stack->GetItem(i);
     auto item_repr = item->repr()->as<PyString>()->ToCppString();
-    VerboseLogger::getInstance().log(item_repr );
+    VerboseLogger::getInstance().log(item_repr);
     auto ptr = reinterpret_cast<uint64_t>(item.get());
     std::string ptr_str = " ( " + std::to_string(ptr) + " ) \n";
     VerboseLogger::getInstance().log(ptr_str);
@@ -498,10 +486,12 @@ PyObjPtr PyFrame::Eval() {
       case ByteCode::POP_JUMP_IF_FALSE: {
         auto needJump = stack.Pop();
         if (!IsTrue(needJump)) {
-          SetProgramCounter(static_cast<Index>(
+          SetProgramCounter(
+            static_cast<Index>(
             static_cast<int64_t>(ProgramCounter()) +
             std::get<int64_t>(inst->Operand())
-          ));
+            )
+          );
         } else {
           NextProgramCounter();
         }
@@ -510,10 +500,12 @@ PyObjPtr PyFrame::Eval() {
       case ByteCode::POP_JUMP_IF_TRUE: {
         auto needJump = stack.Pop();
         if (IsTrue(needJump)) {
-          SetProgramCounter(static_cast<Index>(
+          SetProgramCounter(
+            static_cast<Index>(
             static_cast<int64_t>(ProgramCounter()) +
             std::get<int64_t>(inst->Operand())
-          ));
+            )
+          );
         } else {
           NextProgramCounter();
         }

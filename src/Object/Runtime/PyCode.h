@@ -76,74 +76,144 @@ class PyCode : public PyObject {
    */
   void LoadConst(const PyObjPtr& obj) {
     auto index = IndexOfConst(obj);
-    instructions->Append(CreateLoadConst(index));
+    instructions->Append(MakeInst<ByteCode::LOAD_CONST>(index));
   }
 
   void LoadName(const PyObjPtr& obj) {
     auto index = IndexOfName(obj);
-    instructions->Append(CreateLoadName(index));
+    instructions->Append(MakeInst<ByteCode::LOAD_NAME>(index));
   }
 
   void StoreName(const PyObjPtr& obj) {
     auto index = IndexOfName(obj);
-    instructions->Append(CreateStoreName(index));
+    instructions->Append(MakeInst<ByteCode::STORE_NAME>(index));
   }
 
   void LoadAttr(const PyObjPtr& obj) {
     auto index = IndexOfName(obj);
-    instructions->Append(CreateLoadAttr(index));
+    instructions->Append(MakeInst<ByteCode::LOAD_ATTR>(index));
   }
 
   void LoadGlobal(const PyObjPtr& obj) {
     auto index = IndexOfName(obj);
-    instructions->Append(CreateLoadGlobal(index));
+    instructions->Append(MakeInst<ByteCode::LOAD_GLOBAL>(index));
   }
 
   void LoadFast(const PyObjPtr& obj) {
     auto index = IndexOfVarName(obj);
-    instructions->Append(CreateLoadFast(index));
+    instructions->Append(MakeInst<ByteCode::LOAD_FAST>(index));
   }
 
   void StoreFast(const PyObjPtr& obj) {
     auto index = IndexOfVarName(obj);
-    instructions->Append(CreateStoreFast(index));
+    instructions->Append(MakeInst<ByteCode::STORE_FAST>(index));
   }
 
-  void BuildList(Index size) { instructions->Append(CreateBuildList(size)); }
-  void BuildSlice() { instructions->Append(CreateBuildSlice()); }
-  void BuildMap(Index size) { instructions->Append(CreateBuildMap(size)); }
-  void CallFunction(Index nArgs);
+  void BuildList(Index size) {
+    instructions->Append(MakeInst<ByteCode::BUILD_LIST>(size));
+  }
 
-  void MakeFunction();
+  void BuildSlice() { instructions->Append(MakeInst<ByteCode::BUILD_SLICE>()); }
 
-  void ReturnValue();
-  Index PopJumpIfFalse();
-  Index JumpForward() {
-    instructions->Append(CreateJumpForward(0));
+  void BuildMap(Index size) {
+    instructions->Append(MakeInst<ByteCode::BUILD_MAP>(size));
+  }
+
+  void CallFunction(Index nArgs) {
+    instructions->Append(MakeInst<ByteCode::CALL_FUNCTION>(nArgs));
+  }
+
+  void MakeFunction() {
+    instructions->Append(MakeInst<ByteCode::MAKE_FUNCTION>());
+  }
+
+  void ReturnValue() {
+    instructions->Append(MakeInst<ByteCode::RETURN_VALUE>());
+  }
+
+  Index PopJumpIfFalse() {
+    instructions->Append(MakeInst<ByteCode::POP_JUMP_IF_FALSE>(0));
     return instructions->Length();
   }
-  void JumpAbsolute(Index index);
-  void PopTop();
-  void StoreSubscr();
-  void GetIter();
-  Index ForIter(Index index);
-  void LoadBuildClass();
-  void StoreAttr(const PyObjPtr& obj);
-  void Nop();
-  void UnaryPositive();
-  void UnaryNegative();
-  void UnaryNot();
-  void UnaryInvert();
-  void BinaryPower();
-  void BinaryModulo();
-  void BinaryFloorDivide();
-  void BinaryTrueDivide();
-  void BinaryLShift();
-  void BinaryRShift();
-  void BinaryAnd();
-  void BinaryXor();
-  void BinaryOr();
-  void YieldValue() { instructions->Append(CreateYieldValue()); }
+
+  Index JumpForward() {
+    instructions->Append(MakeInst<ByteCode::JUMP_FORWARD>(0));
+    return instructions->Length();
+  }
+
+  void JumpAbsolute(Index index) {
+    instructions->Append(MakeInst<ByteCode::JUMP_ABSOLUTE>(index));
+  }
+
+  void PopTop() { instructions->Append(MakeInst<ByteCode::POP_TOP>()); }
+
+  void StoreSubscr() {
+    instructions->Append(MakeInst<ByteCode::STORE_SUBSCR>());
+  }
+
+  void GetIter() { instructions->Append(MakeInst<ByteCode::GET_ITER>()); }
+
+  Index ForIter(Index index) {
+    instructions->Append(MakeInst<ByteCode::FOR_ITER>(index));
+    return instructions->Length();
+  }
+
+  void LoadBuildClass() {
+    instructions->Append(MakeInst<ByteCode::LOAD_BUILD_CLASS>());
+  }
+
+  void StoreAttr(const PyObjPtr& obj) {
+    auto index = IndexOfName(obj);
+    instructions->Append(MakeInst<ByteCode::STORE_ATTR>(index));
+  }
+
+  void Nop() { instructions->Append(MakeInst<ByteCode::NOP>()); }
+
+  void UnaryPositive() {
+    instructions->Append(MakeInst<ByteCode::UNARY_POSITIVE>());
+  }
+
+  void UnaryNegative() {
+    instructions->Append(MakeInst<ByteCode::UNARY_NEGATIVE>());
+  }
+
+  void UnaryNot() { instructions->Append(MakeInst<ByteCode::UNARY_NOT>()); }
+
+  void UnaryInvert() {
+    instructions->Append(MakeInst<ByteCode::UNARY_INVERT>());
+  }
+
+  void BinaryPower() {
+    instructions->Append(MakeInst<ByteCode::BINARY_POWER>());
+  }
+
+  void BinaryModulo() {
+    instructions->Append(MakeInst<ByteCode::BINARY_MODULO>());
+  }
+
+  void BinaryFloorDivide() {
+    instructions->Append(MakeInst<ByteCode::BINARY_FLOOR_DIVIDE>());
+  }
+
+  void BinaryTrueDivide() {
+    instructions->Append(MakeInst<ByteCode::BINARY_TRUE_DIVIDE>());
+  }
+
+  void BinaryLShift() {
+    instructions->Append(MakeInst<ByteCode::BINARY_LSHIFT>());
+  }
+
+  void BinaryRShift() {
+    instructions->Append(MakeInst<ByteCode::BINARY_RSHIFT>());
+  }
+
+  void BinaryAnd() { instructions->Append(MakeInst<ByteCode::BINARY_AND>()); }
+
+  void BinaryXor() { instructions->Append(MakeInst<ByteCode::BINARY_XOR>()); }
+
+  void BinaryOr() { instructions->Append(MakeInst<ByteCode::BINARY_OR>()); }
+
+  void YieldValue() { instructions->Append(MakeInst<ByteCode::YIELD_VALUE>()); }
 
  private:
   PyBytesPtr byteCode;
@@ -198,7 +268,7 @@ inline PyObjPtr CreatePyCode(
   bool isGenerator
 ) {
   return std::make_shared<PyCode>(
-    byteCode, consts, names, varNames, name, nLocals,isGenerator
+    byteCode, consts, names, varNames, name, nLocals, isGenerator
   );
 }
 

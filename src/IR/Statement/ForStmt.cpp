@@ -1,4 +1,5 @@
 #include "IR/Statement/ForStmt.h"
+#include "ByteCode/ByteCode.h"
 #include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 #include "IR/Identifier.h"
@@ -37,7 +38,7 @@ Object::PyObjPtr ForStmtKlass::emit(
   code->JumpAbsolute(start - 1);
   Index end = code->Instructions()->Length();
   code->Instructions()->SetItem(
-    start - 1, Object::CreateForIter(end - start + 1)
+    start - 1, Object::MakeInst<Object::ByteCode::FOR_ITER>(end - start + 1)
   );
   return Object::CreatePyNone();
 }

@@ -48,129 +48,237 @@ class InstKlass : public Klass {
   PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
 };
 
-PyInstPtr CreateLoadConst(Index index);
+template <ByteCode Op>
+struct InstTraits {
+  using operand_type = void;
+};
 
-PyInstPtr CreateBinaryAdd();
+template <>
+struct InstTraits<ByteCode::BINARY_ADD> {
+  using operand_type = void;
+};
 
-PyInstPtr CreateBinarySubtract();
+template <>
+struct InstTraits<ByteCode::BINARY_SUBTRACT> {
+  using operand_type = void;
+};
 
-PyInstPtr CreateBinaryMultiply();
+template <>
+struct InstTraits<ByteCode::BINARY_MULTIPLY> {
+  using operand_type = void;
+};
 
-PyInstPtr CreateStoreName(Index index);
+template <>
+struct InstTraits<ByteCode::STORE_NAME> {
+  using operand_type = Index;
+};
 
-PyInstPtr CreateLoadName(Index index);
+template <>
+struct InstTraits<ByteCode::LOAD_NAME> {
+  using operand_type = Index;
+};
 
-PyInstPtr CreateStoreFast(Index index);
+template <>
+struct InstTraits<ByteCode::STORE_FAST> {
+  using operand_type = Index;
+};
 
-PyInstPtr CreateLoadFast(Index index);
+template <>
+struct InstTraits<ByteCode::LOAD_FAST> {
+  using operand_type = Index;
+};
 
-PyInstPtr CreateCompareOp(CompareOp compOp);
+template <>
+struct InstTraits<ByteCode::COMPARE_OP> {
+  using operand_type = CompareOp;
+};
 
-PyInstPtr CreatePopJumpIfFalse(int64_t index);
+template <>
+struct InstTraits<ByteCode::POP_JUMP_IF_FALSE> {
+  using operand_type = int64_t;
+};
 
-PyInstPtr CreatePopJumpIfTrue(int64_t index);
+template <>
+struct InstTraits<ByteCode::POP_JUMP_IF_TRUE> {
+  using operand_type = int64_t;
+};
 
-PyInstPtr CreateMakeFunction();
+template <>
+struct InstTraits<ByteCode::MAKE_FUNCTION> {
+  using operand_type = void;
+};
 
-PyInstPtr CreateCallFunction(Index argumentCount);
+template <>
+struct InstTraits<ByteCode::CALL_FUNCTION> {
+  using operand_type = Index;
+};
 
-PyInstPtr CreateReturnValue();
+template <>
+struct InstTraits<ByteCode::RETURN_VALUE> {
+  using operand_type = void;
+};
 
-PyInstPtr CreateLoadGlobal(Index index);
+template <>
+struct InstTraits<ByteCode::LOAD_GLOBAL> {
+  using operand_type = Index;
+};
 
-PyInstPtr CreatePopTop();
+template <>
+struct InstTraits<ByteCode::POP_TOP> {
+  using operand_type = void;
+};
 
-PyInstPtr CreateLoadAttr(Index index);
+template <>
+struct InstTraits<ByteCode::LOAD_ATTR> {
+  using operand_type = Index;
+};
 
-inline PyInstPtr CreateBuildList(Index size) {
-  return std::make_shared<PyInst>(ByteCode::BUILD_LIST, size);
+template <>
+struct InstTraits<ByteCode::BUILD_LIST> {
+  using operand_type = Index;
+};
+
+template <>
+struct InstTraits<ByteCode::BUILD_SLICE> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::BUILD_MAP> {
+  using operand_type = Index;
+};
+
+template <>
+struct InstTraits<ByteCode::BINARY_MATRIX_MULTIPLY> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::JUMP_ABSOLUTE> {
+  using operand_type = Index;
+};
+
+template <>
+struct InstTraits<ByteCode::BINARY_SUBSCR> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::STORE_SUBSCR> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::GET_ITER> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::FOR_ITER> {
+  using operand_type = Index;
+};
+
+template <>
+struct InstTraits<ByteCode::LOAD_BUILD_CLASS> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::STORE_ATTR> {
+  using operand_type = Index;
+};
+
+template <>
+struct InstTraits<ByteCode::NOP> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::UNARY_POSITIVE> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::UNARY_NEGATIVE> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::UNARY_NOT> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::UNARY_INVERT> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::BINARY_POWER> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::BINARY_MODULO> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::BINARY_FLOOR_DIVIDE> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::BINARY_TRUE_DIVIDE> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::BINARY_XOR> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::BINARY_AND> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::BINARY_OR> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::BINARY_LSHIFT> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::BINARY_RSHIFT> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::YIELD_VALUE> {
+  using operand_type = void;
+};
+
+template <>
+struct InstTraits<ByteCode::JUMP_FORWARD> {
+  using operand_type = Index;
+};
+
+template <ByteCode Op, typename T = typename InstTraits<Op>::operand_type>
+std::enable_if_t<std::is_same_v<T, void>, PyInstPtr> MakeInst() {
+  return std::make_shared<PyInst>(Op);
 }
 
-inline PyInstPtr CreateBuildSlice() {
-  return std::make_shared<PyInst>(ByteCode::BUILD_SLICE);
+template <ByteCode Op, typename T = typename InstTraits<Op>::operand_type>
+std::enable_if_t<!std::is_same_v<T, void>, PyInstPtr> MakeInst(T&& value) {
+  return std::make_shared<PyInst>(Op, std::forward<T>(value));
 }
 
-inline PyInstPtr CreateBuildMap(Index size) {
-  return std::make_shared<PyInst>(ByteCode::BUILD_MAP, size);
-}
 
-PyInstPtr CreateBinaryMatrixMultiply();
-
-PyInstPtr CreateJumpAbsolute(Index index);
-
-PyInstPtr CreateBinarySubscr();
-
-PyInstPtr CreateStoreSubscr();
-
-PyInstPtr CreateGetIter();
-
-PyInstPtr CreateForIter(Index index);
-
-PyInstPtr CreateLoadBuildClass();
-
-PyInstPtr CreateStoreAttr(Index index);
-
-PyInstPtr CreateNop();
-
-inline PyInstPtr CreateUnaryPositive() {
-  return std::make_shared<PyInst>(ByteCode::UNARY_POSITIVE);
-}
-
-inline PyInstPtr CreateUnaryNegative() {
-  return std::make_shared<PyInst>(ByteCode::UNARY_NEGATIVE);
-}
-
-inline PyInstPtr CreateUnaryNot() {
-  return std::make_shared<PyInst>(ByteCode::UNARY_NOT);
-}
-
-inline PyInstPtr CreateUnaryInvert() {
-  return std::make_shared<PyInst>(ByteCode::UNARY_INVERT);
-}
-
-inline PyInstPtr CreateBinaryPower() {
-  return std::make_shared<PyInst>(ByteCode::BINARY_POWER);
-}
-
-inline PyInstPtr CreateBinaryModulo() {
-  return std::make_shared<PyInst>(ByteCode::BINARY_MODULO);
-}
-
-inline PyInstPtr CreateBinaryFloorDivide() {
-  return std::make_shared<PyInst>(ByteCode::BINARY_FLOOR_DIVIDE);
-}
-
-inline PyInstPtr CreateBinaryTrueDivide() {
-  return std::make_shared<PyInst>(ByteCode::BINARY_TRUE_DIVIDE);
-}
-
-inline PyInstPtr CreateBinaryXor() {
-  return std::make_shared<PyInst>(ByteCode::BINARY_XOR);
-}
-
-inline PyInstPtr CreateBinaryAnd() {
-  return std::make_shared<PyInst>(ByteCode::BINARY_AND);
-}
-
-inline PyInstPtr CreateBinaryOr() {
-  return std::make_shared<PyInst>(ByteCode::BINARY_OR);
-}
-
-inline PyInstPtr CreateBinaryLShift() {
-  return std::make_shared<PyInst>(ByteCode::BINARY_LSHIFT);
-}
-
-inline PyInstPtr CreateBinaryRShift() {
-  return std::make_shared<PyInst>(ByteCode::BINARY_RSHIFT);
-}
-
-inline PyInstPtr CreateYieldValue() {
-  return std::make_shared<PyInst>(ByteCode::YIELD_VALUE);
-}
-
-inline PyInstPtr CreateJumpForward(Index index) {
-  return std::make_shared<PyInst>(ByteCode::JUMP_FORWARD, index);
-}
 
 }  // namespace tensorslow::Object
 
