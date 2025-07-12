@@ -2,7 +2,7 @@ import os
 import subprocess
 
 # 定义路径和可执行文件
-build_dir = "./build/Release"
+build_dir = "./build/Debug"
 test_dir = "./test/integration"
 frontend_exe = os.path.join(build_dir, "tensorslow_compiler")
 backend_exe = os.path.join(build_dir, "tensorslow_interpreter")
@@ -26,7 +26,7 @@ backend_file = source_code.replace(".py", ".pyc")
 print("正在读取并执行字节码...")
 if os.path.exists(backend_file):
     backend_command = [backend_exe, f"--file={backend_file}"]
-    # print(backend_command)
+    print(backend_command)
     result = subprocess.run(backend_command)
 else:
     print("错误：字节码文件未生成或路径无效。")

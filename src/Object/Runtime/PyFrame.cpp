@@ -137,169 +137,169 @@ void ParseByteCode(const PyCodePtr& code) {
   while ((size--) != 0U) {
     auto byte = bytes[iter++];
     insts.Push([byte, &iter, &bytes]() {
-    switch (static_cast<ByteCode>(byte)) {
-      case ByteCode::LOAD_CONST: {
+      switch (static_cast<ByteCode>(byte)) {
+        case ByteCode::LOAD_CONST: {
           return MakeInst<ByteCode::LOAD_CONST>(
             Collections::DeserializeU64(bytes, iter)
           );
-      }
-      case ByteCode::BINARY_ADD: {
+        }
+        case ByteCode::BINARY_ADD: {
           return MakeInst<ByteCode::BINARY_ADD>();
-      }
-      case ByteCode::BINARY_MULTIPLY: {
+        }
+        case ByteCode::BINARY_MULTIPLY: {
           return MakeInst<ByteCode::BINARY_MULTIPLY>();
-      }
-      case ByteCode::BINARY_SUBTRACT: {
+        }
+        case ByteCode::BINARY_SUBTRACT: {
           return MakeInst<ByteCode::BINARY_SUBTRACT>();
-      }
-      case ByteCode::STORE_FAST: {
+        }
+        case ByteCode::STORE_FAST: {
           return MakeInst<ByteCode::STORE_FAST>(
             Collections::DeserializeU64(bytes, iter)
           );
-      }
-      case ByteCode::LOAD_FAST: {
+        }
+        case ByteCode::LOAD_FAST: {
           return MakeInst<ByteCode::LOAD_FAST>(
             Collections::DeserializeU64(bytes, iter)
           );
-      }
-      case ByteCode::COMPARE_OP: {
-        auto compareOp = bytes[iter++];
+        }
+        case ByteCode::COMPARE_OP: {
+          auto compareOp = bytes[iter++];
           return MakeInst<ByteCode::COMPARE_OP>(static_cast<CompareOp>(compareOp
           ));
-      }
-      case ByteCode::POP_JUMP_IF_FALSE: {
+        }
+        case ByteCode::POP_JUMP_IF_FALSE: {
           return MakeInst<ByteCode::POP_JUMP_IF_FALSE>(
             Collections::DeserializeI64(bytes, iter)
           );
-      }
-      case ByteCode::POP_JUMP_IF_TRUE: {
+        }
+        case ByteCode::POP_JUMP_IF_TRUE: {
           return MakeInst<ByteCode::POP_JUMP_IF_TRUE>(
             Collections::DeserializeI64(bytes, iter)
-        );
-      }
-      case ByteCode::MAKE_FUNCTION: {
+          );
+        }
+        case ByteCode::MAKE_FUNCTION: {
           return MakeInst<ByteCode::MAKE_FUNCTION>();
-      }
-      case ByteCode::CALL_FUNCTION: {
+        }
+        case ByteCode::CALL_FUNCTION: {
           return MakeInst<ByteCode::CALL_FUNCTION>(
             Collections::DeserializeU64(bytes, iter)
-        );
-      }
-      case ByteCode::RETURN_VALUE: {
+          );
+        }
+        case ByteCode::RETURN_VALUE: {
           return MakeInst<ByteCode::RETURN_VALUE>();
-      }
-      case ByteCode::LOAD_NAME: {
+        }
+        case ByteCode::LOAD_NAME: {
           return MakeInst<ByteCode::LOAD_NAME>(
             Collections::DeserializeU64(bytes, iter)
           );
-      }
-      case ByteCode::STORE_NAME: {
+        }
+        case ByteCode::STORE_NAME: {
           return MakeInst<ByteCode::STORE_NAME>(
             Collections::DeserializeU64(bytes, iter)
           );
-      }
-      case ByteCode::LOAD_GLOBAL: {
+        }
+        case ByteCode::LOAD_GLOBAL: {
           return MakeInst<ByteCode::LOAD_GLOBAL>(
             Collections::DeserializeU64(bytes, iter)
           );
-      }
-      case ByteCode::POP_TOP: {
+        }
+        case ByteCode::POP_TOP: {
           return MakeInst<ByteCode::POP_TOP>();
-      }
-      case ByteCode::LOAD_ATTR: {
+        }
+        case ByteCode::LOAD_ATTR: {
           return MakeInst<ByteCode::LOAD_ATTR>(
             Collections::DeserializeU64(bytes, iter)
           );
-      }
-      case ByteCode::BUILD_LIST: {
+        }
+        case ByteCode::BUILD_LIST: {
           return MakeInst<ByteCode::BUILD_LIST>(
             Collections::DeserializeU64(bytes, iter)
           );
-      }
-      case ByteCode::BUILD_SLICE: {
+        }
+        case ByteCode::BUILD_SLICE: {
           return MakeInst<ByteCode::BUILD_SLICE>();
-      }
-      case ByteCode::BUILD_MAP: {
+        }
+        case ByteCode::BUILD_MAP: {
           return MakeInst<ByteCode::BUILD_MAP>(
             Collections::DeserializeU64(bytes, iter)
           );
-      }
-      case ByteCode::BINARY_MATRIX_MULTIPLY: {
+        }
+        case ByteCode::BINARY_MATRIX_MULTIPLY: {
           return MakeInst<ByteCode::BINARY_MATRIX_MULTIPLY>();
-      }
-      case ByteCode::JUMP_ABSOLUTE: {
+        }
+        case ByteCode::JUMP_ABSOLUTE: {
           return MakeInst<ByteCode::JUMP_ABSOLUTE>(
             Collections::DeserializeU64(bytes, iter)
-        );
-      }
-      case ByteCode::BINARY_SUBSCR: {
+          );
+        }
+        case ByteCode::BINARY_SUBSCR: {
           return MakeInst<ByteCode::BINARY_SUBSCR>();
-      }
-      case ByteCode::STORE_SUBSCR: {
+        }
+        case ByteCode::STORE_SUBSCR: {
           return MakeInst<ByteCode::STORE_SUBSCR>();
-      }
-      case ByteCode::GET_ITER: {
+        }
+        case ByteCode::GET_ITER: {
           return MakeInst<ByteCode::GET_ITER>();
-      }
-      case ByteCode::FOR_ITER: {
+        }
+        case ByteCode::FOR_ITER: {
           return MakeInst<ByteCode::FOR_ITER>(
             Collections::DeserializeU64(bytes, iter)
           );
-      }
-      case ByteCode::LOAD_BUILD_CLASS: {
+        }
+        case ByteCode::LOAD_BUILD_CLASS: {
           return MakeInst<ByteCode::LOAD_BUILD_CLASS>();
-      }
-      case ByteCode::STORE_ATTR: {
+        }
+        case ByteCode::STORE_ATTR: {
           return MakeInst<ByteCode::STORE_ATTR>(
             Collections::DeserializeU64(bytes, iter)
           );
-      }
-      case ByteCode::NOP: {
+        }
+        case ByteCode::NOP: {
           return MakeInst<ByteCode::NOP>();
-      }
-      case ByteCode::UNARY_POSITIVE: {
+        }
+        case ByteCode::UNARY_POSITIVE: {
           return MakeInst<ByteCode::UNARY_POSITIVE>();
-      }
-      case ByteCode::UNARY_NEGATIVE: {
+        }
+        case ByteCode::UNARY_NEGATIVE: {
           return MakeInst<ByteCode::UNARY_NEGATIVE>();
-      }
-      case ByteCode::UNARY_NOT: {
+        }
+        case ByteCode::UNARY_NOT: {
           return MakeInst<ByteCode::UNARY_NOT>();
-      }
-      case ByteCode::UNARY_INVERT: {
+        }
+        case ByteCode::UNARY_INVERT: {
           return MakeInst<ByteCode::UNARY_INVERT>();
-      }
-      case ByteCode::BINARY_POWER: {
+        }
+        case ByteCode::BINARY_POWER: {
           return MakeInst<ByteCode::BINARY_POWER>();
-      }
-      case ByteCode::BINARY_MODULO: {
+        }
+        case ByteCode::BINARY_MODULO: {
           return MakeInst<ByteCode::BINARY_MODULO>();
-      }
-      case ByteCode::BINARY_FLOOR_DIVIDE: {
+        }
+        case ByteCode::BINARY_FLOOR_DIVIDE: {
           return MakeInst<ByteCode::BINARY_FLOOR_DIVIDE>();
-      }
-      case ByteCode::BINARY_TRUE_DIVIDE: {
+        }
+        case ByteCode::BINARY_TRUE_DIVIDE: {
           return MakeInst<ByteCode::BINARY_TRUE_DIVIDE>();
-      }
-      case ByteCode::BINARY_LSHIFT: {
+        }
+        case ByteCode::BINARY_LSHIFT: {
           return MakeInst<ByteCode::BINARY_LSHIFT>();
-      }
-      case ByteCode::BINARY_RSHIFT: {
+        }
+        case ByteCode::BINARY_RSHIFT: {
           return MakeInst<ByteCode::BINARY_RSHIFT>();
-      }
-      case ByteCode::BINARY_AND: {
+        }
+        case ByteCode::BINARY_AND: {
           return MakeInst<ByteCode::BINARY_AND>();
-      }
-      case ByteCode::BINARY_XOR: {
+        }
+        case ByteCode::BINARY_XOR: {
           return MakeInst<ByteCode::BINARY_XOR>();
-      }
-      case ByteCode::BINARY_OR: {
+        }
+        case ByteCode::BINARY_OR: {
           return MakeInst<ByteCode::BINARY_OR>();
-      }
-      case ByteCode::YIELD_VALUE: {
+        }
+        case ByteCode::YIELD_VALUE: {
           return MakeInst<ByteCode::YIELD_VALUE>();
-      }
-      case ByteCode::JUMP_FORWARD: {
+        }
+        case ByteCode::JUMP_FORWARD: {
           return MakeInst<ByteCode::JUMP_FORWARD>(
             Collections::DeserializeU64(bytes, iter)
           );
@@ -307,8 +307,8 @@ void ParseByteCode(const PyCodePtr& code) {
         case ByteCode::STORE_GLOBAL: {
           return MakeInst<ByteCode::STORE_GLOBAL>(
             Collections::DeserializeU64(bytes, iter)
-        );
-    }
+          );
+        }
       }
     }());
   }
@@ -488,8 +488,8 @@ PyObjPtr PyFrame::Eval() {
         if (!IsTrue(needJump)) {
           SetProgramCounter(
             static_cast<Index>(
-            static_cast<int64_t>(ProgramCounter()) +
-            std::get<int64_t>(inst->Operand())
+              static_cast<int64_t>(ProgramCounter()) +
+              std::get<int64_t>(inst->Operand())
             )
           );
         } else {
@@ -502,8 +502,8 @@ PyObjPtr PyFrame::Eval() {
         if (IsTrue(needJump)) {
           SetProgramCounter(
             static_cast<Index>(
-            static_cast<int64_t>(ProgramCounter()) +
-            std::get<int64_t>(inst->Operand())
+              static_cast<int64_t>(ProgramCounter()) +
+              std::get<int64_t>(inst->Operand())
             )
           );
         } else {
@@ -677,7 +677,8 @@ PyObjPtr PyFrame::Eval() {
           value = globals->getitem(key);
         }
         if (!found &&
-            IsTrue(Runtime::VirtualMachine::Instance().Builtins()->contains(key)
+            IsTrue(
+              Runtime::VirtualMachine::Instance().Builtins()->contains(key)
             )) {
           found = true;
           value = Runtime::VirtualMachine::Instance().Builtins()->getitem(key);
@@ -717,7 +718,8 @@ PyObjPtr PyFrame::Eval() {
           value = globals->getitem(key);
         }
         if (!found &&
-            IsTrue(Runtime::VirtualMachine::Instance().Builtins()->contains(key)
+            IsTrue(
+              Runtime::VirtualMachine::Instance().Builtins()->contains(key)
             )) {
           found = true;
           value = Runtime::VirtualMachine::Instance().Builtins()->getitem(key);
@@ -808,10 +810,12 @@ PyObjPtr PyFrame::Eval() {
         auto iter = stack.Pop();
         auto value = iter->next();
         if (value->is(Object::IterDoneKlass::Self())) {
-          SetProgramCounter(static_cast<Index>(
-            static_cast<int64_t>(ProgramCounter()) +
-            std::get<int64_t>(inst->Operand())
-          ));
+          SetProgramCounter(
+            static_cast<Index>(
+              ProgramCounter() +
+              std::get<uint64_t>(inst->Operand())
+            )
+          );
         } else {
           stack.Push(iter);
           stack.Push(value);
@@ -820,9 +824,11 @@ PyObjPtr PyFrame::Eval() {
         break;
       }
       case ByteCode::LOAD_BUILD_CLASS: {
-        stack.Push(Runtime::VirtualMachine::Instance().Builtins()->getitem(
-          CreatePyString("__build_class__")
-        ));
+        stack.Push(
+          Runtime::VirtualMachine::Instance().Builtins()->getitem(
+            CreatePyString("__build_class__")
+          )
+        );
         NextProgramCounter();
         break;
       }
