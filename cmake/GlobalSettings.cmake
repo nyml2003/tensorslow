@@ -65,11 +65,26 @@ endif()
 # 生成 compile_commands.json 文件
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+add_custom_command(
+    OUTPUT ${PROJECT_SOURCE_DIR}/compile_commands.json
+    COMMAND ${CMAKE_COMMAND} -E copy
+        ${CMAKE_BINARY_DIR}/compile_commands.json
+        ${PROJECT_SOURCE_DIR}/compile_commands.json
+    DEPENDS ${CMAKE_BINARY_DIR}/compile_commands.json
+)
+
+add_custom_target(copy_compile_commands
+    DEPENDS ${PROJECT_SOURCE_DIR}/compile_commands.json
+)
+
 # 设置构建系统为 Ninja
 set(CMAKE_GENERATOR Ninja)
 
 # 设置构建命令
 set(BUILD_COMMAND "ninja -j${NUM_PROCESSORS}")
+message(STATUS "Build command: ${BUILD_COMMAND}")
 
 # 包含源文件目录
 include_directories(${tensorslow_src_dir})

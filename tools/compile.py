@@ -2,17 +2,17 @@ import os
 import subprocess
 
 # 定义路径和可执行文件
-build_dir = "./build/Debug"
+build_dir = "./build/Release"
 test_dir = "./test/integration"
 frontend_exe = os.path.join(build_dir, "tensorslow_compiler")
 backend_exe = os.path.join(build_dir, "tensorslow_interpreter")
 
 # 获取源代码文件路径
-source_code = "./test/ml/iris.py"
+# source_code = "./test/ml/iris.py"
 source_code = "./test/dev/dev.py"
 # 显示源代码内容
 print("源代码:")
-with open(source_code, 'r', encoding='utf-8') as file:
+with open(source_code, "r", encoding="utf-8") as file:
     print(file.read())
 
 # 编译到字节码
@@ -22,7 +22,7 @@ print(frontend_command)
 result = subprocess.run(frontend_command)
 
 # 执行字节码（替换文件扩展名为.pyc）
-backend_file = source_code.replace('.py', '.pyc')
+backend_file = source_code.replace(".py", ".pyc")
 print("正在读取并执行字节码...")
 if os.path.exists(backend_file):
     backend_command = [backend_exe, f"--file={backend_file}"]

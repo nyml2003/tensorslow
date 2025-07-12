@@ -5,9 +5,9 @@ import subprocess
 import sys
 
 # 定义路径和可执行文件
-build_dir = r"build\release"
+build_dir = r"build\\Release"
 
-test_dir = r"test\integration"
+test_dir = r"test\\integration"
 frontend_exe = os.path.join(build_dir, "tensorslow_compiler.exe")
 backend_exe = os.path.join(build_dir, "tensorslow_interpreter.exe")
 

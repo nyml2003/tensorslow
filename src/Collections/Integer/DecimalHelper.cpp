@@ -13,8 +13,8 @@ Decimal CreateDecimalOne() {
 Decimal CreateDecimalWithU32(uint32_t value) {
   List<int32_t> parts;
   while (value > 0) {
-    parts.Push(static_cast<int32_t>(value % 10));
-    value /= 10;
+    parts.Push(static_cast<int32_t>(value % Decimal::radix));
+    value /= Decimal::radix;
   }
   parts.Reverse();
   return Decimal(parts, false);

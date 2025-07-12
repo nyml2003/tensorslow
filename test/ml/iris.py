@@ -1,3 +1,4 @@
+time()
 data_class_0 = Array(
     [
         [5.1, 3.5, 1.4, 0.2, 1.0, 0.0, 0.0],
@@ -525,16 +526,17 @@ def train():
                 optimizer.update()
                 batch_counter = 0
         accuracy = predict_and_evaluate(train_set, predict, x)
-        print(
-            "epoch: ",
-            epoch,
-            "train accuracy: ",
-            accuracy,
-            "loss: ",
-            epoch_loss / float(len(train_set)),
-        )
+        # print(
+        #     "epoch: ",
+        #     epoch,
+        #     "train accuracy: ",
+        #     accuracy,
+        #     "loss: ",
+        #     epoch_loss / float(len(train_set)),
+        # )
     accuracy = predict_and_evaluate(test_set, predict, x)
     print("test accuracy: ", accuracy)
 
 
 train()
+time()

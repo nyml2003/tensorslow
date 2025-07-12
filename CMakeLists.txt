@@ -20,23 +20,25 @@ add_executable(
         ${tensorslow_frontend_files}
 )
 
+
 target_link_libraries(
         tensorslow_compiler
         antlr4_static
         tensorslow_common
 )
-add_dependencies(tensorslow_compiler antlr4_static tensorslow_common)
+add_dependencies(tensorslow_compiler antlr4_static tensorslow_common copy_compile_commands)
 
 add_executable(
         tensorslow_interpreter
         ${tensorslow_backend_files}
 )
+
 target_link_libraries(
         tensorslow_interpreter
         tensorslow_common
 )
 
-add_dependencies(tensorslow_interpreter tensorslow_common)
+add_dependencies(tensorslow_interpreter tensorslow_common copy_compile_commands)
 
 add_executable(
         tensorslow_engine
@@ -44,13 +46,14 @@ add_executable(
         ${tensorslow_frontend_files}
 )
 
+
 target_link_libraries(
         tensorslow_engine
         antlr4_static
         tensorslow_common
 )
 
-add_dependencies(tensorslow_engine antlr4_static tensorslow_common)
+add_dependencies(tensorslow_engine antlr4_static tensorslow_common copy_compile_commands)
 
 if (ipo_result)
     foreach(target tensorslow_compiler tensorslow_interpreter tensorslow_engine)
@@ -65,7 +68,6 @@ foreach(target tensorslow_compiler tensorslow_interpreter tensorslow_engine)
     )
 endforeach()
 
-# 删除未使用的函数（按平台）
 foreach(target tensorslow_compiler tensorslow_interpreter tensorslow_engine)
     target_link_options(${target} PRIVATE
         $<$<CXX_COMPILER_ID:GNU,Clang>:-Wl,/OPT:REF>

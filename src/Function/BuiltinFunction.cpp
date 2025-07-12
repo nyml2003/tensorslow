@@ -16,11 +16,13 @@
 #include "Runtime/VirtualMachine.h"
 #include "Tools/Logger/ConsoleLogger.h"
 
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <random>
 #include <sstream>
 #include <thread>
+
 namespace tensorslow::Function {
 
 Object::PyObjPtr Identity(const Object::PyObjPtr& args) {

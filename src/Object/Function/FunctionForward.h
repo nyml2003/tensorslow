@@ -3,6 +3,8 @@
 
 #include <functional>
 #include "Object/Container/PyList.h"
+
+#include <string>
 namespace tensorslow::Object {
 using TypeFunction = std::function<PyObjPtr(PyObjPtr)>;
 // 外部定义的辅助函数模板（可放在头文件或命名空间中）

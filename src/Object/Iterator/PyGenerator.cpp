@@ -5,6 +5,8 @@
 #include "Object/Function/PyNativeFunction.h"
 #include "Object/String/PyString.h"
 
+#include <string>
+
 namespace tensorslow::Object {
 
 PyObjPtr GeneratorKlass::next(const PyObjPtr& obj) {

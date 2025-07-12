@@ -4,8 +4,6 @@
 #include "Collections/String/StringHelper.h"
 namespace tensorslow::Collections {
 
-
-
 String Decimal::ToString() const {
   if (IsZero()) {
     return CreateStringWithCString("0");
@@ -164,7 +162,9 @@ Decimal Decimal::Multiply(const Decimal& rhs) const {
       int32_t product = _lhs.Get(i) * _rhs.Get(j);
       Index index = i + j;
       result.Set(index, result.Get(index) + product);
-      result.Set(index + 1, result.Get(index + 1) + result.Get(index) / Decimal::radix);
+      result.Set(
+        index + 1, result.Get(index + 1) + (result.Get(index) / Decimal::radix)
+      );
       result.Set(index, result.Get(index) % Decimal::radix);
     }
   }

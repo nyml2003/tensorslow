@@ -4,6 +4,7 @@
 #include "Collections/String/String.h"
 
 #include <functional>
+#include <string>
 
 namespace tensorslow::Collections {
 String CreateStringWithCString(const char* str) noexcept;
