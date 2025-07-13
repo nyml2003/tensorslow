@@ -15,10 +15,15 @@
 #include "PyBytes.h"
 #include "Tools/Logger/ConsoleLogger.h"
 
-
 namespace tensorslow::Object {
-std::unordered_map<size_t, std::shared_ptr<PyString>> PyString::stringPool;
 std::mutex PyString::poolMutex;
+
+namespace {
+std::unordered_map<size_t, std::shared_ptr<PyString>>& GetStringPool() {
+  static std::unordered_map<size_t, std::shared_ptr<PyString>> stringPool;
+  return stringPool;
+}
+}  // namespace
 void StringKlass::Initialize() {
   InitKlass(CreatePyString("str")->as<PyString>(), Self());
   Self()->AddAttribute(
@@ -33,7 +38,8 @@ void StringKlass::Initialize() {
   );
   Self()->AddAttribute(
     CreatePyString("__add__")->as<PyString>(),
-    CreatePyNativeFunction(CreateForwardFunction<StringKlass>(&StringKlass::add)
+    CreatePyNativeFunction(
+      CreateForwardFunction<StringKlass>(&StringKlass::add)
     )
   );
   Self()->AddAttribute(
@@ -42,23 +48,27 @@ void StringKlass::Initialize() {
   );
   Self()->AddAttribute(
     CreatePyString("__len__")->as<PyString>(),
-    CreatePyNativeFunction(CreateForwardFunction<StringKlass>(&StringKlass::len)
+    CreatePyNativeFunction(
+      CreateForwardFunction<StringKlass>(&StringKlass::len)
     )
   );
   Self()->AddAttribute(
     CreatePyString("__str__")->as<PyString>(),
-    CreatePyNativeFunction(CreateForwardFunction<StringKlass>(&StringKlass::str)
+    CreatePyNativeFunction(
+      CreateForwardFunction<StringKlass>(&StringKlass::str)
     )
   );
   Self()->AddAttribute(
     CreatePyString("__repr__")->as<PyString>(),
-    CreatePyNativeFunction(CreateForwardFunction<StringKlass>(&StringKlass::repr
-    ))
+    CreatePyNativeFunction(
+      CreateForwardFunction<StringKlass>(&StringKlass::repr)
+    )
   );
   Self()->AddAttribute(
     CreatePyString("__iter__")->as<PyString>(),
-    CreatePyNativeFunction(CreateForwardFunction<StringKlass>(&StringKlass::iter
-    ))
+    CreatePyNativeFunction(
+      CreateForwardFunction<StringKlass>(&StringKlass::iter)
+    )
   );
   Self()->AddAttribute(
     CreatePyString("__serialize__")->as<PyString>(),
@@ -68,8 +78,9 @@ void StringKlass::Initialize() {
   );
   Self()->AddAttribute(
     CreatePyString("__init__")->as<PyString>(),
-    CreatePyNativeFunction(CreateForwardFunction<StringKlass>(&StringKlass::init
-    ))
+    CreatePyNativeFunction(
+      CreateForwardFunction<StringKlass>(&StringKlass::init)
+    )
   );
 }
 
@@ -177,17 +188,17 @@ PyStrPtr PyString::GetItem(Index index) {
 }
 
 PyStrPtr PyString::Join(const PyObjPtr& iterable) {
-  Collections::StringBuilder sb;
+  Collections::StringBuilder stringBuilder;
   for (Index i = 0; i < iterable->as<PyList>()->Length(); i++) {
     auto item = iterable->as<PyList>()->GetItem(i);
     if (i == 0) {
-      sb.Append(item->as<PyString>()->value);
+      stringBuilder.Append(item->as<PyString>()->value);
     } else {
-      sb.Append(value);
-      sb.Append(item->as<PyString>()->value);
+      stringBuilder.Append(value);
+      stringBuilder.Append(item->as<PyString>()->value);
     }
   }
-  return CreatePyString(sb.ToString(), false)->as<PyString>();
+  return CreatePyString(stringBuilder.ToString(), false)->as<PyString>();
 }
 
 // PyListPtr PyString::Split(const PyStrPtr& delimiter) {
@@ -269,13 +280,14 @@ PyObjPtr StringJoin(const PyObjPtr& args) {
 
 PyStrPtr PyString::Create(const Collections::String& value) {
   std::lock_guard<std::mutex> lock(poolMutex);
+  auto& poolInstance = GetStringPool();
   auto hash = value.HashValue();
-  auto iter = stringPool.find(hash);
-  if (iter != stringPool.end()) {
+  auto iter = poolInstance.find(hash);
+  if (iter != poolInstance.end()) {
     return iter->second;
   }
   auto result = std::make_shared<PyString>(value);
-  stringPool[hash] = result;
+  poolInstance[hash] = result;
   return result;
 }
 

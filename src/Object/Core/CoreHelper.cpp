@@ -64,7 +64,7 @@ Invoke(const PyObjPtr& obj, const PyObjPtr& methodName, const PyListPtr& args) {
 
 PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept {
   // Check instance's class attributes
-  auto klass = obj->Klass();
+  auto* klass = obj->Klass();
   auto value = klass->Attributes()->TryGet(attrName);
   if (value != nullptr) {
     return value;
@@ -75,7 +75,7 @@ PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept {
   auto mroLength = mro->Length();
 
   for (Index i = 1; i < mroLength; ++i) {
-    auto baseKlass = mro->GetItem(i)->as<PyType>()->Owner();
+    auto* baseKlass = mro->GetItem(i)->as<PyType>()->Owner();
     value = baseKlass->Attributes()->TryGet(attrName);
     if (value != nullptr) {
       return value;
@@ -313,7 +313,7 @@ KlassPtr CreatePyKlass(
   const PyDictPtr& attributes,
   const PyListPtr& super
 ) {
-  Klass* klass = new Klass();
+  auto* klass = new Klass();
   auto type = CreatePyType(klass)->as<PyType>();
   klass->SetName(name);
   klass->SetAttributes(attributes);
