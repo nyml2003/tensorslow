@@ -6,7 +6,6 @@
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Object.h"
-#include "Object/Runtime/PyInst.h"
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
 #include "Tools/Logger/VerboseLogger.h"
@@ -126,9 +125,11 @@ PyObjPtr CodeKlass::_serialize_(const PyObjPtr& self) {
   result.Append(code->VarNames()->_serialize_()->as<PyBytes>()->Value());
   result.Append(code->Name()->_serialize_()->as<PyBytes>()->Value());
   result.Append(Collections::Serialize(code->NLocals()));
-  result.Append(Collections::Serialize(
-    code->IsGenerator() ? Literal::TRUE_LITERAL : Literal::FALSE_LITERAL
-  ));
+  result.Append(
+    Collections::Serialize(
+      code->IsGenerator() ? Literal::TRUE_LITERAL : Literal::FALSE_LITERAL
+    )
+  );
   result.Append(
     code->Instructions()->_serialize_()->_serialize_()->as<PyBytes>()->Value()
   );
@@ -176,13 +177,14 @@ void PyCode::RegisterVarName(const PyObjPtr& _name) {
   }
 }
 
-
 PyCodePtr CreatePyCode(const PyStrPtr& name) {
   auto byteCode = CreatePyString("")->as<PyBytes>();
   auto consts = CreatePyList();
   auto names = CreatePyList();
   auto varNames = CreatePyList();
-  return std::make_shared<PyCode>(byteCode, consts, names, varNames, name, 0, false);
+  return std::make_shared<PyCode>(
+    byteCode, consts, names, varNames, name, 0, false
+  );
 }
 
 void PrintCode(const PyCodePtr& code) {

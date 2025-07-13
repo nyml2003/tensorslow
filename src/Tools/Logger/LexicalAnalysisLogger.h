@@ -1,6 +1,6 @@
 #ifndef TENSORSLOW_LEXICAL_ANALYSIS_LOGGER_H
 #define TENSORSLOW_LEXICAL_ANALYSIS_LOGGER_H
-#include "ConsoleLogger.h"
+#include "Logger.h"
 namespace tensorslow {
 class LexicalAnalysisLogger : public Logger {
  public:
@@ -14,8 +14,6 @@ class LexicalAnalysisLogger : public Logger {
       (*m_callback)(msg);
     }
   }
-  LexicalAnalysisLogger(const LexicalAnalysisLogger&) = delete;
-  LexicalAnalysisLogger& operator=(const LexicalAnalysisLogger&) = delete;
 
  private:
   LexicalAnalysisLogger() = default;

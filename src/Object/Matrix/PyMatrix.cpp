@@ -12,7 +12,6 @@
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
 
-
 namespace tensorslow::Object {
 PyObjPtr MatrixKlass::repr(const PyObjPtr& obj) {
   return Klass::repr(obj);
@@ -46,7 +45,8 @@ PyObjPtr MatrixKlass::str(const PyObjPtr& obj) {
 
 PyObjPtr MatrixKlass::matmul(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   if (!lhs->is(Self()) || !rhs->is(Self())) {
-    throw std::runtime_error("MatrixKlass::matmul(): lhs or rhs is not a matrix"
+    throw std::runtime_error(
+      "MatrixKlass::matmul(): lhs or rhs is not a matrix"
     );
   }
   return lhs->as<PyMatrix>()->MatrixMultiply(rhs->as<PyMatrix>());
@@ -299,7 +299,8 @@ PyObjPtr MatrixKlass::setitem(
     matrix->Set(row, col, value->as<PyFloat>()->Value());
     return CreatePyNone();
   }
-  throw std::runtime_error("MatrixKlass::setitem(): value type is not supported"
+  throw std::runtime_error(
+    "MatrixKlass::setitem(): value type is not supported"
   );
   return CreatePyNone();
 }
@@ -313,19 +314,19 @@ PyObjPtr MatrixKlass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   }
   // 快速幂
   auto matrix = lhs->as<PyMatrix>();
-  auto n = rhs->as<PyInteger>()->ToI64();
-  if (n < 0) {
+  auto power = rhs->as<PyInteger>()->ToU64();
+  if (power < 0) {
     throw std::runtime_error("MatrixKlass::pow(): n is less than 0");
   }
   auto result = Eye(CreatePyList({lhs->as<PyMatrix>()->Shape()->GetItem(0)}))
                   ->as<PyMatrix>();
   // 快速幂算法
-  while (n != 0) {
-    if ((n & 1) != 0) {
+  while (power != 0) {
+    if ((power & 1ULL) != 0) {
       result = result->MatrixMultiply(matrix);
     }
     matrix = matrix->MatrixMultiply(matrix);
-    n >>= 1;
+    power >>= 1ULL;
   }
   return result;
 }
@@ -334,7 +335,7 @@ void MatrixKlass::Initialize() {
   if (this->isInitialized) {
     return;
   }
-  auto instance = Self();
+  auto* instance = Self();
   InitKlass(CreatePyString("matrix")->as<PyString>(), instance);
   instance->AddAttribute(
     CreatePyString("T")->as<PyString>(), CreatePyIife(Transpose)

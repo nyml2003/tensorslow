@@ -8,7 +8,6 @@
 #include "LogStrategy.h"
 
 #include <memory>
-#include <mutex>
 #include <utility>
 
 namespace tensorslow {
@@ -23,6 +22,10 @@ class Logger {
 
   // 每个 Logger 都要实现自己的 log()
   virtual void log(const std::string& msg) = 0;
+  Logger(const Logger&) = delete;
+  Logger& operator=(const Logger&) = delete;
+  Logger(Logger&&) = delete;
+  Logger& operator=(Logger&&) = delete;
 
  protected:
   explicit Logger();

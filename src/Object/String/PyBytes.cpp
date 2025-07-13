@@ -24,13 +24,15 @@ PyObjPtr BytesKlass::repr(const PyObjPtr& obj) {
   }
   auto bytes = obj->as<PyBytes>();
   const auto& byteArray = bytes->Value();
-  Collections::StringBuilder sb(Collections::CreateStringWithCString("b'"));
+  Collections::StringBuilder stringBuilder(
+    Collections::CreateStringWithCString("b'")
+  );
   for (Index i = 0; i < byteArray.GetCodeUnitCount(); i++) {
     auto byte = byteArray.GetCodeUnit(i);
-    sb.Append(Collections::ReprByte(byte));
+    stringBuilder.Append(Collections::ReprByte(byte));
   }
-  sb.Append(Collections::CreateStringWithCString("'"));
-  return CreatePyString(sb.ToString());
+  stringBuilder.Append(Collections::CreateStringWithCString("'"));
+  return CreatePyString(stringBuilder.ToString());
 }
 
 }  // namespace tensorslow::Object

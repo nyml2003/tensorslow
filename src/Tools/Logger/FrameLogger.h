@@ -1,7 +1,7 @@
 #ifndef TENSORSLOW_FRAME_LOGGER_H
 #define TENSORSLOW_FRAME_LOGGER_H
 
-#include "ConsoleLogger.h"
+#include "Logger.h"
 
 namespace tensorslow {
 
@@ -17,8 +17,6 @@ class FrameLogger : public Logger {
       (*m_callback)(msg);
     }
   }
-  FrameLogger(const FrameLogger&) = delete;
-  FrameLogger& operator=(const FrameLogger&) = delete;
 
  private:
   FrameLogger() = default;

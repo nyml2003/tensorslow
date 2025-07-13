@@ -101,7 +101,7 @@ PyObjPtr IntegerKlass::truediv(const PyObjPtr& lhs, const PyObjPtr& rhs) {
   }
   auto left = static_cast<double>(lhs->as<PyInteger>()->ToU64());
   auto right = static_cast<double>(rhs->as<PyInteger>()->ToU64());
-  return CreatePyFloat(static_cast<double>(left) / static_cast<double>(right));
+  return CreatePyFloat(left / right);
 }
 
 PyObjPtr IntegerKlass::mod(const PyObjPtr& lhs, const PyObjPtr& rhs) {

@@ -8,8 +8,6 @@
 #include "LogStrategy.h"
 #include "Logger.h"
 
-#include <mutex>
-
 namespace tensorslow {
 
 // ConsoleLogger 实现
@@ -25,8 +23,6 @@ class ConsoleLogger : public Logger {
       (*m_callback)(msg);
     }
   }
-  ConsoleLogger(const ConsoleLogger&) = delete;
-  ConsoleLogger& operator=(const ConsoleLogger&) = delete;
 
  private:
   ConsoleLogger() : Logger(std::make_unique<DefaultLogStrategy>()) {}

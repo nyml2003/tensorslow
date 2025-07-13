@@ -24,17 +24,25 @@ PyObjPtr InstKlass::_serialize_(const PyObjPtr& obj) {
     );
   }
   auto inst = obj->as<PyInst>();
-  Collections::StringBuilder sb(Collections::Serialize(inst->Code()));
+  Collections::StringBuilder stringBuilder(
+    Collections::Serialize(inst->Code())
+  );
   std::visit(
     overload{
       [](None) {},
-      [&sb](Index index) { sb.Append(Collections::Serialize(index)); },
-      [&sb](CompareOp compOp) { sb.Append(Collections::Serialize(compOp)); },
-      [&sb](int64_t index) { sb.Append(Collections::Serialize(index)); }
+      [&stringBuilder](Index index) {
+        stringBuilder.Append(Collections::Serialize(index));
+      },
+      [&stringBuilder](CompareOp compOp) {
+        stringBuilder.Append(Collections::Serialize(compOp));
+      },
+      [&stringBuilder](int64_t index) {
+        stringBuilder.Append(Collections::Serialize(index));
+      }
     },
     inst->Operand()
   );
-  return CreatePyBytes(sb.ToString());
+  return CreatePyBytes(stringBuilder.ToString());
 }
 
 PyObjPtr InstKlass::repr(const PyObjPtr& obj) {
@@ -42,18 +50,24 @@ PyObjPtr InstKlass::repr(const PyObjPtr& obj) {
     throw std::runtime_error("PyInst::repr(): obj is not an inst object");
   }
   auto inst = obj->as<PyInst>();
-  Collections::StringBuilder sb(Collections::ToString(inst->Code()));
-  sb.Append(Collections::CreateStringWithCString(" "));
+  Collections::StringBuilder stringBuilder(Collections::ToString(inst->Code()));
+  stringBuilder.Append(Collections::CreateStringWithCString(" "));
   std::visit(
     overload{
       [](None) {},
-      [&sb](Index index) { sb.Append(Collections::ToString(index)); },
-      [&sb](CompareOp compOp) { sb.Append(Collections::ToString(compOp)); },
-      [&sb](int64_t index) { sb.Append(Collections::ToString(index)); }
+      [&stringBuilder](Index index) {
+        stringBuilder.Append(Collections::ToString(index));
+      },
+      [&stringBuilder](CompareOp compOp) {
+        stringBuilder.Append(Collections::ToString(compOp));
+      },
+      [&stringBuilder](int64_t index) {
+        stringBuilder.Append(Collections::ToString(index));
+      }
     },
     inst->Operand()
   );
-  return CreatePyString(sb.ToString(), false);
+  return CreatePyString(stringBuilder.ToString(), false);
 }
 
 }  // namespace tensorslow::Object

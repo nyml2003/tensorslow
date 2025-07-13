@@ -5,7 +5,7 @@
 #include "Logger.h"
 namespace tensorslow {
 void ProxyLogStrategy::operator()(const std::string& msg) const {
-  if (m_logger) {
+  if (m_logger != nullptr) {
     m_logger->log(msg);
   }
 }

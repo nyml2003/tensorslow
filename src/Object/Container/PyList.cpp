@@ -53,7 +53,7 @@ void ListKlass::Initialize() {
   if (this->isInitialized) {
     return;
   }
-  auto instance = Self();
+  auto* instance = Self();
   InitKlass(CreatePyString("list")->as<PyString>(), instance);
   instance->AddAttribute(
     CreatePyString("append")->as<PyString>(), CreatePyNativeFunction(ListAppend)

@@ -120,7 +120,7 @@ PyObjPtr Diagnostic(const PyObjPtr& args) {
     if (!element->is(FloatKlass::Self())) {
       throw std::runtime_error("Diagnostic(): element is not a float");
     }
-    data[i * dim + i] = element->as<PyFloat>()->Value();
+    data[(i * dim) + i] = element->as<PyFloat>()->Value();
   }
   return CreatePyMatrix(Collections::Matrix(dim, dim, data));
 }

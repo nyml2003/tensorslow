@@ -33,7 +33,7 @@ class Schema {
     auto parameter = parameters.find(option);
     if (parameter == parameters.end()) {
       PrintUsage();
-      std::cout << "Invalid parameter name: " << option << std::endl;
+      std::cout << "Invalid parameter name: " << option << '\n';
       throw std::invalid_argument("Invalid parameter name");
     }
     return parameter->second;

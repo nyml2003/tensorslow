@@ -1,10 +1,7 @@
 #ifndef TENSORSLOW_SYNTAX_ANALYSIS_LOGGER_H
 #define TENSORSLOW_SYNTAX_ANALYSIS_LOGGER_H
 
-#include <memory>
-#include <mutex>
-#include <string>
-#include "ConsoleLogger.h"
+
 #include "Logger.h"
 
 namespace tensorslow {
@@ -21,8 +18,6 @@ class SyntaxAnalysisLogger : public Logger {
       (*m_callback)(msg);
     }
   }
-  SyntaxAnalysisLogger(const SyntaxAnalysisLogger&) = delete;
-  SyntaxAnalysisLogger& operator=(const SyntaxAnalysisLogger&) = delete;
 
  private:
   SyntaxAnalysisLogger() = default;

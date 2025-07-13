@@ -78,7 +78,7 @@ class BinaryFileParser {
   Object::PyIntPtr ReadInteger() {
     uint64_t size = ReadSize();
     return Object::CreatePyInteger(Collections::DeserializeInteger(
-      ReadBytes(size * 2 + sizeof(uint64_t) + 1)
+      ReadBytes((size * 2) + sizeof(uint64_t) + 1)
     ));
   }
   Object::PyFloatPtr ReadFloat() { return Object::CreatePyFloat(ReadDouble()); }
@@ -92,7 +92,7 @@ class BinaryFileParser {
       auto obj = ReadObject();
       list.Push(obj);
     }
-    return Object::CreatePyList(std::move(list));
+    return Object::CreatePyList(list);
   }
   uint8_t ReadU8() {
     uint8_t value = 0;

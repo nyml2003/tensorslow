@@ -111,9 +111,11 @@ PyObjPtr FloatKlass::hash(const PyObjPtr& obj) {
   if (!obj->is(Self())) {
     throw std::runtime_error("PyFloat::hash(): obj is not a float");
   }
-  return CreatePyInteger(Collections::CreateIntegerWithU64(
-    static_cast<uint64_t>(obj->as<PyFloat>()->Value())
-  ));
+  return CreatePyInteger(
+    Collections::CreateIntegerWithU64(
+      static_cast<uint64_t>(obj->as<PyFloat>()->Value())
+    )
+  );
 }
 
 PyObjPtr FloatKlass::neg(const PyObjPtr& obj) {
@@ -136,9 +138,11 @@ PyObjPtr FloatKlass::_serialize_(const PyObjPtr& obj) {
     throw std::runtime_error("PyFloat::_serialize_(): obj is not a float");
   }
   auto floatObj = obj->as<PyFloat>();
-  Collections::StringBuilder sb(Collections::Serialize(Literal::FLOAT));
-  sb.Append(Collections::Serialize(floatObj->Value()));
-  return CreatePyBytes(sb.ToString());
+  Collections::StringBuilder stringBuilder(
+    Collections::Serialize(Literal::FLOAT)
+  );
+  stringBuilder.Append(Collections::Serialize(floatObj->Value()));
+  return CreatePyBytes(stringBuilder.ToString());
 }
 
 PyObjPtr FloatKlass::eq(const PyObjPtr& lhs, const PyObjPtr& rhs) {

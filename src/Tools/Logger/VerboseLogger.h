@@ -8,8 +8,6 @@
 #include "LogStrategy.h"
 #include "Logger.h"
 
-#include <mutex>
-
 namespace tensorslow {
 
 class VerboseLogger : public Logger {
@@ -27,8 +25,7 @@ class VerboseLogger : public Logger {
       (*m_callback)(msg);
     }
   }
-  VerboseLogger(const VerboseLogger&) = delete;
-  VerboseLogger& operator=(const VerboseLogger&) = delete;
+
   static void IncreaseIndent() { getInstance().indent++; }
   static void DecreaseIndent() { getInstance().indent--; }
 

@@ -6,7 +6,7 @@
 namespace tensorslow::Collections {
 
 String String::Slice(Index start, Index end) {
-  if (!~start || end == 0 || start >= end) {
+  if (((~start) == 0U) || end == 0 || start >= end) {
     throw std::invalid_argument("String::Slice(): invalid index");
   }
   ParseCodePointAt(end);
@@ -118,7 +118,8 @@ bool String::GreaterThan(const String& rhs) noexcept {
 
     if (thisCodePoint > otherCodePoint) {
       return true;  // 当前字符大于对方字符，返回 true
-    } else if (thisCodePoint < otherCodePoint) {
+    }
+    if (thisCodePoint < otherCodePoint) {
       return false;  // 当前字符小于对方字符，返回 false
     }
   }
@@ -144,16 +145,16 @@ std::size_t String::HashValue() const {
 }
 
 String String::Upper() {
-  // StringBuilder sb;
+  // StringBuilder stringBuilder;
   // ParseCodePoints();
   // for (Index i = 0; i < codePoints.Size(); i++) {
   //   Unicode codePoint = codePoints.Get(i);
   //   if (codePoint >= 'a' && codePoint <= 'z') {
   //     codePoint -= ('a' - 'A');
   //   }
-  //   sb.Append(codePoint);
+  //   stringBuilder.Append(codePoint);
   // }
-  // return sb.ToString();
+  // return stringBuilder.ToString();
   // TODO
   return *this;
 }

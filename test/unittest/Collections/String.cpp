@@ -30,10 +30,10 @@ TEST(String, ComplexString) {
 TEST(String, Concat) {
   String str1 = CreateStringWithCString("Hello");
   String str2 = CreateStringWithCString(" World");
-  StringBuilder sb;
-  sb.Append(str1);
-  sb.Append(str2);
-  String str3 = sb.ToString();
+  StringBuilder stringBuilder;
+  stringBuilder.Append(str1);
+  stringBuilder.Append(str2);
+  String str3 = stringBuilder.ToString();
   ASSERT_EQ(str3.GetCodePointCount(), 11);
   String expected = CreateStringWithCString("Hello World");
   ASSERT_TRUE(str3.Equal(expected));
@@ -42,15 +42,15 @@ TEST(String, Concat) {
 }
 
 TEST(String, Push) {
-  StringBuilder sb;
-  sb.Append('H');
-  sb.Append('e');
-  sb.Append('l');
-  sb.Append('l');
-  sb.Append('o');
-  ASSERT_EQ(sb.Size(), 5);
+  StringBuilder stringBuilder;
+  stringBuilder.Append('H');
+  stringBuilder.Append('e');
+  stringBuilder.Append('l');
+  stringBuilder.Append('l');
+  stringBuilder.Append('o');
+  ASSERT_EQ(stringBuilder.Size(), 5);
   String expected = CreateStringWithCString("Hello");
-  ASSERT_TRUE(sb.ToString().Equal(expected));
+  ASSERT_TRUE(stringBuilder.ToString().Equal(expected));
 }
 
 TEST(String, MixedString) {

@@ -1,7 +1,7 @@
 #ifndef TENSORSLOW_BYTECODE_LOGGER_H
 #define TENSORSLOW_BYTECODE_LOGGER_H
 
-#include "ConsoleLogger.h"
+#include "Logger.h"
 
 namespace tensorslow {
 
@@ -17,8 +17,6 @@ class BytecodeLogger : public Logger {
       (*m_callback)(msg);
     }
   }
-  BytecodeLogger(const BytecodeLogger&) = delete;
-  BytecodeLogger& operator=(const BytecodeLogger&) = delete;
 
  private:
   BytecodeLogger() = default;

@@ -1,7 +1,6 @@
 #ifndef TENSORSLOW_OBJECT_PYFLOAT_H
 #define TENSORSLOW_OBJECT_PYFLOAT_H
 
-#include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
@@ -11,8 +10,6 @@ namespace tensorslow::Object {
 class FloatKlass : public KlassBase<FloatKlass> {
  public:
   explicit FloatKlass() = default;
-
-
 
   void Initialize() override {
     if (this->isInitialized) {

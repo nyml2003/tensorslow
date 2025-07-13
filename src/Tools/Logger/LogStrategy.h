@@ -5,15 +5,14 @@
 #ifndef TENSORSLOW_LOG_CALLBACK_H
 #define TENSORSLOW_LOG_CALLBACK_H
 
-#include <fstream>
-#include <iostream>
-#include <mutex>
-#include <string>
-#include <utility>
 #include "Object/Core/PyNone.h"
 #include "Object/Function/PyNativeFunction.h"
 #include "Object/Object.h"
 #include "Runtime/EventLoop.h"
+
+#include <fstream>
+#include <iostream>
+#include <string>
 
 namespace tensorslow {
 class Logger;
@@ -21,6 +20,13 @@ class LogStrategy {
  public:
   virtual ~LogStrategy() = default;
   virtual void operator()(const std::string& msg) const = 0;  // 调用操作符重载
+
+  LogStrategy() = default;
+
+  LogStrategy(const LogStrategy&) = delete;
+  LogStrategy& operator=(const LogStrategy&) = delete;
+  LogStrategy(LogStrategy&&) = delete;
+  LogStrategy& operator=(LogStrategy&&) = delete;
 };
 
 class DefaultLogStrategy : public LogStrategy {

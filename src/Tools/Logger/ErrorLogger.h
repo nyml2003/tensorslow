@@ -5,7 +5,7 @@
 #ifndef TENSORSLOW_ERROR_LOGGER_H
 #define TENSORSLOW_ERROR_LOGGER_H
 
-#include "ConsoleLogger.h"
+#include "Logger.h"
 
 namespace tensorslow {
 
@@ -24,8 +24,6 @@ class ErrorLogger : public Logger {
       
     }
   }
-  ErrorLogger(const ErrorLogger&) = delete;
-  ErrorLogger& operator=(const ErrorLogger&) = delete;
 
  private:
   ErrorLogger() = default;
