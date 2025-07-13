@@ -1,19 +1,14 @@
 #ifndef TENSORSLOW_AST_CLASSDEF_H
 #define TENSORSLOW_AST_CLASSDEF_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 #include "Object/Object.h"
 
 namespace tensorslow::IR {
 
-class ClassDefKlass : public INodeKlass {
+class ClassDefKlass : public INodeTrait,
+                      public Object::KlassBase<ClassDefKlass> {
  public:
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<ClassDefKlass>();
-    return instance;
-  }
-
   void Initialize() override {
     if (this->isInitialized) {
       return;
@@ -56,7 +51,7 @@ class ClassDef : public INode {
  private:
   Object::PyStrPtr name;   // 类名
   Object::PyListPtr body;  // 类的主体
-  INodePtr bases;  // 保存当前ClassDef的基类, 是一个Identifier对象的列表
+  INodePtr bases;          // 保存当前ClassDef的基类, 是一个Identifier对象的列表
   Object::PyListPtr
     parents;  // 保存整个调用链上的ClassDef,Module和FuncDef所对应的PyCode对象
   Index codeIndex;  // 保存当前ClassDef对应的PyCode对象在codeList中的索引

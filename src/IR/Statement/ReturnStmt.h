@@ -5,7 +5,8 @@
 
 namespace tensorslow::IR {
 
-class ReturnStmtKlass : public INodeKlass {
+class ReturnStmtKlass : public INodeTrait,
+                        public Object::KlassBase<ReturnStmtKlass> {
  public:
   explicit ReturnStmtKlass() = default;
 
@@ -15,11 +16,6 @@ class ReturnStmtKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_returnstmt"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<ReturnStmtKlass>();
-    return instance;
   }
 
   Object::PyObjPtr

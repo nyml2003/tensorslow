@@ -29,11 +29,19 @@ PyListPtr CreatePyList(Index capacity) {
   return std::make_shared<PyList>(list);
 }
 
+PyListPtr CreatePyListWithNullPtr(Index capacity) {
+  if (capacity == 0) {
+    return std::make_shared<PyList>(Collections::List<PyObjPtr>());
+  }
+  Collections::List<PyObjPtr> list(capacity);
+  return std::make_shared<PyList>(list);
+}
+
 PyListPtr CreatePyList() {
   return std::make_shared<PyList>(Collections::List<PyObjPtr>());
 }
 
-PyListPtr CreatePyList(Collections::List<PyObjPtr> list) {
+PyListPtr CreatePyList(const Collections::List<PyObjPtr>& list) {
   return std::make_shared<PyList>(list);
 }
 
@@ -81,12 +89,14 @@ void ListKlass::Initialize() {
   // 注册重载函数
   instance->AddAttribute(
     CreatePyString("__getitem__")->as<PyString>(),
-    CreatePyNativeFunction(CreateForwardFunction<ListKlass>(&ListKlass::getitem)
+    CreatePyNativeFunction(
+      CreateForwardFunction<ListKlass>(&ListKlass::getitem)
     )
   );
   instance->AddAttribute(
     CreatePyString("__setitem__")->as<PyString>(),
-    CreatePyNativeFunction(CreateForwardFunction<ListKlass>(&ListKlass::setitem)
+    CreatePyNativeFunction(
+      CreateForwardFunction<ListKlass>(&ListKlass::setitem)
     )
   );
   instance->AddAttribute(
@@ -238,9 +248,11 @@ PyObjPtr ListKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
       // warning: implicit conversion changes signedness: 'int64_t' (aka 'long
       // long') to 'Index' (aka 'unsigned long long')
       // [clang-diagnostic-sign-conversion]
-      return list->GetItem(static_cast<Index>(
-        static_cast<int64_t>(list->Length()) + index->ToI64()
-      ));
+      return list->GetItem(
+        static_cast<Index>(
+          static_cast<int64_t>(list->Length()) + index->ToI64()
+        )
+      );
     }
   }
   if (key->is(SliceKlass::Self())) {
@@ -256,7 +268,8 @@ PyObjPtr ListKlass::getitem(const PyObjPtr& obj, const PyObjPtr& key) {
     return result;
   }
   auto errorMessage = StringConcat(CreatePyList(
-    {CreatePyString("TypeError: list indices must be integers or slices, not '"
+    {CreatePyString(
+       "TypeError: list indices must be integers or slices, not '"
      ),
      key->Klass()->Name(), CreatePyString("'")}
   ));
@@ -286,7 +299,8 @@ PyObjPtr ListKlass::setitem(
   if (key->is(SliceKlass::Self())) {
     auto slice = key->as<PySlice>();
     if (!slice->GetStep()->is(NoneKlass::Self())) {
-      throw std::runtime_error("List does not support step in slice assignment"
+      throw std::runtime_error(
+        "List does not support step in slice assignment"
       );
     }
     slice->BindLength(list->Length());
@@ -306,7 +320,8 @@ PyObjPtr ListKlass::setitem(
     return CreatePyNone();
   }
   auto errorMessage = StringConcat(CreatePyList(
-    {CreatePyString("TypeError: list indices must be integers or slices, not '"
+    {CreatePyString(
+       "TypeError: list indices must be integers or slices, not '"
      ),
      key->Klass()->Name(), CreatePyString("'")}
   ));

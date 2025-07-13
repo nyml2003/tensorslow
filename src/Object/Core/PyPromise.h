@@ -40,9 +40,9 @@ class PyPromise : public PyObject {
 
 PyPromisePtr CreatePyPromise(const PyObjPtr& executor);
 
-class PromiseKlass : public Klass {
+class PromiseKlass : public KlassBase<PromiseKlass> {
  public:
-  static KlassPtr Self();
+
   void Initialize() override;
   PyObjPtr init(const PyObjPtr& typeObj, const PyObjPtr& args) override;
 };

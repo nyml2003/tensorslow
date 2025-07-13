@@ -17,8 +17,7 @@ class Logger {
   virtual ~Logger() = default;
 
   // 设置自定义回调
-  void setCallback(std::shared_ptr<LogStrategy> callback) {
-    std::lock_guard<std::mutex> lock(m_mutex);
+  void setCallback(std::unique_ptr<LogStrategy> callback) {
     m_callback = std::move(callback);
   }
 
@@ -27,11 +26,10 @@ class Logger {
 
  protected:
   explicit Logger();
-  explicit Logger(std::shared_ptr<LogStrategy> callback)
+  explicit Logger(std::unique_ptr<LogStrategy> callback)
     : m_callback(std::move(callback)) {}
 
-  std::mutex m_mutex;
-  std::shared_ptr<LogStrategy> m_callback;
+  std::unique_ptr<LogStrategy> m_callback;
 };
 }  // namespace tensorslow
 

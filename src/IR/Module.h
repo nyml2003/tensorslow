@@ -1,19 +1,13 @@
 #ifndef TENSORSLOW_AST_MODULE_H
 #define TENSORSLOW_AST_MODULE_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class ModuleKlass : public INodeKlass {
+class ModuleKlass : public INodeTrait, public Object::KlassBase<ModuleKlass> {
  public:
   explicit ModuleKlass() = default;
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<ModuleKlass>();
-    return instance;
-  }
 
   void Initialize() override {
     if (this->isInitialized) {

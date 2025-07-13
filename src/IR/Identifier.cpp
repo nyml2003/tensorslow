@@ -1,6 +1,6 @@
 #include "IR/Identifier.h"
 #include <iostream>
-#include "Function/BuiltinFunction.h"
+
 #include "IR/ClassDef.h"
 #include "IR/FuncDef.h"
 #include "IR/INode.h"
@@ -42,7 +42,8 @@ Object::PyObjPtr IdentifierKlass::visit(
     registry =
       GetIdentifierRegistry(name, code, moduleCode, identifier->Builtins());
   }
-  if (mode == STOREORLOAD::STORE && registry == IdentifierRegistry::UNREGISTERED) {
+  if (mode == STOREORLOAD::STORE &&
+      registry == IdentifierRegistry::UNREGISTERED) {
     if (scope == Object::Scope::GLOBAL) {
       code->RegisterName(name);
       return Object::CreatePyNone();
@@ -52,15 +53,18 @@ Object::PyObjPtr IdentifierKlass::visit(
     }
   }
 
-  if (mode == STOREORLOAD::STORE && registry == IdentifierRegistry::GLOBAL_NAME) {
+  if (mode == STOREORLOAD::STORE &&
+      registry == IdentifierRegistry::GLOBAL_NAME) {
     code->RegisterName(name);
     return Object::CreatePyNone();
   }
-  if (mode == STOREORLOAD::STORE && registry == IdentifierRegistry::LOCAL_VARNAME) {
+  if (mode == STOREORLOAD::STORE &&
+      registry == IdentifierRegistry::LOCAL_VARNAME) {
     code->RegisterVarName(name);
     return Object::CreatePyNone();
   }
-  if (mode == STOREORLOAD::STORE && registry == IdentifierRegistry::LOCAL_NAME) {
+  if (mode == STOREORLOAD::STORE &&
+      registry == IdentifierRegistry::LOCAL_NAME) {
     code->RegisterVarName(name);
     return Object::CreatePyNone();
   }
@@ -68,7 +72,8 @@ Object::PyObjPtr IdentifierKlass::visit(
     code->RegisterName(name);
     return Object::CreatePyNone();
   }
-  if (mode == STOREORLOAD::LOAD && registry == IdentifierRegistry::GLOBAL_NAME) {
+  if (mode == STOREORLOAD::LOAD &&
+      registry == IdentifierRegistry::GLOBAL_NAME) {
     code->RegisterName(name);
     return Object::CreatePyNone();
   }
@@ -76,7 +81,8 @@ Object::PyObjPtr IdentifierKlass::visit(
     code->RegisterName(name);
     return Object::CreatePyNone();
   }
-  if (mode == STOREORLOAD::LOAD && registry == IdentifierRegistry::LOCAL_VARNAME) {
+  if (mode == STOREORLOAD::LOAD &&
+      registry == IdentifierRegistry::LOCAL_VARNAME) {
     code->RegisterVarName(name);
     return Object::CreatePyNone();
   }
@@ -85,7 +91,8 @@ Object::PyObjPtr IdentifierKlass::visit(
       "Cannot store builtin variable" + name->ToCppString()
     );
   }
-  if (mode == STOREORLOAD::LOAD && registry == IdentifierRegistry::UNREGISTERED) {
+  if (mode == STOREORLOAD::LOAD &&
+      registry == IdentifierRegistry::UNREGISTERED) {
     throw std::runtime_error(
       "NameError: name '" + name->ToCppString() + "' is not defined"
     );
@@ -129,15 +136,18 @@ Object::PyObjPtr IdentifierKlass::emit(
     auto registry =
       GetIdentifierRegistry(name, code, moduleCode, identifier->Builtins());
 
-    if (registry == IdentifierRegistry::LOCAL_VARNAME && mode == STOREORLOAD::STORE) {
+    if (registry == IdentifierRegistry::LOCAL_VARNAME &&
+        mode == STOREORLOAD::STORE) {
       code->StoreFast(name);
       return Object::CreatePyNone();
     }
-    if (registry == IdentifierRegistry::LOCAL_NAME && mode == STOREORLOAD::STORE) {
+    if (registry == IdentifierRegistry::LOCAL_NAME &&
+        mode == STOREORLOAD::STORE) {
       code->StoreName(name);
       return Object::CreatePyNone();
     }
-    if (registry == IdentifierRegistry::GLOBAL_NAME && mode == STOREORLOAD::STORE) {
+    if (registry == IdentifierRegistry::GLOBAL_NAME &&
+        mode == STOREORLOAD::STORE) {
       code->StoreName(name);
       return Object::CreatePyNone();
     }
@@ -146,15 +156,18 @@ Object::PyObjPtr IdentifierKlass::emit(
       code->LoadName(name);
       return Object::CreatePyNone();
     }
-    if (registry == IdentifierRegistry::LOCAL_VARNAME && mode == STOREORLOAD::LOAD) {
+    if (registry == IdentifierRegistry::LOCAL_VARNAME &&
+        mode == STOREORLOAD::LOAD) {
       code->LoadFast(name);
       return Object::CreatePyNone();
     }
-    if (registry == IdentifierRegistry::LOCAL_NAME && mode == STOREORLOAD::LOAD) {
+    if (registry == IdentifierRegistry::LOCAL_NAME &&
+        mode == STOREORLOAD::LOAD) {
       code->LoadName(name);
       return Object::CreatePyNone();
     }
-    if (registry == IdentifierRegistry::GLOBAL_NAME && mode == STOREORLOAD::LOAD) {
+    if (registry == IdentifierRegistry::GLOBAL_NAME &&
+        mode == STOREORLOAD::LOAD) {
       code->LoadName(name);
       return Object::CreatePyNone();
     }
@@ -193,10 +206,11 @@ IdentifierRegistry GetIdentifierRegistry(
 Object::PyObjPtr IdentifierKlass::print(const Object::PyObjPtr& obj) {
   auto identifier = obj->as<Identifier>();
   PrintNode(
-    identifier, Object::StringConcat(Object::CreatePyList(
-                                       {Object::CreatePyString("Identifier "),
-                                        identifier->Name()}
-                                     ))
+    identifier, Object::StringConcat(
+                  Object::CreatePyList(
+                    {Object::CreatePyString("Identifier "), identifier->Name()}
+                  )
+                )
                   ->as<Object::PyString>()
   );
   return Object::CreatePyNone();

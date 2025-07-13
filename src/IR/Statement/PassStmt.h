@@ -1,13 +1,13 @@
 #ifndef TENSORSLOW_AST_PASSSTMT_H
 #define TENSORSLOW_AST_PASSSTMT_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 #include "Object/Core/PyNone.h"
 
 namespace tensorslow::IR {
 
-class PassStmtKlass : public INodeKlass {
+class PassStmtKlass : public INodeTrait,
+                      public Object::KlassBase<PassStmtKlass> {
  public:
   explicit PassStmtKlass() = default;
 
@@ -17,11 +17,6 @@ class PassStmtKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_passstmt"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<PassStmtKlass>();
-    return instance;
   }
 
   Object::PyObjPtr visit(

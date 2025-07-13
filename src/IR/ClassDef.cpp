@@ -47,6 +47,7 @@ Object::PyObjPtr ClassDefKlass::visit(
   code->RegisterName(Object::CreatePyString("__qualname__"));
   code->RegisterConst(classDef->Name());
   code->SetScope(Object::Scope::GLOBAL);
+  code->SetInstructions(Object::CreatePyList());
   codeList->as<Object::PyList>()->Append(code);
   classDef->Bases()->visit(codeList);
   auto parent = GetCodeFromList(codeList, classDef->Parent());
@@ -86,7 +87,7 @@ Object::PyObjPtr ClassDefKlass::emit(
   parent->StoreName(classDef->Name());
   if (Config::Has("show_bc")) {
     VerboseLogger::getInstance().setCallback(
-      std::make_shared<ProxyLogStrategy>(&BytecodeLogger::getInstance())
+      std::make_unique<ProxyLogStrategy>(&BytecodeLogger::getInstance())
     );
     Object::PrintCode(selfCode);
   }

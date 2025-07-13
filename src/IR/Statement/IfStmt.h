@@ -1,13 +1,12 @@
 #ifndef TENSORSLOW_AST_IF_STATEMENT_H
 #define TENSORSLOW_AST_IF_STATEMENT_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 #include "Object/Object.h"
 
 namespace tensorslow::IR {
 
-class IfStmtKlass : public INodeKlass {
+class IfStmtKlass : public INodeTrait, public Object::KlassBase<IfStmtKlass> {
  public:
   explicit IfStmtKlass() = default;
 
@@ -17,11 +16,6 @@ class IfStmtKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_ifstmt"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<IfStmtKlass>();
-    return instance;
   }
 
   Object::PyObjPtr

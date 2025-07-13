@@ -16,15 +16,15 @@ class Klass : public std::enable_shared_from_this<Klass> {
   bool isNative{};
 
  protected:
-  bool isInitialized = false;
-
  public:
+  bool isInitialized = false;
   explicit Klass()
     : name(nullptr),
       attributes(nullptr),
       type(nullptr),
       super(nullptr),
       mro(nullptr) {}
+
   void SetName(const PyStrPtr& _name);
   void SetAttributes(const PyDictPtr& _attributes);
   void SetType(const PyTypePtr& _type);
@@ -86,6 +86,17 @@ class Klass : public std::enable_shared_from_this<Klass> {
   virtual PyObjPtr reversed(const PyObjPtr& obj);
   virtual PyObjPtr _serialize_(const PyObjPtr& obj);
 };
+
+template <typename Derived>
+class KlassBase : public Klass {
+ public:
+  KlassBase() = default;
+  static KlassPtr Self() {
+    static Derived instance;
+    return &instance;
+  }
+};
+
 }  // namespace tensorslow::Object
 
 #endif  // TENSORSLOW_OBJECT_KLASS_H

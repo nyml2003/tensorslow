@@ -84,7 +84,7 @@ void BeforeRun(const std::filesystem::path& filename) {
     ConsoleLogger::getInstance().log(write_filename.string());
     ConsoleLogger::getInstance().log("\n");
     ConsoleLogger::getInstance().setCallback(
-      std::make_shared<FileLogStrategy>(write_filename.string())
+      std::make_unique<FileLogStrategy>(write_filename.string())
     );
     return;
   }
@@ -102,15 +102,16 @@ void BeforeRun(const std::filesystem::path& filename) {
     ConsoleLogger::getInstance().log(log_file.string());
     ConsoleLogger::getInstance().log("\n");
     ConsoleLogger::getInstance().setCallback(
-      std::make_shared<FileLogStrategy>(log_file.string())
+      std::make_unique<FileLogStrategy>(log_file.string())
     );
     return;
   }
 }
 
 void AfterRun(const std::filesystem::path& filename) {
-  ConsoleLogger::getInstance().setCallback(std::make_shared<DefaultLogStrategy>(
-  ));
+  ConsoleLogger::getInstance().setCallback(
+    std::make_unique<DefaultLogStrategy>()
+  );
   bool compare_result = Config::Has("compare_result");
   if (compare_result) {
     auto filename_dir = filename.parent_path();
@@ -153,7 +154,7 @@ void RunTest(const std::filesystem::path& filename) {
     Runtime::VirtualMachine::Run(code);
   } catch (const std::exception& e) {
     VerboseLogger::getInstance().setCallback(
-      std::make_shared<ProxyLogStrategy>(&ErrorLogger::getInstance())
+      std::make_unique<ProxyLogStrategy>(&ErrorLogger::getInstance())
     );
     PrintFrame(Runtime::VirtualMachine::Instance().CurrentFrame());
     ErrorLogger::getInstance().log(e.what());

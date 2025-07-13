@@ -1,5 +1,6 @@
 
 #include "IR/INode.h"
+#include "Function/BuiltinFunction.h"
 #include "IR/ClassDef.h"
 #include "IR/FuncDef.h"
 #include "IR/Module.h"

@@ -10,14 +10,11 @@
 #include <utility>
 namespace tensorslow::Object {
 
-class StringKlass : public Klass {
+class StringKlass : public KlassBase<StringKlass> {
  public:
   explicit StringKlass() = default;
 
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<StringKlass>();
-    return instance;
-  }
+
 
   void Initialize() override;
 

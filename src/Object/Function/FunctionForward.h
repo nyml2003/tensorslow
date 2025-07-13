@@ -31,7 +31,7 @@ void expand_indices(
 template <typename T, typename... Args>
 PyObjPtr ForwardFunction(const PyObjPtr& args, PyObjPtr (T::*func)(Args...)) {
   static_assert(
-    std::is_base_of<Klass, T>::value, "T must core_class_inherit from Klass"
+    std::is_base_of_v<Klass, T>, "T must core_class_inherit from Klass"
   );
 
   if (!args->is(ListKlass::Self())) {
@@ -56,7 +56,7 @@ PyObjPtr ForwardFunction(const PyObjPtr& args, PyObjPtr (T::*func)(Args...)) {
 
   return std::apply(
     [&](auto&&... args) {
-      return (static_cast<T*>(T::Self().get())->*func)(std::move(args)...);
+      return (static_cast<T*>(T::Self())->*func)(std::move(args)...);
     },
     params
   );

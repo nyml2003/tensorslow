@@ -1,12 +1,11 @@
 #ifndef TENSORSLOW_AST_UNARY_H
 #define TENSORSLOW_AST_UNARY_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class UnaryKlass : public INodeKlass {
+class UnaryKlass : public INodeTrait, public Object::KlassBase<UnaryKlass> {
  public:
   explicit UnaryKlass() = default;
 
@@ -18,10 +17,6 @@ class UnaryKlass : public INodeKlass {
     this->isInitialized = true;
   }
 
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<UnaryKlass>();
-    return instance;
-  }
   Object::PyObjPtr
   visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;
 

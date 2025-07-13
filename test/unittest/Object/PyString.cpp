@@ -51,12 +51,12 @@ TEST_F(PyStringTest, Eq) {
   {
     auto result = StringKlass::Self()->eq(str1, str2);
     auto pybool = std::dynamic_pointer_cast<PyBoolean>(result);
-    EXPECT_FALSE(pybool->value);
+    EXPECT_FALSE(pybool->Value());
   }
   {
     auto result = StringKlass::Self()->eq(str1, str3);
     auto pybool = std::dynamic_pointer_cast<PyBoolean>(result);
-    EXPECT_TRUE(pybool->value);
+    EXPECT_TRUE(pybool->Value());
   }
 }
 

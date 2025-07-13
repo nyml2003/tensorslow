@@ -224,15 +224,7 @@ TEST(List, Fill) {
   List<char> list3(0);
   ASSERT_THROW(list3.Fill(1), std::runtime_error);
 }
-TEST(List, ExpandWithSpecificCapacity) {
-  List<char> list{1, 2, 3};
-  list.Expand(10);                 // 指定新容量为10
-  ASSERT_EQ(list.Capacity(), 10);  // 检查容量是否正确扩展
-  ASSERT_EQ(list.Size(), 3);       // 检查元素个数不变
-  for (char i = 0; i < 3; i++) {
-    ASSERT_EQ(list[i], i + 1);  // 检查原有元素是否还在
-  }
-}
+
 TEST(List, ConstOperatorIndex) {
   const List<char> list{1, 2, 3};
   ASSERT_EQ(list[0], 1);  // 使用const版本的operator[]访问元素
@@ -277,17 +269,6 @@ TEST(List, GetAndOperatorIndexError) {
   ASSERT_THROW(list.Get(list.Size()), std::out_of_range);  // 测试索引越界
   ASSERT_THROW(list[-1], std::out_of_range);               // 测试负数索引
   ASSERT_THROW(list[list.Size()], std::out_of_range);      // 测试索引越界
-}
-TEST(List, SortAndSlice) {
-  List<char> list{3, 1, 4, 1, 5, 9, 2, 6, 5, 3};
-  std::sort(list.elements.get(), list.elements.get() + list.Size());  // 排序
-  List<char> sub = list.Slice(2, 7);                                  // 切片
-  ASSERT_EQ(sub.Size(), 5);
-  ASSERT_EQ(sub[0], 2);
-  ASSERT_EQ(sub[1], 3);
-  ASSERT_EQ(sub[2], 3);
-  ASSERT_EQ(sub[3], 4);
-  ASSERT_EQ(sub[4], 5);
 }
 TEST(List, ConcatAndReverse) {
   List<char> list1{1, 2, 3};

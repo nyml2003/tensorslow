@@ -27,21 +27,18 @@ PyDictPtr PyObject::Methods() noexcept {
 PyObjPtr ObjectInit(const PyObjPtr& args) {
   CheckNativeFunctionArgumentsWithExpectedLength(args, 1);
   auto self = args->as<PyList>()->GetItem(0);
-  auto klass = self->Klass();
+  auto* klass = self->Klass();
   auto instance = std::make_shared<PyObject>(klass);
   return instance;
 }
 
-KlassPtr ObjectKlass::Self() {
-  static KlassPtr instance = std::make_shared<ObjectKlass>();
-  return instance;
-}
+
 
 void ObjectKlass::Initialize() {
   if (this->isInitialized) {
     return;
   }
-  auto instance = Self();
+  auto *instance = Self();
   instance->SetName(CreatePyString("object")->as<PyString>());
   instance->SetAttributes(CreatePyDict()->as<PyDictionary>());
   instance->AddAttribute(

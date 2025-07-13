@@ -6,7 +6,7 @@
 namespace tensorslow::Object {
 
 class Klass;
-using KlassPtr = std::shared_ptr<Klass>;
+using KlassPtr = Klass*;
 
 class PyObject;
 using PyObjPtr = std::shared_ptr<PyObject>;

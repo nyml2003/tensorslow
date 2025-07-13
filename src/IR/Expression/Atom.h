@@ -1,12 +1,11 @@
 #ifndef TENSORSLOW_AST_ATOM_H
 #define TENSORSLOW_AST_ATOM_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class AtomKlass : public INodeKlass {
+class AtomKlass : public INodeTrait, public Object::KlassBase<AtomKlass> {
  public:
   explicit AtomKlass() = default;
 
@@ -16,11 +15,6 @@ class AtomKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_atom"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<AtomKlass>();
-    return instance;
   }
 
   Object::PyObjPtr

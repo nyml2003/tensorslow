@@ -8,13 +8,10 @@
 #include "Object/String/PyString.h"
 namespace tensorslow::Object {
 
-class IterDoneKlass : public Klass {
+class IterDoneKlass : public KlassBase<IterDoneKlass> {
  public:
   explicit IterDoneKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<IterDoneKlass>();
-    return instance;
-  }
+
 
   void Initialize() override {
     if (this->isInitialized) {
@@ -31,13 +28,10 @@ class IterDone : public PyObject {
   explicit IterDone() : PyObject(IterDoneKlass::Self()) {}
 };
 
-class ListIteratorKlass : public Klass {
+class ListIteratorKlass : public KlassBase<ListIteratorKlass> {
  public:
   explicit ListIteratorKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<ListIteratorKlass>();
-    return instance;
-  }
+
   PyObjPtr iter(const PyObjPtr& obj) override { return obj; }
   PyObjPtr next(const PyObjPtr& obj) override;
   PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
@@ -53,13 +47,10 @@ class ListIteratorKlass : public Klass {
   }
 };
 
-class ListReverseIteratorKlass : public Klass {
+class ListReverseIteratorKlass : public KlassBase<ListReverseIteratorKlass> {
  public:
   explicit ListReverseIteratorKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<ListReverseIteratorKlass>();
-    return instance;
-  }
+
 
   PyObjPtr iter(const PyObjPtr& obj) override { return obj; }
   PyObjPtr next(const PyObjPtr& obj) override;
@@ -106,20 +97,19 @@ class ListReverseIterator : public PyObject {
 
  public:
   explicit ListReverseIterator(const PyObjPtr& list)
-    : PyObject(ListReverseIteratorKlass::Self()), list(list->as<PyList>()), index(this->list->Length() - 1) {}
+    : PyObject(ListReverseIteratorKlass::Self()),
+      list(list->as<PyList>()),
+      index(this->list->Length() - 1) {}
 
   [[nodiscard]] PyListPtr List() const { return list; }
   [[nodiscard]] Index CurrentIndex() const { return index; }
   void Next() { index--; }
 };
 
-class StringIteratorKlass : public Klass {
+class StringIteratorKlass : public KlassBase<StringIteratorKlass> {
  public:
   explicit StringIteratorKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<StringIteratorKlass>();
-    return instance;
-  }
+
   void Initialize() override {
     if (this->isInitialized) {
       return;
@@ -156,13 +146,10 @@ inline PyObjPtr CreateStringIterator(const PyObjPtr& string) {
   return std::make_shared<StringIterator>(string);
 }
 
-class DictItemIteratorKlass : public Klass {
+class DictItemIteratorKlass : public KlassBase<DictItemIteratorKlass> {
  public:
   explicit DictItemIteratorKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<DictItemIteratorKlass>();
-    return instance;
-  }
+
   void Initialize() override {
     if (this->isInitialized) {
       return;

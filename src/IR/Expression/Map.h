@@ -1,12 +1,11 @@
 #ifndef TENSORSLOW_AST_MAP_H
 #define TENSORSLOW_AST_MAP_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class MapKlass : public INodeKlass {
+class MapKlass : public INodeTrait, public Object::KlassBase<MapKlass> {
  public:
   MapKlass() = default;
 
@@ -16,11 +15,6 @@ class MapKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_map"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<MapKlass>();
-    return instance;
   }
 
   Object::PyObjPtr

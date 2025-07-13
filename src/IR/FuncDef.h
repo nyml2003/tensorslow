@@ -1,19 +1,13 @@
 #ifndef TENSORSLOW_AST_FUNCDEF_H
 #define TENSORSLOW_AST_FUNCDEF_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class FuncDefKlass : public INodeKlass {
+class FuncDefKlass : public INodeTrait, public Object::KlassBase<FuncDefKlass> {
  public:
   explicit FuncDefKlass() = default;
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<FuncDefKlass>();
-    return instance;
-  }
 
   void Initialize() override {
     if (this->isInitialized) {
@@ -62,7 +56,7 @@ class FuncDef : public INode {
   Object::PyListPtr body;
   Object::PyListPtr parameters;
   Object::PyListPtr
-    parents;  // 保存整个调用链上的FuncDef或者Module所对应的PyCode对象
+    parents;        // 保存整个调用链上的FuncDef或者Module所对应的PyCode对象
   Index codeIndex;  // 保存当前FuncDef对应的PyCode对象在codeList中的索引
 };
 

@@ -8,7 +8,8 @@
 namespace tensorslow {
 
 Logger::Logger()
-  : m_callback(std::make_shared<ProxyLogStrategy>(&ConsoleLogger::getInstance())
+  : m_callback(
+      std::make_unique<ProxyLogStrategy>(&ConsoleLogger::getInstance())
     ) {}
 
 }  // namespace tensorslow

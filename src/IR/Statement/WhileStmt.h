@@ -1,11 +1,12 @@
 #ifndef TENSORSLOW_AST_WHILE_STATEMENT_H
 #define TENSORSLOW_AST_WHILE_STATEMENT_H
-#include "Function/BuiltinFunction.h"
+
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class WhileStmtKlass : public INodeKlass {
+class WhileStmtKlass : public INodeTrait,
+                       public Object::KlassBase<WhileStmtKlass> {
  public:
   explicit WhileStmtKlass() = default;
 
@@ -15,11 +16,6 @@ class WhileStmtKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_whilestmt"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<WhileStmtKlass>();
-    return instance;
   }
 
   Object::PyObjPtr

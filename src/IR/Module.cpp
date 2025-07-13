@@ -1,5 +1,5 @@
 #include "IR/Module.h"
-#include "Function/BuiltinFunction.h"
+
 #include "IR/INode.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyNone.h"
@@ -16,6 +16,7 @@ Object::PyObjPtr ModuleKlass::visit(
   module->SetCodeIndex(codeList->as<Object::PyList>()->Length());
   auto code = Object::CreatePyCode(module->Name());
   code->SetScope(Object::Scope::GLOBAL);
+  code->SetInstructions(Object::CreatePyList());
   codeList->as<Object::PyList>()->Append(code);
   Object::ForEach(module->Body(), [&codeList](const Object::PyObjPtr& stmt) {
     stmt->as<INode>()->visit(codeList);

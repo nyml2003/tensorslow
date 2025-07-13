@@ -20,8 +20,8 @@ void LoadClass(const PyStrPtr& name, const KlassPtr& klass) {
   klass->SetAttributes(CreatePyDict()->as<PyDictionary>());
   klass->SetType(CreatePyType(klass)->as<PyType>());
   auto objectType = CreatePyType(ObjectKlass::Self());
-  klass->SetSuper(CreatePyList({objectType})->as<PyList>());
-  klass->SetMro(CreatePyList({CreatePyType(klass), objectType})->as<PyList>());
+  klass->SetSuper(CreatePyList({objectType}));
+  klass->SetMro(CreatePyList({CreatePyType(klass), objectType}));
   klass->SetNative();
 }
 
@@ -63,19 +63,25 @@ Invoke(const PyObjPtr& obj, const PyObjPtr& methodName, const PyListPtr& args) {
 }
 
 PyObjPtr GetAttr(const PyObjPtr& obj, const PyStrPtr& attrName) noexcept {
-  if (obj->Klass()->Attributes()->Contains(attrName)) {
-    return obj->Klass()->Attributes()->Get(attrName);
+  // Check instance's class attributes
+  auto klass = obj->Klass();
+  auto value = klass->Attributes()->TryGet(attrName);
+  if (value != nullptr) {
+    return value;
   }
-  if (obj->Klass()->Super()->Length() == 0 &&
-      obj->Klass() == ObjectKlass::Self()) {
-    return nullptr;
-  }
-  for (Index i = 1; i < obj->Klass()->Mro()->Length(); i++) {
-    auto klass = obj->Klass()->Mro()->GetItem(i)->as<PyType>();
-    if (klass->Owner()->Attributes()->Contains(attrName)) {
-      return klass->Owner()->Attributes()->Get(attrName);
+
+  // Traverse the MRO list (starting from index 1 to skip the current class)
+  auto mro = klass->Mro();
+  auto mroLength = mro->Length();
+
+  for (Index i = 1; i < mroLength; ++i) {
+    auto baseKlass = mro->GetItem(i)->as<PyType>()->Owner();
+    value = baseKlass->Attributes()->TryGet(attrName);
+    if (value != nullptr) {
+      return value;
     }
   }
+
   return nullptr;
 }
 
@@ -139,7 +145,7 @@ PyListPtr ComputeMro(const PyTypePtr& type) {
   //     CreatePyString(" with super: "), type->Owner()->Super()->str()}
   //  )));
   auto bases = type->Owner()->Super();
-  PyListPtr mros = CreatePyList()->as<PyList>();
+  PyListPtr mros = CreatePyList();
   for (Index i = 0; i < bases->Length(); i++) {
     auto base = bases->GetItem(i)->as<PyType>();
     auto mro = base->Owner()->Mro();
@@ -180,9 +186,9 @@ void CleanMros(const PyListPtr& mros) {
 
 PyListPtr MergeMro(const PyListPtr& mros) {
   if (mros->Length() == 0) {
-    return CreatePyList()->as<PyList>();
+    return CreatePyList();
   }
-  PyListPtr result = CreatePyList()->as<PyList>();
+  PyListPtr result = CreatePyList();
   while (mros->Length() > 1) {
     //    Function::DebugPrint(StringConcat(
     //      CreatePyList({CreatePyString("Mros to merge: "), mros->str()})
@@ -307,7 +313,7 @@ KlassPtr CreatePyKlass(
   const PyDictPtr& attributes,
   const PyListPtr& super
 ) {
-  auto klass = std::make_shared<Klass>();
+  Klass* klass = new Klass();
   auto type = CreatePyType(klass)->as<PyType>();
   klass->SetName(name);
   klass->SetAttributes(attributes);

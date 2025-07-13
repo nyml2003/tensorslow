@@ -8,14 +8,11 @@
 
 namespace tensorslow::Object {
 
-class FloatKlass : public Klass {
+class FloatKlass : public KlassBase<FloatKlass> {
  public:
   explicit FloatKlass() = default;
 
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<FloatKlass>();
-    return instance;
-  }
+
 
   void Initialize() override {
     if (this->isInitialized) {

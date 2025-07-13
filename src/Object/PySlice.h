@@ -7,13 +7,10 @@
 #include "Object/String/PyString.h"
 namespace tensorslow::Object {
 
-class SliceKlass : public Klass {
+class SliceKlass : public KlassBase<SliceKlass> {
  public:
   explicit SliceKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<SliceKlass>();
-    return instance;
-  }
+
   void Initialize() override {
     if (this->isInitialized) {
       return;

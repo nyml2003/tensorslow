@@ -17,7 +17,6 @@ class SyntaxAnalysisLogger : public Logger {
   }
 
   void log(const std::string& msg) override {
-    std::lock_guard<std::mutex> lock(m_mutex);
     if (m_callback) {
       (*m_callback)(msg);
     }

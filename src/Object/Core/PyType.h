@@ -5,14 +5,11 @@
 
 namespace tensorslow::Object {
 
-class TypeKlass : public Klass {
+class TypeKlass : public KlassBase<TypeKlass> {
  public:
   explicit TypeKlass() = default;
 
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<TypeKlass>();
-    return instance;
-  }
+
 
   void Initialize() override;
 

@@ -1,12 +1,12 @@
 #ifndef TENSORSLOW_AST_EXPRESSION_STATEMENT_H
 #define TENSORSLOW_AST_EXPRESSION_STATEMENT_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class ExprStmtKlass : public INodeKlass {
+class ExprStmtKlass : public INodeTrait,
+                      public Object::KlassBase<ExprStmtKlass> {
  public:
   explicit ExprStmtKlass() = default;
 
@@ -16,11 +16,6 @@ class ExprStmtKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_exprstmt"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<ExprStmtKlass>();
-    return instance;
   }
 
   Object::PyObjPtr

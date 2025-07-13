@@ -1,12 +1,12 @@
 #ifndef TENSORSLOW_AST_FUNCTIONCALL_H
 #define TENSORSLOW_AST_FUNCTIONCALL_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class FunctionCallKlass : public INodeKlass {
+class FunctionCallKlass : public INodeTrait,
+                          public Object::KlassBase<FunctionCallKlass> {
  public:
   FunctionCallKlass() = default;
 
@@ -16,11 +16,6 @@ class FunctionCallKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_functioncall"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<FunctionCallKlass>();
-    return instance;
   }
 
   Object::PyObjPtr

@@ -1,21 +1,17 @@
 #ifndef TENSORSLOW_OBJECT_PYNONE_H
 #define TENSORSLOW_OBJECT_PYNONE_H
 
-
 #include "Object/Core/CoreHelper.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
 
 namespace tensorslow::Object {
 
-class NoneKlass : public Klass {
+class NoneKlass : public KlassBase<NoneKlass> {
  public:
   explicit NoneKlass() = default;
 
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<NoneKlass>();
-    return instance;
-  }
+
 
   void Initialize() override {
     if (this->isInitialized) {

@@ -1,20 +1,16 @@
 #ifndef TENSORSLOW_OBJECT_PYBYTES_H
 #define TENSORSLOW_OBJECT_PYBYTES_H
 
-
 #include "Object/Core/CoreHelper.h"
 #include "Object/String/PyString.h"
 
 namespace tensorslow::Object {
 
-class BytesKlass : public Klass {
+class BytesKlass : public KlassBase<BytesKlass> {
  public:
   explicit BytesKlass() = default;
 
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<BytesKlass>();
-    return instance;
-  }
+
 
   void Initialize() override {
     if (this->isInitialized) {

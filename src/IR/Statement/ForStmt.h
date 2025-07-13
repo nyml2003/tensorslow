@@ -1,12 +1,11 @@
 #ifndef TENSORSLOW_AST_FOR_STATEMENT_H
 #define TENSORSLOW_AST_FOR_STATEMENT_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class ForStmtKlass : public INodeKlass {
+class ForStmtKlass : public INodeTrait, public Object::KlassBase<ForStmtKlass> {
  public:
   explicit ForStmtKlass() = default;
 
@@ -16,11 +15,6 @@ class ForStmtKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_forstmt"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<ForStmtKlass>();
-    return instance;
   }
 
   Object::PyObjPtr

@@ -12,7 +12,7 @@ void TypeKlass::Initialize() {
 }
 
 PyType::PyType(KlassPtr _owner)
-  : PyObject(TypeKlass::Self()), owner(std::move(_owner)) {
+  : PyObject(TypeKlass::Self()), owner(_owner) {
   this->SetAttributes(owner->Attributes());
 }
 

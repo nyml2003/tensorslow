@@ -16,6 +16,7 @@ void CheckNativeFunctionArgumentsWithExpectedLength(
   CheckNativeFunctionArguments(args);
   auto list = args->as<PyList>();
   if (list->Length() != expected) {
+    Function::DebugPrint(list);
     auto errorMessage = StringConcat(CreatePyList(
       {CreatePyString("Check Native Function Arguments With Expected Length: "),
        CreatePyInteger(expected)->str(), CreatePyString(" Expected, but got "),

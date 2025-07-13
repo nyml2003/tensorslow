@@ -1,4 +1,5 @@
 #include "IR/FuncDef.h"
+#include <memory>
 #include "IR/ClassDef.h"
 #include "IR/INode.h"
 #include "IR/Module.h"
@@ -44,6 +45,7 @@ Object::PyObjPtr FuncDefKlass::visit(
   funcDef->SetCodeIndex(codeList->as<Object::PyList>()->Length());
   auto code = Object::CreatePyCode(funcDef->Name());
   code->SetScope(Object::Scope::LOCAL);
+  code->SetInstructions(Object::CreatePyList());
   Object::ForEach(
     funcDef->Parameters(),
     [&code](const Object::PyObjPtr& param) { code->RegisterVarName(param); }
@@ -83,7 +85,7 @@ Object::PyObjPtr FuncDefKlass::emit(
   parent->StoreName(funcDef->Name());
   if (Config::Has("show_bc")) {
     VerboseLogger::getInstance().setCallback(
-      std::make_shared<ProxyLogStrategy>(&BytecodeLogger::getInstance())
+      std::make_unique<ProxyLogStrategy>(&BytecodeLogger::getInstance())
     );
     Object::PrintCode(selfCode);
   }
@@ -94,9 +96,10 @@ Object::PyObjPtr FuncDefKlass::print(const Object::PyObjPtr& obj) {
   auto funcDef = obj->as<FuncDef>();
   PrintNode(
     funcDef,
-    Object::StringConcat(Object::CreatePyList(
-                           {Object::CreatePyString("FuncDef "), funcDef->Name()}
-                         ))
+    Object::StringConcat(
+      Object::CreatePyList({Object::CreatePyString("FuncDef "), funcDef->Name()}
+      )
+    )
       ->as<Object::PyString>()
   );
   Object::ForEach(funcDef->Body(), [&funcDef](const Object::PyObjPtr& stmt) {

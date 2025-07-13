@@ -1,12 +1,12 @@
 #ifndef TENSORSLOW_AST_ASSIGN_STATEMENT_H
 #define TENSORSLOW_AST_ASSIGN_STATEMENT_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class AssignStmtKlass : public INodeKlass {
+class AssignStmtKlass : public INodeTrait,
+                        public Object::KlassBase<AssignStmtKlass> {
  public:
   explicit AssignStmtKlass() = default;
 
@@ -16,11 +16,6 @@ class AssignStmtKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_assignstmt"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<AssignStmtKlass>();
-    return instance;
   }
 
   Object::PyObjPtr

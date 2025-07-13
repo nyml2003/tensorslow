@@ -5,7 +5,8 @@
 
 namespace tensorslow::IR {
 
-class YieldExprKlass : public INodeKlass {
+class YieldExprKlass : public INodeTrait,
+                       public Object::KlassBase<YieldExprKlass> {
  public:
   explicit YieldExprKlass() = default;
 
@@ -15,11 +16,6 @@ class YieldExprKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_YieldExpr"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<YieldExprKlass>();
-    return instance;
   }
 
   Object::PyObjPtr

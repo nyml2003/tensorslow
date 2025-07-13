@@ -1,19 +1,14 @@
 #ifndef TENSORSLOW_AST_MEMBERACCESS_H
 #define TENSORSLOW_AST_MEMBERACCESS_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class MemberAccessKlass : public INodeKlass {
+class MemberAccessKlass : public INodeTrait,
+                          public Object::KlassBase<MemberAccessKlass> {
  public:
   MemberAccessKlass() = default;
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<MemberAccessKlass>();
-    return instance;
-  }
 
   void Initialize() override {
     if (this->isInitialized) {

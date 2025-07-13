@@ -4,18 +4,16 @@
 #include "Collections/Integer/Integer.h"
 #include "Collections/Integer/IntegerHelper.h"
 #include "Object/Core/Klass.h"
-#include "Object/Object.h"
 #include "Object/Core/PyObject.h"
+#include "Object/Object.h"
+
 
 namespace tensorslow::Object {
 
-class IntegerKlass : public Klass {
+class IntegerKlass : public KlassBase<IntegerKlass> {
  public:
   explicit IntegerKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<IntegerKlass>();
-    return instance;
-  }
+
   void Initialize() override;
   PyObjPtr init(const PyObjPtr& klass, const PyObjPtr& args) override;
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
@@ -68,7 +66,9 @@ class PyInteger : public PyObject {
     return Collections::IsBigNumber(value);
   }
 
-  [[nodiscard]] Collections::Integer::IntSign GetSign() const { return value.GetSign(); }
+  [[nodiscard]] Collections::Integer::IntSign GetSign() const {
+    return value.GetSign();
+  }
 
   [[nodiscard]] int64_t ToI64() const { return Collections::ToI64(value); }
 

@@ -1,7 +1,6 @@
 #ifndef TENSORSLOW_AST_AST_NODE_BASE_H
 #define TENSORSLOW_AST_AST_NODE_BASE_H
 
-#include "Object/Core/Klass.h"
 #include "Object/Core/PyObject.h"
 #include "Object/Runtime/PyCode.h"
 namespace tensorslow::IR {
@@ -11,7 +10,7 @@ enum class STOREORLOAD {
   LOAD,
 };
 
-class INodeKlass : public Object::Klass {
+class INodeTrait {
  public:
   virtual Object::PyObjPtr
   visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) = 0;
@@ -20,6 +19,18 @@ class INodeKlass : public Object::Klass {
   emit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) = 0;
 
   virtual Object::PyObjPtr print(const Object::PyObjPtr& obj) = 0;
+
+  virtual ~INodeTrait() = default;
+
+  INodeTrait() = default;
+
+  INodeTrait(const INodeTrait&) = default;
+
+  INodeTrait& operator=(const INodeTrait&) = default;
+
+  INodeTrait(INodeTrait&&) = default;
+
+  INodeTrait& operator=(INodeTrait&&) = default;
 };
 
 class INode;
@@ -29,7 +40,7 @@ using INodePtr = std::shared_ptr<INode>;
 class INode : public Object::PyObject {
  public:
   explicit INode(Object::KlassPtr klass, INodePtr parent)
-    : PyObject(std::move(klass)), parent(std::move(parent)) {}
+    : PyObject(klass), parent(std::move(parent)) {}
 
   [[nodiscard]] INodePtr Parent() const { return parent; }
 
@@ -38,7 +49,7 @@ class INode : public Object::PyObject {
    * 遍历AST树，在当前INode节点所属的PyCode对象中注册常量表(consts)，变量表(names)
    */
   virtual Object::PyObjPtr visit(const Object::PyObjPtr& codeList) {
-    return std::dynamic_pointer_cast<INodeKlass>(Klass())->visit(
+    return dynamic_cast<INodeTrait*>(Klass())->visit(
       shared_from_this(), codeList
     );
   }
@@ -48,7 +59,7 @@ class INode : public Object::PyObject {
    * 遍历AST树，在当前INode节点所属的PyCode对象中生成字节码
    */
   virtual Object::PyObjPtr emit(const Object::PyObjPtr& codeList) {
-    return std::dynamic_pointer_cast<INodeKlass>(Klass())->emit(
+    return dynamic_cast<INodeTrait*>(Klass())->emit(
       shared_from_this(), codeList
     );
   }
@@ -58,9 +69,7 @@ class INode : public Object::PyObject {
    * 遍历AST树，在当前INode节点所属的PyCode对象中打印AST树
    */
   virtual Object::PyObjPtr print() {
-    return std::dynamic_pointer_cast<INodeKlass>(Klass())->print(
-      shared_from_this()
-    );
+    return dynamic_cast<INodeTrait*>(Klass())->print(shared_from_this());
   }
 
  private:

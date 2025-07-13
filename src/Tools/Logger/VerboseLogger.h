@@ -20,7 +20,6 @@ class VerboseLogger : public Logger {
   }
 
   void log(const std::string& msg) override {
-    std::lock_guard<std::mutex> lock(m_mutex);
     if (m_callback) {
       for (int i = 0; i < indent; i++) {
         (*m_callback)("  ");

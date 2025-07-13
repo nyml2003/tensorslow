@@ -23,14 +23,11 @@ class PyInst : public PyObject {
 
 using PyInstPtr = std::shared_ptr<PyInst>;
 
-class InstKlass : public Klass {
+class InstKlass : public KlassBase<InstKlass> {
  public:
   explicit InstKlass() = default;
 
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<InstKlass>();
-    return instance;
-  }
+
 
   void Initialize() override {
     if (this->isInitialized) {
@@ -277,8 +274,6 @@ template <ByteCode Op, typename T = typename InstTraits<Op>::operand_type>
 std::enable_if_t<!std::is_same_v<T, void>, PyInstPtr> MakeInst(T&& value) {
   return std::make_shared<PyInst>(Op, std::forward<T>(value));
 }
-
-
 
 }  // namespace tensorslow::Object
 

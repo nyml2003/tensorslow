@@ -8,14 +8,11 @@ namespace tensorslow::Object {
 
 using TypeFunction = std::function<PyObjPtr(PyObjPtr)>;
 
-class NativeFunctionKlass : public Klass {
+class NativeFunctionKlass : public KlassBase<NativeFunctionKlass> {
  public:
   explicit NativeFunctionKlass() = default;
 
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<NativeFunctionKlass>();
-    return instance;
-  }
+
 
   PyObjPtr repr(const PyObjPtr& obj) override;
   void Initialize() override;

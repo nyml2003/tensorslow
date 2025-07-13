@@ -126,7 +126,7 @@ void ParseAndGenerate(const std::filesystem::path& filePath) {
   auto code = visitor.Code();
   if (Config::Has("show_bc")) {
     VerboseLogger::getInstance().setCallback(
-      std::make_shared<ProxyLogStrategy>(&BytecodeLogger::getInstance())
+      std::make_unique<ProxyLogStrategy>(&BytecodeLogger::getInstance())
     );
     Object::PrintCode(code);
   }

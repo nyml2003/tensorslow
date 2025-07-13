@@ -1,12 +1,11 @@
 #ifndef TENSORSLOW_AST_SLICE_H
 #define TENSORSLOW_AST_SLICE_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class SliceKlass : public INodeKlass {
+class SliceKlass : public INodeTrait, public Object::KlassBase<SliceKlass> {
  public:
   SliceKlass() = default;
 
@@ -16,11 +15,6 @@ class SliceKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_slice"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<SliceKlass>();
-    return instance;
   }
 
   Object::PyObjPtr

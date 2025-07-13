@@ -8,13 +8,10 @@
 
 namespace tensorslow::Object {
 
-class FunctionKlass : public Klass {
+class FunctionKlass : public KlassBase<FunctionKlass> {
  public:
   FunctionKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<FunctionKlass>();
-    return instance;
-  }
+
 
   void Initialize() override {
     if (this->isInitialized) {

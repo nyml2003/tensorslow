@@ -3,12 +3,12 @@
 
 #include <utility>
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
+#include "Object/Core/Klass.h"
 
 namespace tensorslow::IR {
 
-class ListKlass : public INodeKlass {
+class ListKlass : public INodeTrait, public Object::KlassBase<ListKlass> {
  public:
   ListKlass() = default;
 
@@ -18,11 +18,6 @@ class ListKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_list"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<ListKlass>();
-    return instance;
   }
 
   Object::PyObjPtr

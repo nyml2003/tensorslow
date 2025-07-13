@@ -10,13 +10,10 @@ namespace tensorslow::Object {
 class PyBoolean;
 using PyBoolPtr = std::shared_ptr<PyBoolean>;
 
-class BooleanKlass : public Klass {
+class BooleanKlass : public KlassBase<BooleanKlass> {
  public:
   explicit BooleanKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<BooleanKlass>();
-    return instance;
-  }
+
   void Initialize() override {
     if (this->isInitialized) {
       return;

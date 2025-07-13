@@ -218,7 +218,7 @@ Object::PyCodePtr Compile(antlr4::ANTLRInputStream* inputStream) {
   auto code = visitor.Code();
   if (Config::Has("show_bc")) {
     VerboseLogger::getInstance().setCallback(
-      std::make_shared<ProxyLogStrategy>(&BytecodeLogger::getInstance())
+      std::make_unique<ProxyLogStrategy>(&BytecodeLogger::getInstance())
     );
     Object::PrintCode(code);
   }
@@ -228,14 +228,14 @@ Object::PyCodePtr Compile(antlr4::ANTLRInputStream* inputStream) {
 void Interpret(const tensorslow::Object::PyCodePtr& code) {
   if (Config::Has("verbose")) {
     VerboseLogger::getInstance().setCallback(
-      std::make_shared<ProxyLogStrategy>(&FrameLogger::getInstance())
+      std::make_unique<ProxyLogStrategy>(&FrameLogger::getInstance())
     );
   }
   try {
     tensorslow::Runtime::VirtualMachine::Run(code);
   } catch (const std::exception& e) {
     VerboseLogger::getInstance().setCallback(
-      std::make_shared<ProxyLogStrategy>(&ErrorLogger::getInstance())
+      std::make_unique<ProxyLogStrategy>(&ErrorLogger::getInstance())
     );
     PrintFrame(tensorslow::Runtime::VirtualMachine::Instance().CurrentFrame());
     ErrorLogger::getInstance().log(e.what());

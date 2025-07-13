@@ -81,13 +81,10 @@ PyFramePtr CreateFrameWithPyFunction(
   const PyListPtr& arguments
 );
 
-class FrameKlass : public Klass {
+class FrameKlass : public KlassBase<FrameKlass> {
  public:
   explicit FrameKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<FrameKlass>();
-    return instance;
-  }
+
 
   void Initialize() override {
     if (this->isInitialized) {

@@ -7,13 +7,10 @@
 #include "Object/PySlice.h"
 
 namespace tensorslow::Object {
-class ListKlass : public Klass {
+class ListKlass : public KlassBase<ListKlass> {
  public:
   explicit ListKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<ListKlass>();
-    return instance;
-  }
+
   PyObjPtr add(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr mul(const PyObjPtr& lhs, const PyObjPtr& rhs) override;
   PyObjPtr str(const PyObjPtr& obj) override;
@@ -36,7 +33,8 @@ class ListKlass : public Klass {
 };
 PyListPtr CreatePyList();
 PyListPtr CreatePyList(Index capacity);
-PyListPtr CreatePyList(Collections::List<PyObjPtr> list);
+PyListPtr CreatePyListWithNullPtr(Index capacity);
+PyListPtr CreatePyList(const Collections::List<PyObjPtr>& list);
 PyListPtr CreatePyList(std::initializer_list<PyObjPtr> list);
 class PyList;
 using PyListPtr = std::shared_ptr<PyList>;
@@ -49,7 +47,7 @@ class PyList : public PyObject {
     : PyObject(ListKlass::Self()), value(std::move(value)) {}
 
   void Shuffle() { value.Shuffle(); }
-  void Append(PyObjPtr obj) { value.Push(std::move(obj)); }
+  void Append(const PyObjPtr& obj) { value.Push(obj); }
   PyObjPtr Add(const PyObjPtr& obj) {
     return CreatePyList(value.Add(obj->as<PyList>()->value));
   }

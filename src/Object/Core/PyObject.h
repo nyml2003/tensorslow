@@ -1,10 +1,10 @@
 #ifndef TENSORSLOW_OBJECT_PYOBJECT_H
 #define TENSORSLOW_OBJECT_PYOBJECT_H
 
-
+#include "Common.h"
 #include "Object/Core/Klass.h"
 #include "Object/Object.h"
-#include "Common.h"
+
 
 namespace tensorslow::Object {
 
@@ -17,7 +17,7 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   bool hashed = false;
 
  public:
-  explicit PyObject(KlassPtr klass) : klass(std::move(klass)) {}
+  explicit PyObject(KlassPtr klass) : klass(klass) {}
   [[nodiscard]] KlassPtr Klass() const { return klass; }
   [[nodiscard]] PyDictPtr Attributes() noexcept;
   [[nodiscard]] PyDictPtr Methods() noexcept;
@@ -131,10 +131,9 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
 
 using PyObjPtr = std::shared_ptr<PyObject>;
 
-class ObjectKlass : public Klass {
+class ObjectKlass : public KlassBase<ObjectKlass> {
  public:
   explicit ObjectKlass() = default;
-  static KlassPtr Self();
   void Initialize() override;
 };
 

@@ -7,5 +7,5 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 enable_testing()
 include_directories(${tensorslow_src_dir})
-# include(${tensorslow_dir}/test/unittest/Collections/Collections.cmake)
+include(${tensorslow_dir}/test/unittest/Collections/Collections.cmake)
 include(${tensorslow_dir}/test/unittest/Object/Object.cmake)

@@ -13,8 +13,6 @@ class IntermediateCodeLogger : public Logger {
   }
 
   void log(const std::string& msg) override {
-    std::lock_guard<std::mutex> lock(m_mutex);
-
     // 第一次调用时输出 mermaid 图表开头
     if (!m_initialized) {
       (*m_callback)("```mermaid\n");
@@ -26,10 +24,9 @@ class IntermediateCodeLogger : public Logger {
   }
 
   void terminate() {
-    std::lock_guard<std::mutex> lock(m_mutex);
     if (m_initialized) {
       (*m_callback)("```\n");  // 结束 mermaid 图表
-      m_initialized = false;  // 标记为未初始化，以便下次重新开始新的图表
+      m_initialized = false;   // 标记为未初始化，以便下次重新开始新的图表
     }
   }
   IntermediateCodeLogger(const IntermediateCodeLogger&) = delete;

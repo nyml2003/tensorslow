@@ -6,14 +6,10 @@
 
 namespace tensorslow::IR {
 
-class IdentifierKlass : public INodeKlass {
+class IdentifierKlass : public INodeTrait,
+                        public Object::KlassBase<IdentifierKlass> {
  public:
   IdentifierKlass() = default;
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<IdentifierKlass>();
-    return instance;
-  }
 
   void Initialize() override {
     if (this->isInitialized) {

@@ -1,12 +1,11 @@
 #ifndef TENSORSLOW_AST_BINARY_H
 #define TENSORSLOW_AST_BINARY_H
 
-#include "Function/BuiltinFunction.h"
 #include "IR/INode.h"
 
 namespace tensorslow::IR {
 
-class BinaryKlass : public INodeKlass {
+class BinaryKlass : public INodeTrait, public Object::KlassBase<BinaryKlass> {
  public:
   explicit BinaryKlass() = default;
 
@@ -16,11 +15,6 @@ class BinaryKlass : public INodeKlass {
     }
     InitKlass(Object::CreatePyString("ast_binary"), Self());
     this->isInitialized = true;
-  }
-
-  static Object::KlassPtr Self() {
-    static auto instance = std::make_shared<BinaryKlass>();
-    return instance;
   }
 
   Object::PyObjPtr

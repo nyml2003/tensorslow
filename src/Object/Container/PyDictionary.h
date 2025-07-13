@@ -5,17 +5,14 @@
 #include "Object/Core/Klass.h"
 #include "Object/Core/PyObject.h"
 
-#include <map>
+#include <unordered_map>
 
 namespace tensorslow::Object {
 
-class DictionaryKlass : public Klass {
+class DictionaryKlass : public KlassBase<DictionaryKlass> {
  public:
   explicit DictionaryKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<DictionaryKlass>();
-    return instance;
-  }
+
 
   PyObjPtr init(const PyObjPtr& klass, const PyObjPtr& args) override;
 
@@ -35,11 +32,11 @@ class DictionaryKlass : public Klass {
   void Initialize() override;
 };
 
-bool KeyCompare(const PyObjPtr& lhs, const PyObjPtr& rhs);
+// bool KeyCompare(const PyObjPtr& lhs, const PyObjPtr& rhs);
 
 class PyDictionary : public PyObject {
  private:
-  std::map<PyObjPtr, PyObjPtr, decltype(KeyCompare)*> dict{KeyCompare};
+  std::unordered_map<PyObjPtr, PyObjPtr> dict;
 
  public:
   explicit PyDictionary() : PyObject(DictionaryKlass::Self()) {}
@@ -55,6 +52,8 @@ class PyDictionary : public PyObject {
   Index Size() const;
 
   PyObjPtr GetItem(Index index) const;
+
+  PyObjPtr TryGet(const PyObjPtr& key) const;
 
   PyDictPtr Add(const PyDictPtr& other);
   void Clear() { dict.clear(); }

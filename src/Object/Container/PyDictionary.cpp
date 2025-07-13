@@ -23,6 +23,14 @@ PyObjPtr PyDictionary::Get(const PyObjPtr& key) {
   return dict[key];
 }
 
+PyObjPtr PyDictionary::TryGet(const PyObjPtr& key) const {
+  auto dictIter = dict.find(key);
+  if (dictIter != dict.end()) {
+    return dictIter->second;
+  }
+  return nullptr;  // 表示没有找到
+}
+
 void PyDictionary::Remove(const PyObjPtr& key) {
   dict.erase(key);
 }
@@ -175,13 +183,13 @@ PyObjPtr DictionaryKlass::contains(const PyObjPtr& obj, const PyObjPtr& key) {
   return CreatePyBoolean(dict->Contains(key));
 }
 
-bool KeyCompare(const PyObjPtr& lhs, const PyObjPtr& rhs) {
-  auto leftHash =
-    lhs->Hashed() ? lhs->HashValue() : lhs->hash()->as<PyInteger>()->ToU64();
-  auto rightHash =
-    rhs->Hashed() ? rhs->HashValue() : rhs->hash()->as<PyInteger>()->ToU64();
-  return leftHash < rightHash;
-}
+// bool KeyCompare(const PyObjPtr& lhs, const PyObjPtr& rhs) {
+//   auto leftHash =
+//     lhs->Hashed() ? lhs->HashValue() : lhs->hash()->as<PyInteger>()->ToU64();
+//   auto rightHash =
+//     rhs->Hashed() ? rhs->HashValue() : rhs->hash()->as<PyInteger>()->ToU64();
+//   return leftHash < rightHash;
+// }
 
 auto DictClear(const PyObjPtr& obj) -> PyObjPtr {
   auto argList = obj->as<PyList>();

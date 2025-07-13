@@ -140,10 +140,7 @@ PyPromisePtr PyPromise::Catch(const PyObjPtr& onRejected) {
   return CreatePyPromise(new_executor);
 }
 
-KlassPtr PromiseKlass::Self() {
-  static KlassPtr instance = std::make_shared<PromiseKlass>();
-  return instance;
-}
+
 
 void PromiseKlass::Initialize() {
   if (isInitialized) {

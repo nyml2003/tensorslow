@@ -25,7 +25,7 @@ PyObjPtr Map(
     result.Push(func(value));
     value = iter->next();
   }
-  return CreatePyList(result)->as<PyList>();
+  return CreatePyList(result);
 }
 
 }  // namespace tensorslow::Object

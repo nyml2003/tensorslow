@@ -8,13 +8,10 @@
 
 namespace tensorslow::Object {
 class PyGenerator;
-class GeneratorKlass : public Klass {
+class GeneratorKlass : public KlassBase<GeneratorKlass> {
  public:
   explicit GeneratorKlass() = default;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<GeneratorKlass>();
-    return instance;
-  }
+
 
   void Initialize() override;
 
@@ -50,7 +47,7 @@ class PyGenerator : public PyObject {
 
   explicit PyGenerator(std::function<PyObjPtr(const PyGeneratorPtr&)> _func)
     : PyObject(GeneratorKlass::Self()),
-      
+
       func(std::move(_func)) {}
   [[nodiscard]] PyFramePtr Frame() const { return frame; }
   [[nodiscard]] bool IsExhausted() const { return isExhausted; }

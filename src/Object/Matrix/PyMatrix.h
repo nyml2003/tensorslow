@@ -10,14 +10,11 @@
 #include "Object/String/PyString.h"
 namespace tensorslow::Object {
 
-class MatrixKlass : public Klass {
+class MatrixKlass : public KlassBase<MatrixKlass> {
  public:
   explicit MatrixKlass() = default;
   void Initialize() override;
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<MatrixKlass>();
-    return instance;
-  }
+
   PyObjPtr repr(const PyObjPtr& obj) override;
   PyObjPtr str(const PyObjPtr& obj) override;
 

@@ -33,7 +33,7 @@ class PyCode : public PyObject {
 
   [[nodiscard]] PyListPtr Instructions();
 
-  void SetInstructions(const PyListPtr& insts);
+  void SetInstructions(PyListPtr&& insts);
 
   void SetByteCode(const PyBytesPtr& byteCodes);
 
@@ -230,14 +230,11 @@ class PyCode : public PyObject {
 
 using PyCodePtr = std::shared_ptr<PyCode>;
 
-class CodeKlass : public Klass {
+class CodeKlass : public KlassBase<CodeKlass> {
  public:
   explicit CodeKlass() = default;
 
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<CodeKlass>();
-    return instance;
-  }
+
 
   void Initialize() override {
     if (this->isInitialized) {

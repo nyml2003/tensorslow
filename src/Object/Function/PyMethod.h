@@ -5,14 +5,10 @@
 #include "Object/String/PyString.h"
 namespace tensorslow::Object {
 
-class MethodKlass : public Klass {
+class MethodKlass : public KlassBase<MethodKlass> {
  public:
   explicit MethodKlass() = default;
 
-  static KlassPtr Self() {
-    static KlassPtr instance = std::make_shared<MethodKlass>();
-    return instance;
-  }
 
   void Initialize() override {
     if (this->isInitialized) {

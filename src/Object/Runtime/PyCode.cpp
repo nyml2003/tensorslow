@@ -24,7 +24,7 @@ PyCode::PyCode(
 )
   : PyObject(CodeKlass::Self()),
     byteCode(std::move(byteCodes)),
-    instructions(CreatePyList(0)->as<PyList>()),
+    instructions(nullptr),
     consts(std::move(consts)),
     names(std::move(names)),
     varNames(std::move(varNames)),
@@ -36,8 +36,8 @@ PyListPtr PyCode::Instructions() {
   return instructions;
 }
 
-void PyCode::SetInstructions(const PyListPtr& insts) {
-  instructions = insts;
+void PyCode::SetInstructions(PyListPtr&& insts) {
+  instructions = std::move(insts);
 }
 
 void PyCode::SetByteCode(const PyBytesPtr& byteCodes) {
@@ -179,9 +179,9 @@ void PyCode::RegisterVarName(const PyObjPtr& _name) {
 
 PyCodePtr CreatePyCode(const PyStrPtr& name) {
   auto byteCode = CreatePyString("")->as<PyBytes>();
-  auto consts = CreatePyList()->as<PyList>();
-  auto names = CreatePyList()->as<PyList>();
-  auto varNames = CreatePyList()->as<PyList>();
+  auto consts = CreatePyList();
+  auto names = CreatePyList();
+  auto varNames = CreatePyList();
   return std::make_shared<PyCode>(byteCode, consts, names, varNames, name, 0, false);
 }
 

@@ -21,7 +21,6 @@ class ConsoleLogger : public Logger {
   }
 
   void log(const std::string& msg) override {
-    std::lock_guard<std::mutex> lock(m_mutex);
     if (m_callback) {
       (*m_callback)(msg);
     }
@@ -30,7 +29,7 @@ class ConsoleLogger : public Logger {
   ConsoleLogger& operator=(const ConsoleLogger&) = delete;
 
  private:
-  ConsoleLogger() : Logger(std::make_shared<DefaultLogStrategy>()) {}
+  ConsoleLogger() : Logger(std::make_unique<DefaultLogStrategy>()) {}
 };
 
 }  // namespace tensorslow

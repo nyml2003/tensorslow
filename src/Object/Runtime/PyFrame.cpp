@@ -44,7 +44,7 @@ PyFramePtr CreateModuleEntryFrame(const PyCodePtr& code) {
   auto locals = CreatePyDict()->as<PyDictionary>();
   auto globals = locals;
   locals->Put(CreatePyString("__name__"), CreatePyString("__main__"));
-  auto fastLocals = CreatePyList(code->NLocals())->as<PyList>();
+  auto fastLocals = CreatePyList(code->NLocals());
   auto caller = nullptr;
   auto frame =
     std::make_shared<PyFrame>(code, locals, globals, fastLocals, caller);
@@ -95,15 +95,15 @@ PyListPtr PyFrame::CurrentFastLocals() const {
 }
 
 PyListPtr PyFrame::DumpStack() const {
-  return CreatePyList(stack.GetContent())->as<PyList>();
+  return CreatePyList(stack.GetContent());
 }
 
 PyInstPtr PyFrame::Instruction() const {
   if (!isParsed) {
     ParseByteCode(code);
   }
-  auto insts = code->Instructions()->as<PyList>();
-  return insts->GetItem(programCounter)->as<PyInst>();
+
+  return code->Instructions()->GetItem(programCounter)->as<PyInst>();
 }
 
 bool PyFrame::Finished() {
@@ -133,10 +133,10 @@ void ParseByteCode(const PyCodePtr& code) {
   }
   iter++;
   Index size = Collections::DeserializeU64(bytes, iter);
-  auto insts = Collections::List<PyObjPtr>(size);
-  while ((size--) != 0U) {
+  auto insts = CreatePyList(size);
+  for (Index pcCounter = 0; pcCounter < size; pcCounter++) {
     auto byte = bytes[iter++];
-    insts.Push([byte, &iter, &bytes]() {
+    insts->SetItem(pcCounter, [byte, &iter, &bytes]() {
       switch (static_cast<ByteCode>(byte)) {
         case ByteCode::LOAD_CONST: {
           return MakeInst<ByteCode::LOAD_CONST>(
@@ -312,7 +312,7 @@ void ParseByteCode(const PyCodePtr& code) {
       }
     }());
   }
-  code->SetInstructions(std::make_shared<PyList>(insts));
+  code->SetInstructions(std::move(insts));
 }
 
 PyObjPtr FrameKlass::repr(const PyObjPtr& obj) {
@@ -353,18 +353,18 @@ void PrintFrame(const PyFramePtr& frame) {
   VerboseLogger::DecreaseIndent();
 
   // Stack
-  VerboseLogger::getInstance().log("\nStack(*ptr):\n");
-  auto stack = frame->DumpStack();
-  for (Index i = 0; i < stack->Length(); i++) {
-    VerboseLogger::getInstance().log(std::to_string(i) + ": ");
-    VerboseLogger::getInstance().log("  ");
-    auto item = stack->GetItem(i);
-    auto item_repr = item->repr()->as<PyString>()->ToCppString();
-    VerboseLogger::getInstance().log(item_repr);
-    auto ptr = reinterpret_cast<uint64_t>(item.get());
-    std::string ptr_str = " ( " + std::to_string(ptr) + " ) \n";
-    VerboseLogger::getInstance().log(ptr_str);
-  }
+  // VerboseLogger::getInstance().log("\nStack(*ptr):\n");
+  // auto stack = frame->DumpStack();
+  // for (Index i = 0; i < stack->Length(); i++) {
+  //   VerboseLogger::getInstance().log(std::to_string(i) + ": ");
+  //   VerboseLogger::getInstance().log("  ");
+  //   auto item = stack->GetItem(i);
+  //   auto item_repr = item->repr()->as<PyString>()->ToCppString();
+  //   VerboseLogger::getInstance().log(item_repr);
+  //   auto ptr = reinterpret_cast<uint64_t>(item.get());
+  //   std::string ptr_str = " ( " + std::to_string(ptr) + " ) \n";
+  //   VerboseLogger::getInstance().log(ptr_str);
+  // }
 
   // Locals
   VerboseLogger::getInstance().log("\nLocals:\n");
@@ -405,37 +405,39 @@ bool PyFrame::HasCaller() const {
 
 PyObjPtr PyFrame::Eval() {
   while (!Finished()) {
-    const auto& inst = Instruction();
+    auto inst = Instruction();
+    auto byteCode = inst->Code();
+    auto oprt = inst->Operand();
     if (Config::Has("verbose")) {
       PrintFrame(shared_from_this()->as<PyFrame>());
     }
-    switch (inst->Code()) {
+    switch (byteCode) {
       case ByteCode::LOAD_CONST: {
-        auto key = std::get<Index>(inst->Operand());
+        auto key = std::get<Index>(oprt);
         auto value = Code()->Consts()->getitem(CreatePyInteger(key));
         stack.Push(value);
         NextProgramCounter();
         break;
       }
       case ByteCode::STORE_GLOBAL: {
-        auto key = std::get<Index>(inst->Operand());
+        auto key = std::get<Index>(oprt);
         auto value = stack.Pop();
         globals->setitem(CreatePyInteger(key), value);
         NextProgramCounter();
         break;
       }
       case ByteCode::STORE_FAST: {
-        auto index = std::get<Index>(inst->Operand());
+        auto index = std::get<Index>(oprt);
         auto value = stack.Pop();
         fastLocals->setitem(CreatePyInteger(index), value);
         NextProgramCounter();
         break;
       }
       case ByteCode::COMPARE_OP: {
-        auto oprt = std::get<CompareOp>(inst->Operand());
+        auto compareOp = std::get<CompareOp>(oprt);
         auto right = stack.Pop();
         auto left = stack.Pop();
-        switch (oprt) {
+        switch (compareOp) {
           case CompareOp::EQUAL: {
             stack.Push(left->eq(right));
             break;
@@ -488,8 +490,7 @@ PyObjPtr PyFrame::Eval() {
         if (!IsTrue(needJump)) {
           SetProgramCounter(
             static_cast<Index>(
-              static_cast<int64_t>(ProgramCounter()) +
-              std::get<int64_t>(inst->Operand())
+              static_cast<int64_t>(ProgramCounter()) + std::get<int64_t>(oprt)
             )
           );
         } else {
@@ -502,8 +503,7 @@ PyObjPtr PyFrame::Eval() {
         if (IsTrue(needJump)) {
           SetProgramCounter(
             static_cast<Index>(
-              static_cast<int64_t>(ProgramCounter()) +
-              std::get<int64_t>(inst->Operand())
+              static_cast<int64_t>(ProgramCounter()) + std::get<int64_t>(oprt)
             )
           );
         } else {
@@ -652,15 +652,15 @@ PyObjPtr PyFrame::Eval() {
         break;
       }
       case ByteCode::LOAD_FAST: {
-        auto index = std::get<Index>(inst->Operand());
+        auto index = std::get<Index>(oprt);
         auto value = fastLocals->GetItem(index);
         stack.Push(value);
         NextProgramCounter();
         break;
       }
       case ByteCode::CALL_FUNCTION: {
-        auto argumentCount = std::get<Index>(inst->Operand());
-        auto argList = CreatePyList(stack.Top(argumentCount))->as<PyList>();
+        auto argumentCount = std::get<Index>(oprt);
+        auto argList = CreatePyList(stack.Top(argumentCount));
         auto func = stack.Pop();
         auto result = Runtime::Evaluator::InvokeCallable(func, argList);
         stack.Push(result);
@@ -668,11 +668,11 @@ PyObjPtr PyFrame::Eval() {
         break;
       }
       case ByteCode::LOAD_GLOBAL: {
-        auto index = std::get<Index>(inst->Operand());
+        auto index = std::get<Index>(oprt);
         auto key = Code()->Names()->GetItem(index);
         bool found = false;
         PyObjPtr value = CreatePyNone();
-        if (IsTrue(globals->contains(key))) {
+        if (globals->Contains(key)) {
           found = true;
           value = globals->getitem(key);
         }
@@ -695,7 +695,7 @@ PyObjPtr PyFrame::Eval() {
         break;
       }
       case ByteCode::STORE_NAME: {
-        auto index = std::get<Index>(inst->Operand());
+        auto index = std::get<Index>(oprt);
         auto key = Code()->Names()->GetItem(index);
         auto value = stack.Pop();
         locals->setitem(key, value);
@@ -703,7 +703,7 @@ PyObjPtr PyFrame::Eval() {
         break;
       }
       case ByteCode::LOAD_NAME: {
-        auto index = std::get<Index>(inst->Operand());
+        auto index = std::get<Index>(oprt);
         auto key = Code()->Names()->GetItem(index);
         // LEGB rule
         // local -> enclosing -> global -> built-in
@@ -740,7 +740,7 @@ PyObjPtr PyFrame::Eval() {
         break;
       }
       case ByteCode::LOAD_ATTR: {
-        auto index = std::get<Index>(inst->Operand());
+        auto index = std::get<Index>(oprt);
         auto key = Code()->Names()->GetItem(index);
         auto obj = stack.Pop();
         auto value = obj->getattr(key);
@@ -768,7 +768,7 @@ PyObjPtr PyFrame::Eval() {
         break;
       }
       case ByteCode::BUILD_LIST: {
-        auto size = std::get<Index>(inst->Operand());
+        auto size = std::get<Index>(oprt);
         Collections::List<PyObjPtr> elements(size);
         for (Index i = 0; i < size; i++) {
           elements.Push(stack.Pop());
@@ -788,7 +788,7 @@ PyObjPtr PyFrame::Eval() {
         break;
       }
       case ByteCode::JUMP_ABSOLUTE: {
-        SetProgramCounter(std::get<Index>(inst->Operand()));
+        SetProgramCounter(std::get<Index>(oprt));
         break;
       }
       case ByteCode::STORE_SUBSCR: {
@@ -811,10 +811,7 @@ PyObjPtr PyFrame::Eval() {
         auto value = iter->next();
         if (value->is(Object::IterDoneKlass::Self())) {
           SetProgramCounter(
-            static_cast<Index>(
-              ProgramCounter() +
-              std::get<uint64_t>(inst->Operand())
-            )
+            static_cast<Index>(ProgramCounter() + std::get<uint64_t>(oprt))
           );
         } else {
           stack.Push(iter);
@@ -833,7 +830,7 @@ PyObjPtr PyFrame::Eval() {
         break;
       }
       case ByteCode::STORE_ATTR: {
-        auto index = std::get<Index>(inst->Operand());
+        auto index = std::get<Index>(oprt);
         auto key = Code()->Names()->GetItem(index);
         auto obj = stack.Pop();
         auto value = stack.Pop();
@@ -850,11 +847,11 @@ PyObjPtr PyFrame::Eval() {
         return CreatePyGenerator(shared_from_this()->as<PyFrame>());
       }
       case ByteCode::JUMP_FORWARD: {
-        SetProgramCounter(programCounter + std::get<Index>(inst->Operand()));
+        SetProgramCounter(programCounter + std::get<Index>(oprt));
         break;
       }
       case ByteCode::BUILD_MAP: {
-        auto size = std::get<Index>(inst->Operand());
+        auto size = std::get<Index>(oprt);
         auto map = CreatePyDict();
         for (Index i = 0; i < size; i++) {
           auto value = stack.Pop();
