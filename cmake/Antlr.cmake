@@ -1,8 +1,10 @@
 set(tensorslow_antlr4_grammar_dir ${tensorslow_dir}/grammar)
-set(tensorslow_antlr4_generated_dir ${tensorslow_dir}/generated)
-add_subdirectory(${tensorslow_dir}/antlr-runtime ${CMAKE_BINARY_DIR}/antlr4_build)
+set(ANTLR_SOURCE_DIR ${tensorslow_dir}/third_party/antlr-runtime/src)
+set(tensorslow_antlr4_generated_dir ${tensorslow_dir}/third_party/antlr-runtime/generated)
+add_subdirectory(${tensorslow_dir}/third_party/antlr-runtime ${CMAKE_BINARY_DIR}/antlr4_build)
 include_directories(${tensorslow_antlr4_generated_dir})
-include_directories(${tensorslow_dir}/antlr-runtime/src)
+include_directories(${tensorslow_dir}/third_party/antlr-runtime/src)
+
 set(ANTLR_GENERATION_COMPLETE_FLAG ${tensorslow_antlr4_generated_dir}/.antlr4_generation_complete)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
@@ -12,7 +14,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
             COMMAND ${CMAKE_COMMAND} -E remove_directory ${tensorslow_antlr4_generated_dir}
             COMMAND ${CMAKE_COMMAND} -E make_directory ${tensorslow_antlr4_generated_dir}
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${tensorslow_antlr4_grammar_dir} ${tensorslow_antlr4_generated_dir}
-            COMMAND powershell.exe -Command "java -jar '${tensorslow_dir}/jar/antlr-4.13.2-complete.jar' -Dlanguage=Cpp -visitor -o ${tensorslow_antlr4_generated_dir} '${tensorslow_antlr4_grammar_dir}/Python3Lexer.g4' '${tensorslow_antlr4_grammar_dir}/Python3Parser.g4'"
+            COMMAND powershell.exe -Command "java -jar '${tensorslow_dir}/third_party/antlr-4.13.2-complete.jar' -Dlanguage=Cpp -visitor -o ${tensorslow_antlr4_generated_dir} '${tensorslow_antlr4_grammar_dir}/Python3Lexer.g4' '${tensorslow_antlr4_grammar_dir}/Python3Parser.g4'"
             COMMAND ${CMAKE_COMMAND} -E touch ${ANTLR_GENERATION_COMPLETE_FLAG}
             WORKING_DIRECTORY ${tensorslow_dir}
             COMMENT "Generating ANTLR files using local JAR (only once)"
@@ -25,7 +27,7 @@ else ()
             COMMAND ${CMAKE_COMMAND} -E remove_directory ${tensorslow_antlr4_generated_dir}
             COMMAND ${CMAKE_COMMAND} -E make_directory ${tensorslow_antlr4_generated_dir}
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${tensorslow_antlr4_grammar_dir} ${tensorslow_antlr4_generated_dir}
-            COMMAND java -jar ${tensorslow_dir}/jar/antlr-4.13.2-complete.jar
+            COMMAND java -jar ${tensorslow_dir}/thiry_party/antlr-4.13.2-complete.jar
             -Dlanguage=Cpp
             -visitor
             -o ${tensorslow_antlr4_generated_dir}

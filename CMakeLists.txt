@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(tensorslow)
-include(cmake/GlobalSettings.cmake)
-include(cmake/AntlrConfig.cmake)
-
+include(cmake/Settings.cmake)
+include(cmake/Test.cmake)
 include(src/source.cmake)
 
 message(STATUS "tensorslow_frontend_files: ${tensorslow_frontend_files}")
@@ -75,7 +74,3 @@ foreach(target tensorslow_compiler tensorslow_interpreter tensorslow_engine)
         $<$<CXX_COMPILER_ID:MSVC>:/OPT:REF>
     )
 endforeach()
-
-include(cmake/tools.cmake)
-
-include(test/unittest/unittest.cmake)

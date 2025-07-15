@@ -20,7 +20,7 @@
 /test/dev/
 
 # 根据语法文件生成的词法分析器和语法分析器
-/generated
+/third_party/antlr-runtime/generated/
 
 # clangd
 /.cache
