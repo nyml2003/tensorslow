@@ -10,11 +10,11 @@ class ClassDefKlass : public INodeTrait,
                       public Object::KlassBase<ClassDefKlass> {
  public:
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     InitKlass(Object::CreatePyString("ast_classdef"), Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   Object::PyObjPtr

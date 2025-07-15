@@ -12,14 +12,13 @@ class FunctionKlass : public KlassBase<FunctionKlass> {
  public:
   FunctionKlass() = default;
 
-
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("function")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   PyObjPtr repr(const PyObjPtr& obj) override;

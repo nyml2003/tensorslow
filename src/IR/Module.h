@@ -10,11 +10,11 @@ class ModuleKlass : public INodeTrait, public Object::KlassBase<ModuleKlass> {
   explicit ModuleKlass() = default;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     InitKlass(Object::CreatePyString("ast_module"), Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
   Object::PyObjPtr
   visit(const Object::PyObjPtr& obj, const Object::PyObjPtr& codeList) override;

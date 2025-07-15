@@ -8,7 +8,7 @@
 
 namespace tensorslow::Object {
 
-enum class ByteCode {
+enum class ByteCode : uint8_t {
   POP_TOP = 1,
   NOP = 9,
   UNARY_POSITIVE = 10,          // 一元运算符 +
@@ -56,7 +56,7 @@ enum class ByteCode {
   CALL_FUNCTION = 142,
 };
 
-enum class CompareOp {
+enum class CompareOp : uint8_t {
   EQUAL = 2,
   NOT_EQUAL = 3,
   LESS_THAN = 0,
@@ -71,7 +71,7 @@ enum class CompareOp {
 
 using OperandKind = std::variant<CompareOp, None, Index, int64_t>;
 
-enum class Literal {
+enum class Literal : uint8_t {
   INTEGER,
   ZERO,
   FLOAT,

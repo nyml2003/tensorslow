@@ -12,14 +12,13 @@ class IterDoneKlass : public KlassBase<IterDoneKlass> {
  public:
   explicit IterDoneKlass() = default;
 
-
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("StopIteration")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 };
 
@@ -38,12 +37,12 @@ class ListIteratorKlass : public KlassBase<ListIteratorKlass> {
   PyObjPtr repr(const PyObjPtr& obj) override;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("ListIterator")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 };
 
@@ -51,19 +50,18 @@ class ListReverseIteratorKlass : public KlassBase<ListReverseIteratorKlass> {
  public:
   explicit ListReverseIteratorKlass() = default;
 
-
   PyObjPtr iter(const PyObjPtr& obj) override { return obj; }
   PyObjPtr next(const PyObjPtr& obj) override;
   PyObjPtr str(const PyObjPtr& obj) override { return repr(obj); }
   PyObjPtr repr(const PyObjPtr& obj) override;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("ListReverseIterator")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 };
 
@@ -111,12 +109,12 @@ class StringIteratorKlass : public KlassBase<StringIteratorKlass> {
   explicit StringIteratorKlass() = default;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("StringIterator")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
   PyObjPtr iter(const PyObjPtr& obj) override { return obj; }
   PyObjPtr next(const PyObjPtr& obj) override;
@@ -151,12 +149,12 @@ class DictItemIteratorKlass : public KlassBase<DictItemIteratorKlass> {
   explicit DictItemIteratorKlass() = default;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("DictItemIterator")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
   PyObjPtr iter(const PyObjPtr& obj) override { return obj; }
   PyObjPtr next(const PyObjPtr& obj) override;

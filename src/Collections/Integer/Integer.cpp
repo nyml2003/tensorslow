@@ -19,48 +19,61 @@ String Integer::ToString() const {
 }
 String Integer::ToHexString() const {
   if (IsZero()) {
-    return CreateStringWithCString("0");
+    return CreateStringWithCString("0x0");
   }
+
   List<Byte> str;
-  for (Index i = 0; i < parts.Size(); i++) {
+
+  for (Index i = 0; i < parts.Size(); ++i) {
     uint32_t item = parts.Get(i);
-    std::array<uint8_t, 4> buffer = {0, 0, 0, 0};
-    buffer[0] = (item & 0x0000F000) >> 12;
-    buffer[1] = (item & 0x00000F00) >> 8;
-    buffer[2] = (item & 0x000000F0) >> 4;
-    buffer[3] = (item & 0x0000000F);
-    for (Index j = 0; j < 4; j++) {
-      str.Push(HexToByte(buffer[j]));
+
+    // 每个 32 位整数可以拆分为 8 个十六进制字符
+    constexpr uint8_t NIBBLE_BITS = 4;     // 每个十六进制位占4位
+    constexpr uint8_t NIBBLE_MASK = 0x0F;  // 用于提取每个 nibble
+    for (auto j = NIBBLE_BITS - 1; j >= 0; --j) {
+      // 使用无符号类型进行位运算
+      auto nibble =
+        static_cast<uint8_t>((item >> (j * NIBBLE_BITS)) & NIBBLE_MASK);
+
+      Byte hex_char = (nibble < Decimal::radix)
+                        ? (Byte_0 + nibble)
+                        : (Byte_A + nibble - Decimal::radix);
+
+      str.Push(hex_char);
     }
   }
-  Index it = 0;
-  for (; it < str.Size(); it++) {
-    if (str.Get(it) != Byte_0) {
-      break;
-    }
+
+  // 去除前导零
+  Index iter = 0;
+  while (iter < str.Size() && str.Get(iter) == Byte_0) {
+    ++iter;
   }
-  str = str.Slice(it, str.Size());
-  str.Unshift(Byte_x);
-  str.Unshift(Byte_0);
+  str = str.Slice(iter, str.Size());
+
+  // 添加 "0x" 前缀
+  str.Insert(0, 'x');
+  str.Insert(0, '0');
+
   return String(std::move(str));
 }
-Integer Integer::Add(const Integer& rhs) const {
+Integer Integer::Add(const Integer& rhs) const {  // NOLINT(misc-no-recursion)
   if (sign == rhs.sign) {
     uint32_t carry = 0;
     List<uint32_t> result;
-    for (Index i = parts.Size() - 1, j = rhs.parts.Size() - 1; ~i || ~j;) {
+    for (Index i = parts.Size() - 1, j = rhs.parts.Size() - 1;
+         ((~i) != 0U) || ((~j) != 0U);) {
       uint32_t sum = carry;
-      if (~i) {
+      if ((~i) != 0U) {
         sum += parts.Get(i);
         --i;
       }
-      if (~j) {
+      if ((~j) != 0U) {
         sum += rhs.parts.Get(j);
         --j;
       }
       // 进位是高16位
-      carry = (sum >> 16) & 0x0000FFFF;
-      sum &= 0x0000FFFF;
+      carry = (sum >> significantBits) & low16Mask;
+      sum &= low16Mask;
       result.Push(sum);
     }
     if (carry != 0) {
@@ -112,12 +125,14 @@ bool Integer::GreaterThan(const Integer& rhs) const {
   }
   return false;
 }
-Integer Integer::Subtract(const Integer& rhs) const {
+Integer Integer::Subtract(  // NOLINT(misc-no-recursion)
+  const Integer& rhs
+) const {
   // 正负号相同
   if (sign == rhs.sign) {
     // 假定左值大于右值
     bool _sign = false;
-    Index size;
+    Index size = 0;
     List<uint32_t> _lhs = parts.Copy();
     _lhs.Reverse();
     List<uint32_t> _rhs = rhs.parts.Copy();
@@ -136,7 +151,7 @@ Integer Integer::Subtract(const Integer& rhs) const {
       std::swap(_lhs, _rhs);
     } else {
       size = _lhs.Size();
-      for (Index i = size - 1; ~i; --i) {
+      for (Index i = size - 1; (~i) != 0U; --i) {
         if (_lhs.Get(i) > _rhs.Get(i)) {
           break;
         }
@@ -150,10 +165,10 @@ Integer Integer::Subtract(const Integer& rhs) const {
     List<uint32_t> result(size);
     bool borrow = false;
     for (Index i = 0; i < size; i++) {
-      uint32_t diff;
+      uint32_t diff = 0;
       uint32_t sub = _rhs.Get(i) + (borrow ? 1 : 0);
       if (_lhs.Get(i) < sub) {
-        diff = 0x10000 + _lhs.Get(i) - sub;
+        diff = low16Mask + 1 + _lhs.Get(i) - sub;
         borrow = true;
       } else {
         diff = _lhs.Get(i) - sub;
@@ -182,8 +197,10 @@ Integer Integer::Multiply(const Integer& rhs) const {
       uint32_t product = _lhs.Get(i) * _rhs.Get(j);
       Index index = i + j;
       result.Set(index, result.Get(index) + product);
-      result.Set(index + 1, result.Get(index + 1) + (result.Get(index) >> 16));
-      result.Set(index, (result.Get(index) & 0x0000FFFF));
+      result.Set(
+        index + 1, result.Get(index + 1) + (result.Get(index) >> Integer::radix)
+      );
+      result.Set(index, (result.Get(index) & low16Mask));
     }
   }
   TrimTrailingZero(result);
@@ -262,9 +279,9 @@ bool Integer::Equal(const Integer& rhs) const {
 }
 Integer Integer::BitWiseAnd(const Integer& rhs) const {
   List<uint32_t> result(std::max(parts.Size(), rhs.parts.Size()));
-  for (Index i = parts.Size() - 1, j = rhs.parts.Size() - 1; ~i || ~j;
-       --i, --j) {
-    if (!~i || !~j) {
+  for (Index i = parts.Size() - 1, j = rhs.parts.Size() - 1;
+       ((~i) != 0U) || ((~j) != 0U); --i, --j) {
+    if (((~i) == 0U) || ((~j) == 0U)) {
       result.Push(0);
     } else {
       result.Push(parts.Get(i) & rhs.parts.Get(j));
@@ -275,11 +292,11 @@ Integer Integer::BitWiseAnd(const Integer& rhs) const {
 }
 Integer Integer::BitWiseOr(const Integer& rhs) const {
   List<uint32_t> result(std::max(parts.Size(), rhs.parts.Size()));
-  for (Index i = parts.Size() - 1, j = rhs.parts.Size() - 1; ~i || ~j;
-       --i, --j) {
-    if (!~i) {
+  for (Index i = parts.Size() - 1, j = rhs.parts.Size() - 1;
+       ((~i) != 0U) || ((~j) != 0U); --i, --j) {
+    if ((~i) == 0U) {
       result.Push(rhs.parts[j]);
-    } else if (!~j) {
+    } else if ((~j) == 0U) {
       result.Push(parts[i]);
     } else {
       result.Push(parts[i] | rhs.parts[j]);
@@ -290,11 +307,11 @@ Integer Integer::BitWiseOr(const Integer& rhs) const {
 }
 Integer Integer::BitWiseXor(const Integer& rhs) const {
   List<uint32_t> result(std::max(parts.Size(), rhs.parts.Size()));
-  for (Index i = parts.Size() - 1, j = rhs.parts.Size() - 1; ~i || ~j;
-       --i, --j) {
-    if (!~i) {
+  for (Index i = parts.Size() - 1, j = rhs.parts.Size() - 1;
+       ((~i) != 0U) || ((~j) != 0U); --i, --j) {
+    if ((~i) == 0U) {
       result.Push(rhs.parts[j]);
-    } else if (!~j) {
+    } else if ((~j) == 0U) {
       result.Push(parts[i]);
     } else {
       result.Push(parts[i] ^ rhs.parts[j]);
@@ -366,10 +383,10 @@ Integer Integer::LeftShift(const Integer& rhs) const {
 
   // 计算总位移量（使用uint64_t防止32位溢出）
   uint64_t totalShift = ToU64(rhs);
-  uint64_t blockShift = (totalShift - 1) / 16 + 1;
-  uint64_t bitShift = totalShift % 16;
+  uint64_t blockShift = ((totalShift - 1) / Integer::radix) + 1;
+  uint64_t bitShift = totalShift % Integer::radix;
   if (bitShift != 0) {
-    bitShift = 16 - bitShift;
+    bitShift = Integer::radix - bitShift;
   }
   Integer result = Copy();
   result.parts.ExpandWithElement(result.parts.Size() + blockShift, 0);
@@ -390,23 +407,23 @@ Integer Integer::RightShift(const Integer& rhs) const {
   // 计算总位移量
   uint64_t totalShift = ToU64(rhs);
   // 如果总位移量超过最大范围，直接返回0
-  if (totalShift >= 16 * parts.Size()) {
+  if (totalShift >= Integer::radix * parts.Size()) {
     return CreateIntegerZero();
   }
   Integer result = Copy();
-  uint64_t blockShift = totalShift / 16;
-  uint64_t bitShift = totalShift % 16;
+  uint64_t blockShift = totalShift / Integer::radix;
+  uint64_t bitShift = totalShift % Integer::radix;
   result.parts.RemoveRange(result.parts.Size() - 1 - blockShift, blockShift);
   if (bitShift == 0) {
     return result;
   }
   uint32_t overflowPicker = (1 << (bitShift + 1)) - 1;
-  for (Index i = result.parts.Size() - 2; ~i; i--) {
+  for (Index i = result.parts.Size() - 2; (~i) != 0U; i--) {
     uint32_t high = result.parts.Get(i);
     uint32_t low = result.parts.Get(i + 1);
     low >>= bitShift;
     high &= overflowPicker;
-    high = (high << (16 - bitShift)) & 0xFFFF;
+    high = (high << (Integer::radix - bitShift)) & low16Mask;
     result.parts.Set(i + 1, low | high);
   }
   result.parts.Set(0, result.parts.Get(0) >> bitShift);

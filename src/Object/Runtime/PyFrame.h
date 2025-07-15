@@ -85,14 +85,13 @@ class FrameKlass : public KlassBase<FrameKlass> {
  public:
   explicit FrameKlass() = default;
 
-
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("frame")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   PyObjPtr repr(const PyObjPtr& obj) override;

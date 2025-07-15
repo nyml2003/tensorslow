@@ -1,4 +1,6 @@
+// NOLINTBEGIN(*)
 #include <memory>
+
 #include "../test_default.h"
 
 #include "../Collections/Collections.h"
@@ -70,3 +72,4 @@ TEST_F(PyStringTest, Boolean) {
 }
 
 }  // namespace tensorslow::Object
+// NOLINTEND(*)

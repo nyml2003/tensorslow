@@ -14,7 +14,10 @@ class Integer {
 
  public:
   static const uint32_t radix = 16;
-  enum class IntSign { Positive = 0, Negative = 1 };
+  static const uint32_t significantBits = 16;  // 高16位只用于加法进位和乘法进位
+  static const uint32_t low16Mask = 0xFFFF;
+  
+  enum class IntSign : uint8_t { Positive = 0, Negative = 1 };
   explicit Integer();
   explicit Integer(const List<uint32_t>& _parts, bool _sign);
   [[nodiscard]] List<uint32_t> Data() const;

@@ -1,3 +1,4 @@
+// NOLINTBEGIN(*)
 #include "Collections/Integer/Integer.h"
 #include <gtest/gtest.h>
 #include "../test_default.h"
@@ -96,6 +97,8 @@ TEST(Integer, IntegerDivisionByZero) {
 TEST(Integer, IntegerToHexString) {
   Integer a = CreateIntegerWithCString("255");
   ASSERT_EQ(a.ToHexString().ToCppString(), "0xFF");
+  a = CreateIntegerWithCString("123456789");
+  ASSERT_EQ(a.ToHexString().ToCppString(), "0x75BCD15");
 }
 
 TEST(Integer, IntegerBitWiseAnd) {
@@ -334,3 +337,5 @@ TEST(Integer, LEFT_SHIFT) {
   b = CreateIntegerWithCString("16");
   ASSERT_EQ(a.LeftShift(b).ToString().ToCppString(), "4294901760");
 }
+
+// NOLINTEND(*)

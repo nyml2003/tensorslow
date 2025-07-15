@@ -16,6 +16,7 @@
 #include "Runtime/VirtualMachine.h"
 #include "Tools/Logger/ConsoleLogger.h"
 
+#include <algorithm>
 #include <chrono>
 #include <iomanip>
 #include <iostream>
@@ -386,7 +387,7 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
       Object::CreatePyList({_name_, Object::CreatePyString("."), name})
     )
       ->as<Object::PyString>();
-  auto klass = Object::CreatePyKlass(typeName, classDict, bases);
+  auto *klass = Object::CreatePyKlass(typeName, classDict, bases);
   auto type = Object::CreatePyType(klass);
   return type;
 }
@@ -476,9 +477,7 @@ auto Max(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
   const Collections::List<double>& values = matrix->Ravel();
   double maxValue = values[0];
   for (Index i = 1; i < values.Size(); i++) {
-    if (values[i] > maxValue) {
-      maxValue = values[i];
-    }
+    maxValue = std::max(values[i], maxValue);
   }
   return Object::CreatePyFloat(maxValue);
 }

@@ -11,11 +11,11 @@ class ReturnStmtKlass : public INodeTrait,
   explicit ReturnStmtKlass() = default;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     InitKlass(Object::CreatePyString("ast_returnstmt"), Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   Object::PyObjPtr

@@ -27,15 +27,13 @@ class InstKlass : public KlassBase<InstKlass> {
  public:
   explicit InstKlass() = default;
 
-
-
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("inst")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   PyObjPtr _serialize_(const PyObjPtr& obj) override;

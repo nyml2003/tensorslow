@@ -15,7 +15,7 @@
 #include <filesystem>
 
 namespace tensorslow {
-void DefineOption() {
+inline void DefineOption() {
   Schema::Accept(
     {OptionConvention(
        "file",
@@ -62,7 +62,7 @@ void DefineOption() {
   );
 }
 
-void BeforeRun(const std::filesystem::path& filename) {
+inline void BeforeRun(const std::filesystem::path& filename) {
   bool compare_result = Config::Has("compare_result");
   bool show_result = Config::Has("show_result");
   bool verbose = Config::Has("verbose");
@@ -108,7 +108,7 @@ void BeforeRun(const std::filesystem::path& filename) {
   }
 }
 
-void AfterRun(const std::filesystem::path& filename) {
+inline void AfterRun(const std::filesystem::path& filename) {
   ConsoleLogger::getInstance().setCallback(
     std::make_unique<DefaultLogStrategy>()
   );
@@ -142,7 +142,7 @@ void AfterRun(const std::filesystem::path& filename) {
   }
 }
 
-void RunTest(const std::filesystem::path& filename) {
+inline void RunTest(const std::filesystem::path& filename) {
   ConsoleLogger::getInstance().log("解析字节码文件: ");
   ConsoleLogger::getInstance().log(filename.string());
   ConsoleLogger::getInstance().log("\n");
@@ -164,7 +164,7 @@ void RunTest(const std::filesystem::path& filename) {
   AfterRun(filename);
 }
 
-void InitEnv(int argc, char** argv) {
+inline void InitEnv(int argc, char** argv) {
   DefineOption();
   Config::Accept(argc, argv);
 }

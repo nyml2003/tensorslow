@@ -10,11 +10,11 @@ class BinaryKlass : public INodeTrait, public Object::KlassBase<BinaryKlass> {
   explicit BinaryKlass() = default;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     InitKlass(Object::CreatePyString("ast_binary"), Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   Object::PyObjPtr

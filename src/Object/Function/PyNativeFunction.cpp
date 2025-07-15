@@ -69,11 +69,11 @@ void CheckNativeFunctionArgumentWithType(
 }
 
 void NativeFunctionKlass::Initialize() {
-  if (this->isInitialized) {
+  if (this->IsInitialized()) {
     return;
   }
   InitKlass(CreatePyString("native_function")->as<PyString>(), Self());
-  this->isInitialized = true;
+  this->SetInitialized();
 }
 
 PyObjPtr NativeFunctionKlass::repr(const PyObjPtr& obj) {

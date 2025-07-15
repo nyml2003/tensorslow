@@ -3,7 +3,6 @@
 
 #include "Collections/String/String.h"
 
-#include <functional>
 #include <string>
 
 namespace tensorslow::Collections {

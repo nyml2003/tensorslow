@@ -332,7 +332,7 @@ PyObjPtr MatrixKlass::pow(const PyObjPtr& lhs, const PyObjPtr& rhs) {
 }
 
 void MatrixKlass::Initialize() {
-  if (this->isInitialized) {
+  if (this->IsInitialized()) {
     return;
   }
   auto* instance = Self();
@@ -349,7 +349,7 @@ void MatrixKlass::Initialize() {
   instance->AddAttribute(
     CreatePyString("ravel")->as<PyString>(), CreatePyNativeFunction(Ravel)
   );
-  this->isInitialized = true;
+  this->SetInitialized();
 }
 
 PyObjPtr MatrixKlass::neg(const tensorslow::Object::PyObjPtr& obj) {

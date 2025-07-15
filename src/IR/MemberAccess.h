@@ -11,11 +11,11 @@ class MemberAccessKlass : public INodeTrait,
   MemberAccessKlass() = default;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     InitKlass(Object::CreatePyString("ast_memberaccess"), Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   Object::PyObjPtr

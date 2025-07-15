@@ -1,4 +1,5 @@
 #include "Object/Core/CoreHelper.h"
+#include "Function/BuiltinFunction.h"
 #include "Object/Container/PyDictionary.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
@@ -13,6 +14,7 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/String/PyBytes.h"
 #include "Runtime/VirtualMachine.h"
+#include "gsl/pointers"
 
 namespace tensorslow::Object {
 void LoadClass(const PyStrPtr& name, const KlassPtr& klass) {
@@ -184,6 +186,38 @@ void CleanMros(const PyListPtr& mros) {
   }
 }
 
+std::optional<std::tuple<Index, PyTypePtr>> FindCandidateBase(
+  const PyListPtr& mros
+) {
+  for (Index i = 0; i < mros->Length(); i++) {
+    auto head = mros->GetItem(i)->as<PyList>()->GetItem(0)->as<PyType>();
+    if (CouldTypePlaceAhead(mros, head, i)) {
+      return std::make_tuple(i, head);
+    }
+  }
+  return std::nullopt;
+}
+
+void RemoveHeadFromMros(
+  const PyListPtr& mros,
+  Index excludeIndex,
+  const PyTypePtr& head
+) {
+  for (Index j = 0; j < mros->Length(); j++) {
+    if (j == excludeIndex) {
+      continue;  // 改成使用传入的 excludeIndex
+    }
+
+    auto list = mros->GetItem(j)->as<PyList>();
+    if (IsTrue(list->GetItem(0)->eq(head))) {
+      list->RemoveAt(0);
+      if (list->Length() == 0) {
+        mros->RemoveAt(j);
+      }
+    }
+  }
+}
+
 PyListPtr MergeMro(const PyListPtr& mros) {
   if (mros->Length() == 0) {
     return CreatePyList();
@@ -194,39 +228,19 @@ PyListPtr MergeMro(const PyListPtr& mros) {
     //      CreatePyList({CreatePyString("Mros to merge: "), mros->str()})
     //    ));
     CleanMros(mros);
-    bool notFindBase = true;
-    for (Index i = 0; i < mros->Length() && notFindBase; i++) {
-      auto head = mros->GetItem(i)->as<PyList>()->GetItem(0)->as<PyType>();
-      bool couldPlaceAhead = CouldTypePlaceAhead(mros, head, i);
-      if (!couldPlaceAhead) {
-        continue;
-      }
-      notFindBase = false;
-      result->Append(head);
-      //      Function::DebugPrint(StringConcat(
-      //        CreatePyList({CreatePyString("choose base: "),
-      //        head->Owner()->Name()})
-      //      ));
-      //      Function::DebugPrint(StringConcat(
-      //        CreatePyList({CreatePyString("Mros merging: "), mros->str()})
-      //      ));
-      for (Index j = 0; j < mros->Length(); j++) {
-        if (i == j) {
-          continue;
-        }
-        auto list = mros->GetItem(j)->as<PyList>();
-        if (IsTrue(list->GetItem(0)->eq(head))) {
-          list->RemoveAt(0);
-          if (list->Length() == 0) {
-            mros->RemoveAt(j);
-          }
-        }
-      }
-      mros->GetItem(i)->as<PyList>()->RemoveAt(0);
-      if (mros->GetItem(i)->as<PyList>()->Length() == 0) {
-        mros->RemoveAt(i);
-      }
+    auto candidate = FindCandidateBase(mros);
+    if (candidate == std::nullopt) {
+      break;
     }
+    Index candidateIndex = std::get<0>(candidate.value());
+    auto head = std::get<1>(candidate.value());
+    result->Append(head);
+    RemoveHeadFromMros(mros, candidateIndex, head);
+    mros->GetItem(candidateIndex)->as<PyList>()->RemoveAt(0);
+    if (mros->GetItem(candidateIndex)->as<PyList>()->Length() == 0) {
+      mros->RemoveAt(candidateIndex);
+    }
+
     //    Function::DebugPrint(StringConcat(
     //      CreatePyList({CreatePyString("Mros after merge: "), mros->str()})
     //    ));
@@ -313,7 +327,8 @@ KlassPtr CreatePyKlass(
   const PyDictPtr& attributes,
   const PyListPtr& super
 ) {
-  auto* klass = new Klass();
+  auto* klass =
+    gsl::owner<Klass*>{new Klass()};  // NOLINT(readability-redundant-casting)
   auto type = CreatePyType(klass)->as<PyType>();
   klass->SetName(name);
   klass->SetAttributes(attributes);

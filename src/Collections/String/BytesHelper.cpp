@@ -1,19 +1,23 @@
 #include "Collections/String/BytesHelper.h"
 #include "Collections/Integer/DecimalHelper.h"
+#include "Collections/Integer/Integer.h"
 #include "Collections/Integer/IntegerHelper.h"
 #include "Collections/String/StringHelper.h"
 #include "Tools/Logger/ConsoleLogger.h"
 #include "Tools/Logger/ErrorLogger.h"
 
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <stdexcept>
+#include <sstream>
 namespace tensorslow::Collections {
 String ReprByte(Byte byte) {
   // 使用 \x 格式表示一个字节
-  char buffer[5];  // 需要 5 个字符：\x + 2 个十六进制字符 + 终止符
-  std::snprintf(buffer, sizeof(buffer), "\\x%02X", byte);
-  return CreateStringWithCString(buffer);
+  std::ostringstream oss;
+  oss << "\\x" << std::hex << std::setw(2) << std::setfill('0')
+      << static_cast<unsigned>(byte);
+  return CreateStringWithCString(oss.str().c_str());
 }
 
 void Write(const String& bytes, const std::string& filename) {
@@ -26,7 +30,7 @@ void Write(const String& bytes, const std::string& filename) {
     tensorslow::ErrorLogger::getInstance().log("无法打开文件：" + filename);
     return;
   }
-  file.write(data.data(), std::streamsize(data.size()));
+  file.write(data.data(), static_cast<std::streamsize>(data.size()));
   tensorslow::ConsoleLogger::getInstance().log("写入文件：");
   tensorslow::ConsoleLogger::getInstance().log(filename);
   tensorslow::ConsoleLogger::getInstance().log("\n");
@@ -103,13 +107,15 @@ String Serialize(const Integer& value) {
     return CreateStringWithCString("");
   }
   Index size = value.Data().Size();
-  List<Byte> bytes(size * 2 + sizeof(uint64_t) + 1);
+  List<Byte> bytes((size * 2) + sizeof(uint64_t) + 1);
   StringBuilder result(String(std::move(bytes)));
   result.Append(Serialize(size));
   result.Append(value.Sign() ? '-' : '+');
   auto data = value.Data();
   for (Index i = 0; i < size; i++) {
-    result.Append(Serialize(static_cast<uint16_t>(data.Get(i) & 0x0000FFFF)));
+    result.Append(
+      Serialize(static_cast<uint16_t>(data.Get(i) & Integer::low16Mask))
+    );
   }
   return result.ToString();
 }
@@ -117,11 +123,11 @@ Integer DeserializeInteger(const List<Byte>& bytes) {
   if (bytes.Size() == 0) {
     return CreateIntegerZero();
   }
-  Index i = 0;
-  Index size = DeserializeU64(bytes.Slice(i, i + sizeof(uint64_t)));
-  i += sizeof(uint64_t);
-  bool sign;
-  switch (bytes.Get(i)) {
+  Index iter = 0;
+  Index size = DeserializeU64(bytes.Slice(iter, iter + sizeof(uint64_t)));
+  iter += sizeof(uint64_t);
+  bool sign = false;
+  switch (bytes.Get(iter)) {
     case '+':
       sign = false;
       break;
@@ -131,12 +137,12 @@ Integer DeserializeInteger(const List<Byte>& bytes) {
     default:
       throw std::runtime_error("Invalid sign for Integer");
   }
-  i++;
+  iter++;
   List<uint32_t> data;
   for (Index j = 0; j < size; j++) {
-    data.Push(DeserializeU16(
-      bytes.Slice(i + j * sizeof(uint16_t), i + (j + 1) * sizeof(uint16_t))
-    ));
+    data.Push(DeserializeU16(bytes.Slice(
+      iter + (j * sizeof(uint16_t)), iter + ((j + 1) * sizeof(uint16_t))
+    )));
   }
   return Integer(data, sign);
 }

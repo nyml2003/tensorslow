@@ -143,7 +143,7 @@ PyPromisePtr PyPromise::Catch(const PyObjPtr& onRejected) {
 
 
 void PromiseKlass::Initialize() {
-  if (isInitialized) {
+  if (IsInitialized()) {
     return;
   }
   InitKlass(CreatePyString("Promise")->as<PyString>(), Self());
@@ -171,7 +171,7 @@ void PromiseKlass::Initialize() {
   );
   AddAttribute(CreatePyString("reject"), CreatePyNativeFunction(PromiseReject));
 
-  isInitialized = true;
+  SetInitialized();
 }
 
 PyObjPtr PromiseKlass::init(const PyObjPtr& /*typeObj*/, const PyObjPtr& args) {

@@ -12,7 +12,7 @@ using PyPromisePtr = std::shared_ptr<PyPromise>;
 
 class PyPromise : public PyObject {
  public:
-  enum class State { PENDING, FULFILLED, REJECTED };
+  enum class State : std::uint8_t { PENDING, FULFILLED, REJECTED };
 
   explicit PyPromise(PyObjPtr executor);
 
@@ -42,7 +42,6 @@ PyPromisePtr CreatePyPromise(const PyObjPtr& executor);
 
 class PromiseKlass : public KlassBase<PromiseKlass> {
  public:
-
   void Initialize() override;
   PyObjPtr init(const PyObjPtr& typeObj, const PyObjPtr& args) override;
 };

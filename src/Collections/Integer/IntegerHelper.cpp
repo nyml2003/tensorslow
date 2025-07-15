@@ -144,7 +144,7 @@ uint64_t ToU64(const Integer& integer) {
 Integer CreateIntegerWithU64(uint64_t value, bool sign) {
   List<uint32_t> parts;
   while (value != 0) {
-    parts.Push(value & 0x0000FFFF);
+    parts.Push(value & Integer::low16Mask);
     value >>= Integer::radix;
   }
   parts.Reverse();
@@ -175,7 +175,7 @@ int64_t ToI64(const Integer& integer) {
   for (Index i = 0; i < integer.Data().Size(); i++) {
     result = (result << Integer::radix) | integer.Data().Get(i);
   }
-  return integer.Sign() ? -static_cast<int64_t>(result) : result;
+  return integer.Sign() ? -result : result;
 }
 
 }  // namespace tensorslow::Collections

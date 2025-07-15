@@ -7,5 +7,6 @@ add_executable(
 )
 
 # gtest
+set_target_properties(${test_name} PROPERTIES COMPILE_FLAGS "")
 target_link_libraries(${test_name} gtest gtest_main tensorslow_common)
 add_test(NAME ${test_name} COMMAND ${test_name})

@@ -62,7 +62,7 @@ Index PyDictionary::Size() const {
 }
 
 void DictionaryKlass::Initialize() {
-  if (this->isInitialized) {
+  if (this->IsInitialized()) {
     return;
   }
   InitKlass(CreatePyString("dict")->as<PyString>(), Self());
@@ -80,7 +80,7 @@ void DictionaryKlass::Initialize() {
     CreatePyNativeFunction(DictGet)->as<PyNativeFunction>()
   );
 
-  this->isInitialized = true;
+  this->SetInitialized();
 }
 
 PyObjPtr DictionaryKlass::init(const PyObjPtr& klass, const PyObjPtr& args) {

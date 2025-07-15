@@ -1,6 +1,7 @@
 #include "String.h"
 #include "StringHelper.h"
 
+#include <cassert>
 #include <stdexcept>
 
 namespace tensorslow::Collections {
@@ -18,6 +19,7 @@ String String::Slice(Index start, Index end) {
 
 void String::ParseCodePoint() const noexcept {
   Byte leadByte = codeUnits.Get(unparsedCodeUnitOffset);
+
   uint8_t sequenceLength = utf8_sequence_length[leadByte];
   Unicode codePoint = 0;
   switch (sequenceLength) {

@@ -1,3 +1,4 @@
+// NOLINTBEGIN(*)
 #include "Collections/Matrix.h"
 #include "../test_default.h"
 #include "Collections/String/StringHelper.h"
@@ -144,3 +145,5 @@ TEST(Matrix, Eye) {
     }
   }
 }
+
+// NOLINTEND(*)

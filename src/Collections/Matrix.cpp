@@ -1,6 +1,5 @@
 
 #include "Collections/Matrix.h"
-#include <iostream>
 #include "Collections/String/StringHelper.h"
 
 namespace tensorslow::Collections {
@@ -28,7 +27,7 @@ Matrix::Matrix(List<List<double>> data) {
   this->data.Fill(0);
   for (Index i = 0; i < rows; i++) {
     for (Index j = 0; j < cols; j++) {
-      this->data.Set(i * cols + j, data[i][j]);
+      this->data.Set((i * cols) + j, data[i][j]);
     }
   }
 }
@@ -41,7 +40,7 @@ void Matrix::Set(Index row, Index col, double value) {
   if (row >= rows || col >= cols) {
     throw std::invalid_argument("Matrix::Set: Index out of range");
   }
-  data.Set(row * cols + col, value);
+  data.Set((row * cols) + col, value);
 }
 
 void Matrix::Shuffle() {
@@ -78,7 +77,7 @@ Matrix Matrix::Transpose() const {
   Matrix result(cols, rows);
   for (Index i = 0; i < rows; i++) {
     for (Index j = 0; j < cols; j++) {
-      result.data.Set(j * rows + i, At(i, j));
+      result.data.Set((j * rows) + i, At(i, j));
     }
   }
   return result;
@@ -140,7 +139,7 @@ Matrix Matrix::Add(const Matrix& other) const {
     Matrix result(rows, cols);
     for (Index i = 0; i < rows; i++) {
       for (Index j = 0; j < cols; j++) {
-        result.data.Set(i * cols + j, At(i, j) + other.At(i, j));
+        result.data.Set((i * cols) + j, At(i, j) + other.At(i, j));
       }
     }
     return result;
@@ -151,7 +150,7 @@ Matrix Matrix::Add(const Matrix& other) const {
   for (Index i = 0; i < result.rows; i++) {
     for (Index j = 0; j < result.cols; j++) {
       result.data.Set(
-        i * result.cols + j, BroadcastAt(i, j, thisBroadcastType) +
+        (i * result.cols) + j, BroadcastAt(i, j, thisBroadcastType) +
                                other.BroadcastAt(i, j, otherBroadcastType)
       );
     }
@@ -169,7 +168,7 @@ Matrix Matrix::Multiply(const Matrix& other) const {
     Matrix result(rows, cols);
     for (Index i = 0; i < rows; i++) {
       for (Index j = 0; j < cols; j++) {
-        result.data.Set(i * cols + j, At(i, j) * other.At(i, j));
+        result.data.Set((i * cols) + j, At(i, j) * other.At(i, j));
       }
     }
     return result;
@@ -180,7 +179,7 @@ Matrix Matrix::Multiply(const Matrix& other) const {
   for (Index i = 0; i < result.rows; i++) {
     for (Index j = 0; j < result.cols; j++) {
       result.data.Set(
-        i * result.cols + j, BroadcastAt(i, j, thisBroadcastType) *
+        (i * result.cols) + j, BroadcastAt(i, j, thisBroadcastType) *
                                other.BroadcastAt(i, j, otherBroadcastType)
       );
     }
@@ -220,7 +219,7 @@ const List<double>& Matrix::Data() const {
 }
 
 double Matrix::At(Index row, Index col) const {
-  return data.Get(row * cols + col);
+  return data.Get((row * cols) + col);
 }
 
 Matrix Matrix::Reshape(Index newRows, Index newCols) const {
@@ -249,7 +248,7 @@ Matrix Matrix::MatrixMultiply(const Matrix& other) const {
           for (Index k = kk; k < std::min(kk + tile_size, K); ++k) {
             // 内层循环 j 连续访问 B[k][j]
             for (Index j = jj; j < std::min(jj + tile_size, N); ++j) {
-              result.Set(i, j, result.At(i, j) + At(i, k) * other.At(k, j));
+              result.Set(i, j, result.At(i, j) + (At(i, k) * other.At(k, j)));
             }
           }
         }
@@ -263,7 +262,7 @@ Matrix Matrix::MatrixMultiply(const Matrix& other) const {
 Matrix Matrix::Eye(Index n) {
   Matrix result(n, n);
   for (Index i = 0; i < n; i++) {
-    result.data.Set(i * n + i, 1);
+    result.data.Set((i * n) + i, 1);
   }
   return result;
 }
@@ -282,7 +281,7 @@ Matrix Matrix::GetCols(Index start, Index stop) const {
   }
   List<double> newData;
   for (Index row = 0; row < rows; row++) {
-    newData.Concat(data.Slice(row * cols + start, row * cols + stop));
+    newData.Concat(data.Slice((row * cols) + start, (row * cols) + stop));
   }
   return Matrix(rows, stop - start, newData);
 }
@@ -298,7 +297,7 @@ Matrix Matrix::GetSlice(
   }
   List<double> newData;
   for (Index row = rowStart; row < rowStop; row++) {
-    newData.Concat(data.Slice(row * cols + colStart, row * cols + colStop));
+    newData.Concat(data.Slice((row * cols) + colStart, (row * cols) + colStop));
   }
   return Matrix(rowStop - rowStart, colStop - colStart, newData);
 }
@@ -310,9 +309,9 @@ void Matrix::SetRows(Index start, Index stop, const Matrix& other) {
   if (other.rows != stop - start || other.cols != cols) {
     throw std::invalid_argument("Invalid other");
   }
-  double* targetData = data.Data() + start * cols;
+  double* targetData = data.Data() + (start * cols);
   const double* sourceData = other.data.Data();
-  std::copy(sourceData, sourceData + (stop - start) * cols, targetData);
+  std::copy(sourceData, sourceData + ((stop - start) * cols), targetData);
 }
 void Matrix::SetCols(Index start, Index stop, const Matrix& other) {
   if (stop > cols - 1 || start > stop) {
@@ -325,9 +324,9 @@ void Matrix::SetCols(Index start, Index stop, const Matrix& other) {
   const double* sourceData = other.data.Data();
   for (Index row = 0; row < rows; row++) {
     std::copy(
-      sourceData + row * other.cols,
-      sourceData + row * other.cols + (stop - start),
-      targetData + row * cols + start
+      sourceData + (row * other.cols),
+      sourceData + (row * other.cols) + (stop - start),
+      targetData + (row * cols) + start
     );
   }
 }
@@ -361,9 +360,9 @@ void Matrix::SetSlice(
   // 遍历目标区域的每一行
   for (Index row = 0; row < targetRows; ++row) {
     // 计算目标矩阵的起始位置
-    double* targetRowStart = targetData + (rowStart + row) * cols + colStart;
+    double* targetRowStart = targetData + ((rowStart + row) * cols) + colStart;
     // 计算源矩阵的起始位置
-    const double* sourceRowStart = sourceData + row * other.cols;
+    const double* sourceRowStart = sourceData + (row * other.cols);
 
     // 复制一行数据
     std::copy(sourceRowStart, sourceRowStart + targetCols, targetRowStart);

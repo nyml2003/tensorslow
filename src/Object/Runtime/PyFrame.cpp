@@ -327,7 +327,7 @@ PyObjPtr FrameKlass::repr(const PyObjPtr& obj) {
   ));
 }
 
-void PrintFrame(const PyFramePtr& frame) {
+void PrintFrame(const PyFramePtr& frame) {  // NOLINT(misc-no-recursion)
   // Frame representation
   VerboseLogger::getInstance().log(frame->repr()->as<PyString>()->ToCppString()
   );
@@ -403,7 +403,7 @@ bool PyFrame::HasCaller() const {
   return caller != nullptr;
 }
 
-PyObjPtr PyFrame::Eval() {
+PyObjPtr PyFrame::Eval() {  // NOLINT(readability-function-cognitive-complexity)
   while (!Finished()) {
     auto inst = Instruction();
     auto byteCode = inst->Code();

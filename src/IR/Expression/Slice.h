@@ -10,11 +10,11 @@ class SliceKlass : public INodeTrait, public Object::KlassBase<SliceKlass> {
   SliceKlass() = default;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     InitKlass(Object::CreatePyString("ast_slice"), Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   Object::PyObjPtr

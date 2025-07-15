@@ -4,7 +4,6 @@
 #include "Collections/Integer/Integer.h"
 #include "Collections/String/String.h"
 namespace tensorslow::Collections {
-// int32_t UnicodeToDec(Unicode unicode) noexcept;
 Byte DecToByte(int32_t dec) noexcept;
 int32_t ByteToDec(Byte byte) noexcept;
 Decimal CreateDecimalWithString(const String& str);

@@ -1,12 +1,14 @@
 #ifndef TENSORSLOW_OBJECT_COMMON_H
 #define TENSORSLOW_OBJECT_COMMON_H
 
+#include <gsl/gsl>
 #include <memory>
+
 
 namespace tensorslow::Object {
 
 class Klass;
-using KlassPtr = Klass*;
+using KlassPtr = gsl::owner<Klass*>;
 
 class PyObject;
 using PyObjPtr = std::shared_ptr<PyObject>;

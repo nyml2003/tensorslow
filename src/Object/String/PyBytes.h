@@ -10,15 +10,13 @@ class BytesKlass : public KlassBase<BytesKlass> {
  public:
   explicit BytesKlass() = default;
 
-
-
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("bytes")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   PyObjPtr _serialize_(const PyObjPtr& obj) override;

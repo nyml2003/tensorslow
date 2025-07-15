@@ -32,13 +32,11 @@ PyObjPtr ObjectInit(const PyObjPtr& args) {
   return instance;
 }
 
-
-
 void ObjectKlass::Initialize() {
-  if (this->isInitialized) {
+  if (this->IsInitialized()) {
     return;
   }
-  auto *instance = Self();
+  auto* instance = Self();
   instance->SetName(CreatePyString("object")->as<PyString>());
   instance->SetAttributes(CreatePyDict()->as<PyDictionary>());
   instance->AddAttribute(
@@ -63,7 +61,7 @@ void ObjectKlass::Initialize() {
   );
   instance->SetNative();
   ConfigureBasicAttributes(instance);
-  this->isInitialized = true;
+  this->SetInitialized();
 }
 
 bool operator==(const PyObjPtr& lhs, const PyObjPtr& rhs) {

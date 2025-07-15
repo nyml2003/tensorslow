@@ -3,7 +3,6 @@
 
 #include <array>
 #include <cstdint>
-#include <mutex>
 #include "Collections/List.h"
 namespace tensorslow::Collections {
 
@@ -98,8 +97,7 @@ class String {
  public:
   explicit String(List<Byte>&& codeUnits, size_t hashValue)
     : codeUnits(std::move(codeUnits)), hashValue(hashValue), hashed(true) {}
-  explicit String(List<Byte>&& codeUnits)
-    : codeUnits(std::move(codeUnits)), hashValue(0), hashed(false) {}
+  explicit String(List<Byte>&& codeUnits) : codeUnits(std::move(codeUnits)) {}
 
   String(const String& other) = default;
   String(String&& other) noexcept = default;
@@ -114,8 +112,9 @@ class String {
     return codeUnits.Size();
   }
   [[nodiscard]] Unicode GetCodePoint(Index index) {
-    if (index >= codePoints.Size())
+    if (index >= codePoints.Size()) {
       ParseCodePointAt(index);
+    }
     return codePoints[index];
   }
   [[nodiscard]] Index GetCodePointCount() const noexcept {

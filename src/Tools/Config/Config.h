@@ -52,15 +52,15 @@ class Config {
 
   static std::string Get(const std::string& option) {
     const auto& parameters = Config::Instance().Parameters();
-    auto it = parameters.find(option);
-    if (it == parameters.end()) {
+    auto parameter = parameters.find(option);
+    if (parameter == parameters.end()) {
       try {
         return Schema::Find(option).DefaultValue();
       } catch (const std::out_of_range&) {
         throw std::invalid_argument("OptionConvention not found: " + option);
       }
     }
-    return it->second;
+    return parameter->second;
   }
 
   static bool Has(const std::string& option) {

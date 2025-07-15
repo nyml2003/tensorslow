@@ -4,15 +4,14 @@
 namespace tensorslow::Object {
 
 void TypeKlass::Initialize() {
-  if (this->isInitialized) {
+  if (this->IsInitialized()) {
     return;
   }
   InitKlass(CreatePyString("type")->as<PyString>(), Self());
-  this->isInitialized = true;
+  this->SetInitialized();
 }
 
-PyType::PyType(KlassPtr _owner)
-  : PyObject(TypeKlass::Self()), owner(_owner) {
+PyType::PyType(KlassPtr _owner) : PyObject(TypeKlass::Self()), owner(_owner) {
   this->SetAttributes(owner->Attributes());
 }
 

@@ -50,7 +50,7 @@ PyListPtr CreatePyList(std::initializer_list<PyObjPtr> list) {
 }
 
 void ListKlass::Initialize() {
-  if (this->isInitialized) {
+  if (this->IsInitialized()) {
     return;
   }
   auto* instance = Self();
@@ -143,7 +143,7 @@ void ListKlass::Initialize() {
       CreateForwardFunction<ListKlass>(&ListKlass::_serialize_)
     )
   );
-  this->isInitialized = true;
+  this->SetInitialized();
 }
 
 PyObjPtr ListKlass::init(const PyObjPtr& type, const PyObjPtr& args) {

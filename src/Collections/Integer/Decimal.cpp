@@ -20,7 +20,7 @@ String Decimal::ToString() const {
 String Decimal::ToHexString() const {
   return CreateIntegerWithDecimal(*this).ToHexString();
 }
-Decimal Decimal::Add(const Decimal& rhs) const {
+Decimal Decimal::Add(const Decimal& rhs) const {  // NOLINT(misc-no-recursion)
   if (IsZero()) {
     return rhs.Copy();
   }
@@ -94,7 +94,9 @@ bool Decimal::GreaterThan(const Decimal& rhs) const {
   }
   return false;
 }
-Decimal Decimal::Subtract(const Decimal& rhs) const {
+Decimal Decimal::Subtract(  // NOLINT(misc-no-recursion)
+  const Decimal& rhs
+) const {
   // 正负号相同
   if (sign == rhs.sign) {
     // 假定左值大于右值

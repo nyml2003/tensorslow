@@ -4,7 +4,6 @@
 #include "Common.h"
 
 #include <algorithm>
-#include <execution>
 #include <initializer_list>
 #include <memory>
 #include <random>
@@ -216,9 +215,7 @@ List<T>::List(Index _capacity) : size(0), capacity(_capacity) {
   }
 }
 template <typename T>
-List<T>::List() : size(0), capacity(0) {
-  elements = nullptr;
-}
+List<T>::List() : size(0), capacity(0), elements(nullptr) {}
 template <typename T>
 List<T>::List(Index count, T element) : size(count) {
   if (count == 0) {

@@ -2,6 +2,8 @@
 #define TENSORSLOW_OBJECT_CORE_HELPER_H
 
 #include "Object/String/PyString.h"
+
+#include <optional>
 namespace tensorslow::Object {
 
 void LoadClass(const Object::PyStrPtr& name, const Object::KlassPtr& klass);
@@ -50,7 +52,15 @@ bool CouldTypePlaceAhead(
   const Object::PyTypePtr& type,
   Index ignore
 );
+void RemoveHeadFromMros(
+  const PyListPtr& mros,
+  Index excludeIndex,
+  const PyTypePtr& head
+);
 void CleanMros(const Object::PyListPtr& mros);
+std::optional<std::tuple<Index, PyTypePtr>> FindCandidateBase(
+  const PyListPtr& mros
+);
 Object::KlassPtr CreatePyKlass(
   const Object::PyStrPtr& name,
   const Object::PyDictPtr& attributes,

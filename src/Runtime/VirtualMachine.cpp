@@ -12,6 +12,7 @@
 #include "Object/Runtime/PyCode.h"
 #include "Object/Runtime/PyFrame.h"
 #include "Runtime/EventLoop.h"
+#include "Runtime/GarbageCollector.h"
 #include "Runtime/Genesis.h"
 
 namespace tensorslow::Runtime {
@@ -19,6 +20,8 @@ namespace tensorslow::Runtime {
 VirtualMachine::VirtualMachine() {
   frame = nullptr;
   builtins = Genesis();
+  // // 初始化垃圾回收器
+  // GarbageCollector::GetInstance();
 }
 
 VirtualMachine& VirtualMachine::Instance() {
@@ -49,7 +52,7 @@ Object::PyObjPtr CallNativeFunction(
 ) {
   return func->Call(arguments);
 }
-Object::PyObjPtr CallMethod(
+Object::PyObjPtr CallMethod( // NOLINT(misc-no-recursion)
   const Object::PyMethodPtr& func,
   const Object::PyListPtr& arguments
 ) {
@@ -76,7 +79,7 @@ Object::PyObjPtr UserFunction(
   }
   return frame->EvalAndDestroy();
 }
-Object::PyObjPtr InvokeCallable(
+Object::PyObjPtr InvokeCallable( // NOLINT( misc-no-recursion)
   const Object::PyObjPtr& func,
   const Object::PyListPtr& arguments
 ) {

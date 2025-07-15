@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 namespace tensorslow::Object {
-class Klass : public std::enable_shared_from_this<Klass> {
+class Klass {
  private:
   PyStrPtr name;
   PyDictPtr attributes;
@@ -14,10 +14,9 @@ class Klass : public std::enable_shared_from_this<Klass> {
   PyListPtr super;
   PyListPtr mro;
   bool isNative{};
-
- protected:
- public:
   bool isInitialized = false;
+
+ public:
   explicit Klass()
     : name(nullptr),
       attributes(nullptr),
@@ -32,6 +31,8 @@ class Klass : public std::enable_shared_from_this<Klass> {
   void SetSuper(const PyListPtr& _super);
   void SetMro(const PyListPtr& _mro);
   virtual void Initialize() { throw std::runtime_error("not implemented"); }
+  [[nodiscard]] bool IsInitialized() const { return isInitialized; }
+  void SetInitialized() { this->isInitialized = true; }
   [[nodiscard]] bool IsNative() const { return isNative; }
   void AddAttribute(const PyStrPtr& key, const PyObjPtr& value);
   Klass(const Klass& other) = delete;

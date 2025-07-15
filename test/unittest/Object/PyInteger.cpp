@@ -1,5 +1,6 @@
 #include "Object/Number/PyInteger.h"
 #include <memory>
+// NOLINTBEGIN(*)
 #include "../test_default.h"
 
 #include "../Collections/Collections.h"
@@ -123,3 +124,4 @@ int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+// NOLINTEND(*)

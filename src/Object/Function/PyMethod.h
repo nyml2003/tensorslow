@@ -9,14 +9,13 @@ class MethodKlass : public KlassBase<MethodKlass> {
  public:
   explicit MethodKlass() = default;
 
-
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("method")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
   PyObjPtr repr(const PyObjPtr& obj) override;
 };

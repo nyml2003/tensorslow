@@ -11,11 +11,11 @@ class IfStmtKlass : public INodeTrait, public Object::KlassBase<IfStmtKlass> {
   explicit IfStmtKlass() = default;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     InitKlass(Object::CreatePyString("ast_ifstmt"), Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   Object::PyObjPtr

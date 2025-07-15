@@ -46,7 +46,7 @@ list(APPEND tensorslow_cxx_flags
 )
 
 # 设置编译器选项以生成代码覆盖率数据
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
 #set(CMAKE_CXX_CLANG_TIDY "clang-tidy")
 # 设置编译器选项以生成覆盖率数据
 #set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} --coverage")
@@ -64,8 +64,6 @@ endif()
 
 # 生成 compile_commands.json 文件
 set(CMAKE_EXPORT_COMPILE_COMMANDS on)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_custom_command(
     OUTPUT ${PROJECT_SOURCE_DIR}/compile_commands.json
@@ -93,3 +91,5 @@ include_directories(${tensorslow_src_dir})
 set(tensorslow_frontend_files "")
 
 enable_testing()
+
+include_directories(${PROJECT_SOURCE_DIR}/third_party/gsl/include)

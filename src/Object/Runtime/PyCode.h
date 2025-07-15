@@ -234,15 +234,13 @@ class CodeKlass : public KlassBase<CodeKlass> {
  public:
   explicit CodeKlass() = default;
 
-
-
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("code")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   PyObjPtr repr(const PyObjPtr& self) override;

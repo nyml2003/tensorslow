@@ -5,7 +5,6 @@
 #include "Object/Core/Klass.h"
 #include "Object/Object.h"
 
-
 namespace tensorslow::Object {
 
 class PyObject : public std::enable_shared_from_this<PyObject> {
@@ -15,9 +14,19 @@ class PyObject : public std::enable_shared_from_this<PyObject> {
   PyDictPtr methods;     // 需要bound的属性
   Index hashValue{};
   bool hashed = false;
+  bool isMarked = false;  // 垃圾回收标记位
 
  public:
   explicit PyObject(KlassPtr klass) : klass(klass) {}
+
+  // 垃圾回收支持
+  bool IsMarked() const { return isMarked; }
+  void SetMarked(bool marked) { isMarked = marked; }
+
+  // virtual void Mark() = 0;
+
+  // virtual void Create() = 0;
+
   [[nodiscard]] KlassPtr Klass() const { return klass; }
   [[nodiscard]] PyDictPtr Attributes() noexcept;
   [[nodiscard]] PyDictPtr Methods() noexcept;

@@ -19,12 +19,6 @@ Decimal CreateDecimalWithU32(uint32_t value) {
   parts.Reverse();
   return Decimal(parts, false);
 }
-// int32_t UnicodeToDec(Unicode unicode) noexcept {
-//   if (unicode >= Unicode_0 && unicode <= Unicode_9) {
-//     return static_cast<int32_t>(unicode - Unicode_0);
-//   }
-//   return -1;
-// }
 Byte DecToByte(int32_t dec) noexcept {
   return static_cast<Byte>(static_cast<Byte>(dec) + Byte_0);
 }

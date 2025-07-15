@@ -1,3 +1,4 @@
+// NOLINTBEGIN(*)
 #include "../test_default.h"
 
 #include "Collections/List.h"
@@ -241,7 +242,7 @@ TEST(List, RemoveAtBoundaryAndError) {
   list.RemoveAt(list.Size() - 1);  // 移除最后一个元素
   ASSERT_EQ(list.Size(), 1);
   ASSERT_EQ(list[0], 2);
-  ASSERT_THROW(list.RemoveAt(-1), std::runtime_error);  // 测试负数索引
+  ASSERT_THROW(list.RemoveAt(-1), std::runtime_error);           // 测试负数索引
   ASSERT_THROW(list.RemoveAt(list.Size()), std::runtime_error);  // 测试索引越界
 }
 TEST(List, RemoveRangeBoundaryAndError) {
@@ -313,3 +314,5 @@ TEST(List, InsertAndReplace) {
   ASSERT_EQ(list[4], 4);
   ASSERT_EQ(list[5], 5);
 }
+
+// NOLINTEND(*)

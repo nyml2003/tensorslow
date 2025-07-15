@@ -11,15 +11,13 @@ class NoneKlass : public KlassBase<NoneKlass> {
  public:
   explicit NoneKlass() = default;
 
-
-
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("NoneType")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   PyObjPtr repr(const PyObjPtr& obj) override;

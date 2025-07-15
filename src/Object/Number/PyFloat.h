@@ -12,12 +12,12 @@ class FloatKlass : public KlassBase<FloatKlass> {
   explicit FloatKlass() = default;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("float")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   PyObjPtr init(const PyObjPtr& klass, const PyObjPtr& args) override;

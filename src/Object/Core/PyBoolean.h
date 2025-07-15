@@ -1,7 +1,6 @@
 #ifndef TENSORSLOW_OBJECT_PYBOOLEAN_H
 #define TENSORSLOW_OBJECT_PYBOOLEAN_H
 
-#include "Function/BuiltinFunction.h"
 #include "Object/Core/CoreHelper.h"
 #include "Object/String/PyString.h"
 
@@ -15,12 +14,12 @@ class BooleanKlass : public KlassBase<BooleanKlass> {
   explicit BooleanKlass() = default;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("bool")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   PyObjPtr eq(const PyObjPtr& lhs, const PyObjPtr& rhs) override;

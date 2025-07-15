@@ -10,11 +10,11 @@ class ForStmtKlass : public INodeTrait, public Object::KlassBase<ForStmtKlass> {
   explicit ForStmtKlass() = default;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     InitKlass(Object::CreatePyString("ast_forstmt"), Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   Object::PyObjPtr

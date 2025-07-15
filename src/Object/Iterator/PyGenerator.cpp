@@ -12,7 +12,7 @@ PyObjPtr GeneratorKlass::next(const PyObjPtr& obj) {
 }
 
 void GeneratorKlass::Initialize() {
-  if (this->isInitialized) {
+  if (this->IsInitialized()) {
     return;
   }
   InitKlass(CreatePyString("generator"), GeneratorKlass::Self());
@@ -37,7 +37,7 @@ void GeneratorKlass::Initialize() {
       return generator->Send(value);
     })
   );
-  this->isInitialized = true;
+  this->SetInitialized();
 }
 
 }  // namespace tensorslow::Object

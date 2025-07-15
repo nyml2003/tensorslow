@@ -4,12 +4,12 @@
 namespace tensorslow::Object {
 
 void IifeKlass::Initialize() {
-  if (this->isInitialized) {
+  if (this->IsInitialized()) {
     return;
   }
   InitKlass(CreatePyString("iife")->as<PyString>(), IifeKlass::Self());
   ConfigureBasicAttributes(IifeKlass::Self());
-  this->isInitialized = true;
+  this->SetInitialized();
 }
 
 PyObjPtr IifeKlass::str(const PyObjPtr& /*self*/) {

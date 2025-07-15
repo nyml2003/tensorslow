@@ -1,5 +1,6 @@
 
 #include <memory>
+// NOLINTBEGIN(*)
 #include "../test_default.h"
 
 #include "Function/BuiltinFunction.h"
@@ -110,3 +111,4 @@ TEST_F(EventLoopTest, PromiseChaining) {
 //   });
 //   EventLoop::Instance().Run();
 // }
+// NOLINTEND(*)

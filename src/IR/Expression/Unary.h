@@ -10,11 +10,11 @@ class UnaryKlass : public INodeTrait, public Object::KlassBase<UnaryKlass> {
   explicit UnaryKlass() = default;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     InitKlass(Object::CreatePyString("ast_unary"), Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
 
   Object::PyObjPtr

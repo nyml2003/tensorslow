@@ -12,12 +12,12 @@ class SliceKlass : public KlassBase<SliceKlass> {
   explicit SliceKlass() = default;
 
   void Initialize() override {
-    if (this->isInitialized) {
+    if (this->IsInitialized()) {
       return;
     }
     LoadClass(CreatePyString("slice")->as<PyString>(), Self());
     ConfigureBasicAttributes(Self());
-    this->isInitialized = true;
+    this->SetInitialized();
   }
   PyObjPtr init(const PyObjPtr& type, const PyObjPtr& args) override;
   PyObjPtr str(const PyObjPtr& obj) override;

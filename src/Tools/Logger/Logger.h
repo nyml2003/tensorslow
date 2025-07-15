@@ -31,7 +31,7 @@ class Logger {
   explicit Logger();
   explicit Logger(std::unique_ptr<LogStrategy> callback)
     : m_callback(std::move(callback)) {}
-
+  // NOLINTNEXTLINE
   std::unique_ptr<LogStrategy> m_callback;
 };
 }  // namespace tensorslow

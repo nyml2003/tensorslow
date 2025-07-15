@@ -1,3 +1,4 @@
+// NOLINTBEGIN(*)
 #include "../test_default.h"
 
 #include "Collections.h"
@@ -99,6 +100,8 @@ TEST(Decimal, DecimalDivisionByZero) {
 TEST(Decimal, DecimalToHexString) {
   Decimal a = CreateDecimalWithCString("255");
   ASSERT_EQ(a.ToHexString().ToCppString(), "0xFF");
+  a = CreateDecimalWithCString("123456789");
+  ASSERT_EQ(a.ToHexString().ToCppString(), "0x75BCD15");
 }
 
 TEST(Decimal, ExtraAdd) {
@@ -249,7 +252,9 @@ TEST(Decimal, Extra) {
   Decimal a = CreateDecimalWithCString("456456768578941657896468574896789");
   Decimal b = CreateDecimalWithCString("486546534");
   tensorslow::Collections::List<Decimal> c = a.DivMod(b);
-  ASSERT_TRUE(c.Get(0).Equal(CreateDecimalWithCString("938156448934731611707398"
-  )));
+  ASSERT_TRUE(
+    c.Get(0).Equal(CreateDecimalWithCString("938156448934731611707398"))
+  );
   ASSERT_TRUE(c.Get(1).Equal(CreateDecimalWithCString("255838257")));
 }
+// NOLINTEND(*)

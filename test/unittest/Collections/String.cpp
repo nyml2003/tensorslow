@@ -1,3 +1,4 @@
+// NOLINTBEGIN(*)
 #include "../test_default.h"
 
 #include "Collections.h"
@@ -226,3 +227,5 @@ TEST(String, ToString) {
 //  ASSERT_EQ(str3.Size(), 5);
 //  ASSERT_TRUE(str3.Equal(CreateStringWithCString("Hello")));
 //}
+
+// NOLINTEND(*)

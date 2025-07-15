@@ -1,4 +1,5 @@
 #include <memory>
+// NOLINTBEGIN(*)
 #include "../test_default.h"
 
 #include "../Collections/Collections.h"
@@ -109,3 +110,4 @@ MRO of F: ['F', 'B', 'C', 'O', 'object']
     "<class 'object'>"
   );
 }
+// NOLINTEND(*)
