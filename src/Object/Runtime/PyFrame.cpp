@@ -20,7 +20,7 @@
 #include "Object/String/PyString.h"
 #include "Runtime/VirtualMachine.h"
 #include "Tools/Config/Config.h"
-#include "Tools/Logger/VerboseLogger.h"
+#include "Tools/Terminal/VerboseTerminal.h"
 
 namespace tensorslow::Object {
 
@@ -121,7 +121,7 @@ void PyFrame::NextProgramCounter() {
 
 void ParseByteCode(const PyCodePtr& code) {
   if (code->ByteCode() == nullptr) {
-    //    ErrorLogger::getInstance().log(
+    //    ConsoleTerminal::get_instance().log(
     //      "bytecode passing in memory or something wrong"
     //    );
     return;
@@ -329,71 +329,74 @@ PyObjPtr FrameKlass::repr(const PyObjPtr& obj) {
 
 void PrintFrame(const PyFramePtr& frame) {  // NOLINT(misc-no-recursion)
   // Frame representation
-  VerboseLogger::getInstance().log(frame->repr()->as<PyString>()->ToCppString()
+  VerboseTerminal::get_instance().info(
+    frame->repr()->as<PyString>()->ToCppString()
   );
-  VerboseLogger::getInstance().log("\n");
+  VerboseTerminal::get_instance()
+    .
 
-  // Program Counter
-  VerboseLogger::getInstance().log("Program Counter: ");
+    // Program Counter
+    VerboseTerminal::get_instance()
+    .info("Program Counter: ");
   auto pc_repr = CreatePyInteger(frame->ProgramCounter())
                    ->repr()
                    ->as<PyString>()
                    ->ToCppString();
-  VerboseLogger::getInstance().log(pc_repr);
+  VerboseTerminal::get_instance().info(pc_repr);
 
   // Current Instruction
-  VerboseLogger::getInstance().log("\nCurrent Instruction: ");
+  VerboseTerminal::get_instance().info("Current Instruction: ");
   auto instr_repr = frame->Instruction()->repr()->as<PyString>()->ToCppString();
-  VerboseLogger::getInstance().log(instr_repr);
+  VerboseTerminal::get_instance().info(instr_repr);
 
   // Code
-  VerboseLogger::getInstance().log("\nCode:\n");
-  VerboseLogger::IncreaseIndent();
+  VerboseTerminal::get_instance().info("Code:");
+  VerboseTerminal::IncreaseIndent();
   PrintCode(frame->Code());
-  VerboseLogger::DecreaseIndent();
+  VerboseTerminal::DecreaseIndent();
 
   // Stack
-  // VerboseLogger::getInstance().log("\nStack(*ptr):\n");
+  // VerboseTerminal::get_instance().log("Stack(*ptr):");
   // auto stack = frame->DumpStack();
   // for (Index i = 0; i < stack->Length(); i++) {
-  //   VerboseLogger::getInstance().log(std::to_string(i) + ": ");
-  //   VerboseLogger::getInstance().log("  ");
+  //   VerboseTerminal::get_instance().log(std::to_string(i) + ": ");
+  //   VerboseTerminal::get_instance().log("  ");
   //   auto item = stack->GetItem(i);
   //   auto item_repr = item->repr()->as<PyString>()->ToCppString();
-  //   VerboseLogger::getInstance().log(item_repr);
+  //   VerboseTerminal::get_instance().log(item_repr);
   //   auto ptr = reinterpret_cast<uint64_t>(item.get());
-  //   std::string ptr_str = " ( " + std::to_string(ptr) + " ) \n";
-  //   VerboseLogger::getInstance().log(ptr_str);
+  //   std::string ptr_str = " ( " + std::to_string(ptr) + " ) ";
+  //   VerboseTerminal::get_instance().log(ptr_str);
   // }
 
   // Locals
-  VerboseLogger::getInstance().log("\nLocals:\n");
+  VerboseTerminal::get_instance().info("Locals:");
   auto locals_repr =
     frame->CurrentLocals()->repr()->as<PyString>()->ToCppString();
-  VerboseLogger::getInstance().log(locals_repr + "\n");
+  VerboseTerminal::get_instance().info(locals_repr + "");
 
   // Globals
-  VerboseLogger::getInstance().log("Globals:\n");
+  VerboseTerminal::get_instance().info("Globals:");
   auto globals_repr =
     frame->CurrentGlobals()->repr()->as<PyString>()->ToCppString();
-  VerboseLogger::getInstance().log(globals_repr + "\n");
+  VerboseTerminal::get_instance().info(globals_repr + "");
 
   // FastLocals
-  VerboseLogger::getInstance().log("FastLocals:\n");
+  VerboseTerminal::get_instance().info("FastLocals:");
   auto fast_locals_repr =
     frame->CurrentFastLocals()->repr()->as<PyString>()->ToCppString();
-  VerboseLogger::getInstance().log(fast_locals_repr + "\n");
+  VerboseTerminal::get_instance().info(fast_locals_repr + "");
 
   // Caller
-  VerboseLogger::getInstance().log("Caller: ");
+  VerboseTerminal::get_instance().info("Caller: ");
   if (frame->HasCaller()) {
-    VerboseLogger::IncreaseIndent();
+    VerboseTerminal::IncreaseIndent();
     PrintFrame(frame->Caller());
-    VerboseLogger::DecreaseIndent();
+    VerboseTerminal::DecreaseIndent();
   } else {
-    VerboseLogger::getInstance().log("This is the top frame\n");
+    VerboseTerminal::get_instance().info("This is the top frame");
   }
-  VerboseLogger::getInstance().log("</frame>\n");
+  VerboseTerminal::get_instance().info("</frame>");
 }
 PyFramePtr PyFrame::Caller() const {
   return caller;
@@ -745,16 +748,16 @@ PyObjPtr PyFrame::Eval() {  // NOLINT(readability-function-cognitive-complexity)
         auto obj = stack.Pop();
         auto value = obj->getattr(key);
         if (value == nullptr) {
-          std::cout << "object attributes: " << '\n';
-          obj->Attributes()->str()->as<PyString>()->PrintLine();
-          std::cout << "class attributes: " << '\n';
-          obj->Klass()->Attributes()->str()->as<PyString>()->PrintLine();
-          std::cout << "mro: " << '\n';
-          obj->Klass()->Mro()->str()->as<PyString>()->PrintLine();
+          std::cout << "object attributes: ";
+          obj->Attributes()->str()->as<PyString>()->Print();
+          std::cout << "class attributes: ";
+          obj->Klass()->Attributes()->str()->as<PyString>()->Print();
+          std::cout << "mro: ";
+          obj->Klass()->Mro()->str()->as<PyString>()->Print();
           for (Index i = 0; i < obj->Klass()->Mro()->Length(); i++) {
             auto mro = obj->Klass()->Mro()->GetItem(i)->as<PyType>();
-            mro->Owner()->Name()->str()->as<PyString>()->PrintLine();
-            mro->str()->as<PyString>()->PrintLine();
+            mro->Owner()->Name()->str()->as<PyString>()->Print();
+            mro->str()->as<PyString>()->Print();
           }
           throw std::runtime_error(
             "AttributeError: '" +

@@ -68,7 +68,7 @@ TEST_F(PyStringTest, Boolean) {
     Collections::CreateIntegerWithU64(reinterpret_cast<uint64_t>(result.get()))
       .ToHexString();
   auto resultIdString = CreatePyString(resultId);
-  resultIdString->PrintLine();
+  resultIdString->Print();
 }
 
 }  // namespace tensorslow::Object

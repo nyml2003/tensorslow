@@ -8,8 +8,8 @@
 #include "Object/Runtime/PyCode.h"
 #include "Object/String/PyString.h"
 #include "Tools/Config/Config.h"
-#include "Tools/Logger/BytecodeLogger.h"
-#include "Tools/Logger/VerboseLogger.h"
+
+#include "Tools/Terminal/VerboseTerminal.h"
 namespace tensorslow::IR {
 
 ClassDef::ClassDef(
@@ -86,8 +86,8 @@ Object::PyObjPtr ClassDefKlass::emit(
   parent->CallFunction(3);
   parent->StoreName(classDef->Name());
   if (Config::Has("show_bc")) {
-    VerboseLogger::getInstance().setCallback(
-      std::make_unique<ProxyLogStrategy>(&BytecodeLogger::getInstance())
+    VerboseTerminal::get_instance().switch_strategy(
+      std::make_unique<ProxyTerminalStrategy>(&BytecodeTerminal::get_instance())
     );
     Object::PrintCode(selfCode);
   }
@@ -97,10 +97,11 @@ Object::PyObjPtr ClassDefKlass::emit(
 Object::PyObjPtr ClassDefKlass::print(const Object::PyObjPtr& obj) {
   auto classDef = obj->as<ClassDef>();
   PrintNode(
-    classDef, Object::StringConcat(Object::CreatePyList(
-                                     {Object::CreatePyString("ClassDef "),
-                                      classDef->Name()}
-                                   ))
+    classDef, Object::StringConcat(
+                Object::CreatePyList(
+                  {Object::CreatePyString("ClassDef "), classDef->Name()}
+                )
+              )
                 ->as<Object::PyString>()
   );
   classDef->Bases()->print();

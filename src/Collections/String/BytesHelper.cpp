@@ -3,14 +3,17 @@
 #include "Collections/Integer/Integer.h"
 #include "Collections/Integer/IntegerHelper.h"
 #include "Collections/String/StringHelper.h"
-#include "Tools/Logger/ConsoleLogger.h"
-#include "Tools/Logger/ErrorLogger.h"
 
+#include "Tools/Terminal/Terminal.h"
+
+#include <format>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
+
+
 namespace tensorslow::Collections {
 String ReprByte(Byte byte) {
   // 使用 \x 格式表示一个字节
@@ -27,19 +30,16 @@ void Write(const String& bytes, const std::string& filename) {
   }
   std::ofstream file(filename, std::ios::binary);
   if (!file.is_open()) {
-    tensorslow::ErrorLogger::getInstance().log("无法打开文件：" + filename);
+    ConsoleTerminal::get_instance().error("无法打开文件：" + filename);
     return;
   }
   file.write(data.data(), static_cast<std::streamsize>(data.size()));
-  tensorslow::ConsoleLogger::getInstance().log("写入文件：");
-  tensorslow::ConsoleLogger::getInstance().log(filename);
-  tensorslow::ConsoleLogger::getInstance().log("\n");
-  tensorslow::ConsoleLogger::getInstance().log("文件大小：");
-  tensorslow::ConsoleLogger::getInstance().log(std::to_string(data.size()));
-  tensorslow::ConsoleLogger::getInstance().log("字节");
-  tensorslow::ConsoleLogger::getInstance().log("\n");
+  ConsoleTerminal::get_instance().info(std::format("写入文件：{}", filename));
+  ConsoleTerminal::get_instance().info(
+    std::format("文件大小：{}字节", data.size())
+  );
   if (!file) {
-    tensorslow::ErrorLogger::getInstance().log("写入文件时出错：" + filename);
+    ConsoleTerminal::get_instance().info("写入文件时出错：" + filename);
   }
   file.close();
 }

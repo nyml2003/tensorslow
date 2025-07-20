@@ -13,7 +13,8 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "PyBytes.h"
-#include "Tools/Logger/ConsoleLogger.h"
+
+#include "Tools/Terminal/Terminal.h"
 
 namespace tensorslow::Object {
 std::mutex PyString::poolMutex;
@@ -215,12 +216,7 @@ PyStrPtr PyString::Add(const PyStrPtr& other) {
 }
 
 void PyString::Print() const {
-  tensorslow::ConsoleLogger::getInstance().log(ToCppString());
-}
-
-void PyString::PrintLine() const {
-  tensorslow::ConsoleLogger::getInstance().log(ToCppString());
-  tensorslow::ConsoleLogger::getInstance().log("\n");
+  ConsoleTerminal::get_instance().info(ToCppString());
 }
 
 std::string PyString::ToCppString() const {

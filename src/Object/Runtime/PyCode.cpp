@@ -8,7 +8,7 @@
 #include "Object/Object.h"
 #include "Object/String/PyBytes.h"
 #include "Object/String/PyString.h"
-#include "Tools/Logger/VerboseLogger.h"
+#include "Tools/Terminal/VerboseTerminal.h"
 
 namespace tensorslow::Object {
 
@@ -189,50 +189,58 @@ PyCodePtr CreatePyCode(const PyStrPtr& name) {
 
 void PrintCode(const PyCodePtr& code) {
   auto codeObj = code->as<PyCode>();
-  VerboseLogger::getInstance().log(codeObj->str()->as<PyString>()->ToCppString()
+  VerboseTerminal::get_instance().info(
+    codeObj->str()->as<PyString>()->ToCppString()
   );
-  VerboseLogger::getInstance().log("\n");
-  VerboseLogger::IncreaseIndent();
+  VerboseTerminal::get_instance().VerboseTerminal::IncreaseIndent();
 
-  VerboseLogger::getInstance().log("name: \n");
-  VerboseLogger::getInstance().log(
+  VerboseTerminal::get_instance().info("name: ");
+  VerboseTerminal::get_instance().info(
     codeObj->Name()->str()->as<PyString>()->ToCppString()
   );
-  VerboseLogger::getInstance().log("\n");
+  VerboseTerminal::get_instance()
+    .
 
-  VerboseLogger::getInstance().log("consts: \n");
-  VerboseLogger::getInstance().log(
+    VerboseTerminal::get_instance()
+    .info("consts: ");
+  VerboseTerminal::get_instance().info(
     codeObj->Consts()->str()->as<PyString>()->ToCppString()
   );
-  VerboseLogger::getInstance().log("\n");
+  VerboseTerminal::get_instance()
+    .
 
-  VerboseLogger::getInstance().log("names: \n");
-  VerboseLogger::getInstance().log(
+    VerboseTerminal::get_instance()
+    .info("names: ");
+  VerboseTerminal::get_instance().info(
     codeObj->Names()->str()->as<PyString>()->ToCppString()
   );
-  VerboseLogger::getInstance().log("\n");
+  VerboseTerminal::get_instance()
+    .
 
-  VerboseLogger::getInstance().log("varNames: \n");
-  VerboseLogger::getInstance().log(
+    VerboseTerminal::get_instance()
+    .info("varNames: ");
+  VerboseTerminal::get_instance().info(
     codeObj->VarNames()->str()->as<PyString>()->ToCppString()
   );
-  VerboseLogger::getInstance().log("\n");
+  VerboseTerminal::get_instance()
+    .
 
-  VerboseLogger::getInstance().log("instructions:\n");
-  VerboseLogger::IncreaseIndent();
+    VerboseTerminal::get_instance()
+    .info("instructions:");
+  VerboseTerminal::IncreaseIndent();
 
   for (Index i = 0; i < codeObj->Instructions()->Length(); i++) {
     auto inst = codeObj->Instructions()->GetItem(i);
     std::string line = std::to_string(i) + ": " +
-                       inst->str()->as<PyString>()->ToCppString() + "\n";
-    VerboseLogger::getInstance().log(line);
+                       inst->str()->as<PyString>()->ToCppString() + "";
+    VerboseTerminal::get_instance().info(line);
   }
 
-  VerboseLogger::DecreaseIndent();
-  VerboseLogger::getInstance().log("nLocals: ");
-  VerboseLogger::getInstance().log(std::to_string(codeObj->NLocals()) + "\n");
+  VerboseTerminal::DecreaseIndent();
+  VerboseTerminal::get_instance().info("nLocals: ");
+  VerboseTerminal::get_instance().info(std::to_string(codeObj->NLocals()) + "");
 
-  VerboseLogger::DecreaseIndent();
+  VerboseTerminal::DecreaseIndent();
 }
 
 }  // namespace tensorslow::Object

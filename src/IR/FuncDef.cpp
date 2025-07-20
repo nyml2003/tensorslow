@@ -8,8 +8,8 @@
 #include "Object/Iterator/IteratorHelper.h"
 #include "Object/Runtime/PyCode.h"
 #include "Tools/Config/Config.h"
-#include "Tools/Logger/BytecodeLogger.h"
-#include "Tools/Logger/VerboseLogger.h"
+
+#include "Tools/Terminal/VerboseTerminal.h"
 namespace tensorslow::IR {
 
 FuncDef::FuncDef(
@@ -84,8 +84,8 @@ Object::PyObjPtr FuncDefKlass::emit(
   parent->MakeFunction();
   parent->StoreName(funcDef->Name());
   if (Config::Has("show_bc")) {
-    VerboseLogger::getInstance().setCallback(
-      std::make_unique<ProxyLogStrategy>(&BytecodeLogger::getInstance())
+    VerboseTerminal::get_instance().switch_strategy(
+      std::make_unique<ProxyTerminalStrategy>(&BytecodeTerminal::get_instance())
     );
     Object::PrintCode(selfCode);
   }

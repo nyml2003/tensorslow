@@ -1,5 +1,6 @@
 #include "Function/BuiltinFunction.h"
 #include "Collections/Integer/IntegerHelper.h"
+#include "Collections/String/String.h"
 #include "Object/Container/PyList.h"
 #include "Object/Core/PyBoolean.h"
 #include "Object/Core/PyNone.h"
@@ -14,7 +15,7 @@
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
 #include "Runtime/VirtualMachine.h"
-#include "Tools/Logger/ConsoleLogger.h"
+#include "Tools/Terminal/Terminal.h"
 
 #include <algorithm>
 #include <chrono>
@@ -37,35 +38,32 @@ Object::PyObjPtr Identity(const Object::PyObjPtr& args) {
 }
 
 void DebugPrint(const Object::PyObjPtr& obj) {
-  tensorslow::ConsoleLogger::getInstance().log("[DEBUG] ");
+  ConsoleTerminal::get_instance().info("[DEBUG] ");
   if (obj->is(Object::StringKlass::Self())) {
-    tensorslow::ConsoleLogger::getInstance().log(
+    ConsoleTerminal::get_instance().info(
       obj->as<Object::PyString>()->ToCppString()
     );
   } else {
-    tensorslow::ConsoleLogger::getInstance().log(
+    ConsoleTerminal::get_instance().info(
       obj->str()->as<Object::PyString>()->ToCppString()
     );
   }
-  tensorslow::ConsoleLogger::getInstance().log("\n");
 }
 
 Object::PyObjPtr Print(const Object::PyObjPtr& args) {
   CheckNativeFunctionArguments(args);
   auto argList = args->as<Object::PyList>();
   if (argList->Length() == 0) {
-    Object::CreatePyString("\n")->Print();
     return Object::CreatePyNone();
   }
-  argList->GetItem(0)->str()->as<Object::PyString>()->Print();
-  auto sep = Object::CreatePyString(" ")->as<Object::PyString>();
+  std::string result;
+  result += argList->GetItem(0)->str()->as<Object::PyString>()->ToCppString();
   for (Index i = 1; i < argList->Length(); i++) {
-    sep->Print();
+    result += " ";
     auto arg = argList->GetItem(i);
-    arg->str()->as<Object::PyString>()->Print();
+    result += arg->str()->as<Object::PyString>()->ToCppString();
   }
-  Object::CreatePyString("\n")->Print();
-
+  ConsoleTerminal::get_instance().info(result);
   return Object::CreatePyNone();
 }
 
@@ -84,12 +82,16 @@ Object::PyObjPtr RandInt(const Object::PyObjPtr& args) {
   auto argList = args->as<Object::PyList>();
   auto left = argList->GetItem(0)->as<Object::PyInteger>();
   auto right = argList->GetItem(1)->as<Object::PyInteger>();
-  if (IsTrue(left->ge(Object::CreatePyInteger(
-        static_cast<uint64_t>(std::numeric_limits<int32_t>::max())
-      ))) ||
-      IsTrue(right->ge(Object::CreatePyInteger(
-        static_cast<uint64_t>(std::numeric_limits<int32_t>::max())
-      ))) ||
+  if (IsTrue(left->ge(
+        Object::CreatePyInteger(
+          static_cast<uint64_t>(std::numeric_limits<int32_t>::max())
+        )
+      )) ||
+      IsTrue(right->ge(
+        Object::CreatePyInteger(
+          static_cast<uint64_t>(std::numeric_limits<int32_t>::max())
+        )
+      )) ||
       IsTrue(left->ge(right))) {
     throw std::runtime_error(
       "RandInt function need left argument less than right argument"
@@ -114,7 +116,7 @@ Object::PyObjPtr Sleep(const Object::PyObjPtr& args) {
   auto seconds =
     args->as<Object::PyList>()->GetItem(0)->as<Object::PyInteger>();
   if (IsTrue(seconds->lt(Object::CreatePyInteger(0ULL)))) {
-    seconds->str()->as<Object::PyString>()->PrintLine();
+    seconds->str()->as<Object::PyString>()->Print();
     throw std::runtime_error("Sleep function need non-negative argument");
   }
   auto secondsValue = seconds->ToU64();
@@ -237,7 +239,8 @@ auto ReadFile(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
 //             ret = gen->Send(result);
 //           } catch (const std::exception& e) {
 //             return Runtime::Evaluator::InvokeCallable(
-//               reject, Object::CreatePyList({Object::CreatePyString(e.what())})
+//               reject,
+//               Object::CreatePyList({Object::CreatePyString(e.what())})
 //             );
 //           }
 //           if (ret->Klass() == Object::GeneratorKlass::Self()) {
@@ -289,9 +292,9 @@ Object::PyObjPtr Time(const Object::PyObjPtr& args) {
   oss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");
   oss << '.' << std::setfill('0') << std::setw(9) << ns;  // 显示纳秒，补零到9位
 
-  tensorslow::ConsoleLogger::getInstance().log("Current time: ");
-  tensorslow::ConsoleLogger::getInstance().log(oss.str());
-  tensorslow::ConsoleLogger::getInstance().log("\n");
+  ConsoleTerminal::get_instance().info("Current time: ");
+  ConsoleTerminal::get_instance().info(oss.str());
+
   return Object::CreatePyNone();
 }
 /*
@@ -387,7 +390,7 @@ Object::PyObjPtr BuildClass(const Object::PyObjPtr& args) {
       Object::CreatePyList({_name_, Object::CreatePyString("."), name})
     )
       ->as<Object::PyString>();
-  auto *klass = Object::CreatePyKlass(typeName, classDict, bases);
+  auto* klass = Object::CreatePyKlass(typeName, classDict, bases);
   auto type = Object::CreatePyType(klass);
   return type;
 }
@@ -409,8 +412,8 @@ auto LogisticLoss(const Object::PyObjPtr& args) noexcept -> Object::PyObjPtr {
   );
 }
 
-auto LogisticLossDerivative(const Object::PyObjPtr& args
-) noexcept -> Object::PyObjPtr {
+auto LogisticLossDerivative(const Object::PyObjPtr& args) noexcept
+  -> Object::PyObjPtr {
   auto argList = args->as<Object::PyList>();
   auto matrix = argList->GetItem(0)->as<Object::PyMatrix>();
   const Collections::List<double>& values = matrix->Ravel();

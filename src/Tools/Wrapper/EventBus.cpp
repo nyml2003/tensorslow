@@ -1,4 +1,5 @@
 #include "Tools/Wrapper/EventBus.h"
+#include <algorithm>
 
 EventBus& EventBus::get_instance() {
   static EventBus instance;
@@ -8,22 +9,20 @@ EventBus& EventBus::get_instance() {
 EventId EventBus::subscribe(EventType type, const Callback& callback) {
   std::lock_guard<std::mutex> lock(mtx);
   EventId event_id = generate_id();
-  subscriptions[type].push_back({event_id, callback});
+  subscriptions[type].push_back({.id = event_id, .callback = callback});
   return event_id;
 }
 
 void EventBus::unsubscribe(EventId event_id) {
   std::lock_guard<std::mutex> lock(mtx);
   for (auto& [type, handlerList] : subscriptions) {
-    handlerList.erase(
-      std::remove_if(
-        handlerList.begin(), handlerList.end(),
-        [event_id](const Subscription& subscription) {
-          return subscription.id == event_id;
-        }
-      ),
-      handlerList.end()
+    auto range = std::ranges::remove_if(
+      handlerList,
+      [event_id](const Subscription& subscription) {
+        return subscription.id == event_id;
+      }
     );
+    handlerList.erase(range.begin(), range.end());
   }
 }
 

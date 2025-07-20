@@ -20,6 +20,13 @@
 
 // -------------------------------
 // 定义所有事件类型（只需在这里添加）
+// CONSOLE: 控制台输出
+// ERROR: 错误信息
+// COMPILER_LEXICAL: 词法分析器输出词法单元序列
+// COMPILER_SYNTAX: 语法分析器输出抽象语法树
+// COMPILER_SEMANTIC: 语义分析器输出中间代码树，mermaid 图
+// COMPILER_CODEGEN: 代码生成器输出字节码
+// VM_FRAME_DUMP: 虚拟机帧栈输出
 // -------------------------------
 
 #define EVENT_TYPES(F)    \

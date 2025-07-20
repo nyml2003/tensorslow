@@ -13,14 +13,9 @@
 #include "Runtime/VirtualMachine.h"
 #include "Tools/Config/Config.h"
 #include "Tools/Config/Schema.h"
-#include "Tools/Logger/BytecodeLogger.h"
-#include "Tools/Logger/ConsoleLogger.h"
-#include "Tools/Logger/ErrorLogger.h"
-#include "Tools/Logger/FrameLogger.h"
-#include "Tools/Logger/IntermediateCodeTreeLogger.h"
-#include "Tools/Logger/LexicalAnalysisLogger.h"
-#include "Tools/Logger/SyntaxAnalysisLogger.h"
-#include "Tools/Logger/VerboseLogger.h"
+#include "Tools/Terminal/IntermediateRepresentationTerminal.h"
+#include "Tools/Terminal/Terminal.h"
+#include "Tools/Terminal/VerboseTerminal.h"
 #include "antlr4-runtime.h"
 
 #include <filesystem>
@@ -32,8 +27,9 @@ void DefineOption() {
     OptionConvention(
       "file",
       [](const std::string& value) {
-        if (value.empty())
+        if (value.empty()) {
           return false;
+        }
         bool file_exists = std::filesystem::exists(value);
         std::string extension =
           std::filesystem::path(value).extension().string();
@@ -105,9 +101,9 @@ void ValidateOptions() {
   int mode_count = Config::Has("interpret") + Config::Has("compile") +
                    Config::Has("interpret_bytecode");
   if (mode_count != 1) {
-    ConsoleLogger::getInstance().log(
+    ConsoleTerminal::get_instance().error(
       "错误: 必须指定且只能指定一个执行方式：--interpret、--compile 或 "
-      "--interpret_bytecode\n"
+      "--interpret_bytecode"
     );
     Schema::PrintUsage();
     exit(1);
@@ -115,8 +111,8 @@ void ValidateOptions() {
 
   // 检查来源唯一性
   if (!(Config::Has("file") ^ Config::Has("source"))) {
-    ConsoleLogger::getInstance().log(
-      "错误: 必须指定且只能指定一个来源：--file 或 --source\n"
+    ConsoleTerminal::get_instance().error(
+      "错误: 必须指定且只能指定一个来源：--file 或 --source"
     );
     Schema::PrintUsage();
     exit(1);
@@ -124,8 +120,8 @@ void ValidateOptions() {
 
   // 检查 source 与 interpret_bytecode 互斥
   if (Config::Has("source") && Config::Has("interpret_bytecode")) {
-    ConsoleLogger::getInstance().log(
-      "错误: 当使用 --source 时，不能启用 --interpret_bytecode 模式\n"
+    ConsoleTerminal::get_instance().error(
+      "错误: 当使用 --source 时，不能启用 --interpret_bytecode 模式"
     );
     Schema::PrintUsage();
     exit(1);
@@ -148,11 +144,11 @@ void ValidateOptions() {
     if ((mode == "interpret" && ext != ".py") ||
         (mode == "interpret_bytecode" && ext != ".pyc") ||
         (mode == "compile" && ext != ".py")) {
-      ConsoleLogger::getInstance().log(
+      ConsoleTerminal::get_instance().error(
         "错误: " + mode +
         " 模式要求文件扩展名为 .py（interpret/compile）或 "
         ".pyc（interpret_bytecode），但当前文件为: " +
-        ext + "\n"
+        ext + ""
       );
       Schema::PrintUsage();
       exit(1);
@@ -168,7 +164,7 @@ void InitRuntimeSupport() {
 
 antlr4::ANTLRInputStream* CreateANTLRInputStream() {
   if (Config::Has("file")) {
-    ConsoleLogger::getInstance().log("文件名: " + Config::Get("file") + "\n");
+    ConsoleTerminal::get_instance().info("文件名: " + Config::Get("file") + "");
     std::ifstream file(Config::Get("file"));
     return new antlr4::ANTLRInputStream(file);
   }
@@ -192,15 +188,15 @@ Object::PyCodePtr Compile(antlr4::ANTLRInputStream* inputStream) {
   //  // 打印词法
   if (Config::Has("show_tokens")) {
     for (const auto& token : tokens.getTokens()) {
-      LexicalAnalysisLogger::getInstance().log(token->toString());
-      LexicalAnalysisLogger::getInstance().log("\n");
+      LexicalAnalysisTerminal::get_instance().info(token->toString());
     }
-    ConsoleLogger::getInstance().log("词法单元流生成完毕\n");
+    ConsoleTerminal::get_instance().info("词法单元流生成完毕");
   }
   if (Config::Has("show_ast")) {
-    SyntaxAnalysisLogger::getInstance().log(tree->toStringTree(&parser));
-    SyntaxAnalysisLogger::getInstance().log("\n");
-    ConsoleLogger::getInstance().log("抽象语法树生成完毕\n");
+    SyntaxAnalysisTerminal::get_instance().info(tree->toStringTree(&parser));
+    ConsoleTerminal::get_instance().info(
+      "抽象语法树生成完毕"
+    );
   }
   std::string moduleName = Config::Has("file")     ? Config::Get("file")
                            : Config::Has("source") ? "temporaryModule"
@@ -212,13 +208,13 @@ Object::PyCodePtr Compile(antlr4::ANTLRInputStream* inputStream) {
   visitor.Emit();
   if (Config::Has("show_ir")) {
     visitor.Print();
-    IntermediateCodeLogger::getInstance().terminate();
-    ConsoleLogger::getInstance().log("中间代码树生成完毕\n");
+    IntermediateRepresentationTerminal::get_instance().terminate();
+    ConsoleTerminal::get_instance().info("中间代码树生成完毕");
   }
   auto code = visitor.Code();
   if (Config::Has("show_bc")) {
-    VerboseLogger::getInstance().setCallback(
-      std::make_unique<ProxyLogStrategy>(&BytecodeLogger::getInstance())
+    VerboseTerminal::get_instance().switch_strategy(
+      std::make_unique<ProxyTerminalStrategy>(&BytecodeTerminal::get_instance())
     );
     Object::PrintCode(code);
   }
@@ -226,25 +222,17 @@ Object::PyCodePtr Compile(antlr4::ANTLRInputStream* inputStream) {
 }
 
 void Interpret(const tensorslow::Object::PyCodePtr& code) {
-  if (Config::Has("verbose")) {
-    VerboseLogger::getInstance().setCallback(
-      std::make_unique<ProxyLogStrategy>(&FrameLogger::getInstance())
-    );
-  }
   try {
     tensorslow::Runtime::VirtualMachine::Run(code);
   } catch (const std::exception& e) {
-    VerboseLogger::getInstance().setCallback(
-      std::make_unique<ProxyLogStrategy>(&ErrorLogger::getInstance())
-    );
     PrintFrame(tensorslow::Runtime::VirtualMachine::Instance().CurrentFrame());
-    ErrorLogger::getInstance().log(e.what());
+    ConsoleTerminal::get_instance().error(e.what());
     throw;
   }
 }
 
 void HandleInterpret() {
-  auto inputStream = CreateANTLRInputStream();
+  auto* inputStream = CreateANTLRInputStream();
   auto code = Compile(inputStream);
   DestroyANTLRInputStream(inputStream);
   Interpret(code);
@@ -258,7 +246,7 @@ void HandleInterpretBytecode() {
 }
 
 void HandleCompile() {
-  auto inputStream = CreateANTLRInputStream();
+  auto* inputStream = CreateANTLRInputStream();
   auto code = Compile(inputStream);
   DestroyANTLRInputStream(inputStream);
   if (Config::Has("file")) {

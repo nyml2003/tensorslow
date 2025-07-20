@@ -4,7 +4,7 @@
 #include "IR/ClassDef.h"
 #include "IR/FuncDef.h"
 #include "IR/Module.h"
-#include "Tools/Logger/IntermediateCodeTreeLogger.h"
+#include "Tools/Terminal/IntermediateRepresentationTerminal.h"
 
 namespace tensorslow::IR {
 Object::PyCodePtr
@@ -27,15 +27,15 @@ GetCodeFromList(const Object::PyObjPtr& codeList, const INodePtr& node) {
   return GetCodeFromList(codeList, node->Parent());
 }
 void PrintNode(const Object::PyObjPtr& node, const Object::PyStrPtr& text) {
-  IntermediateCodeLogger::getInstance().log(
+  IntermediateRepresentationTerminal::get_instance().info(
     Function::Identity(Object::CreatePyList({node}))
       ->str()
       ->as<Object::PyString>()
       ->ToCppString()
   );
-  IntermediateCodeLogger::getInstance().log("[");
-  IntermediateCodeLogger::getInstance().log(text->ToCppString());
-  IntermediateCodeLogger::getInstance().log("]\n");
+  IntermediateRepresentationTerminal::get_instance().info("[");
+  IntermediateRepresentationTerminal::get_instance().info(text->ToCppString());
+  IntermediateRepresentationTerminal::get_instance().info("]");
 }
 
 void PrintEdge(
@@ -43,26 +43,26 @@ void PrintEdge(
   const Object::PyObjPtr& child,
   const Object::PyStrPtr& text
 ) {
-  IntermediateCodeLogger::getInstance().log(
+  IntermediateRepresentationTerminal::get_instance().info(
     Function::Identity(Object::CreatePyList({parent}))
       ->str()
       ->as<Object::PyString>()
       ->ToCppString()
   );
   if (text == nullptr) {
-    IntermediateCodeLogger::getInstance().log("--->");
+    IntermediateRepresentationTerminal::get_instance().info("--->");
   } else {
-    IntermediateCodeLogger::getInstance().log("-- ");
-    IntermediateCodeLogger::getInstance().log(text->ToCppString());
-    IntermediateCodeLogger::getInstance().log(" -->");
+    IntermediateRepresentationTerminal::get_instance().info("-- ");
+    IntermediateRepresentationTerminal::get_instance().info(text->ToCppString()
+    );
+    IntermediateRepresentationTerminal::get_instance().info(" -->");
   }
-  IntermediateCodeLogger::getInstance().log(
+  IntermediateRepresentationTerminal::get_instance().info(
     Function::Identity(Object::CreatePyList({child}))
       ->str()
       ->as<Object::PyString>()
       ->ToCppString()
   );
-  IntermediateCodeLogger::getInstance().log("\n");
 }
 
 }  // namespace tensorslow::IR

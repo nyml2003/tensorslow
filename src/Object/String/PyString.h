@@ -53,7 +53,6 @@ class PyString : public PyObject {
   PyStrPtr Add(const PyStrPtr& other);
 
   void Print() const;
-  void PrintLine() const;
 
   std::string ToCppString() const;
 

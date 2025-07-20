@@ -6,7 +6,7 @@
 #define TENSORSLOW_CONFIG_SCHEMA_H
 
 #include "OptionConvention.h"
-#include "Tools/Logger/ConsoleLogger.h"
+#include "Tools/Terminal/Terminal.h"
 
 #include <iostream>
 #include <map>
@@ -33,28 +33,27 @@ class Schema {
     auto parameter = parameters.find(option);
     if (parameter == parameters.end()) {
       PrintUsage();
-      std::cout << "Invalid parameter name: " << option << '\n';
+      std::cout << "Invalid parameter name: " << option;
       throw std::invalid_argument("Invalid parameter name");
     }
     return parameter->second;
   }
   static void PrintUsage() {
-    ConsoleLogger::getInstance().log(
-      "Invalid parameters, please check the usage.\n"
+    ConsoleTerminal::get_instance().info(
+      "Invalid parameters, please check the usage."
     );
-    ConsoleLogger::getInstance().log("Options:\n");
+    ConsoleTerminal::get_instance().info("Options:");
     for (const auto& [name, param] : Instance().Parameters()) {
-      ConsoleLogger::getInstance().log("  --");
-      ConsoleLogger::getInstance().log(name);
-      ConsoleLogger::getInstance().log("=<value>  (default: ");
-      ConsoleLogger::getInstance().log(param.DefaultValue());
-      ConsoleLogger::getInstance().log(") tip: ");
-      ConsoleLogger::getInstance().log(param.Tip());
-      ConsoleLogger::getInstance().log("\n");
+      ConsoleTerminal::get_instance().info("  --");
+      ConsoleTerminal::get_instance().info(name);
+      ConsoleTerminal::get_instance().info("=<value>  (default: ");
+      ConsoleTerminal::get_instance().info(param.DefaultValue());
+      ConsoleTerminal::get_instance().info(") tip: ");
+      ConsoleTerminal::get_instance().info(param.Tip());
     }
-    ConsoleLogger::getInstance().log("  --help  Display this help message\n");
-    ConsoleLogger::getInstance().log(
-      "  --version  Display version information\n"
+    ConsoleTerminal::get_instance().info("  --help  Display this help message");
+    ConsoleTerminal::get_instance().info(
+      "  --version  Display version information"
     );
   }
 
@@ -63,7 +62,7 @@ class Schema {
       PrintUsage();
       exit(0);
     } else if (option == "version") {
-      ConsoleLogger::getInstance().log("Version: 1.0.0\n");
+      ConsoleTerminal::get_instance().info("Version: 1.0.0");
       exit(0);
     }
   }
@@ -74,7 +73,8 @@ class Schema {
   ) const {
     return m_parameters;
   }
-  void SetParameters(const std::map<std::string, OptionConvention>& parameters
+  void SetParameters(
+    const std::map<std::string, OptionConvention>& parameters
   ) {
     m_parameters = parameters;
   }

@@ -8,9 +8,6 @@
 #include "Runtime/VirtualMachine.h"
 #include "Tools/Config/Config.h"
 #include "Tools/Config/Schema.h"
-#include "Tools/Logger/ConsoleLogger.h"
-#include "Tools/Logger/ErrorLogger.h"
-#include "Tools/Logger/VerboseLogger.h"
 
 #include <filesystem>
 
@@ -76,20 +73,20 @@ inline void BeforeRun(const std::filesystem::path& filename) {
     throw std::runtime_error("show_result 和 verbose 不能同时为 true");
   }
   if (compare_result) {
-    ConsoleLogger::getInstance().log("本次测试模式：和预期结果比较\n");
+    ConsoleTerminal::get_instance().info("本次测试模式：和预期结果比较");
     auto filename_dir = filename.parent_path();
     auto write_filename =
       filename_dir / filename_dir.filename().replace_extension(".out");
-    ConsoleLogger::getInstance().log("输出结果到: ");
-    ConsoleLogger::getInstance().log(write_filename.string());
-    ConsoleLogger::getInstance().log("\n");
-    ConsoleLogger::getInstance().setCallback(
-      std::make_unique<FileLogStrategy>(write_filename.string())
+    ConsoleTerminal::get_instance().info("输出结果到: ");
+    ConsoleTerminal::get_instance().info(write_filename.string());
+
+    ConsoleTerminal::get_instance().switch_strategy(
+      std::make_unique<FileTerminalStrategy>(write_filename.string())
     );
     return;
   }
   if (show_result) {
-    ConsoleLogger::getInstance().log("本次测试模式：直接输出结果\n");
+    ConsoleTerminal::get_instance().info("本次测试模式：直接输出结果");
     return;
   }
   if (verbose) {
@@ -97,20 +94,20 @@ inline void BeforeRun(const std::filesystem::path& filename) {
     auto log_file =
       (std::filesystem::path(verbose_dir) /
        (filename.stem().replace_extension(".log")).filename());
-    ConsoleLogger::getInstance().log("本次测试模式：调试模式\n");
-    ConsoleLogger::getInstance().log("输出结果到: ");
-    ConsoleLogger::getInstance().log(log_file.string());
-    ConsoleLogger::getInstance().log("\n");
-    ConsoleLogger::getInstance().setCallback(
-      std::make_unique<FileLogStrategy>(log_file.string())
+    ConsoleTerminal::get_instance().info("本次测试模式：调试模式");
+    ConsoleTerminal::get_instance().info("输出结果到: ");
+    ConsoleTerminal::get_instance().info(log_file.string());
+
+    ConsoleTerminal::get_instance().switch_strategy(
+      std::make_unique<FileTerminalStrategy>(log_file.string())
     );
     return;
   }
 }
 
 inline void AfterRun(const std::filesystem::path& filename) {
-  ConsoleLogger::getInstance().setCallback(
-    std::make_unique<DefaultLogStrategy>()
+  ConsoleTerminal::get_instance().switch_strategy(
+    std::make_unique<StardardTerminalStrategy>()
   );
   bool compare_result = Config::Has("compare_result");
   if (compare_result) {
@@ -127,25 +124,25 @@ inline void AfterRun(const std::filesystem::path& filename) {
     while (std::getline(write_stream, write_line)) {
       std::getline(expected_stream, expected_line);
       if (write_line != expected_line) {
-        ConsoleLogger::getInstance().log("❌ 测试失败\n");
-        ConsoleLogger::getInstance().log("预期结果: ");
-        ConsoleLogger::getInstance().log(expected_line);
-        ConsoleLogger::getInstance().log("\n");
-        ConsoleLogger::getInstance().log("实际结果: ");
-        ConsoleLogger::getInstance().log(write_line);
-        ConsoleLogger::getInstance().log("\n");
+        ConsoleTerminal::get_instance().info("❌ 测试失败");
+        ConsoleTerminal::get_instance().info("预期结果: ");
+        ConsoleTerminal::get_instance().info(expected_line);
+
+        ConsoleTerminal::get_instance().info("实际结果: ");
+        ConsoleTerminal::get_instance().info(write_line);
+
         exit(1);
       }
     }
-    ConsoleLogger::getInstance().log("✅ 测试通过\n");
+    ConsoleTerminal::get_instance().info("✅ 测试通过");
     return;
   }
 }
 
 inline void RunTest(const std::filesystem::path& filename) {
-  ConsoleLogger::getInstance().log("解析字节码文件: ");
-  ConsoleLogger::getInstance().log(filename.string());
-  ConsoleLogger::getInstance().log("\n");
+  ConsoleTerminal::get_instance().info("解析字节码文件: ");
+  ConsoleTerminal::get_instance().info(filename.string());
+
   Runtime::BinaryFileParser parser(filename);
   auto code = parser.Parse();
 
@@ -153,11 +150,8 @@ inline void RunTest(const std::filesystem::path& filename) {
   try {
     Runtime::VirtualMachine::Run(code);
   } catch (const std::exception& e) {
-    VerboseLogger::getInstance().setCallback(
-      std::make_unique<ProxyLogStrategy>(&ErrorLogger::getInstance())
-    );
     PrintFrame(Runtime::VirtualMachine::Instance().CurrentFrame());
-    ErrorLogger::getInstance().log(e.what());
+    ConsoleTerminal::get_instance().error(e.what());
     throw;
   }
 

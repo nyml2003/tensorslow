@@ -3,8 +3,8 @@ set(tensorslow_dir ${CMAKE_CURRENT_SOURCE_DIR})
 set(tensorslow_src_dir ${tensorslow_dir}/src)
 
 # 设置 C++ 标准和编译器选项
-set(CMAKE_CXX_STANDARD 17) # C++17
-set(CMAKE_CXX_STANDARD_REQUIRED ON) # 强制使用 C++17
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF) # 禁用编译器特定扩展
 
 

@@ -27,7 +27,8 @@
 #include "Object/Number/PyInteger.h"
 #include "Object/Object.h"
 #include "Object/String/PyString.h"
-#include "Tools/Logger/ErrorLogger.h"
+#include "Tools/Terminal/Terminal.h"
+
 #include "support/Any.h"
 
 namespace tensorslow::Generation {
@@ -63,7 +64,8 @@ antlrcpp::Any Generator::visitStmt(Python3Parser::StmtContext* ctx) {
   return nullptr;
 }
 
-antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
+antlrcpp::Any Generator::visitFile_input(
+  Python3Parser::File_inputContext* ctx
 ) {
   auto stmts = ctx->stmt();
   Collections::List<Object::PyObjPtr> statements(
@@ -82,7 +84,9 @@ antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
       }
       continue;
     }
-    ErrorLogger::getInstance().log("visitFile_input: Unknown statement type");
+    ConsoleTerminal::get_instance().error(
+      "visitFile_input: Unknown statement type"
+    );
   }
   if (context->is(IR::ModuleKlass::Self())) {
     context->as<IR::Module>()->SetBody(Object::CreatePyList(statements));
@@ -92,7 +96,9 @@ antlrcpp::Any Generator::visitFile_input(Python3Parser::File_inputContext* ctx
     context->as<IR::FuncDef>()->SetBody(Object::CreatePyList(statements));
     return nullptr;
   }
-  ErrorLogger::getInstance().log("visitFile_input: Unknown context type");
+  ConsoleTerminal::get_instance().error(
+    "visitFile_input: Unknown context type"
+  );
   return nullptr;
 }
 
@@ -100,8 +106,9 @@ antlrcpp::Any Generator::visitTestlist_comp(
   Python3Parser::Testlist_compContext* ctx
 ) {
   auto testlist = ctx->test();
-  Collections::List<Object::PyObjPtr> tests(static_cast<uint64_t>(testlist.size(
-  )));
+  Collections::List<Object::PyObjPtr> tests(
+    static_cast<uint64_t>(testlist.size())
+  );
   for (auto* test : testlist) {
     tests.Push(std::any_cast<IR::INodePtr>(visitTest(test)));
   }
@@ -448,7 +455,8 @@ antlrcpp::Any Generator::visitArglist(Python3Parser::ArglistContext* ctx) {
     return Object::CreatePyList();
   }
   auto arglist = ctx->argument();
-  Collections::List<Object::PyObjPtr> args(static_cast<uint64_t>(arglist.size())
+  Collections::List<Object::PyObjPtr> args(
+    static_cast<uint64_t>(arglist.size())
   );
   for (auto* arg : arglist) {
     args.Push(std::any_cast<IR::INodePtr>(visitArgument(arg)));
@@ -543,7 +551,8 @@ antlrcpp::Any Generator::visitNot_test(Python3Parser::Not_testContext* ctx) {
   throw std::runtime_error("visitNot_test: Unknown type");
 }
 
-antlrcpp::Any Generator::visitComparison(Python3Parser::ComparisonContext* ctx
+antlrcpp::Any Generator::visitComparison(
+  Python3Parser::ComparisonContext* ctx
 ) {
   if (ctx->comp_op().empty()) {
     return visitExpr(ctx->expr(0));
@@ -629,7 +638,7 @@ antlrcpp::Any Generator::visitCompound_stmt(
   }
   // 其他情况（不应该出现）
 
-  ErrorLogger::getInstance().log(
+  ConsoleTerminal::get_instance().error(
     "visitCompound_stmt: Unknown compound statement type"
   );
   return nullptr;
@@ -669,7 +678,9 @@ antlrcpp::Any Generator::visitBlock(Python3Parser::BlockContext* ctx) {
         }
         continue;
       }
-      ErrorLogger::getInstance().log("visitBlock: Unknown statement type");
+      ConsoleTerminal::get_instance().error(
+        "visitBlock: Unknown statement type"
+      );
     }
     return Object::CreatePyList(stmts);
   }
@@ -696,7 +707,8 @@ antlrcpp::Any Generator::visitSimple_stmts(
   return nullptr;
 }
 
-antlrcpp::Any Generator::visitReturn_stmt(Python3Parser::Return_stmtContext* ctx
+antlrcpp::Any Generator::visitReturn_stmt(
+  Python3Parser::Return_stmtContext* ctx
 ) {
   if (ctx->testlist() == nullptr) {
     return IR::CreateReturnStmt(
@@ -712,7 +724,8 @@ antlrcpp::Any Generator::visitTestlist(Python3Parser::TestlistContext* ctx) {
   return visitTest(ctx->test(0));
 }
 
-antlrcpp::Any Generator::visitParameters(Python3Parser::ParametersContext* ctx
+antlrcpp::Any Generator::visitParameters(
+  Python3Parser::ParametersContext* ctx
 ) {
   if (ctx->typedargslist() != nullptr) {
     return visitTypedargslist(ctx->typedargslist());
@@ -724,7 +737,8 @@ antlrcpp::Any Generator::visitTypedargslist(
   Python3Parser::TypedargslistContext* ctx
 ) {
   auto tfpdef = ctx->tfpdef();
-  Collections::List<Object::PyObjPtr> args(static_cast<uint64_t>(tfpdef.size())
+  Collections::List<Object::PyObjPtr> args(
+    static_cast<uint64_t>(tfpdef.size())
   );
   for (auto* def : tfpdef) {
     args.Push(Object::CreatePyString(def->getText().c_str()));
@@ -765,7 +779,8 @@ antlrcpp::Any Generator::visitIf_stmt(Python3Parser::If_stmtContext* ctx) {
   return ifStmt;
 }
 
-antlrcpp::Any Generator::visitWhile_stmt(Python3Parser::While_stmtContext* ctx
+antlrcpp::Any Generator::visitWhile_stmt(
+  Python3Parser::While_stmtContext* ctx
 ) {
   auto condition = std::any_cast<IR::INodePtr>(visitTest(ctx->test()));
   auto body = std::any_cast<Object::PyListPtr>(visitBlock(ctx->block(0)));
@@ -788,7 +803,8 @@ antlrcpp::Any Generator::visitSubscriptlist(
   return IR::CreateList(Object::CreatePyList(subscripts), context);
 }
 
-antlrcpp::Any Generator::visitSubscript_(Python3Parser::Subscript_Context* ctx
+antlrcpp::Any Generator::visitSubscript_(
+  Python3Parser::Subscript_Context* ctx
 ) {
   if (ctx->COLON() == nullptr) {
     return std::any_cast<IR::INodePtr>(visitTest(ctx->test(0)));
@@ -865,14 +881,16 @@ antlrcpp::Any Generator::visitImport_stmt(
   return IR::CreateAtom(Object::CreatePyNone(), context);
 }
 
-antlrcpp::Any Generator::visitYield_stmt(Python3Parser::Yield_stmtContext* ctx
+antlrcpp::Any Generator::visitYield_stmt(
+  Python3Parser::Yield_stmtContext* ctx
 ) {
   return IR::CreateExprStmt(
     std::any_cast<IR::INodePtr>(visitYield_expr(ctx->yield_expr())), context
   );
 }
 
-antlrcpp::Any Generator::visitYield_expr(Python3Parser::Yield_exprContext* ctx
+antlrcpp::Any Generator::visitYield_expr(
+  Python3Parser::Yield_exprContext* ctx
 ) {
   if (ctx->yield_arg()->testlist() != nullptr) {
     return IR::CreateYieldExpr(

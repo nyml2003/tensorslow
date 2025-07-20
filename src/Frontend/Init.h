@@ -11,13 +11,10 @@
 #include "Python3Parser.h"
 #include "Tools/Config/Config.h"
 #include "Tools/Config/Schema.h"
-#include "Tools/Logger/BytecodeLogger.h"
-#include "Tools/Logger/ConsoleLogger.h"
-#include "Tools/Logger/ErrorLogger.h"
-#include "Tools/Logger/IntermediateCodeTreeLogger.h"
-#include "Tools/Logger/LexicalAnalysisLogger.h"
-#include "Tools/Logger/SyntaxAnalysisLogger.h"
-#include "Tools/Logger/VerboseLogger.h"
+
+#include "Tools/Terminal/IntermediateRepresentationTerminal.h"
+#include "Tools/Terminal/Terminal.h"
+#include "Tools/Terminal/VerboseTerminal.h"
 #include "antlr4-runtime.h"
 
 #include <filesystem>
@@ -85,12 +82,14 @@ void InitFrontendClasses() {
 void ParseAndGenerate(const std::filesystem::path& filePath) {
   std::ifstream stream(filePath);
   if (!stream.is_open()) {
-    ErrorLogger::getInstance().log("Failed to open file: " + filePath.string());
+    ConsoleTerminal::get_instance().error(
+      "Failed to open file: " + filePath.string()
+    );
     return;
   }
-  ConsoleLogger::getInstance().log("正在解析文件 ");
-  ConsoleLogger::getInstance().log(filePath.string());
-  ConsoleLogger::getInstance().log("\n");
+  ConsoleTerminal::get_instance().info("正在解析文件 ");
+  ConsoleTerminal::get_instance().info(filePath.string());
+
   antlr4::ANTLRInputStream inputStream(stream);
   Python3Lexer lexer(&inputStream);
   antlr4::CommonTokenStream tokens(&lexer);
@@ -101,14 +100,13 @@ void ParseAndGenerate(const std::filesystem::path& filePath) {
   //  // 打印词法
   if (Config::Has("show_tokens")) {
     for (const auto& token : tokens.getTokens()) {
-      LexicalAnalysisLogger::getInstance().log(token->toString());
-      LexicalAnalysisLogger::getInstance().log("\n");
+      LexicalAnalysisTerminal::get_instance().info(token->toString());
     }
-    ConsoleLogger::getInstance().log("词法单元流生成完毕\n");
+    ConsoleTerminal::get_instance().info("词法单元流生成完毕");
   }
   if (Config::Has("show_ast")) {
-    SyntaxAnalysisLogger::getInstance().log(tree->toStringTree(&parser));
-    ConsoleLogger::getInstance().log("\n抽象语法树生成完毕\n");
+    SyntaxAnalysisTerminal::get_instance().info(tree->toStringTree(&parser));
+    ConsoleTerminal::get_instance().info("抽象语法树生成完毕");
   }
 
   Generation::Generator visitor(
@@ -120,13 +118,13 @@ void ParseAndGenerate(const std::filesystem::path& filePath) {
   visitor.Emit();
   if (Config::Has("show_ir")) {
     visitor.Print();
-    IntermediateCodeLogger::getInstance().terminate();
-    ConsoleLogger::getInstance().log("中间代码树生成完毕\n");
+    IntermediateRepresentationTerminal::get_instance().terminate();
+    ConsoleTerminal::get_instance().info("中间代码树生成完毕");
   }
   auto code = visitor.Code();
   if (Config::Has("show_bc")) {
-    VerboseLogger::getInstance().setCallback(
-      std::make_unique<ProxyLogStrategy>(&BytecodeLogger::getInstance())
+    VerboseTerminal::get_instance().switch_strategy(
+      std::make_unique<ProxyTerminalStrategy>(&BytecodeTerminal::get_instance())
     );
     Object::PrintCode(code);
   }
